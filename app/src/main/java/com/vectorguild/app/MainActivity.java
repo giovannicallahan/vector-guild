@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new SaveBridge(), "AndroidSave");
         speech = new TextToSpeech(this, status -> {
             speechReady = status == TextToSpeech.SUCCESS;
-            if (speechReady) speech.setLanguage(Locale.US);
+            if (speechReady) { speech.setLanguage(Locale.US); chooseMiraVoice(); }
         });
         webView.addJavascriptInterface(new SpeechBridge(), "AndroidSpeech");
         webView.setWebViewClient(new WebViewClient() {
@@ -98,6 +98,38 @@ public class MainActivity extends Activity {
             }
         });
         webView.loadUrl("file:///android_asset/game/index.html");
+    }
+    /* Mira is a woman with a gentle voice. The engine's default voice is often male or flat, so pick the best
+       installed English female voice (works offline), then soften pitch and pace. Names follow Google and Samsung
+       engines; an unknown engine keeps its default voice with the softer pitch and pace. */
+    private static int miraScore(android.speech.tts.Voice v) {
+        String n = v.getName().toLowerCase(Locale.US);
+        Locale l = v.getLocale();
+        if (l == null || !"en".equals(l.getLanguage())) return -1;
+        int s = 0;
+        if (n.contains("female") || n.contains("-sfg") || n.contains("-tpf") || n.contains("-tpc") || n.contains("-iob") || n.contains("-iog")
+            || n.contains("-gba") || n.contains("-gbc") || n.contains("-fis") || n.contains("smtf") || n.contains("-aua") || n.contains("-auc")) s += 100;
+        if (n.contains("male") && !n.contains("female") || n.contains("-iol") || n.contains("-iom") || n.contains("-tpd") || n.contains("smtm")
+            || n.contains("-gbb") || n.contains("-gbd") || n.contains("-rjs") || n.contains("-aub") || n.contains("-aud")) s -= 100;
+        if ("US".equals(l.getCountry())) s += 20;
+        if (!v.isNetworkConnectionRequired()) s += 30;
+        s += v.getQuality() / 20;
+        if (n.contains("-sfg")) s += 5;
+        return s;
+    }
+    private void chooseMiraVoice() {
+        try {
+            android.speech.tts.Voice best = null; int top = 0;
+            java.util.Set<android.speech.tts.Voice> all = speech.getVoices();
+            if (all != null) for (android.speech.tts.Voice v : all) {
+                if (v.getFeatures() != null && v.getFeatures().contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)) continue;
+                int sc = miraScore(v); if (sc > top) { top = sc; best = v; }
+            }
+            if (best != null && top >= 100) speech.setVoice(best);
+            android.util.Log.i("MathCosmos", "Mira voice: " + (best != null && top >= 100 ? best.getName() : "engine default") + " of " + (all == null ? 0 : all.size()));
+        } catch (Exception ignored) { }
+        speech.setPitch(1.08f);
+        speech.setSpeechRate(0.92f);
     }
     private class SpeechBridge {
         @JavascriptInterface public void speak(String text) {
