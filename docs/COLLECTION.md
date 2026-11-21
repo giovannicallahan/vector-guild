@@ -48,6 +48,9 @@ could be stored). Unknown figure or achievement ids in a save are kept, not drop
 
 On load, any solved mission, star or finished chapter not yet in `meta.paid` is paid (so a 2.0 or
 1.4.1 player gets stardust for past work). Drills completed before 2.1 are not paid.
+Past work is always paid at the base rates in the table, whatever figure is equipped at the time: a perk
+counts only for a mission solved now (and a chapter that solve completes). The star map does not know a
+realm's chapters, so a finished chapter is paid when that realm is next opened.
 
 ## Pulls
 
@@ -55,6 +58,9 @@ On load, any solved mission, star or finished chapter not yet in `meta.paid` is 
 - Rates: common 70%, rare 24%, legendary 6%.
 - Guarantees: a rare or better at least every 5th pull; a legendary at least every 20th pull.
 - Within a rarity every figure is equally likely.
+- The chances shown are those of the next summon: when a guarantee is due they show it (0 / 80 / 20, or
+  legendary 100%), with the usual chances in one line beside them.
+- The summon button states its price, and a summon never takes a different price from the one shown.
 - A duplicate raises that figure's count (shown as stars, up to 5) and refunds 20 / 35 / 60 stardust
   for common / rare / legendary.
 - Random numbers come from `crypto.getRandomValues` with a `Math.random` fallback; the function
@@ -108,5 +114,8 @@ Rewards run from 15 to 150 stardust. Names are plain and friendly; no jargon.
 - `qa/collection.test.js`: award idempotency, retroactive payment, pull rates within tolerance over
   100,000 seeded pulls, both guarantees, duplicate refunds, perks, every achievement reachable and
   paid once, 2.0 save loads unchanged, export/import round trip, storage failure.
+- `qa/collection-ui.test.js`: the interface on a stand-in page: toasts and the page's dialogs, the summon
+  button's price, the chances shown, the chip's word and name, the phone top bar.
+- `qa/realm-collection.test.js`: the collection on the realm page, for both packs.
 - `qa/collection-data.test.js`: the figure data (written by the research workflow).
 - All existing QA commands still pass.

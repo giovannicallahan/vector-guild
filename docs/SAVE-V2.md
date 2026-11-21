@@ -7,7 +7,8 @@ localStorage key `vector-guild-save-v2`. The 1.x key `vector-guild-save-v1` is n
   seed: <int >= 0>,          // global; 0 = authored numbers (legacy saves)
   seeds: { <packId>: <int >= 0> },  // optional: a realm's own seed, used instead of `seed` for that realm only
   intro: <bool>,             // wormhole already shown
-  realms: { <packId>: <slice> } }
+  realms: { <packId>: <slice> },
+  meta: <collection> }       // optional, since 2.1: stardust, figures, achievements (global, see below)
 ```
 `<slice>` is exactly the 1.4.1 save object without `seed`, using the pack's LOCAL mission ids:
 `{solved, xp, points, tools, clean, revealed, landmarks, contracts, reviews, errors, rolls}`.
@@ -21,12 +22,33 @@ Rules
 - A v2 backup is restored only when every realm slice is an object whose `solved` and `tools` are lists of strings; otherwise nothing is changed. The stored save itself is read leniently (any object slice), so slices of unknown packs are never rejected.
 - A realm page that is open while its slice or seed is replaced in storage (restore or reset in another tab, or the page coming back from the back/forward cache) reloads instead of writing its old copy (`game/app.js`, `pageshow` and `storage` listeners).
 
+The collection (`meta`, since 2.1; rules in `docs/COLLECTION.md`, logic in `game/collection/core.js`)
+
+```
+meta: { v: 1,
+  dust, earned,                      // stardust in hand, lifetime stardust
+  owned: { <figureId>: <count> },    // counts >= 1
+  equipped: <figureId> | null,       // always an owned figure
+  ach: [ <achievementId> ],
+  pulls, sinceRare, sinceLegend,     // pull counters
+  paid: { <realmId>: { solved: [qid], clean: [qid], chapters: [n] } },   // what stardust was already paid for
+  drills,                            // review drills counted
+  looks: { <realmId>: [qid] } }      // missions where the "second look" perk was already used
+```
+- A save without `meta` (2.0) loads unchanged and stays without `meta` until something is earned. `meta()` then returns an empty collection.
+- `meta` is normalised whenever it is read or written: counts become whole numbers >= 0, lists lose duplicates and wrong types, `equipped` must be owned. Figure and achievement ids this build does not know are kept, and so are fields it does not know.
+- `putRealm`, `reset(id)` and a 1.x import leave `meta` alone. `resetAll()` removes it.
+- A v2 backup with `meta` replaces the collection. A v2 backup without `meta` (made by 2.0) keeps the collection already on the device.
+- `meta.paid` is what makes stardust idempotent: a mission, star or chapter listed there is never paid again, also after a realm reset or a restore.
+
 `window.VGSave` (classic script `game/save-store.js`, no dependencies, safe when localStorage throws):
 - `load()` -> whole v2 object (migrating if needed; never throws)
 - `realm(id)` -> slice or null
 - `putRealm(id, slice)` -> writes that slice only, leaves others untouched
 - `seed(id?)` -> the seed for realm `id` (its override, else the global seed); without `id`, the global seed
 - `totalXp()` / `introSeen()` / `setIntroSeen()`
-- `exportAll()` -> v2 object for the backup file
+- `meta()` -> normalised copy of the collection (an empty one when the save has none)
+- `putMeta(meta)` -> stores the collection only; returns false if nothing could be stored
+- `exportAll()` -> v2 object for the backup file (with `meta` when there is one)
 - `importAny(obj)` -> accepts a v2 object or a 1.x object (becomes realms.la); returns {ok, error, kind}. `ok` is false, and nothing is changed, when the file is not a (complete) save or when the device could not store it (`error` says which)
 - `reset(id)` -> removes one realm's slice; `resetAll()`

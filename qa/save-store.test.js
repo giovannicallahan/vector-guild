@@ -221,4 +221,84 @@ test('an unreadable v2 entry is set aside, not silently lost', () => {
   assert.equal(storage.get(V2 + '-unreadable'), '{broken');
 });
 
+/* ---- The collection (meta, since 2.1; docs/COLLECTION.md) ---- */
+const EMPTY_META = { v: 1, dust: 0, earned: 0, owned: {}, equipped: null, ach: [], pulls: 0, sinceRare: 0, sinceLegend: 0, paid: {}, drills: 0, looks: {} };
+
+test('meta: a 2.0 save has none, loads without loss, and reading the collection writes nothing', () => {
+  const v20 = { v: 2, seed: 12, intro: true, realms: { la: { solved: ['q01'], tools: [], xp: 100 }, calc1: { future: 1 } } }, raw = JSON.stringify(v20);
+  const { store, storage } = page(new Map([[V2, raw]]));
+  assert.deepEqual(plain(store.load()), v20); assert.deepEqual(plain(store.meta()), EMPTY_META);
+  assert.deepEqual(plain(store.exportAll()), v20, 'no meta appears until something is stored'); assert.equal(storage.get(V2), raw);
+  store.putRealm('la', { solved: ['q01', 'q02'], tools: [], xp: 200 }); assert.equal('meta' in JSON.parse(storage.get(V2)), false);
+  assert.deepEqual(plain(page().store.meta()), EMPTY_META, 'a fresh save too');
+});
+
+test('meta: putMeta stores the collection only; meta() returns a copy', () => {
+  const { store, storage } = page(new Map([[V2, JSON.stringify({ v: 2, seed: 12, seeds: { la: 4 }, intro: true, realms: { la: { solved: ['q01'], tools: [], xp: 100 } } })]]));
+  const m = store.meta(); m.dust = 70; m.earned = 130; m.owned.euclid = 2; m.equipped = 'euclid'; m.ach.push('solve-1'); m.pulls = 3; m.sinceRare = 1; m.sinceLegend = 3; m.paid.la = { solved: ['q01'], clean: [], chapters: [0] }; m.drills = 4; m.looks.la = ['q01'];
+  assert.equal(store.putMeta(m), true);
+  const d = JSON.parse(storage.get(V2));
+  assert.deepEqual(d.meta, plain(m)); assert.deepEqual(d.realms, { la: { solved: ['q01'], tools: [], xp: 100 } }); assert.equal(d.seed, 12); assert.deepEqual(d.seeds, { la: 4 }); assert.equal(d.intro, true);
+  const copy = store.meta(); copy.owned.euclid = 99; copy.ach.push('x'); assert.deepEqual(plain(store.meta()), plain(m));
+  assert.deepEqual(plain(page(storage).store.meta()), plain(m), 'the next page sees it');
+  store.putRealm('found', { solved: [], tools: [] }); store.setIntroSeen(); assert.deepEqual(plain(store.meta()), plain(m), 'other writes leave it alone');
+  assert.deepEqual(plain(store.exportAll().meta), plain(m)); assert.equal(store.totalXp(), 100);
+});
+
+test('meta: unsafe values are made safe; unknown figure ids, achievement ids and fields are kept', () => {
+  const messy = { v: 7, dust: -5, earned: 2.5, owned: { euclid: 2, noether: 0, gauss: -1, x: 'many', future_figure: 1 }, equipped: 'noether', ach: ['a', 'a', 5, '', 'later-achievement'], pulls: '3', sinceRare: null, sinceLegend: 4,
+    paid: { la: { solved: ['q01', 'q01', 3], clean: 'q01', chapters: [0, 0, -1, 1.5, 2] }, found: 'x', other: {} }, drills: 6, looks: { la: ['q01', 'q01'], found: [], odd: 3 }, later: { field: [1] } };
+  const { store } = page(new Map([[V2, JSON.stringify({ v: 2, seed: 1, realms: {}, meta: messy })]]));
+  const want = { v: 1, dust: 0, earned: 0, owned: { euclid: 2, future_figure: 1 }, equipped: null, ach: ['a', 'later-achievement'], pulls: 0, sinceRare: 0, sinceLegend: 4,
+    paid: { la: { solved: ['q01'], clean: [], chapters: [0, 2] }, other: { solved: [], clean: [], chapters: [] } }, drills: 6, looks: { la: ['q01'] }, later: { field: [1] } };
+  assert.deepEqual(plain(store.meta()), want);
+  assert.equal(store.putMeta(messy), true); assert.deepEqual(plain(store.meta()), want, 'putMeta normalises as well');
+  const m = store.meta(); m.equipped = 'future_figure'; store.putMeta(m); assert.equal(store.meta().equipped, 'future_figure', 'an owned figure this build does not know can stay equipped');
+  for (const junk of [null, 7, 'text', [], undefined]) { store.putMeta(junk); assert.deepEqual(plain(store.meta()), EMPTY_META); }
+  const odd = page(new Map([[V2, JSON.stringify({ v: 2, seed: 1, realms: {}, meta: [1, 2] })]])).store;
+  assert.deepEqual(plain(odd.meta()), EMPTY_META); assert.equal('meta' in odd.exportAll(), false);
+});
+
+test('meta: export and import carry it; a 2.0 backup keeps the collection on the device; a 1.x import and reset(realm) leave it alone; resetAll clears it', () => {
+  const { store } = page(new Map(), { VG_SEED: 1 });
+  store.putRealm('la', { solved: ['q01'], tools: [] });
+  const m = store.meta(); m.dust = 45; m.earned = 45; m.owned.euclid = 1; m.ach = ['solve-1']; m.paid.la = { solved: ['q01'], clean: [], chapters: [] }; store.putMeta(m);
+  const backup = store.exportAll(); assert.deepEqual(plain(backup.meta), plain(m));
+  /* Another device: the backup's collection replaces whatever was there. */
+  const other = page(new Map(), { VG_SEED: 3 }).store; const theirs = other.meta(); theirs.dust = 999; theirs.owned.gauss = 4; other.putMeta(theirs);
+  assert.equal(other.importAny(backup).ok, true); assert.deepEqual(plain(other.meta()), plain(m)); assert.deepEqual(plain(other.exportAll()), plain(backup));
+  /* A v2 backup without meta (made by 2.0): realms are replaced, the collection is kept. */
+  assert.equal(other.importAny({ v: 2, seed: 8, intro: false, realms: { found: { solved: ['q01', 'q02'], tools: [] } } }).ok, true);
+  assert.equal(other.realm('la'), null); assert.equal(other.seed(), 8); assert.deepEqual(plain(other.meta()), plain(m));
+  /* A 1.x backup, a realm reset and a refused import leave it alone. */
+  assert.equal(other.importAny({ solved: ['q01', 'q02'], tools: [], seed: 4 }).ok, true); assert.deepEqual(plain(other.meta()), plain(m));
+  other.reset('la'); other.reset('found'); assert.deepEqual(plain(other.meta()), plain(m));
+  assert.equal(other.importAny({ v: 2, seed: 1, realms: { la: { solved: 'x' } }, meta: { dust: 5000 } }).ok, false); assert.deepEqual(plain(other.meta()), plain(m));
+  other.resetAll(); assert.deepEqual(plain(other.meta()), EMPTY_META); assert.equal('meta' in other.exportAll(), false);
+  /* An imported collection is normalised like a stored one. */
+  assert.equal(other.importAny({ v: 2, seed: 1, realms: {}, meta: { dust: 30, owned: { a: 1, b: 0 }, equipped: 'b', extra: 1 } }).ok, true);
+  assert.deepEqual(plain(other.meta()), { ...EMPTY_META, dust: 30, owned: { a: 1 }, extra: 1 });
+});
+
+test('meta: a 1.x save migrates with no collection, and the v1 entry is untouched by putMeta', () => {
+  const v1raw = JSON.stringify({ solved: ['q01'], tools: [], seed: 4 }), { store, storage } = page(new Map([[V1, v1raw]]));
+  store.load(); assert.deepEqual(plain(store.meta()), EMPTY_META);
+  const m = store.meta(); m.dust = 10; assert.equal(store.putMeta(m), true);
+  assert.equal(storage.get(V1), v1raw); assert.equal(store.meta().dust, 10); assert.deepEqual(plain(store.realm('la').solved), ['q01']);
+});
+
+test('meta: putMeta reports when nothing could be stored, and nothing throws', () => {
+  const storage = new Map([[V2, JSON.stringify({ v: 2, seed: 5, realms: {}, meta: { dust: 20 } })]]);
+  const window = { localStorage: { getItem: k => storage.has(k) ? storage.get(k) : null, setItem() { throw Error('QuotaExceeded'); }, removeItem() {} } };
+  vm.runInNewContext(source, { window, Math, JSON });
+  const m = window.VGSave.meta(); m.dust = 500;
+  assert.equal(window.VGSave.putMeta(m), false); assert.equal(window.VGSave.meta().dust, 20, 'the stored collection is still the truth');
+  /* Storage blocked altogether: kept in memory for this page, like realm progress. */
+  const blocked = { VG_SEED: 3 }; Object.defineProperty(blocked, 'localStorage', { get() { throw Error('blocked'); } });
+  vm.runInNewContext(source, { window: blocked, Math, JSON });
+  assert.deepEqual(plain(blocked.VGSave.meta()), EMPTY_META); const b = blocked.VGSave.meta(); b.dust = 7;
+  assert.equal(blocked.VGSave.putMeta(b), false); assert.equal(blocked.VGSave.meta().dust, 7);
+  blocked.VGSave.resetAll(); assert.equal(blocked.VGSave.meta().dust, 0);
+});
+
 console.log(`PASS: ${count} save-store tests.`);

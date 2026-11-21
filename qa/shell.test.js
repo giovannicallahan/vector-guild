@@ -1,5 +1,6 @@
 /* Shell logic: soft locks, progress text, card model, 3D/flat choice, Android Back, star-map label placement
-   and a few source checks (shader smoothstep order, list overlay guards).
+   and a few source checks (shader smoothstep order, list overlay guards). Also the collection interface
+   (game/collection/ui.js): its pure helpers, how the shell loads and wires it, and its style rules.
    Loads game/shell/shell.js without a window (the page part returns early) and game/realms/registry.js in a vm.
    Run: node qa/shell.test.js (VERBOSE=1 lists each group). */
 const fs = require('node:fs');
@@ -218,5 +219,125 @@ check(() => {
     for (const n of r.needs) assert.ok(node(n), r.node + ' needs a known node: ' + n);
   }
 }, 'registry coverage');
+
+/* ---------- Collection: button, overlay wiring and the interface helpers (docs/COLLECTION.md) ---------- */
+const indexHtml = fs.readFileSync(game + '/index.html', 'utf8');
+const uiSrc = fs.readFileSync(game + '/collection/ui.js', 'utf8');
+const uiCss = fs.readFileSync(game + '/collection/collection.css', 'utf8');
+const U = require(game + '/collection/ui.js'); /* no window: only the pure helpers load */
+
+check(() => {
+  assert.equal(L.backAction({ collectionOpen: true, dialogOpen: true, cardOpen: true, listOpen: true }), 'collection', 'the collection closes first');
+  assert.equal(L.backAction(L.overlayState({ collectionOpen: true, listOverlay: true, contextLost: true })), 'collection');
+  assert.equal(L.backAction(L.overlayState({ collectionOpen: false, cardOpen: true })), 'card');
+  assert.match(shellSrc, /if\(a==='collection'\)\{CollUI\.back\(\);return true\}/, 'Android Back goes to the overlay');
+  assert.match(shellSrc, /e\.key!=='Escape'\|\|\(dlg&&dlg\.open\)\|\|collOpen\(\)/, 'Escape does not close the card under the overlay');
+  assert.match(shellSrc, /buildModels\(\);showXp\(\);settleAwards\(\);/, 'awards settle when the shell loads');
+  assert.match(shellSrc, /function refresh\(\)\{[^}]*settleAwards\(\)\}/, 'and after a restore or a change in another tab');
+  assert.match(shellSrc, /!Save\.fallback/, 'no collection button on the read-only stand-in store');
+  assert.equal(U.backStep({ open: false, detail: 'euclid' }), null);
+  assert.equal(U.backStep({ open: true, detail: 'euclid' }), 'detail', 'a figure card goes back to the grid first');
+  assert.equal(U.backStep({ open: true, detail: null }), 'overlay');
+  assert.match(uiSrc, /root\.VectorGuildBack = w/, 'the overlay puts itself in front of the page\'s own Back handler');
+}, 'collection: Back and Escape close the overlay first');
+
+check(() => {
+  /* Classic scripts in dependency order, all before shell.js; the Android app loads this page from file://. */
+  const scripts = [...indexHtml.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1]);
+  const at = f => { const i = scripts.indexOf(f); assert.ok(i >= 0, f + ' is loaded'); return i; };
+  for (const f of ['save-store.js', 'realms/registry.js', 'collection/figures.js', 'collection/achievements.js', 'collection/core.js']) assert.ok(at(f) < at('collection/ui.js'), f + ' loads before the interface');
+  assert.ok(at('collection/ui.js') < at('shell/shell.js'));
+  assert.doesNotMatch(indexHtml, /type="module"/);
+  assert.match(indexHtml, /<link rel="stylesheet" href="collection\/collection\.css">/);
+  assert.equal((indexHtml.match(/<button class="vg-ghost vg-coll" data-collection type="button" hidden>Collection<\/button>/g) || []).length, 2, 'one Collection button in the map header and one in the list header');
+  assert.match(shellSrc, /querySelectorAll\('\[data-collection\]'\)[\s\S]{0,80}CollUI\.chip\(b,\{label:'Collection'\}\)/, 'the button shows the stardust count');
+  for (const src of [uiSrc, fs.readFileSync(game + '/collection/core.js', 'utf8')]) {
+    assert.doesNotMatch(src, /\bfetch\s*\(|XMLHttpRequest|^\s*(import|export)\s/m, 'no network and no modules');
+  }
+  for (const name of ['open', 'close', 'toast', 'chip']) assert.match(uiSrc, new RegExp('root\\.VGCollectionUI = \\{[^}]*\\b' + name + ': ' + name + '\\b'), 'VGCollectionUI.' + name);
+}, 'collection: loaded and wired into the shell');
+
+check(() => {
+  assert.equal(U.pickTab('figures'), 'figures');
+  assert.equal(U.pickTab('shop'), 'summon');
+  assert.equal(U.pickTab(), 'summon');
+  assert.equal(U.summonLabel(0), 'Summon for free');
+  assert.equal(U.summonLabel(60), 'Summon for 60 stardust');
+  assert.equal(U.summonNote(0, 0, 48), 'Your first summon is free.');
+  assert.equal(U.summonNote(60, 145, 48), 'You have 145 stardust. One summon uses 60.');
+  assert.equal(U.summonNote(60, 45, 48), 'You need 15 more stardust. Solve missions to earn it.');
+  assert.match(U.summonNote(60, 500, 0), /did not load/);
+  assert.equal(U.percent(0.7), '70%');
+  assert.equal(U.percent(0.06), '6%');
+  assert.deepEqual(U.guaranteeLines({ rareEvery: 5, legendEvery: 20, rareIn: 1, legendIn: 14 }), [
+    'At least one rare or legendary figure in every 5 summons. Your next summon is one for sure.',
+    'At least one legendary figure in every 20 summons. One is certain within your next 14 summons.']);
+  assert.equal(U.pullText({ ok: true, duplicate: false }), 'New figure found.');
+  assert.equal(U.pullText({ ok: true, duplicate: true, refund: 35, count: 3, stars: 3 }), 'You have this one. It is now at 3 of 5 stars. 35 stardust came back.');
+  assert.equal(U.pullText({ ok: true, duplicate: true, refund: 20, count: 6, stars: 5 }), 'You have this one at 5 stars already. 20 stardust came back.');
+  assert.equal(U.pullText({ ok: false, reason: 'dust' }), '');
+  for (const r of ['dust', 'empty', 'storage', 'not-owned', 'anything']) assert.ok(U.failText(r).length > 10);
+  assert.equal(U.chipLabel('Collection', 120, ''), 'Collection: 120 stardust');
+  assert.equal(U.chipLabel('', 5, 'Emmy Noether'), 'Collection: 5 stardust, Emmy Noether equipped');
+  assert.equal(U.years({ born: '1731', died: '1806' }), '1731 to 1806');
+  assert.equal(U.years({ born: 'c. 287 BCE', died: 'c. 212 BCE' }), 'c. 287 BCE to c. 212 BCE');
+  assert.equal(U.years({ born: '1977', died: '' }), 'Born 1977');
+  assert.equal(U.years({}), '');
+  /* Player-facing words: stardust is earned by playing, never bought. */
+  const words = [U.summonLabel(60), U.summonNote(60, 10, 48), U.summonNote(60, 100, 48), ...U.guaranteeLines({ rareEvery: 5, legendEvery: 20, rareIn: 2, legendIn: 2 })].join(' ') +
+    ' ' + [...uiSrc.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/'((?:[^'\\\n]|\\.)*)'/g)].map(m => m[1]).filter(t => / /.test(t)).join(' ');
+  assert.doesNotMatch(words, /\b(buy|bought|purchase|price|pay|paid|shop|store credit|coins?|cash|money|gacha|loot)\b|[$€£]/i, 'no real-money wording');
+}, 'collection: plain words for summon, stars and the chip');
+
+check(() => {
+  /* Source links leave the app the same way the reading links in app.js do: a plain https link with
+     rel="noopener noreferrer". MainActivity.shouldOverrideUrlLoading hands an https link to the phone's browser. */
+  assert.equal(U.safeUrl('https://en.wikipedia.org/wiki/Emmy_Noether'), 'https://en.wikipedia.org/wiki/Emmy_Noether');
+  for (const bad of ['http://example.org/', 'javascript:alert(1)', 'file:///etc/passwd', '//example.org', 'https://a.b/" onclick="x', 'https://a.b/ c', '', null, 7]) assert.equal(U.safeUrl(bad), null, String(bad));
+  assert.equal(U.sourceLabel('https://en.wikipedia.org/wiki/X'), 'Wikipedia');
+  assert.equal(U.sourceLabel('https://www.nasa.gov/people/x'), 'NASA');
+  assert.equal(U.sourceLabel('https://www.example.org/a?b'), 'example.org', 'an unknown site shows its address');
+  assert.match(uiSrc, /a\.rel = 'noopener noreferrer'/);
+  assert.match(uiSrc, /\.map\(safeUrl\)\.filter\(Boolean\)/, 'only checked links are drawn');
+  assert.match(fs.readFileSync(game + '/app.js', 'utf8'), /rel="noopener noreferrer"/, 'same as the reading links');
+  /* Emblems are drawn from markup: nothing that could run code or load a file. */
+  assert.equal(U.emblemOk('<g fill="none"><circle cx="32" cy="32" r="20"/><path d="M1 2L3 4"/><animate attributeName="r"/></g>'), true);
+  for (const bad of ['<script>x</script>', '<circle onload="x()"/>', '<a href="https://x.y"><circle/></a>', '<image href="x.png"/>', '<use href="#a"/>', '<foreignObject></foreignObject>', '', null]) assert.equal(U.emblemOk(bad), false, String(bad));
+  const figs = {}; let loaded = false;
+  try { vm.runInNewContext(fs.readFileSync(game + '/collection/figures.js', 'utf8'), { window: figs }); loaded = Array.isArray(figs.VG_FIGURES); } catch (e) { loaded = false; }
+  if (loaded) for (const f of figs.VG_FIGURES) {
+    assert.ok(U.emblemOk(f.emblem), f.id + ': emblem can be drawn');
+    assert.ok(f.sources.every(u => U.safeUrl(u) && U.sourceLabel(u)), f.id + ': every source link can be shown');
+    assert.ok(U.years(f), f.id + ': years');
+  }
+}, 'collection: source links and emblems');
+
+check(() => {
+  /* Text is 11px or more, controls are 44px or more, motion can be switched off, and the page cannot scroll sideways. */
+  const sizes = [...uiCss.matchAll(/font(?:-size)?:[^;}]*?(\d+(?:\.\d+)?)px/g)].map(m => +m[1]);
+  assert.ok(sizes.length > 20, 'found the font sizes');
+  assert.ok(Math.min(...sizes) >= 11, 'smallest text is ' + Math.min(...sizes) + 'px');
+  for (const sel of ['.vgc-primary,.vgc-root .vgc-secondary', '.vgc-tab', '.vgc-back', '.vgc-link']) {
+    const rule = uiCss.split('\n').find(l => l.startsWith('.vgc-root ' + sel + '{'));
+    assert.ok(rule && /min-height:(4[4-9]|[5-9]\d)px/.test(rule), sel + ' is at least 44px high');
+  }
+  assert.match(uiCss, /\.vgc-root \.vgc-close\{[^}]*width:44px;height:44px/);
+  assert.match(uiCss, /:where\(\.vgc-chip\)\{[^}]*min-height:44px/);
+  assert.match(uiCss, /\.vgc-root \.vgc-tile\{[^}]*min-height:1\d\dpx/);
+  assert.match(uiCss, /@media\(prefers-reduced-motion:reduce\)\{\.vgc-root,\.vgc-root \*[^}]*animation:none!important/);
+  assert.match(uiCss, /\.vgc-root \.vgc-pane\{[^}]*overflow-x:hidden/);
+  /* Every rule is scoped, so the realm page's own styles are left alone. */
+  const loose = uiCss.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@keyframes[^{]+\{(?:[^{}]*\{[^{}]*\})*\s*\}/g, '').replace(/@media[^{]+\{/g, '').split('}')
+    .map(r => r.split('{')[0].trim()).filter(Boolean).flatMap(s => s.split(',')).map(s => s.trim()).filter(s => !/vgc-/.test(s));
+  assert.deepEqual(loose, [], 'selectors without a vgc- class');
+  /* Dialog semantics and focus. */
+  assert.match(uiSrc, /showModal\(\)/);
+  assert.match(uiSrc, /setAttribute\('role', 'dialog'\)[\s\S]{0,60}setAttribute\('aria-modal', 'true'\)/, 'the plain fallback is still a dialog');
+  assert.match(uiSrc, /setAttribute\('aria-labelledby', 'vgc-title'\)/);
+  assert.match(uiSrc, /returnTo = document\.activeElement/);
+  assert.match(uiSrc, /focusOn\(back\)/, 'focus goes back to where it was');
+  assert.match(uiSrc, /n\.tabIndex >= 0/, 'Tab only stops on things that take Tab');
+  assert.match(uiSrc, /setAttribute\('role', 'tablist'\)/);
+}, 'collection: sizes, motion, scoping and dialog semantics');
 
 console.log('shell logic: ' + checks + ' checks passed');

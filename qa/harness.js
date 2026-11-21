@@ -3,7 +3,10 @@
           node qa/harness.js --realm found      another pack: every generic per-mission check, with that pack's
           node qa/harness.js found              chapters, source rule and ranks, and a play-through of its first mission
    Option: --complete  fail when a pack declares chapter missions that are not written yet (otherwise a note).
-   The pack's scripts are read from game/realms/packs.js in the order realm.html loads them. */
+   The pack's scripts are read from game/realms/packs.js in the order realm.html loads them, with the scripts every
+   realm page shares (VG_REALM_SHARED: the collection) around them. Every page load below has the collection running,
+   so the linear algebra checks also prove that it changes no XP, answer or unlock.
+   Required from another test (qa/realm-collection.test.js), this file runs its checks and exports boot(). */
 const fs = require('node:fs');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
@@ -13,7 +16,7 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const args = process.argv.slice(2);
 const packsWindow = {};
 vm.runInNewContext(read('realms/packs.js'), { window: packsWindow });
-const PACKS = packsWindow.VG_PACKS;
+const PACKS = packsWindow.VG_PACKS, SHARED = packsWindow.VG_REALM_SHARED;
 const realmAt = args.indexOf('--realm');
 const realm = realmAt >= 0 ? args[realmAt + 1] : (args.find(a => !a.startsWith('--') && Object.prototype.hasOwnProperty.call(PACKS, a)) || 'la');
 const complete = args.includes('--complete');
@@ -21,10 +24,21 @@ if (!Object.prototype.hasOwnProperty.call(PACKS, realm)) { console.error(`FAIL: 
 const pack = PACKS[realm], isLA = realm === 'la';
 const byId = {};
 /* Scripts that need a real browser page are left to the Playwright checks (qa/handson-browser.js). */
-const browserOnly = new Set(['handson.js']);
+const browserOnly = new Set(['handson.js', 'collection/ui.js']);
+/* The collection is loaded on every realm page: data and logic before the pack, page code just before app.js. */
+assert.deepEqual(Array.from(SHARED.before), ['realms/registry.js', 'collection/figures.js', 'collection/achievements.js', 'collection/core.js'], 'the collection data and core load before the pack');
+assert.deepEqual(Array.from(SHARED.after), ['collection/ui.js'], 'the collection interface loads after the pack, before app.js');
+assert.deepEqual(Array.from(SHARED.styles), ['collection/collection.css']);
+{
+  const page = read('realm.html');
+  assert.ok(page.includes("pack.styles.concat((window.VG_REALM_SHARED||{}).styles||[])") && page.includes("(shared.before||[]).concat(pack.scripts,shared.after||[],'app.js')"), 'realm.html writes the shared files around every pack, app.js last');
+  assert.ok(page.indexOf('src="save-store.js"') > 0 && page.indexOf('src="save-store.js"') < page.indexOf('shared.before'), 'save-store.js loads before the collection');
+  assert.match(page, /<div class="top-stats">.*id="points".*<button type="button" id="collection-chip" class="collection-chip" hidden><\/button>.*id="help"/, 'the top bar has the collection chip after XP and SP');
+  assert.ok(!/type="module"|\bfetch\(|\bimport\s/.test(page), 'classic scripts only');
+}
 const curriculumWindow = { VG_SEED: 0 }; // seed 0 = authored numbers, so the scripted answers below stay valid
 let authoredOrder = null;
-for (const file of pack.scripts) {
+for (const file of [...SHARED.before, ...pack.scripts, ...SHARED.after]) {
   if (browserOnly.has(file)) continue;
   if (file === 'chapters.js') authoredOrder = (curriculumWindow.QUESTS || []).map(q => q.id);
   vm.runInNewContext(read(file), { window: curriculumWindow, Math });
@@ -138,14 +152,21 @@ assert.ok(quests.every(q => (q.prereqs||[]).every(id => byId[id])), 'all prerequ
 let reachable = new Set(), changed = true;
 while (changed) { changed = false; for (const q of quests) if (!reachable.has(q.id) && (q.prereqs||[]).every(id => reachable.has(id))) { reachable.add(q.id); changed = true; } }
 assert.equal(reachable.size, quests.length, 'all missions are reachable');
-const appSource = fs.readFileSync(root + '/app.js', 'utf8'), storeSource = read('save-store.js');
+const appSource = fs.readFileSync(root + '/app.js', 'utf8'), storeSource = read('save-store.js'), coreSource = read('collection/core.js');
+assert.ok(curriculumWindow.VGCollection && Array.isArray(curriculumWindow.VG_ACHIEVEMENTS) && Array.isArray(curriculumWindow.VG_REALMS), 'the collection core, achievements and registry load on the realm page');
+if (!Array.isArray(curriculumWindow.VG_FIGURES)) curriculumWindow.VG_FIGURES = []; // the figure list is written separately; the page works without it
 
 /* One page load: a fresh save store over `storage` (a Map standing for localStorage), then app.js. */
-function boot(storage = new Map()) {
+/* page: extra window properties for this page load only (a stand-in VGCollectionUI, a figure list for a test). */
+function boot(storage = new Map(), page = {}) {
   const localStorage = { getItem: k => storage.has(k) ? storage.get(k) : null, setItem: (k, v) => storage.set(k, String(v)), removeItem: k => storage.delete(k) };
   const storeWindow = { VG_SEED: curriculumWindow.VG_SEED, localStorage };
   vm.runInNewContext(storeSource, { window: storeWindow, Math, JSON });
   curriculumWindow.VGSave = storeWindow.VGSave; // app.js keeps the store it finds when it starts
+  /* Each page load has its own window over the shared pack modules, and its own collection core over its own
+     store: the core looks up window.VGSave on every call, so a shared one would follow the latest page load. */
+  const pageWindow = Object.assign(Object.create(curriculumWindow), page, { VGSave: storeWindow.VGSave });
+  if (!('VGCollection' in page)) vm.runInNewContext(coreSource, { window: pageWindow, Math, JSON }); // page.VGCollection = null: a page without the collection
   /* Window listeners and reloads of this page load, so a test can fire pageshow or storage and count reloads. */
   const listeners = {}, pageInfo = { reloads: 0 };
   curriculumWindow.addEventListener = (type, fn) => { listeners[type] = fn; };
@@ -198,7 +219,7 @@ function boot(storage = new Map()) {
     querySelectorAll: () => [], createElement: () => element('created'),
   };
   const context = {
-    window: curriculumWindow, Outpost: curriculumWindow.Outpost,
+    window: pageWindow, Outpost: curriculumWindow.Outpost,
     /* A module the pack does not load stays undefined, as on the page. */
     VisualLab: curriculumWindow.VisualLab && { ...curriculumWindow.VisualLab, mount() {} },
     Graph2D: curriculumWindow.Graph2D && { ...curriculumWindow.Graph2D, mount() {} },
@@ -209,9 +230,9 @@ function boot(storage = new Map()) {
     __getMain: () => mainInputs, __getGuided: () => guidedInputs,
     alert() {}, confirm: () => true, Blob: class {}, URL: { createObjectURL(){}, revokeObjectURL(){} }, console,
   };
-  const instrumented = appSource.replace(/\}\)\(\);\s*$/, 'globalThis.__qa={normalize,mission,available:(id)=>available(quests.find(q=>q.id===id)),getState:()=>JSON.parse(JSON.stringify(state)),getMain:()=>__getMain(),getGuided:()=>__getGuided(),activeId:()=>activeId,variant:()=>activeVariant,rank,review,parseNumber,toolResult,level,current:()=>currentMission,reviewDue,pickReview,setState:(patch)=>Object.assign(state,patch)};})();');
+  const instrumented = appSource.replace(/\}\)\(\);\s*$/, 'globalThis.__qa={normalize,mission,available:(id)=>available(quests.find(q=>q.id===id)),getState:()=>JSON.parse(JSON.stringify(state)),getMain:()=>__getMain(),getGuided:()=>__getGuided(),activeId:()=>activeId,variant:()=>activeVariant,rank,review,parseNumber,toolResult,level,current:()=>currentMission,reviewDue,pickReview,render,setState:(patch)=>Object.assign(state,patch)};})();');
   vm.runInNewContext(instrumented, context);
-  return { qa: context.__qa, el: element, dc, stage, guided, storage, curriculum: curriculumWindow.QUESTS, fire: (type, event) => listeners[type] && listeners[type](event), page: pageInfo, store: storeWindow.VGSave };
+  return { qa: context.__qa, el: element, dc, stage, guided, storage, curriculum: curriculumWindow.QUESTS, fire: (type, event) => listeners[type] && listeners[type](event), page: pageInfo, store: storeWindow.VGSave, window: pageWindow, collection: pageWindow.VGCollection };
 }
 /* A second page's view of the same storage (the star map, another tab): its own VGSave over the same Map. */
 boot.storeOver = storage => {
@@ -601,3 +622,4 @@ if (isLA) {
   console.log(`PASS: ${REALM.name} (${realm}): ${questCount}-mission teaching/guidance/schema/reachability audit; declared chapters, sectors, tiers and ranks; ${REALM.sourceRule.label} sources; experiments and variants; narration; first-mission play-through with its own save slice.`);
   if (missing.length) console.log(`NOTE: ${missing.length} of ${declared.flatMap(c => c.ids).length} declared missions are not written yet: ${missing.join(' ')}. Run with --complete to require them.`);
 }
+module.exports = { boot, realm, REALM, quests, byId, chapters, curriculumWindow };
