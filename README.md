@@ -97,3 +97,6 @@ Checks: the 2.2 commands, plus `node qa/harness.js --complete --complete-practic
 - Every mission has a generator and an independent oracle (`qa/realms/calc1/`); shared content rules moved to `qa/pack-checks.js`.
 - 75 calculus terms in the tap-to-define glossary; two new achievements; Mira's 40 calculus briefings are recorded.
 - MathCosmos now has 592 missions in three realms.
+
+## Version 2.5.1
+- **Shorter mission screen on phones:** the lesson steps, worked example, common mistakes and sources are drop-downs under the explanation, and Mira's briefing shows four lines with "Read the full briefing" on narrow screens.
