@@ -15,5 +15,5 @@ java com.sun.tools.javac.Main -source 8 -target 8 -classpath "$ANDROID_PLATFORM_
 "$ANDROID_BUILD_TOOLS/d8" --min-api 23 --lib "$ANDROID_PLATFORM_JAR" --output "$build/dex" $(find "$build/classes" -name '*.class')
 (cd "$build/dex" && zip -q ../unsigned.apk classes.dex)
 "$ANDROID_BUILD_TOOLS/zipalign" -f 4 "$build/unsigned.apk" "$build/aligned.apk"
-"$ANDROID_BUILD_TOOLS/apksigner" sign --ks "$SIGNING_KEYSTORE" --ks-key-alias "$SIGNING_ALIAS" --ks-pass env:SIGNING_PASSWORD --key-pass env:SIGNING_PASSWORD --out "$build/Vector-Guild.apk" "$build/aligned.apk"
-"$ANDROID_BUILD_TOOLS/apksigner" verify --verbose "$build/Vector-Guild.apk"
+"$ANDROID_BUILD_TOOLS/apksigner" sign --ks "$SIGNING_KEYSTORE" --ks-key-alias "$SIGNING_ALIAS" --ks-pass env:SIGNING_PASSWORD --key-pass env:SIGNING_PASSWORD --out "$build/MathCosmos.apk" "$build/aligned.apk"
+"$ANDROID_BUILD_TOOLS/apksigner" verify --verbose "$build/MathCosmos.apk"
