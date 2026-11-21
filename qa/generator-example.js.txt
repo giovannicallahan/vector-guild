@@ -1,0 +1,23 @@
+/* Worked example of one generator (mission q01). Generator files follow this shape exactly.
+   Helpers on window.Gen:  n(x) number→text with "−";  plus(x) "+3" / "−2";  par(x) "(−1)" / "4";
+   vec([..], sep) "(3, −1, 2)".  R in draw(): R.int(lo,hi), R.nz(lo,hi) nonzero, R.pick(list),
+   R.bool(), R.except(lo,hi,[excluded]). */
+(function(){
+'use strict';
+const G=window.Gen,{n,plus,par,vec}=G;
+Object.assign(window.MISSION_GEN,{
+q01:{
+ canonical:{a:[3,-1,2],b:[-1,4,0]},
+ draw:R=>({a:[R.nz(-6,6),R.nz(-6,6),R.int(-6,6)],b:[R.nz(-6,6),R.nz(-6,6),R.int(-6,6)]}),
+ build:({a,b})=>{const s=a.map((x,i)=>x+b[i]);return {
+  prompt:`Thrusters deliver impulses ${vec(a)} and ${vec(b)} N·s. Enter the resultant x, y, z.`,
+  answer:s,
+  hints:['Add the x components first.',`The z components are ${n(a[2])} and ${n(b[2])}.`],
+  solution:`(${n(a[0])}${plus(b[0])}, ${n(a[1])}${plus(b[1])}, ${n(a[2])}${plus(b[2])}) = ${vec(s,',')} N·s.`,
+  guidance:[
+   {prompt:`What is the resultant x impulse: ${n(a[0])}+${par(b[0])}?`,answer:[s[0]],explanation:`Both x impulses act on the same axis, so their signed sum is ${n(s[0])} N·s.`},
+   {prompt:`What are the resultant y and z impulses: ${n(a[1])}${plus(b[1])} and ${n(a[2])}${plus(b[2])}?`,answer:[s[1],s[2]],explanation:`The remaining components are ${n(s[1])} and ${n(s[2])} N·s; retain x,y,z order.`}
+  ]};}
+}
+});
+})();

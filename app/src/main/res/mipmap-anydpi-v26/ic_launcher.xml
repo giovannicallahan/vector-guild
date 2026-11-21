@@ -1,0 +1,1 @@
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@drawable/vector_guild_background"/><foreground android:drawable="@drawable/vector_guild_foreground"/></adaptive-icon>

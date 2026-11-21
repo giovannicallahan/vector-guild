@@ -1,0 +1,94 @@
+/* Vector Guild 1.3 additions. Loaded after styles.css and docking.css. */
+
+/* Touch targets: every control is at least 44 px in both directions. */
+.help-btn{width:44px;height:44px}
+.close{width:44px;height:44px}
+.icon-btn{min-width:44px;min-height:44px}
+.nav{min-height:44px}
+.secondary,.primary{min-height:44px}
+.text-link{min-height:44px;padding:0 4px}
+.tool-form input,.answer-grid input{min-height:44px}
+.lesson-sources a{display:inline-block;padding:12px 0}
+.guide-list summary{min-height:44px}
+
+/* Chapters reuse the sector panel, but collapse. */
+.chapter>summary{cursor:pointer;list-style:none}
+.chapter>summary::-webkit-details-marker{display:none}
+.chapter>summary::after{content:'▾';color:var(--muted);margin-left:10px}
+.chapter[open]>summary::after{content:'▴'}
+.chapter:not([open])>summary{border-bottom:0}
+.chapter>summary:focus-visible{outline:2px solid var(--lime);outline-offset:-2px}
+.chapter-note{margin:0;padding:14px 22px;border-top:1px solid var(--line);color:var(--cyan);font-size:12px}
+
+/* Review drill bar */
+.review-bar{display:flex;align-items:center;gap:18px;justify-content:space-between;flex-wrap:wrap;margin:18px 0 6px;padding:16px 22px;border:1px solid var(--line);background:#172428}
+.review-bar p{margin:6px 0 0;color:var(--muted);font-size:12px}
+
+/* Outpost status list: readable replacement for the in-picture labels on small screens. */
+.outpost-status{display:none;list-style:none;margin:10px 0 0;padding:0;grid-template-columns:1fr 1fr;gap:6px}
+.outpost-status li{padding:9px 10px;border:1px solid #3d5a59;border-radius:8px;background:#152b31;display:grid;gap:3px}
+.outpost-status b{font-size:12px}
+.outpost-status span{font-size:11px;color:#9bb5af}
+.outpost-status .building span{color:var(--cyan)}
+.outpost-status .online span{color:var(--lime)}
+.outpost>p{margin-top:22px}
+
+/* Contract board */
+.vg-board{margin:28px 0 12px;padding:22px;border:1px solid var(--line);background:#172428}
+.vg-board h2{margin:10px 0}
+.vg-board>p{color:var(--muted);line-height:1.6;max-width:70ch}
+.board-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
+.board-card{padding:18px;border:1px solid var(--line);background:#14201f;min-width:0}
+.board-card.is-open{border-color:var(--lime)}
+.board-card.is-done{border-color:#4d9f8d}
+.board-card h3{margin:12px 0 8px;font-size:17px}
+.board-card p{color:#bdd1c8;line-height:1.55;font-size:13px}
+.board-needs{list-style:none;margin:12px 0;padding:0;display:grid;gap:8px}
+.board-needs li{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;min-height:44px}
+.board-problem h4{font-size:10px;letter-spacing:1.6px;color:var(--lime);margin:14px 0 8px}
+.board-problem .primary{margin-top:14px}
+.board-feedback{min-height:20px;color:var(--lime)!important}
+.board-locked{color:var(--muted)!important;font-size:12px!important}
+.board-explain{border-left:2px solid var(--cyan);padding-left:12px}
+
+@media(max-width:950px){
+  /* All six sections stay visible: a 3 × 2 grid instead of a row that scrolls out of view. */
+  nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;gap:4px}
+  .sidebar .nav{width:100%;min-width:0;justify-content:center;gap:6px;padding:8px 4px;text-align:center}
+  .nav span{width:auto}
+  .board-grid{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  .outpost-scene .op-label{display:none}
+  .outpost-status{display:grid}
+  .vg-board{padding:14px}
+  .review-bar{padding:14px}
+  .review-bar button{width:100%}
+  .sector-heading{flex-wrap:wrap;gap:10px;padding:14px}
+  .sector-heading .sector-count{margin-left:0;flex-basis:100%;order:3}
+  .chapter>summary::after{margin-left:auto}
+}
+
+/* ---- 1.4: fractions note, error notebook, pitfall chips ---- */
+.entry-note{font-size:12px;color:var(--muted);margin:10px 0 0}
+.entry-note .text-link{font-size:12px;min-height:0;padding:12px 4px;margin:-12px 0}
+.pitfall-ask{margin:14px 0;padding:14px;border:1px solid #6b5a3a;border-left:3px solid #f3c37b;background:#221f18;display:grid;gap:8px}
+.pitfall-ask b{font-size:10px;letter-spacing:1.6px;color:#f3c37b}
+.pitfall-ask p{margin:0;font-size:13px}
+.pit-chip{text-align:left;white-space:normal;line-height:1.4;padding:10px 12px}
+.pit-chip[aria-pressed=true]{border-color:#f3c37b;color:#f3c37b}
+.pit-chip[aria-pressed=true]::before{content:'✓ '}
+.notebook{margin:0 0 30px;padding:22px;border:1px solid var(--line);background:#172428}
+.notebook h2{margin:10px 0}
+.notebook>p{color:var(--muted);line-height:1.6;max-width:70ch}
+.notebook-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.nb-entry{padding:16px;border:1px solid var(--line);background:#14201f;min-width:0}
+.nb-entry.is-open{border-color:#8a7445}
+.nb-entry.is-closed{opacity:.8}
+.nb-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.nb-entry p{margin:8px 0;font-size:13px;color:#bdd1c8}
+.nb-entry ul{margin:8px 0;padding-left:18px;font-size:13px;line-height:1.5}
+.nb-count{color:#f3c37b}
+.nb-none{color:var(--muted)!important}
+@media(max-width:650px){.notebook{padding:14px}.notebook-list{grid-template-columns:1fr}}
+.reference-problem{margin:8px 0;padding:10px 12px;border-left:2px solid var(--cyan);background:#14262b;font-size:13px}

@@ -1,0 +1,11 @@
+<resources>
+    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@drawable/vector_guild_splash</item>
+        <item name="android:windowSplashScreenBackground">#10232e</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/vector_guild_foreground</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:statusBarColor">#101b20</item>
+        <item name="android:navigationBarColor">#101b20</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

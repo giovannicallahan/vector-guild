@@ -1,0 +1,4 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/vector_guild_background"/>
+    <item android:width="216dp" android:height="216dp" android:gravity="center" android:drawable="@drawable/vector_guild_foreground"/>
+</layer-list>

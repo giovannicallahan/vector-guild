@@ -1,0 +1,19 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.vectorguild.app'
+    compileSdk 37
+    defaultConfig {
+        applicationId 'com.vectorguild.app'
+        minSdk 23
+        targetSdk 37
+        versionCode 6
+        versionName '1.4.1'
+    }
+}
+
+tasks.register('syncGame', Copy) {
+    from rootProject.file('game')
+    into file('src/main/assets/game')
+}
+preBuild.dependsOn syncGame
