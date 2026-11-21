@@ -98,5 +98,9 @@ Checks: the 2.2 commands, plus `node qa/harness.js --complete --complete-practic
 - 75 calculus terms in the tap-to-define glossary; two new achievements; Mira's 40 calculus briefings are recorded.
 - MathCosmos now has 592 missions in three realms.
 
+## Version 2.5.2
+
+On phones, a lesson's explanation paragraph shows its first five lines with **Read more** / **Show less**. Desktop is unchanged.
+
 ## Version 2.5.1
 - **Shorter mission screen on phones:** the lesson steps, worked example, common mistakes and sources are drop-downs under the explanation, and Mira's briefing shows four lines with "Read the full briefing" on narrow screens.
