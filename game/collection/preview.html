@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figure roster preview</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px 16px 48px; background: #101b20; color: #e6eef0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  #summary { margin: 0 0 20px; color: #9fb4ba; }
+  h2 { font-size: 14px; letter-spacing: .08em; text-transform: uppercase; margin: 28px 0 12px; color: #9fb4ba; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .card { border: 1px solid #2a3d44; border-radius: 10px; padding: 14px; background: #15242a; }
+  .card.rare { border-color: #4f8fb0; }
+  .card.legendary { border-color: #d8b25a; }
+  .card svg { display: block; width: 64px; height: 64px; margin-bottom: 10px; color: #e6eef0; }
+  .card.rare svg { color: #8cc7e6; }
+  .card.legendary svg { color: #f0cf7a; }
+  .name { font-weight: 600; }
+  .years, .tags { color: #9fb4ba; font-size: 13px; }
+  .known { margin: 6px 0 8px; }
+  .tags span { display: inline-block; border: 1px solid #2a3d44; border-radius: 999px; padding: 1px 8px; margin-right: 6px; }
+</style>
+</head>
+<body>
+<h1>Figure roster preview</h1>
+<p id="summary">Loading figures.js.</p>
+<div id="roster"></div>
+<script src="figures.js"></script>
+<script>
+(function () {
+  var figures = Array.isArray(window.VG_FIGURES) ? window.VG_FIGURES : [];
+  var roster = document.getElementById('roster'), summary = document.getElementById('summary');
+  var el = function (tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  if (!figures.length) { summary.textContent = 'figures.js did not load or has no figures.'; return; }
+  var rarities = ['legendary', 'rare', 'common'], parts = [];
+  rarities.forEach(function (r) {
+    var list = figures.filter(function (f) { return f.rarity === r; });
+    if (!list.length) return;
+    parts.push(list.length + ' ' + r);
+    roster.appendChild(el('h2', '', r + ' (' + list.length + ')'));
+    var grid = el('div', 'grid');
+    list.forEach(function (f) {
+      var card = el('div', 'card ' + r);
+      /* The emblem is inner svg markup from figures.js, a local file checked by qa/collection-data.test.js. */
+      var holder = el('div');
+      holder.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" role="img">' + f.emblem + '</svg>';
+      holder.firstChild.setAttribute('aria-label', 'Emblem for ' + f.name);
+      card.appendChild(holder.firstChild);
+      card.appendChild(el('div', 'name', f.name));
+      card.appendChild(el('div', 'years', f.born + ' to ' + f.died));
+      card.appendChild(el('div', 'known', f.knownFor));
+      var tags = el('div', 'tags');
+      tags.appendChild(el('span', '', f.rarity));
+      tags.appendChild(el('span', '', f.perk));
+      card.appendChild(tags);
+      grid.appendChild(card);
+    });
+    roster.appendChild(grid);
+  });
+  summary.textContent = figures.length + ' figures: ' + parts.join(', ') + '.';
+})();
+</script>
+</body>
+</html>
