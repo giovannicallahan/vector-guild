@@ -74,3 +74,17 @@ Version 2.2 adds practice missions to Foundations, drop-down chapters, the home 
 - **Collection:** one new achievement, "Bedrock" (every Foundations mission, practice included). "Solid ground" keeps its 2.1 meaning: every concept learned.
 
 Checks: the 2.0 commands, plus `node qa/harness.js --realm found --complete --complete-practice` (fails if any of the 120 practice missions is missing), `node qa/styles.test.js`, `node qa/collection.test.js`, `node qa/realm-collection.test.js`, `node qa/collection-data.test.js` and `node qa/home.test.js`. The Playwright scripts were not run. The Android version is 2.2 (versionCode 9); no APK was built.
+
+## Version 2.3
+
+Version 2.3 adds practice missions to linear algebra, a skip-ahead check, tap-to-define words, a daily review and install from the website. Saves from 2.2 and earlier load unchanged; save keys and the app id are the same, and the 68 linear algebra learn missions give the same numbers and text as 1.4.1.
+
+- **Linear algebra practice (`game/realms/la/practice-1.js` to `practice-14.js`):** each of the 68 concepts has three optional practice missions (`q01b` a new setting, `q01c` an applied problem, `q01d` a challenge), 204 in all, so linear algebra has 272 missions. Each has its own generator and its own oracle (`qa/realms/la/oracle-p1.js` to `oracle-p14.js`). The format is in `docs/PACK-FORMAT.md`, section 10.6.
+- **Ranks:** linear algebra ranks count every solved mission. The 1.4.1 steps are kept as `learnAt`, so the learn missions alone climb the old ladder and no save is demoted. One new top rank, GUILD LUMINARY, needs all 272.
+- **Skip-ahead check (`game/skip.js`):** a chapter that is not complete offers a check with one fresh problem from each of its learn missions, with no hints. Passing marks those missions solved (XP, skill points and stardust once, no first-try stars). Failing changes nothing except a short list of lessons to study; a new try needs one of them opened, or a new day.
+- **Tap-to-define words (`game/glossary.js`):** 61 Foundations and 67 linear algebra terms are underlined in lessons, prompts, hints and solutions. A tap shows a one-sentence meaning, a small example and the mission that teaches the word. Mission text is not changed.
+- **Daily review (`game/daily.js`):** once per day, a card on the home page and on each realm page asks three fresh problems from missions already solved. Finishing pays stardust once for that day and counts a day streak. It unlocks after three solved missions.
+- **Install from the website (`game/install.js`, `game/sw.js`, `game/manifest.webmanifest`, `docs/INSTALL.md`):** on https the game can be installed and then plays offline. Nothing of this runs in the Android app (`file://`). Run `node tools/build-sw.js` after any change under `game/`.
+- **Collection:** one new achievement, "Full span" (every linear algebra mission, practice included). "Master of arrows" keeps its meaning: every concept learned.
+
+Checks: the 2.2 commands, plus `node qa/harness.js --complete --complete-practice` (fails if any of the 204 practice missions is missing), `node qa/skip.test.js`, `node qa/glossary.test.js`, `node qa/daily.test.js` and `node qa/install.test.js`. The Playwright scripts were not run. The Android version is 2.3 (versionCode 10); no APK was built.

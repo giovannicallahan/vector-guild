@@ -301,4 +301,27 @@ test('meta: putMeta reports when nothing could be stored, and nothing throws', (
   blocked.VGSave.resetAll(); assert.equal(blocked.VGSave.meta().dust, 0);
 });
 
+test('meta.daily (the daily review): absent stays absent, present is made safe, and it travels with the save', () => {
+  const { store, storage } = page(new Map([[V2, JSON.stringify({ v: 2, seed: 5, realms: {}, meta: { dust: 20 } })]]));
+  assert.equal('daily' in store.meta(), false, 'a collection from before the daily review gains no field');
+  const m = store.meta(); m.daily = { day: 20778, streak: 4, best: 2, paid: [7, 3, 3, -1, 'x'], at: { day: 20779, n: 2 }, seen: { 'la:q01': 20770, 'found:q02': 'x' }, future: true };
+  assert.equal(store.putMeta(m), true);
+  const want = { day: 20778, streak: 4, best: 4, paid: [3, 7], seen: { 'la:q01': 20770 }, future: true, at: { day: 20779, n: 2 } };
+  assert.deepEqual(plain(store.meta().daily), want); assert.deepEqual(JSON.parse(storage.get(V2)).meta.daily, want);
+  /* Progress on a day that is already paid, or a broken mark, is dropped; a day that is not a whole number means "never". */
+  m.daily = { day: 20778, streak: 0, at: { day: 20778, n: 1 } }; store.putMeta(m);
+  assert.deepEqual(plain(store.meta().daily), { day: 20778, streak: 1, best: 1, paid: [], seen: {} });
+  m.daily = { day: 1.5, streak: 6, best: 6, at: { day: 3, n: 0 } }; store.putMeta(m);
+  assert.deepEqual(plain(store.meta().daily), { day: null, streak: 0, best: 6, paid: [], seen: {} });
+  m.daily = 'x'; store.putMeta(m); assert.equal('daily' in store.meta(), false);
+  /* Export and import carry it; a 1.x import, and a v2 backup with no collection, keep the one on this device. */
+  m.daily = { day: 20778, streak: 2, best: 5, paid: [3] }; store.putMeta(m);
+  const backup = plain(store.exportAll()), kept = { day: 20778, streak: 2, best: 5, paid: [3], seen: {} };
+  assert.deepEqual(backup.meta.daily, kept);
+  const { store: other } = page(); other.load(); assert.equal(other.importAny(backup).ok, true); assert.deepEqual(plain(other.meta().daily), kept);
+  assert.equal(other.importAny({ solved: ['q01'], tools: [] }).ok, true); assert.deepEqual(plain(other.meta().daily), kept);
+  assert.equal(other.importAny({ v: 2, seed: 1, realms: {} }).ok, true); assert.deepEqual(plain(other.meta().daily), kept);
+  other.resetAll(); assert.equal('daily' in other.meta(), false);
+});
+
 console.log(`PASS: ${count} save-store tests.`);

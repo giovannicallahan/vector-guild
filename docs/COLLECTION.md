@@ -29,7 +29,8 @@ meta: {
   sinceRare: 0,         // pulls since a rare or legendary
   sinceLegend: 0,       // pulls since a legendary
   paid: { <realmId>: { solved: [qid...], clean: [qid...], chapters: [n...] } },
-  drills: 0             // review drills completed (counted once each)
+  drills: 0,            // review drills completed (counted once each)
+  daily: { ... }        // the daily review (2.3), see "Daily review"; absent in older saves
 }
 ```
 
@@ -87,6 +88,51 @@ mission solved, practice included (160); linear algebra finished; missions solve
 realms; first drill; 10 drills; first pull; 5, 15 and 30 different figures; a legendary; a figure at
 5 stars; a figure equipped; every figure of one field; a landmark bought; every landmark of a realm.
 Rewards run from 15 to 150 stardust. Names are plain and friendly; no jargon.
+
+## Daily review (2.3)
+
+Once per local calendar day the home page and each realm page show a "Daily review" card: three short
+problems with fresh numbers, drawn from missions the player has already solved, answered in the card.
+
+- **Where the problems come from.** The same problem models, number reading and check as a review drill
+  (`Variants.make` / `Variants.check`). A realm page uses that realm only. The home page uses every realm with
+  solved missions; it loads no pack itself, so when the player starts, each realm's pack scripts are loaded into
+  a hidden same-origin frame (packs reuse mission ids, so they cannot share a page).
+- **Which missions.** One entry per solved concept (a practice mission `q07b` counts for `q07`). The draw is
+  weighted: `1 + days since it was last practised (0 to 60; 60 when never) + (30 + 5 per notebook miss, up to
+  6, while its notebook entry is open)`. "Practised" means a review drill (`reviews[id].last`) or an earlier
+  daily review (`meta.daily.seen`); the save keeps no time for the solve itself. Three different concepts when
+  there are three; with fewer, they come round again with new numbers.
+- **A miss.** The card shows the answer and the working, then gives the same concept once more with new
+  numbers. After a second miss it moves on ("This one will come back another day"). Finishing means having
+  worked through all three, so a review can always be finished.
+- **Unlock.** Three solved missions (in that realm, on a realm page). Until then the card says so.
+- **Pay.** Finishing pays 15 stardust once per day. A day streak counts days in a row; streaks of 3, 7, 14 and
+  30 days pay 20, 40, 80 and 150 once each, ever. A missed day sets the streak back to 0 and takes nothing
+  away (stardust, figures and the best streak stay); the card says so.
+- **Never twice.** `VGCollection.onDailyDone(day)` is the only place that pays. `day` is the local calendar day
+  as whole days since 1970. It pays only when `day` is later than `meta.daily.day`, so a reload, a second tab,
+  a re-import of the same backup, or a device clock set back pays nothing. With the clock set back, the card
+  says the next review opens once the date has passed the last paid day.
+- **Not changed by it.** Realm slices: XP, solved missions, the spaced review schedule and the error notebook
+  are untouched (the realm page keeps its slice in memory, so the card must not write it).
+
+```
+meta.daily: {             // absent until the player first makes progress; older saves load unchanged
+  day: <n> | null,        // last day paid
+  streak: 0,              // days in a row ending on `day`
+  best: 0,                // longest streak
+  paid: [3, 7],           // streak milestones already paid
+  at: { day, n },         // problems done on a day not finished yet (dropped when the day is paid)
+  seen: { "<realm>:<qid>": <day> }   // when a concept was last passed in a daily review (at most 400)
+}
+```
+
+Export and import carry it with the rest of `meta`; a 1.x import and `reset(realm)` leave it; `resetAll`
+clears it. The date source is injectable: `VGDaily.setClock(() => Date)`, or `window.VG_DAILY_NOW` set before
+`daily.js` loads. Files: `game/daily.js`, `game/daily.css` (loaded on the home page by `index.html` and on
+realm pages through `VG_REALM_SHARED`); the home page has one slot for the card (`.vgh-daily`, `shell/home.js`);
+on a realm page the card puts itself after the review-drill bar. Checks: `qa/daily.test.js`.
 
 ## Files
 

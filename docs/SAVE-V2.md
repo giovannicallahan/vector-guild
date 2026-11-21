@@ -12,6 +12,8 @@ localStorage key `vector-guild-save-v2`. The 1.x key `vector-guild-save-v1` is n
 ```
 `<slice>` is exactly the 1.4.1 save object without `seed`, using the pack's LOCAL mission ids:
 `{solved, xp, points, tools, clean, revealed, landmarks, contracts, reviews, errors, rolls}`.
+Since 2.3 a slice may also hold `skips` (the skip-ahead check, `game/skip.js`): `{ "<chapter index>": { last, miss: [learn ids], seen, n } }`, one record per chapter whose check was failed and that is not complete yet. A save without `skips` loads as before; a damaged record is dropped; a mission passed by a check is stored exactly like a solved one.
+Since 2.3 `meta` may also hold `daily` (the daily review, `game/daily.js`, rules in `docs/COLLECTION.md`): the last finished day, the day streak, the best streak, the streak rewards already paid and the missions recently asked. It is kept only when the save has one, is made safe on every read, and travels with the backup.
 
 Rules
 - First run with no v2 key: if a v1 save parses, `realms.la` = that object (seed moved to the top level, `seed` missing -> 0), `intro:false`. Otherwise a fresh save with a random non-zero seed and no realms.

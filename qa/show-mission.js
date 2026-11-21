@@ -2,7 +2,8 @@
    Usage: node qa/show-mission.js q12            authored fields (including lesson and worked example)
           node qa/show-mission.js q12 --draw 3   authored prompt plus three generated versions
           node qa/show-mission.js q01 --realm found   a mission of another pack (default la)
-          node qa/show-mission.js q01b --realm found  a practice mission: its own fields, and what it takes from its parent */
+          node qa/show-mission.js q01b --realm found  a practice mission: its own fields, and what it takes from its parent
+          node qa/show-mission.js q01b --draw 3       a linear algebra practice mission and three generated versions */
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');

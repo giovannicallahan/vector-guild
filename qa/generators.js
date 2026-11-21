@@ -2,10 +2,11 @@
    Usage: node qa/generators.js [id ...]      e.g. node qa/generators.js q01 q02 q01b
    Options: --realm ID (or a bare pack id; default la)  --draws N (default 300)
             --strict (text differences at canonical parameters fail)
-   The pack's scripts come from game/realms/packs.js. Oracles: qa/oracle-*.js for linear algebra,
-   qa/realms/<id>/oracle-*.js for any other pack. A mission without a generator or an oracle fails.
+   The pack's scripts come from game/realms/packs.js. Oracles: qa/realms/<id>/oracle-*.js; the 68 linear algebra
+   learn missions keep theirs in qa/oracle-a.js ... oracle-d.js. A mission without a generator or an oracle fails.
    Practice missions (q01b ..., docs/PACK-FORMAT.md "Practice missions") are missions like any other here: each
-   needs its own generator and its own oracle (qa/realms/found/oracle-p1.js ... oracle-p8.js).
+   needs its own generator and its own oracle (qa/realms/found/oracle-p1.js ... oracle-p8.js,
+   qa/realms/la/oracle-p1.js ... oracle-p14.js).
    Exit code 0 only if every checked mission passes. */
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -27,9 +28,11 @@ if (!own(realm)) { console.error(`unknown realm "${realm}"; packs: ${Object.keys
 /* The whole pack loads, as on the page, except a script that needs a real browser page. */
 for (const file of packs.VG_PACKS[realm].scripts) if (file !== 'handson.js') load(path.join(game, file));
 window.ORACLE = {};
-const oracleDir = realm === 'la' ? __dirname : path.join(__dirname, 'realms', realm);
-const oracleName = realm === 'la' ? /^oracle-[a-z]\.js$/ : /^oracle-.+\.js$/;
-if (fs.existsSync(oracleDir)) for (const file of fs.readdirSync(oracleDir).filter(f => oracleName.test(f)).sort()) load(path.join(oracleDir, file));
+/* Linear algebra: its 68 learn oracles are qa/oracle-a.js ... oracle-d.js (as in 1.4.1); its practice oracles are
+   qa/realms/la/oracle-p1.js ... oracle-p14.js. Any other pack: every qa/realms/<id>/oracle-*.js. */
+const oracleDir = path.join(__dirname, 'realms', realm);
+const oracleDirs = realm === 'la' ? [[__dirname, /^oracle-[a-z]\.js$/], [oracleDir, /^oracle-.+\.js$/]] : [[oracleDir, /^oracle-.+\.js$/]];
+for (const [dir, name] of oracleDirs) if (fs.existsSync(dir)) for (const file of fs.readdirSync(dir).filter(f => name.test(f)).sort()) load(path.join(dir, file));
 
 const { Gen, MISSION_GEN, ORACLE, QUESTS } = window;
 const bad = /NaN|undefined|Infinity|[=(,:·]\s*null\b|\[object|[+−]\s*-|(?<![A-Za-z])-\d|\d\.\d{5,}|[+−]\s*[+−]\d|\(\s*\)/;

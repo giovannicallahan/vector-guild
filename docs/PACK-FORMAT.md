@@ -363,3 +363,56 @@ node qa/show-mission.js q01b --realm found --draw 3              # print it, and
 node qa/harness.js --realm found                                 # all checks; missing practice is a NOTE
 node qa/harness.js --realm found --complete --complete-practice  # at the end: all 40 learn and all 120 practice
 ```
+
+### 10.6 Linear algebra practice
+
+Linear algebra (`la`) has practice missions in the same format: everything in §10.1–§10.5 applies, with `--realm found` left out of the commands (linear algebra is the default pack). `REALM.practice.kinds` is the same `{ b: 'setting', c: 'applied', d: 'challenge' }`, so the full pack is 68 learn + 204 practice = 272 missions. **The 68 learn missions, their generators and their oracles are those of 1.4.1 and must not change by one character**: do not edit `game/curriculum.js`, `game/extra-quests.js`, `game/gen-a.js` … `gen-d.js` or `qa/oracle-a.js` … `oracle-d.js`.
+
+**Files.** Fourteen files, one author each. File N covers concepts q(5N−4) … q(5N); file 14 covers q66–q68.
+
+| N | Missions and generators (`game/realms/la/`) | Oracles (`qa/realms/la/`) | Concepts | Practice missions |
+|---|---|---|---|---|
+| 1 | `practice-1.js` | `oracle-p1.js` | q01–q05 | 15 |
+| 2 | `practice-2.js` | `oracle-p2.js` | q06–q10 | 15 |
+| 3 | `practice-3.js` | `oracle-p3.js` | q11–q15 | 15 |
+| 4 | `practice-4.js` | `oracle-p4.js` | q16–q20 | 15 |
+| 5 | `practice-5.js` | `oracle-p5.js` | q21–q25 | 15 |
+| 6 | `practice-6.js` | `oracle-p6.js` | q26–q30 | 15 |
+| 7 | `practice-7.js` | `oracle-p7.js` | q31–q35 | 15 |
+| 8 | `practice-8.js` | `oracle-p8.js` | q36–q40 | 15 |
+| 9 | `practice-9.js` | `oracle-p9.js` | q41–q45 | 15 |
+| 10 | `practice-10.js` | `oracle-p10.js` | q46–q50 | 15 |
+| 11 | `practice-11.js` | `oracle-p11.js` | q51–q55 | 15 |
+| 12 | `practice-12.js` | `oracle-p12.js` | q56–q60 | 15 |
+| 13 | `practice-13.js` | `oracle-p13.js` | q61–q65 | 15 |
+| 14 | `practice-14.js` | `oracle-p14.js` | q66–q68 | 9 |
+
+Each stub exists with its boilerplate; add entries inside your two files and nowhere else. `game/realms/packs.js` already lists the fourteen practice files (after `gen-d.js`, before `chapters.js`), and `qa/generators.js` loads every `qa/realms/la/oracle-*.js` beside the 1.4.1 oracles. The files are classic scripts: no `import`, no `fetch`.
+
+**Registration.** As in §10.3: `add(mission, generator)`, or the helper `practice(meta, stepLabels, generator)` in each stub, which takes the prompt, answers, hints, solution and guided steps from `build(canonical)` so the authored text and the generator cannot drift apart (`meta` = `{id, parent, kind, title, brief, labels, tolerance, uses?}`; `stepLabels` = the labels of each guided step, in order). The stub also gives `n`, `plus`, `par`, `vec` from `Gen` and `mat(M)` for a matrix written row by row, `[[2,0],[0,1]]`, the way the learn missions print one. The worked sample is `q01b` in `game/realms/la/practice-1.js`, with its oracle in `qa/realms/la/oracle-p1.js`.
+
+**Inherited from the parent (do not write these):** `topic`, `tier`, `xp`, `sector`, the chapter, `lesson`, `teaching`, `sources` (with the lecture link `reading-links.js` adds), the concept bench experiment, the review drill and the 3D and graph labs. `prereqs` is `[parent]`; a practice mission has no `artifact`. The docking trial, the hands-on benches, the contracts and the contract board belong to learn missions and never open on a practice id. Linear algebra XP is per mission, not per tier: a practice mission pays its parent's `xp`.
+
+**Answers with several boxes.** Most linear algebra answers are a vector or a matrix. Every number is one answer box, and `labels` has one label per box, in the order the prompt asks for them:
+
+- a vector: one box per component, named by axis or index and by what it measures, as the parent does: `['total x', 'total y', 'total z']`, `['flow 1', 'flow 2', 'flow 3']`;
+- a matrix: one box per entry, **row by row**, labelled by row then column: `['entry 11', 'entry 12', 'entry 21', 'entry 22']`, or with the matrix's name: `['R11', 'R12', 'R22']`, `['inverse 11', …]`. Ask only for the entries that carry the idea (an upper triangle, a diagonal); six boxes is the most any mission uses;
+- a scalar that goes with it comes after the entries, with a plain name: `['x', 'y', 'z', 'dimension']`;
+- a yes or no is asked as 1 or 0, and the prompt says so ("enter 1 for yes, 0 for no");
+- the prompt ends by naming the order ("Enter the total move: x, then y, then z."). A guided step asks for one or two of the same boxes and reuses their labels.
+
+An eigenvector, a null vector or any answer that is only fixed up to a scale needs the scale pinned in the prompt ("with last component 1", "of length 1 with positive x"), or the box would reject a correct answer.
+
+**Tolerance.** `tolerance` is absolute and applies to every box. All 68 learn missions use `0.01`; keep `0.01` for answers that are exact or short decimals (draw parameters so they are). Where an answer must be rounded (a square root, an angle), the prompt says how ("to 2 decimal places") and the tolerance still accepts the rounded value: `0.01` for two decimals. Never loosen it to hide a float error: fix the draw.
+
+**Text.** Plain short sentences; a term the parent's lesson did not teach gets a few words of explanation. Print numbers with `n()`, `plus()`, `par()`, `vec()` so every minus sign is `−` (U+2212). The harness fails a practice mission whose prompt, with its numbers removed, matches the parent's or a sibling's.
+
+**Ranks and achievements.** The 1.4.1 ranks keep their steps as `learnAt` (5, 12, 20, 30, 40, 50, 60 and 68 learn missions), so learn missions alone climb the old ladder and no save is demoted; `at` counts all solved missions and is set below four times `learnAt` (12, 30, 52, 84, 120, 160, 204, 244), so solved practice can also bring a rank a little sooner, as in Foundations; one new top rank, GUILD LUMINARY, needs all 272. "Master of arrows" (`la-done`) is still the 68 learn missions; "Full span" (`la-master`) is all 272. While practice files are still filling up, the engine scales the `at` steps to the missions that exist and the collection keeps the registry's 272 for "every mission".
+
+```sh
+node qa/show-mission.js q01b --draw 3                # print the sample, and three generated versions
+node qa/generators.js --strict --draws 1000 q06b     # one practice mission: generator, text and oracle
+node qa/generators.js --strict --draws 1000          # the whole pack, learn and practice
+node qa/harness.js                                   # all checks; missing practice is a NOTE
+node qa/harness.js --complete-practice               # at the end: all 204 practice missions
+```

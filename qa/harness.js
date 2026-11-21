@@ -1,5 +1,5 @@
 /* Content and gameplay checks for one realm pack, run in Node without a browser.
-   Usage: node qa/harness.js                    linear algebra (pack "la"), exactly the 1.4.1 checks plus save 2.0
+   Usage: node qa/harness.js                    linear algebra (pack "la"): the 1.4.1 checks, save 2.0 and practice missions
           node qa/harness.js --realm found      another pack: every generic per-mission check, with that pack's
           node qa/harness.js found              chapters, source rule and ranks, and a play-through of its first mission
    Option: --complete  fail when a pack declares chapter missions that are not written yet (otherwise a note).
@@ -30,8 +30,8 @@ const byId = {};
 const browserOnly = new Set(['handson.js', 'collection/ui.js']);
 /* The collection is loaded on every realm page: data and logic before the pack, page code just before app.js. */
 assert.deepEqual(Array.from(SHARED.before), ['realms/registry.js', 'collection/figures.js', 'collection/achievements.js', 'collection/core.js'], 'the collection data and core load before the pack');
-assert.deepEqual(Array.from(SHARED.after), ['collection/ui.js'], 'the collection interface loads after the pack, before app.js');
-assert.deepEqual(Array.from(SHARED.styles), ['collection/collection.css']);
+assert.deepEqual(Array.from(SHARED.after), ['collection/ui.js', 'daily.js'], 'the collection interface and the daily review card load after the pack, before app.js');
+assert.deepEqual(Array.from(SHARED.styles), ['collection/collection.css', 'daily.css']);
 {
   const page = read('realm.html');
   assert.ok(page.includes("pack.styles.concat((window.VG_REALM_SHARED||{}).styles||[])") && page.includes("(shared.before||[]).concat(pack.scripts,shared.after||[],'app.js')"), 'realm.html writes the shared files around every pack, app.js last');
@@ -54,9 +54,9 @@ if (isLA) assert.ok(curriculumWindow.VisualLab && curriculumWindow.Graph2D, '3D 
 for (const q of curriculumWindow.QUESTS) byId[q.id] = q;
 const quests = curriculumWindow.QUESTS;
 const questCount = quests.length;
-/* Learn missions (one per concept) and practice missions (those with a parent). Linear algebra has only learn missions. */
+/* Learn missions (one per concept) and practice missions (those with a parent). Both packs have practice missions. */
 const learn = quests.filter(q => !q.parent), practice = quests.filter(q => q.parent);
-if (isLA) assert.equal(practice.length, 0, 'linear algebra has no practice missions: its 68 missions are unchanged');
+if (isLA) assert.equal(learn.length, 68, 'linear algebra keeps its 68 learn missions; practice missions are extra');
 
 /* Pack configuration: every field the engine reads is present, and a feature that is off has no script. */
 const declared = Array.isArray(REALM.chapters) ? REALM.chapters : null;
@@ -82,7 +82,7 @@ else assert.ok(questCount >= 1, 'the pack has at least one mission');
 assert.equal(new Set(quests.map(q => q.id)).size, quests.length, 'mission IDs must be unique');
 assert.ok(quests.every(q => q.sources?.length && q.sources.every(s => /^https:\/\//.test(s.url) && s.title && s.verified)), 'every mission has attributed source links');
 assert.ok(quests.every(q => q.sources.some(s => REALM.sourceRule.publisherPattern.test(s.title))), `every mission has a per-lesson ${REALM.sourceRule.label} link`);
-if (isLA) assert.ok(curriculumWindow.CURRICULUM_SCOPE?.includes(`${questCount}-mission`), 'field guide scope follows actual quest count');
+if (isLA) assert.ok(curriculumWindow.CURRICULUM_SCOPE?.includes(`${learn.length}-mission`), 'field guide scope follows the number of learn missions');
 assert.ok(curriculumWindow.ConceptLab && curriculumWindow.EXPERIMENTS, 'predict-first experiment runner and models load');
 assert.ok(learn.every(q => typeof curriculumWindow.EXPERIMENTS[q.id] === 'function'), 'every learn mission has a topic-specific experiment model');
 assert.ok(practice.every(q => typeof curriculumWindow.EXPERIMENTS[q.parent] === 'function' && curriculumWindow.EXPERIMENTS[q.id] === undefined), 'a practice mission uses its parent\'s experiment and registers none of its own');
@@ -555,24 +555,37 @@ if (isLA) {
   assert.equal(everything.points, questCount + 9 - 12 - 48, 'a finished campaign can afford every tool and landmark');
   assert.ok(everything.points >= 0);
   // Ranks step through the whole campaign instead of stopping at 30 missions.
-  const rankAt = n => boot(new Map([['vector-guild-save-v1', JSON.stringify({ solved: quests.slice(0, n).map(q => q.id), tools: [] })]])).qa.rank();
-  assert.deepEqual([0, 5, 12, 20, 30, 40, 50, 60, questCount].map(rankAt), ['CADET','ENGINEER','SPECIALIST','CHIEF ENGINEER','VECTOR SAGE','SYSTEMS MASTER','PRINCIPAL DESIGNER','GUILD FELLOW','GUILD ARCHITECT']);
+  // The 1.4.1 ladder is climbed by the learn missions alone, step for step (learnAt), so no 1.4.1 save is demoted.
+  const rankOf = ids => boot(new Map([['vector-guild-save-v1', JSON.stringify({ solved: ids, tools: [] })]])).qa.rank(), rankAt = n => rankOf(learn.slice(0, n).map(q => q.id));
+  const ladder141 = [[0,'CADET'],[5,'ENGINEER'],[12,'SPECIALIST'],[20,'CHIEF ENGINEER'],[30,'VECTOR SAGE'],[40,'SYSTEMS MASTER'],[50,'PRINCIPAL DESIGNER'],[60,'GUILD FELLOW'],[68,'GUILD ARCHITECT']];
+  for (let n = 0; n <= learn.length; n++) assert.equal(rankAt(n), ladder141.filter(([at]) => n >= at).pop()[1], `${n} learn missions hold the 1.4.1 rank`);
+  assert.deepEqual(Array.from(ranks.filter(r => !r.top).map(r => [r.learnAt ?? 0, r.title])), ladder141, 'every 1.4.1 rank keeps its title and its step, counted in learn missions');
+  assert.equal(ranks.length, ladder141.length + 1, 'practice adds exactly one rank, at the top');
+  // The one new rank needs every mission, learn and practice.
+  if (practice.length) { assert.equal(rankOf(quests.map(q => q.id)), ranks[ranks.length - 1].title); assert.equal(rankOf(quests.slice(0, -1).map(q => q.id)) === ranks[ranks.length - 1].title, false, 'one mission short is not the top rank'); }
+  // Practice never lowers a rank: adding practice solves to a learn-only save keeps or raises it.
+  const titles = ranks.map(r => r.title);
+  for (const n of [4, 5, 19, 39, 40, 67, 68]) { const held = learn.slice(0, n).map(q => q.id), extra = practice.filter(p => held.includes(p.parent)).map(p => p.id); assert.ok(titles.indexOf(rankOf([...held, ...extra])) >= titles.indexOf(rankAt(n)), `practice solved on top of ${n} learn missions does not lower the rank`); }
 }
 
 /* Packs other than linear algebra: the declared campaign is complete (or reported as not yet written),
    ranks reach the top at the declared mission count, and the engine plays the pack's first mission through
    with its own save slice. */
 let missing = [], missingPractice = [], plannedPractice = [];
-if (!isLA) {
-  const ids = declared.flatMap(c => c.ids);
+{
+  /* The planned campaign: the declared missions, or (computed chapters, linear algebra) the learn missions that exist. */
+  const ids = declared ? declared.flatMap(c => c.ids) : learn.map(q => q.id);
   missing = ids.filter(id => !byId[id]);
   // Copy out of the vm realm: strict deepEqual compares Array prototypes, so a vm-made [] never equals [].
   if (complete) assert.deepEqual(Array.from(missing), [], 'every declared mission is written');
-  /* Planned practice: one mission per declared concept and per letter of REALM.practice.kinds. */
+  /* Planned practice: one mission per concept and per letter of REALM.practice.kinds. */
   plannedPractice = ids.flatMap(id => Object.keys(REALM.practice?.kinds || {}).sort().map(letter => id + letter));
   missingPractice = plannedPractice.filter(id => !byId[id]);
   if (completePractice) assert.deepEqual(Array.from(missingPractice), [], 'every planned practice mission is written');
-  assert.equal(ranks[ranks.length - 1].at, ids.length + plannedPractice.length, 'the top rank needs every declared mission, learn and practice');
+  if (!isLA || REALM.practice) assert.equal(ranks[ranks.length - 1].at, ids.length + plannedPractice.length, 'the top rank needs every declared mission, learn and practice');
+  if (isLA) assert.equal(ids.length + plannedPractice.length, 272, 'linear algebra plans 68 learn + 204 practice missions');
+}
+if (!isLA) {
   for (const name of ['Docking', 'Contracts', 'Board', 'HandsOn', 'VisualLab', 'Graph2D']) if (!pack.scripts.some(f => ({ Docking: 'docking.js', Contracts: 'contracts.js', Board: 'board.js', HandsOn: 'handson.js', VisualLab: 'lab3d.js', Graph2D: 'graph-lab.js' })[name] === f)) assert.equal(curriculumWindow[name], undefined, `${name} is not loaded`);
   const fill = (inputs, values) => { assert.equal(inputs.length, values.length); inputs.forEach((x, i) => x.value = String(values[i])); };
   const first = quests[0], play = boot();
@@ -674,7 +687,7 @@ if (!isLA) {
     assert.equal(run.qa.getState().errors[parent.id]?.n, 1, 'a miss on a practice mission is logged under its concept'); assert.equal(run.qa.getState().errors[p0.id], undefined);
     fill(run.qa.getMain(), p0.answer); run.el('#submit-answer').onclick();
     assert.match(run.el('.feedback').textContent, /Mission complete/); assert.match(run.el('.feedback')._html, /PRACTICE COMPLETE/);
-    assert.equal(run.qa.getState().xp, xpOf(upTo) + REALM.tierXp[parent.tier], 'a practice mission pays the XP of its tier'); assert.equal(run.qa.getState().points, upTo.length + 1);
+    assert.equal(run.qa.getState().xp, xpOf(upTo) + parent.xp, 'a practice mission pays the XP of its concept (its tier, where the pack fixes XP by tier)'); assert.equal(run.qa.getState().points, upTo.length + 1);
     assert.deepEqual(Array.from(run.qa.getState().clean), [], 'a solve after a miss earns no first-try star');
     assert.ok(JSON.parse(run.storage.get(KEY)).realms[sid].solved.includes(p0.id), 'the practice id is saved in the realm\'s slice');
     assert.ok(JSON.parse(run.storage.get(KEY)).meta.paid[sid].solved.includes(p0.id), 'stardust is paid for a practice solve like any first solve');
@@ -695,7 +708,9 @@ if (!isLA) {
       assert.equal(boot(saved(learn.slice(0, r.learnAt).map(q => q.id))).qa.rank(), r.title, `${r.learnAt} concepts learned hold the rank ${r.title}`);
       assert.notEqual(boot(saved(learn.slice(0, r.learnAt - 1).map(q => q.id))).qa.rank(), r.title, `${r.learnAt - 1} concepts do not reach ${r.title}`);
     }
-    if (byLearn.length) {
+    /* The strip checks below read the pack's own `at` steps, so they run once every planned practice mission is written;
+       until then the engine scales `at` down to the missions that exist (app.js, "ranks") and the counts differ. */
+    if (byLearn.length && ranks[ranks.length - 1].at <= quests.length) {
       const some = boot(saved(learn.slice(0, byLearn[0].learnAt - 1).map(q => q.id)));
       assert.match(some.el('#content').innerHTML, new RegExp('>1 NEW CONCEPT TO ' + byLearn[0].title + ' ·'), 'the strip counts the fewest steps to the next rank and says they are concepts');
       /* The strip names what it counts. Practice does not move a count of concepts, so a count labelled MISSIONS must go
@@ -749,7 +764,7 @@ if (!isLA) {
   const laterHome = later.el('#content').innerHTML;
   assert.deepEqual(wellFormed(laterHome, 'campaign').filter(t => t.open).map(t => t.key), ['campaign:1']);
   const c0 = chapters[0], count = laterHome.match(/data-dd="campaign:0".*?<span class="dd-count">(.*?)<\/span><span class="dd-bar/)[1];
-  assert.ok(count.startsWith(`${c0.ids.length} / ${c0.ids.length} ${isLA ? 'complete' : 'learned'}${c0.practice.length ? ` · 0 / ${c0.practice.length} practice` : ''}`), `chapter 1 count reads "${count}"`);
+  assert.ok(count.startsWith(`${c0.ids.length} / ${c0.ids.length} ${REALM.practice || practice.length ? 'learned' : 'complete'}${c0.practice.length ? ` · 0 / ${c0.practice.length} practice` : ''}`), `chapter 1 count reads "${count}"`);
   assert.match(laterHome, /data-dd="campaign:0".*?<span class="dd-bar dd-bar-learn" aria-hidden="true"><i style="width:100%"><\/i><\/span>/, 'a progress bar shows the learn share');
   for (const view of ['skills', 'guide', 'artifacts']) {
     const html = later.qa.show(view), list = wellFormed(html, view).filter(t => t.key.startsWith(view + ':'));
@@ -759,6 +774,12 @@ if (!isLA) {
     if (view === 'skills') for (const q of learn) assert.ok(html.includes(`<button class="tree-node `) && html.includes(`data-quest="${q.id}"`), `${q.id} is in the skill tree`);
     if (view === 'guide') { assert.equal((html.match(/<span class="guide-id">/g) || []).length, learn.length, 'the field guide lists each concept once'); }
     if (view === 'artifacts') assert.equal((html.match(/<article class="card">/g) || []).length, quests.filter(q => q.artifact).length);
+  }
+  /* Features keyed by mission id (docking trial, contracts, contract board, concept chooser) see learn missions only. */
+  if (practice.length) {
+    if (curriculumWindow.Docking) assert.ok(practice.every(q => !curriculumWindow.Docking.supported(q.id) && curriculumWindow.Docking.html(q) === ''), 'a practice mission has no docking trial');
+    if (curriculumWindow.Board) assert.ok(curriculumWindow.Board.defs.every(d => d.needs.every(id => byId[id] && !byId[id].parent)), 'a contract asks for learn missions only');
+    if (REALM.features.labs.length && curriculumWindow.ConceptLab.html.length === 1) { const lab = later.qa.show('visual'); assert.ok(lab.includes(`<option value="${learn[0].id}">`) && practice.every(q => !lab.includes(`<option value="${q.id}">`)), 'the concept chooser lists one experiment per concept, no practice ids'); }
   }
   later.qa.show('campaign');
   if (chapters.length > 1 && chapters[0].ids.length > 1) {
@@ -884,11 +905,11 @@ if (isLA) {
   const drill = boot(new Map([['vector-guild-save-v1', JSON.stringify({ solved: ['q01','q02','q03'], tools: [] })]]));
   const xpBefore = drill.qa.getState().xp; drill.qa.review();
   assert.match(drill.dc._html, /REVIEW DRILL/);
-  console.log(`PASS: ${questCount}-mission teaching/guidance/schema/reachability audit; chapters, variants, contract board, economy and ranks; 68 interactive experiments and 3D/2D formulas; sourced lessons; outpost mentor; guided help; rewards/payoff; old and new save persistence/unlocks; import normalization.`);
+  console.log(`PASS: ${questCount}-mission teaching/guidance/schema/reachability audit (${learn.length} learn + ${practice.length} practice); chapters, variants, contract board, economy and ranks; 68 interactive experiments and 3D/2D formulas; sourced lessons; outpost mentor; guided help; rewards/payoff; old and new save persistence/unlocks; import normalization; practice missions and drop-down menus.`);
   console.log(`NOTE: offline imports cannot authenticate an entirely forged closed completion list (${forged.solved.length}/${questCount} accepted; XP recomputed).`);
 } else {
   console.log(`PASS: ${REALM.name} (${realm}): ${questCount}-mission teaching/guidance/schema/reachability audit (${learn.length} learn + ${practice.length} practice); declared chapters, sectors, tiers and ranks; ${REALM.sourceRule.label} sources; experiments and variants; narration; first-mission play-through with its own save slice; practice missions and drop-down menus.`);
   if (missing.length) console.log(`NOTE: ${missing.length} of ${declared.flatMap(c => c.ids).length} declared missions are not written yet: ${missing.join(' ')}. Run with --complete to require them.`);
-  if (missingPractice.length) { const concepts = [...new Set(missingPractice.map(id => id.slice(0, 3)))]; console.log(`NOTE: ${missingPractice.length} of ${plannedPractice.length} planned practice missions are not written yet (${concepts.length} concepts: ${concepts[0]}${concepts.length > 1 ? '–' + concepts[concepts.length - 1] : ''}). Run with --complete-practice to require them.`); }
 }
+if (missingPractice.length) { const concepts = [...new Set(missingPractice.map(id => id.slice(0, 3)))]; console.log(`NOTE: ${missingPractice.length} of ${plannedPractice.length} planned practice missions are not written yet (${concepts.length} concepts: ${concepts[0]}${concepts.length > 1 ? '–' + concepts[concepts.length - 1] : ''}). Run with --complete-practice to require them.`); }
 module.exports = { boot, realm, REALM, quests, byId, chapters, curriculumWindow };

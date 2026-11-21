@@ -74,7 +74,8 @@ check(() => {
   assert.equal(L.softLock(node('alg'), REALMS, partway).locked, true, 'one concept short is not finished, however much practice is solved');
   const learned = saveWith({ found: { solved: ids(LEARN), xp: 500 } });
   assert.equal(L.softLock(node('alg'), REALMS, learned).locked, false, 'every concept learned unlocks Algebra without any practice');
-  assert.equal(L.softLock(node('diff'), REALMS, saveWith({ la: { solved: ids(LA - 1) } })).locked, true, 'a pack without practice still needs every mission');
+  const LA_LEARN = REALMS.find(r => r.node === 'alg').parts[0].learn || LA;
+  assert.equal(L.softLock(node('diff'), REALMS, saveWith({ la: { solved: ids(LA_LEARN - 1) } })).locked, true, 'one linear algebra concept short is not finished');
   const done = saveWith({ found: { solved: ids(FOUND), xp: 520 } });
   assert.equal(L.softLock(node('alg'), REALMS, done).locked, false, 'finished Foundations unlocks Algebra');
   const both = saveWith({ found: { solved: ids(FOUND) }, la: { solved: ids(LA) } });

@@ -348,8 +348,11 @@ test('every achievement is false on an empty save, can be reached, and is paid o
   S.load();
   const empty = C.context(); for (const a of A) { assert.equal(a.test(empty), false, a.id + ' on an empty save'); if (a.progress) assert.equal(a.progress(empty).have, 0, a.id); }
   /* Play everything: both realms finished with stars and every landmark, 25 drills, every figure, one at 5 stars. */
-  S.putRealm('la', slice(ids(68), ids(20), { landmarks: [0, 1, 2, 3, 4, 5, 6, 7] }));
-  S.putRealm('found', slice(ids(40), ids(8), { landmarks: [0, 1, 2, 3, 4, 5, 6] }));
+  /* Each realm with all its practice missions as well (ids ending in b, c, d): "Full span" needs all 272 linear algebra
+     missions and "Bedrock" all 160 of Foundations. The registry's count stands even where the page knows fewer missions. */
+  const everyMission = n => ids(n).concat(ids(n).flatMap(q => ['b', 'c', 'd'].map(l => q + l)));
+  S.putRealm('la', slice(everyMission(68), ids(20), { landmarks: [0, 1, 2, 3, 4, 5, 6, 7] }));
+  S.putRealm('found', slice(everyMission(40), ids(8), { landmarks: [0, 1, 2, 3, 4, 5, 6] }));
   const seen = [...C.settle(LA), ...C.settle(FOUND)];
   for (let i = 0; i < 25; i++) seen.push(...C.onDrillDone());
   give(S, 1000000);
@@ -388,6 +391,23 @@ test('achievement thresholds: one short is not enough; progress counts up and is
   S.putRealm('found', slice(withPractice(119))); assert.equal(C.context().realms.found.finished, false);
   S.putRealm('found', slice(withPractice(120))); assert.equal(C.context().realms.found.finished, true); assert.equal(A.find(a => a.id === 'found-master').test(C.context()), true);
   S.putRealm('found', slice(ids(40)));
+  /* Linear algebra: 68 learn missions (complete, "Master of arrows" as in 2.1) and 272 with practice (finished, "Full span"). */
+  {
+    const laWith = n => ids(68).concat(ids(68).flatMap(q => ['b', 'c', 'd'].map(l => q + l)).slice(0, n)), ach = id => A.find(a => a.id === id).test(C.context());
+    S.putRealm('la', slice(ids(67).concat(['q01b', 'q01c', 'q01d']))); assert.equal(C.context().realms.la.complete, false, 'practice does not stand in for a concept'); assert.equal(ach('la-done'), false);
+    assert.equal(C.context().realms.la.missions, 272); assert.equal(C.context().realms.la.learn, 68);
+    S.putRealm('la', slice(ids(68))); assert.equal(C.context().realms.la.complete, true); assert.equal(C.context().realms.la.finished, false);
+    assert.equal(ach('la-done'), true, 'the 68 learn missions earn "Master of arrows", as before practice existed'); assert.equal(ach('la-master'), false);
+    S.putRealm('la', slice(laWith(203))); assert.equal(ach('la-master'), false);
+    S.putRealm('la', slice(laWith(204))); assert.equal(C.context().realms.la.finished, true); assert.equal(ach('la-master'), true);
+    /* On the realm page while practice is still being written (69 missions exist): the registry's 272 stands, so
+       solving what exists is not "every mission". */
+    const partial = Object.assign({}, LA, { missions: 69, learn: 68 });
+    S.putRealm('la', slice(ids(68).concat(['q01b'])));
+    const paidNow = C.settle(partial).filter(e => e.type === 'achievement').map(e => e.id);
+    assert.ok(paidNow.includes('la-done'), 'the page pays "Master of arrows" for the 68 learn missions'); assert.ok(!paidNow.includes('la-master') && !S.meta().ach.includes('la-master'), 'a half-written pack is not finished early');
+    S.reset('la');
+  }
   S.putRealm('mystery', slice(ids(500))); assert.equal(C.context().realms.mystery.finished, false, 'a realm with no known mission count is never "finished"');
   /* Every landmark of a realm: the realm finished, its chapters paid, and as many landmarks as chapters. */
   S.putRealm('found', slice(ids(40), [], { landmarks: [0, 1, 2, 3, 4, 5] })); C.settle(FOUND); assert.equal(C.context().landmarkRealm, false); assert.equal(C.context().landmarks, 6);
