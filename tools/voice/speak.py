@@ -5,6 +5,19 @@ SUB = {'ᵢ':' i','₁':' 1','₂':' 2','ₙ':' n','ₖ':' k','₊':' plus'}
 GREEK = {'λ':'lambda','θ':'theta','Σ':'sigma','σ':'sigma','μ':'mu','α':'alpha','π':'pi','ℓ':'l'}
 def spoken(t):
     t = t.replace('’', "'").replace('“', '').replace('”', '').replace('′', ' prime')
+    # Calculus (2.5): limits, primes, integrals, small marks.
+    t = t.replace('″', ' double prime').replace('ô', 'o').replace('The arrow → means', 'The arrow means')
+    t = re.sub(r'\blim (\w)\s*→\s*(\w+)⁻', r'the limit as \1 approaches \2 from the left', t)
+    t = re.sub(r'\blim (\w)\s*→\s*(\w+)⁺', r'the limit as \1 approaches \2 from the right', t)
+    t = re.sub(r'\blim (\w)\s*→\s*(−?[\w∞]+)', r'the limit as \1 approaches \2 of', t)
+    t = re.sub(r'\blim\b', 'the limit', t)
+    t = t.replace('→', ' approaches ').replace('∞', ' infinity ')
+    t = t.replace('ⁿ⁻¹', ' to the power n minus 1 ').replace('ⁿ⁺¹', ' to the power n plus 1 ')
+    t = re.sub(r'(?<!⁻)¹', ' to the power 1', t)
+    t = t.replace('the tall S, ∫,', 'the tall S,').replace('The ∫ sign', 'The integral sign').replace('∫ from', 'the integral from').replace('∫', 'the integral of ')
+    t = re.sub(r'\bd([xyt])/d([xt])\b', r'd \1 d \2', t)
+    t = re.sub(r'(?<![+−] )\bd([xyt])\b', r'd \1', t)
+    t = t.replace('Δ', 'delta ').replace('₀', ' nought').replace('≈', ' is about ').replace('π/', 'π over ')
     t = re.sub(r'‖([^‖]+)‖', r'the length of \1', t)
     t = t.replace('⁻¹', ' inverse ').replace('ᵀ', ' transpose ').replace('⁺', ' plus ')
     t = re.sub(r'\|\|([^|]+)\|\|', r'the length of \1 ', t)

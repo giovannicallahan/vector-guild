@@ -1,6 +1,6 @@
 /* Tap-to-define words (game/glossary.js).
    Run: node qa/glossary.test.js
-   Checks the data (window.VG_GLOSSARY) and the matching (VGGlossary.find) for both packs, without a page:
+   Checks the data (window.VG_GLOSSARY) and the matching (VGGlossary.find) for every pack, without a page:
      - at least 40 terms per pack; every entry has a one-sentence meaning, an example and a learn mission that teaches it
      - every term is really used in the pack's lesson, prompt, hint or solution text
      - matching takes whole words, the longest term first, each term once per block, and leaves a word alone where it has another sense
@@ -29,9 +29,12 @@ function texts(q) {
 }
 
 let checks = 0;
-for (const realm of ['found', 'la']) {
+for (const realm of ['found', 'la', 'calc1']) {
   const w = load(realm), G = w.VG_GLOSSARY, V = w.VGGlossary, pack = G[realm], keys = Object.keys(pack);
   const learn = new Map(w.QUESTS.filter(q => !q.parent).map(q => [q.id, q])), before = JSON.stringify(w.QUESTS);
+  /* A pack that is still being written (Calculus 1) declares its learn missions in REALM.chapters before they exist:
+     a word may be given to a declared mission, and must be used in the text once that mission is written. */
+  const declared = new Set((w.REALM.chapters || []).flatMap(c => Array.from(c.ids)));
   assert.ok(V && typeof V.wrap === 'function' && typeof V.find === 'function' && typeof V.close === 'function', 'VGGlossary');
   assert.ok(keys.length >= 40, `${realm}: ${keys.length} terms (needs 40)`);
   const used = new Set();
@@ -43,9 +46,9 @@ for (const realm of ['found', 'la']) {
     assert.ok(!/[.!?]\s+\p{Lu}/u.test(e.means.replace(/\b[A-Z]\s/g, 'x ')), where + ': the meaning is one sentence');
     assert.ok(e.example.length >= 8 && e.example.length <= 150, where + ': a tiny example');
     for (const text of [e.means, e.example]) { assert.ok(!/(?<![A-Za-z–-])-(?=[\d(a-z])/.test(text), where + ': minus signs are U+2212'); assert.ok(!/\s{2}|\s$|^\s/.test(text), where + ': tidy spacing'); }
-    assert.ok(learn.has(e.taught), where + `: taught in a learn mission (${e.taught})`);
+    assert.ok(learn.has(e.taught) || declared.has(e.taught), where + `: taught in a learn mission (${e.taught})`);
     assert.ok(Array.isArray(e.also), where + ': also');
-    assert.ok(used.has(key), where + ': the word is used in the pack\'s text');
+    if (learn.has(e.taught)) assert.ok(used.has(key), where + ': the word is used in the pack\'s text');
     checks++;
   }
   /* matching */
@@ -58,6 +61,12 @@ for (const realm of ['found', 'la']) {
     assert.deepEqual(hit('Fractions and Matrices; Σ a(2, j)'), ['fraction@Fractions', 'matrix@Matrices', 'σ@Σ'], 'plurals and capitals');
     assert.deepEqual(hit('Use Pythagoras’ rule here.'), ['pythagoras’ rule@Pythagoras’ rule']);
     const taken = new Set(); hit('A fraction.', taken); assert.deepEqual(hit('The fraction and its numerator.', taken), ['numerator@numerator'], 'a term already used in the block is skipped');
+  } else if (realm === 'calc1') {
+    assert.deepEqual(hit('The average rate of change is a rate of change over an interval; intervals shrink.'), ['average rate of change@average rate of change', 'rate of change@rate of change', 'interval@interval'], 'longest term first, each term once');
+    assert.deepEqual(hit('We write Δ for a change. The slope of the secant line tends to that of the tangent line.'), ['δ@Δ', 'secant line@secant line', 'tangent line@tangent line']);
+    assert.deepEqual(hit('Keep to the speed limit. The tangent of the angle is 1.'), [], 'everyday and trigonometric senses are left alone');
+    assert.deepEqual(hit('The limit exists; the definite integral is an integral. Concave up, then L’Hôpital’s rule.'), ['limit@limit', 'definite integral@definite integral', 'integral@integral', 'concave@Concave up', 'l’hôpital’s rule@L’Hôpital’s rule']);
+    for (const term of ['limit', 'derivative', 'tangent line', 'secant line', 'rate of change', 'continuous', 'asymptote', 'critical point', 'concave', 'antiderivative', 'integral', 'riemann sum']) assert.ok(pack[term], 'calc1 defines "' + term + '"');
   } else {
     assert.deepEqual(hit('The dot product of unit vectors; each vector has a norm.'), ['dot product@dot product', 'unit vector@unit vectors', 'vector@vector', 'norm@norm']);
     assert.deepEqual(hit('Use the inverse cosine, then the inverse of A.'), ['inverse@inverse'], 'the first "inverse" has another sense and is left alone');
@@ -117,9 +126,9 @@ for (const realm of ['found', 'la']) {
 }
 const src = read('glossary.js'), app = read('app.js'), packs = read('realms/packs.js'), css = read('update.css');
 assert.ok(!/\bfetch\(|\bimport\s|type="module"|innerHTML/.test(src), 'glossary.js: a classic script; the pop-up is built from text nodes, never from HTML strings');
-assert.equal((packs.match(/'glossary\.js'/g) || []).length, 2, 'both packs load glossary.js');
+assert.equal((packs.match(/'glossary\.js'/g) || []).length, 3, 'every pack loads glossary.js');
 assert.ok((app.match(/gloss\(/g) || []).length >= 5 && /VGGlossary\?\.close\?\.\(\)\)return true/.test(app), 'app.js wraps lesson, prompt, hint and solution text, and Back closes a definition first');
 assert.ok(/button\.gloss\{[^}]*padding:15px 3px[^}]*text-decoration:underline dotted/.test(css) && /button\.gloss::after\{[^}]*width:max\(100%,44px\)/.test(css), 'the word has a dotted underline and a 44 px tap area');
 assert.ok(/prefers-reduced-motion:reduce\)\{\.gloss-pop\{animation:none\}\}/.test(css), 'the pop-up honours reduced motion');
 checks += 5;
-console.log(`PASS: glossary, ${checks} checks: ${Object.keys(load('found').VG_GLOSSARY.found).length} Foundations terms and ${Object.keys(load('la').VG_GLOSSARY.la).length} linear algebra terms, matching rules, unchanged mission text.`);
+console.log(`PASS: glossary, ${checks} checks: ${Object.keys(load('found').VG_GLOSSARY.found).length} Foundations terms, ${Object.keys(load('la').VG_GLOSSARY.la).length} linear algebra terms and ${Object.keys(load('calc1').VG_GLOSSARY.calc1).length} Calculus 1 terms, matching rules, unchanged mission text.`);

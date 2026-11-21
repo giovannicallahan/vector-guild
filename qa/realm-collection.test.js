@@ -296,7 +296,7 @@ function suite(realm) {
   });
 }
 
-for (const realm of ['la', 'found']) suite(realm);
+for (const realm of ['la', 'found', 'calc1']) suite(realm);
 
 /* Wiring that only the files can show. */
 const app = fs.readFileSync(path.resolve(__dirname, '../game/app.js'), 'utf8');

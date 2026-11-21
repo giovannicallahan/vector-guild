@@ -60,10 +60,10 @@ check(() => {
   assert.equal(L.softLock(node('found'), REALMS, empty).locked, false, 'Foundations builds on nothing');
   /* Discrete math has no ready part yet, so Number & graph theory is not held back by it. */
   assert.equal(L.softLock(node('num'), REALMS, empty).locked, false);
-  /* Differential equations needs Calculus (nothing ready) and Algebra (linear algebra ready, unfinished). */
+  /* Differential equations needs Calculus (Calculus 1 ready, unfinished) and Algebra (linear algebra ready, unfinished). */
   const diff = L.softLock(node('diff'), REALMS, empty);
-  assert.deepEqual(diff.missing, ['alg']);
-  assert.equal(diff.goHref, 'realm.html?realm=la');
+  assert.deepEqual(diff.missing, ['calc', 'alg']);
+  assert.equal(diff.goHref, 'realm.html?realm=calc1');
 }, 'soft lock with no progress');
 
 check(() => {
@@ -78,8 +78,11 @@ check(() => {
   assert.equal(L.softLock(node('diff'), REALMS, saveWith({ la: { solved: ids(LA_LEARN - 1) } })).locked, true, 'one linear algebra concept short is not finished');
   const done = saveWith({ found: { solved: ids(FOUND), xp: 520 } });
   assert.equal(L.softLock(node('alg'), REALMS, done).locked, false, 'finished Foundations unlocks Algebra');
+  /* Differential equations needs Algebra and Calculus: linear algebra and Calculus 1, the ready parts of each. */
   const both = saveWith({ found: { solved: ids(FOUND) }, la: { solved: ids(LA) } });
-  assert.equal(L.softLock(node('diff'), REALMS, both).locked, false);
+  assert.deepEqual(L.softLock(node('diff'), REALMS, both).missing, ['calc']);
+  const three = saveWith({ found: { solved: ids(FOUND) }, la: { solved: ids(LA) }, calc1: { solved: ids(count('calc1')) } });
+  assert.equal(L.softLock(node('diff'), REALMS, three).locked, false);
   const broken = id => { throw new Error('storage ' + id); };
   assert.equal(L.softLock(node('alg'), REALMS, broken).locked, true, 'a throwing save reads as no progress');
   const custom = [{ node: 'a', name: 'A', needs: [], parts: [{ id: 'pa', status: 'ready', missions: 2 }] },
@@ -117,11 +120,20 @@ check(() => {
     ['abstract', false, 'Not built yet', null]]);
   assert.equal(alg.started, true);
 
+  /* Calculus: Calculus 1 is a pack; Calculus 2 and 3 are not built yet. It builds on Foundations. */
   const calc = L.cardModel(node('calc'), REALMS, empty);
-  assert.equal(calc.ready, false);
-  assert.ok(calc.parts.every(p => p.text === 'Not built yet' && p.href === null), 'coming parts have no Enter link');
-  assert.equal(calc.lock.locked, false, 'nothing to enter, so no soft-lock sentence or Go button');
-  assert.equal(L.softLock(node('calc'), REALMS, empty).locked, true, 'softLock itself still sees the unfinished need');
+  assert.equal(calc.ready, true);
+  assert.deepEqual(calc.parts.map(p => [p.id, p.ready, p.text, p.href]), [
+    ['calc1', true, '0 / ' + count('calc1') + ' solved', 'realm.html?realm=calc1'],
+    ['calc2', false, 'Not built yet', null], ['calc3', false, 'Not built yet', null]]);
+  assert.equal(calc.lock.locked, true, 'Foundations is not learned yet, so the card says so');
+  assert.equal(calc.lock.goHref, 'realm.html?realm=found');
+  /* A node with no ready part has nothing to enter, so its card has no soft-lock sentence or Go button. */
+  const stat = L.cardModel(node('stat'), REALMS, empty);
+  assert.equal(stat.ready, false);
+  assert.ok(stat.parts.every(p => p.text === 'Not built yet' && p.href === null), 'coming parts have no Enter link');
+  assert.equal(stat.lock.locked, false, 'nothing to enter, so no soft-lock sentence or Go button');
+  assert.equal(L.softLock(node('stat'), REALMS, empty).locked, true, 'softLock itself still sees the unfinished need');
 }, 'card model');
 
 check(() => {

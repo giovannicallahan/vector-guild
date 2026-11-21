@@ -224,9 +224,9 @@ function suite(realm) {
   });
 }
 
-for (const realm of ['la', 'found']) suite(realm);
+for (const realm of ['la', 'found', 'calc1']) suite(realm);
 const packs = fs.readFileSync(path.join(__dirname, '..', 'game', 'realms', 'packs.js'), 'utf8'), src = fs.readFileSync(path.join(__dirname, '..', 'game', 'skip.js'), 'utf8');
-assert.equal((packs.match(/'skip\.js'/g) || []).length, 2, 'both packs load skip.js');
+assert.equal((packs.match(/'skip\.js'/g) || []).length, 3, 'every pack loads skip.js');
 assert.ok(!/\bfetch\(|\bimport\s|localStorage|document\./.test(src), 'skip.js is a classic script with no page or storage code');
 checks++;
 console.log(`PASS: skip-ahead check, ${checks} checks (linear algebra and Foundations): offer, fresh problems, pass, fail, retry, saves.`);

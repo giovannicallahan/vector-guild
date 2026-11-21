@@ -37,7 +37,7 @@ const ids = n => Array.from({ length: n }, (_, i) => 'q' + String(i + 1).padStar
 const slice = (solved, clean = [], more = {}) => ({ solved, xp: 0, points: 0, tools: [], clean, revealed: [], landmarks: [], contracts: [], reviews: {}, errors: {}, rolls: {}, ...more });
 /* What a realm page hands to settle(): n missions cut into equal chapters. */
 function realmCtx(id, missions, chapters) { const all = ids(missions), size = Math.ceil(missions / chapters); return { id, missions, ids: all, chapters: Array.from({ length: chapters }, (_, i) => ({ index: i, name: 'Chapter ' + (i + 1), ids: all.slice(i * size, (i + 1) * size) })) }; }
-const LA = realmCtx('la', 68, 8), FOUND = realmCtx('found', 40, 7);
+const LA = realmCtx('la', 68, 8), FOUND = realmCtx('found', 40, 7), CALC1 = realmCtx('calc1', 40, 7);
 const total = events => events.reduce((n, e) => n + e.dust, 0);
 const types = events => events.map(e => e.type === 'achievement' ? 'achievement:' + e.id : e.type);
 const give = (S, dust) => { const m = S.meta(); m.dust = dust; S.putMeta(m); };
@@ -48,9 +48,9 @@ const eq = (actual, expected, message) => assert.deepEqual(plain(actual), plain(
 let count = 0;
 const test = (name, fn) => { fn(); count++; console.log('ok   ' + name); };
 
-test('achievement list: about 28, unique ids, plain fields, rewards from 15 to 150', () => {
+test('achievement list: about 30, unique ids, plain fields, rewards from 15 to 150', () => {
   const { A } = page();
-  assert.ok(A.length >= 26 && A.length <= 30, 'about 28: ' + A.length);
+  assert.ok(A.length >= 26 && A.length <= 34, 'about 30: ' + A.length);
   assert.equal(new Set(A.map(a => a.id)).size, A.length);
   for (const a of A) {
     assert.match(a.id, /^[a-z0-9-]+$/); assert.ok(a.name && a.text, a.id);
@@ -353,7 +353,8 @@ test('every achievement is false on an empty save, can be reached, and is paid o
   const everyMission = n => ids(n).concat(ids(n).flatMap(q => ['b', 'c', 'd'].map(l => q + l)));
   S.putRealm('la', slice(everyMission(68), ids(20), { landmarks: [0, 1, 2, 3, 4, 5, 6, 7] }));
   S.putRealm('found', slice(everyMission(40), ids(8), { landmarks: [0, 1, 2, 3, 4, 5, 6] }));
-  const seen = [...C.settle(LA), ...C.settle(FOUND)];
+  S.putRealm('calc1', slice(everyMission(40), ids(8), { landmarks: [0, 1, 2, 3, 4, 5, 6] }));
+  const seen = [...C.settle(LA), ...C.settle(FOUND), ...C.settle(CALC1)];
   for (let i = 0; i < 25; i++) seen.push(...C.onDrillDone());
   give(S, 1000000);
   const rng = mulberry(7); let pulls = 0;

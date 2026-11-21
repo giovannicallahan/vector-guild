@@ -88,3 +88,12 @@ Version 2.3 adds practice missions to linear algebra, a skip-ahead check, tap-to
 - **Collection:** one new achievement, "Full span" (every linear algebra mission, practice included). "Master of arrows" keeps its meaning: every concept learned.
 
 Checks: the 2.2 commands, plus `node qa/harness.js --complete --complete-practice` (fails if any of the 204 practice missions is missing), `node qa/skip.test.js`, `node qa/glossary.test.js`, `node qa/daily.test.js` and `node qa/install.test.js`. The Playwright scripts were not run. The Android version is 2.3 (versionCode 10); no APK was built.
+
+## Version 2.4
+- **Mira's recorded voice:** the 108 learn briefings of Foundations and linear algebra are recorded with a local open-source voice (Kokoro, `af_heart`). See `docs/VOICE.md`.
+
+## Version 2.5
+- **Calculus 1: change (`game/realms/calc1/`):** a third playable realm. 40 concepts in 7 chapters, from average rate of change and limits, through derivatives and their uses, to antiderivatives and the Fundamental Theorem of Calculus; each concept has a learn mission and three practice missions, 160 in all. Sources are OpenStax Calculus Volume 1. The plan is `docs/CALC1-PLAN.md`; the format is `docs/PACK-FORMAT.md`, section 11.
+- Every mission has a generator and an independent oracle (`qa/realms/calc1/`); shared content rules moved to `qa/pack-checks.js`.
+- 75 calculus terms in the tap-to-define glossary; two new achievements; Mira's 40 calculus briefings are recorded.
+- MathCosmos now has 592 missions in three realms.

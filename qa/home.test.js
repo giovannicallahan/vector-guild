@@ -23,17 +23,17 @@ const ids = n => Array.from({ length: n }, (_, i) => 'q' + String(i + 1).padStar
 const model = (id, slices) => H.cardModel(node(id), REALMS, saveWith(slices || {}));
 /* How many missions each ready part has: whatever the registry says today. Nothing below writes a count. */
 const count = id => { for (const r of REALMS) for (const p of r.parts) if (p.id === id) return p.missions; throw new Error('no part ' + id); };
-const FOUND = count('found'), LA = count('la');
-assert.ok(FOUND > 12 && LA > 30, 'both ready parts have missions');
+const FOUND = count('found'), LA = count('la'), CALC1 = count('calc1');
+assert.ok(FOUND > 12 && LA > 30 && CALC1 > 12, 'every ready part has missions');
 let checks = 0;
 const check = (fn, label) => { fn(); checks++; if (process.env.VERBOSE) console.log('ok -', label); };
 
 check(() => {
   const s = H.splitRealms(REALMS);
-  assert.deepEqual(s.ready.map(r => r.node), ['found', 'alg'], 'realms with a ready part, in registry order');
+  assert.deepEqual(s.ready.map(r => r.node), ['found', 'alg', 'calc'], 'realms with a ready part, in registry order');
   assert.equal(s.ready.length + s.coming.length, REALMS.length, 'every realm is in exactly one group');
   assert.ok(s.coming.every(r => !H.isReady(r)));
-  assert.equal(H.moreTitle(s.coming.length), 'More realms on the way (9)');
+  assert.equal(H.moreTitle(s.coming.length), 'More realms on the way (8)');
   assert.equal(H.isReady({ parts: [{ status: 'ready' }] }), false, 'a ready part needs a pack id');
   assert.equal(H.isReady({}), false);
   assert.equal(H.isReady(null), false);
@@ -43,7 +43,8 @@ check(() => {
 check(() => {
   assert.equal(H.cardStatus(model('found')), 'Start here');
   assert.equal(H.cardStatus(model('alg')), '0 / ' + LA + ' solved');
-  assert.equal(H.cardStatus(model('calc')), 'Not built yet');
+  assert.equal(H.cardStatus(model('calc')), '0 / ' + CALC1 + ' solved');
+  assert.equal(H.cardStatus(model('stat')), 'Not built yet');
   assert.equal(H.cardStatus(model('found', { found: { solved: ids(12) } })), '12 / ' + FOUND + ' solved');
   assert.equal(H.cardStatus(model('found', { found: { solved: ids(FOUND) } })), FOUND + ' / ' + FOUND + ' solved · complete');
   assert.equal(H.cardStatus(model('found', { found: { solved: ids(FOUND + 9) } })), FOUND + ' / ' + FOUND + ' solved · complete', 'never more than the registry count');
@@ -54,7 +55,8 @@ check(() => {
   const other = [{ node: 'x', name: 'X', needs: [], parts: [{ id: 'px', name: 'X', status: 'ready', missions: 500 }] }];
   assert.equal(H.cardStatus(H.cardModel(other[0], other, saveWith({ px: { solved: ids(7) } }))), '7 / 500 solved');
   /* Only ready parts count: Algebra's unbuilt part adds nothing. */
-  assert.equal(H.nodeProgress(model('calc')).total, 0);
+  assert.equal(H.nodeProgress(model('calc')).total, CALC1, 'Calculus 1 only: Calculus 2 and 3 are not built');
+  assert.equal(H.nodeProgress(model('stat')).total, 0);
 }, 'card status text');
 
 check(() => {
@@ -76,7 +78,8 @@ check(() => {
   assert.equal(H.continueTarget(REALMS, saveWith({ found: { solved: ids(FOUND) }, la: { solved: ids(2) } })).id, 'la');
   assert.equal(H.continueTarget(REALMS, saveWith({ found: { solved: ids(FOUND) } })).label, 'Continue: Linear algebra', 'next unfinished part');
   /* Everything finished: still a button, on the part with most solved (registry order breaks a tie). */
-  assert.equal(H.continueTarget(REALMS, saveWith({ found: { solved: ids(FOUND) }, la: { solved: ids(LA) } })).id, FOUND >= LA ? 'found' : 'la');
+  assert.equal(H.continueTarget(REALMS, saveWith({ found: { solved: ids(FOUND) }, la: { solved: ids(LA) } })).id, 'calc1', 'Calculus 1 is the part left');
+  assert.equal(H.continueTarget(REALMS, saveWith({ found: { solved: ids(FOUND) }, la: { solved: ids(LA) }, calc1: { solved: ids(CALC1) } })).id, FOUND >= LA ? 'found' : 'la');
   /* Practice is optional: with every learn mission solved (practice untouched) Foundations is done for this button,
      as it is for the Algebra card's soft lock, however few Linear algebra missions are solved. */
   {
@@ -94,14 +97,14 @@ check(() => {
     /* One learn mission short: Foundations is still being learned, and has more solved. */
     assert.equal(H.continueTarget(REALMS, saveWith({ found: { solved: ids(LEARN - 1) }, la: { solved: ids(1) } })).id, 'found');
     /* Nothing left to learn anywhere: the part with practice left, not the fully finished one. */
-    const p = H.continueTarget(REALMS, saveWith({ found: { solved: ids(LEARN) }, la: { solved: ids(LA) } }));
+    const p = H.continueTarget(REALMS, saveWith({ found: { solved: ids(LEARN) }, la: { solved: ids(LA) }, calc1: { solved: ids(CALC1) } }));
     assert.equal(p.id, 'found', 'practice left');
     assert.equal(p.kind, 'continue');
   }
   /* XP without a solved mission counts as started. */
   assert.equal(H.continueTarget(REALMS, saveWith({ la: { solved: [], xp: 10 } })).label, 'Continue: Linear algebra');
   /* Nothing playable, or a store that throws. */
-  assert.equal(H.continueTarget([node('calc')], saveWith({})), null);
+  assert.equal(H.continueTarget([node('stat')], saveWith({})), null);
   assert.equal(H.continueTarget([], saveWith({})), null);
   assert.equal(H.continueTarget(REALMS, id => { throw new Error('storage ' + id); }).label, 'Start here: Foundations');
   /* With no realm that builds on nothing, the first ready part is the start. */

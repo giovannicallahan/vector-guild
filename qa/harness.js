@@ -698,13 +698,15 @@ if (!isLA) {
     const learned = boot(saved(learn.map(q => q.id)));
     const built = learned.qa.normalize({ solved: learn.map(q => q.id), tools: [], landmarks: chapters.map((_, i) => i) });
     assert.equal(built.landmarks.length, Math.min(chapters.length, Math.floor(learn.length / REALM.landmarkCost)), 'every chapter is complete, so its landmark can be built, with no practice mission solved');
-    assert.equal((learned.el('#content').innerHTML.match(/✦ COMPLETE/g) || []).length, chapters.length); assert.doesNotMatch(learned.el('#content').innerHTML, /★ MASTERED/);
+    /* A chapter none of whose missions is written yet (a pack that is still filling up) cannot be complete. */
+    assert.equal((learned.el('#content').innerHTML.match(/✦ COMPLETE/g) || []).length, chapters.filter(c => c.ids.length).length); assert.doesNotMatch(learned.el('#content').innerHTML, /★ MASTERED/);
     assert.equal(learned.qa.next(), practice[0].id, 'with every concept learned, practice is what comes next');
     assert.notEqual(learned.qa.rank(), ranks[ranks.length - 1].title, 'the top rank needs the practice missions too');
     /* learnAt: a rank is also held by that many concepts learned alone, so a save from before practice existed keeps its rank. */
     const byLearn = ranks.filter(r => r.learnAt !== undefined);
-    assert.ok(byLearn.every((r, i) => !r.top && Number.isInteger(r.learnAt) && r.learnAt > 0 && r.learnAt <= r.at && r.learnAt <= learn.length && (i === 0 || r.learnAt > byLearn[i - 1].learnAt)), 'learnAt rises, never asks more than `at`, and is not on the top rank');
-    for (const r of byLearn) {
+    assert.ok(byLearn.every((r, i) => !r.top && Number.isInteger(r.learnAt) && r.learnAt > 0 && r.learnAt <= r.at && r.learnAt <= learn.length + missing.length && (i === 0 || r.learnAt > byLearn[i - 1].learnAt)), 'learnAt rises, never asks more than `at`, and is not on the top rank');
+    /* Played through once every declared learn mission is written (a pack that is still filling up has too few). */
+    if (!missing.length) for (const r of byLearn) {
       assert.equal(boot(saved(learn.slice(0, r.learnAt).map(q => q.id))).qa.rank(), r.title, `${r.learnAt} concepts learned hold the rank ${r.title}`);
       assert.notEqual(boot(saved(learn.slice(0, r.learnAt - 1).map(q => q.id))).qa.rank(), r.title, `${r.learnAt - 1} concepts do not reach ${r.title}`);
     }
@@ -730,7 +732,9 @@ if (!isLA) {
       assert.ok(sawConcepts > 1 && sawMissions > 1, 'both ways of counting were seen (' + sawConcepts + ' concept counts, ' + sawMissions + ' mission counts)');
     }
     const everything = boot(saved(quests.map(q => q.id)));
-    assert.equal(everything.qa.rank(), ranks[ranks.length - 1].title, 'every mission solved reaches the top rank');
+    /* With fewer missions written than the pack has ranks, the scaled steps (app.js, "ranks") cannot all fit below the
+       mission count, so the top rank waits for more missions. */
+    if (quests.length >= ranks.length) assert.equal(everything.qa.rank(), ranks[ranks.length - 1].title, 'every mission solved reaches the top rank');
     assert.equal(everything.qa.getState().xp, xpOf(quests.map(q => q.id)));
     const full = chapters.filter(c => c.practice.length).length;
     assert.equal((everything.el('#content').innerHTML.match(/★ MASTERED/g) || []).length, full, 'a chapter with all its practice solved shows as mastered');
@@ -762,7 +766,10 @@ if (!isLA) {
   const firstTwo = chapters[0].ids.concat(chapters[1].ids.slice(0, 1));
   const later = boot(new Map([[KEY, JSON.stringify({ v: 2, seed: 0, intro: true, realms: { [sid]: { solved: firstTwo, tools: [] } } })]]));
   const laterHome = later.el('#content').innerHTML;
-  assert.deepEqual(wellFormed(laterHome, 'campaign').filter(t => t.open).map(t => t.key), ['campaign:1']);
+  /* secondWritten: chapter 2 has a mission. In a pack that is still filling up it may have none yet; then no chapter
+     has a next mission, and the checks that need chapter 2 wait for it. */
+  const secondWritten = chapters[1].ids.length > 0;
+  assert.deepEqual(wellFormed(laterHome, 'campaign').filter(t => t.open).map(t => t.key), secondWritten ? ['campaign:1'] : ['campaign:0']);
   const c0 = chapters[0], count = laterHome.match(/data-dd="campaign:0".*?<span class="dd-count">(.*?)<\/span><span class="dd-bar/)[1];
   assert.ok(count.startsWith(`${c0.ids.length} / ${c0.ids.length} ${REALM.practice || practice.length ? 'learned' : 'complete'}${c0.practice.length ? ` · 0 / ${c0.practice.length} practice` : ''}`), `chapter 1 count reads "${count}"`);
   assert.match(laterHome, /data-dd="campaign:0".*?<span class="dd-bar dd-bar-learn" aria-hidden="true"><i style="width:100%"><\/i><\/span>/, 'a progress bar shows the learn share');
@@ -782,7 +789,7 @@ if (!isLA) {
     if (REALM.features.labs.length && curriculumWindow.ConceptLab.html.length === 1) { const lab = later.qa.show('visual'); assert.ok(lab.includes(`<option value="${learn[0].id}">`) && practice.every(q => !lab.includes(`<option value="${q.id}">`)), 'the concept chooser lists one experiment per concept, no practice ids'); }
   }
   later.qa.show('campaign');
-  if (chapters.length > 1 && chapters[0].ids.length > 1) {
+  if (chapters.length > 1 && chapters[0].ids.length > 1 && secondWritten) {
     /* Finishing a chapter. The player looked into chapter 2 and closed it, then solved the last learn mission of
        chapter 1 from its open drop-down. When the dialog closes: chapter 2 is now the current chapter and opens
        (a remembered "closed" does not hide it), and chapter 1 stays open, so focus returns to the mission's card
@@ -843,7 +850,9 @@ if (!isLA) {
   const first = learn[0], run = boot();
   run.qa.mission(first.id); run.el('#ready').onclick();
   const grouped = x => Number.isInteger(x) && Math.abs(x) >= 1000 ? String(x).replace(/\B(?=(\d{3})+$)/g, ',') : String(x);
-  assert.ok(first.answer.some(x => grouped(x).includes(',')), first.id + ' has an answer of 1000 or more, so this check types a comma');
+  /* Foundations' first mission has an answer of 1000 or more, so this check types a comma there; a pack whose first
+     mission has only small answers is solved here with plain numbers. */
+  if (realm === 'found') assert.ok(first.answer.some(x => grouped(x).includes(',')), first.id + ' has an answer of 1000 or more, so this check types a comma');
   run.qa.getMain().forEach((x, i) => x.value = grouped(first.answer[i])); run.el('#submit-answer').onclick();
   assert.match(run.el('.feedback').textContent, /Mission complete/, 'a correct answer typed with a thousands comma is accepted');
   assert.equal(run.qa.getState().errors[first.id], undefined, 'and logs no miss'); assert.deepEqual(Array.from(run.qa.getState().clean), [first.id], 'and keeps the first-try star');
@@ -880,7 +889,7 @@ if (!isLA) {
      never repeats the prompt, and repeats the answers only where the mission has few different answers. */
   const Gen = curriculumWindow.Gen, page = boot(), same = (a, b) => JSON.stringify(a.answer) === JSON.stringify(b.answer);
   const cases = []; for (const q of quests) if (Gen.has(q.id)) for (let seed = 1; seed <= 120; seed++) cases.push([q, seed]);
-  if (!isLA) cases.push([byId.q08b, 4], [byId.q40d, 2], [byId.q40b, 18]); // identical consecutive rolls found in review
+  if (realm === 'found') cases.push([byId.q08b, 4], [byId.q40d, 2], [byId.q40b, 18]); // identical consecutive rolls found in review (Foundations)
   let repeats = 0, plainNext = 0;
   for (const [q, seed] of cases) {
     const shown = Gen.instance(q, seed, 0); if (shown === q) continue;
@@ -891,7 +900,7 @@ if (!isLA) {
     assert.notEqual(next.prompt, shown.prompt, q.id + ' seed ' + seed + ': the mission after a reveal is a different problem');
     if (same(next, shown)) { repeats++; let distinct = new Set(); for (let r = 1; r <= 24; r++) distinct.add(JSON.stringify(Gen.instance(q, seed, r).answer)); assert.ok(distinct.size < 5, q.id + ' seed ' + seed + ': the revealed answers come back although the mission has ' + distinct.size + ' different answers'); }
   }
-  if (!isLA) assert.ok(plainNext >= 3, 'the plain next roll would have repeated the problem in the review cases');
+  if (realm === 'found') assert.ok(plainNext >= 3, 'the plain next roll would have repeated the problem in the review cases');
   /* Through the page: reveal, reopen, and the problem on screen has changed; the save keeps one integer per mission. */
   const g = quests.find(q => Gen.has(q.id) && !(q.prereqs || []).length), ui = boot();
   ui.qa.setState({ seed: 4 }); ui.qa.mission(g.id); ui.el('#ready').onclick(); const shownPrompt = ui.qa.current().prompt;

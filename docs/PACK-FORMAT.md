@@ -416,3 +416,63 @@ node qa/generators.js --strict --draws 1000          # the whole pack, learn and
 node qa/harness.js                                   # all checks; missing practice is a NOTE
 node qa/harness.js --complete-practice               # at the end: all 204 practice missions
 ```
+
+## 11. Calculus 1
+
+Calculus 1 (`calc1`, "Calculus 1: change") follows this contract exactly as Foundations does: read "found" as "calc1" in §1–§10. The concept list, the player it is written for and the setting are in `docs/CALC1-PLAN.md`. The pack is planned as 40 learn + 120 practice = 160 missions; `REALM.practice.kinds` is the same `{ b: 'setting', c: 'applied', d: 'challenge' }`.
+
+**Files.** One author per letter and per practice file. Every stub exists with its boilerplate; add entries inside it.
+
+| File | Holds | Concepts |
+|---|---|---|
+| `game/realms/calc1/missions-a.js` … `missions-d.js` | learn missions (§2) | a q01–q10, b q11–q20, c q21–q30, d q31–q40 |
+| `game/realms/calc1/gen-a.js` … `gen-d.js` | their generators (§3) | same letters |
+| `game/realms/calc1/experiments-a.js` … `experiments-d.js` | concept-bench models (§4) | same letters |
+| `game/realms/calc1/variants-a.js` … `variants-d.js` | review-drill statements (§5) | same letters |
+| `game/realms/calc1/practice-1.js` … `practice-8.js` | practice missions and their generators (§10) | file N: q(5N−4)–q(5N), 15 missions |
+| `qa/realms/calc1/oracle-a.js` … `oracle-d.js` | oracles of the learn missions (§6) | same letters |
+| `qa/realms/calc1/oracle-p1.js` … `oracle-p8.js` | oracles of the practice missions | same numbers |
+| `qa/realms/calc1/oracle-pack-checks.js` | rules only this pack needs (registers no oracle) | |
+| `qa/pack-checks.js` | the content rules every pack after Foundations shares (below) | |
+
+Load order is that of Foundations (§1): `pack.js`, `missions-*`, `gen-core.js`, `gen-*`, `gameplay.js`, `experiments-*`, `variants-*`, `practice-*`, `variants.js`, `concept-lab.js`, `chapters.js`, `skip.js`, `glossary.js`. The worked samples are `q01` (`missions-a.js`, `gen-a.js`, `experiments-a.js`, `variants-a.js`, `oracle-a.js`) and `q01b` (`practice-1.js`, `oracle-p1.js`).
+
+**Ids, chapters, tiers, sectors** (fixed by `REALM.chapters` in `game/realms/calc1/pack.js`):
+
+| Ch | Name | Ids | Tier, XP | Sector (mission `sector` field) |
+|---|---|---|---|---|
+| 1 | Rates and limits | q01–q06 | Basic, 100 | Tracking Station |
+| 2 | Continuity and infinity | q07–q11 | Basic, 100 | Flow Control |
+| 3 | The derivative | q12–q17 | Intermediate, 150 | Test Track |
+| 4 | Rules of differentiation | q18–q23 | Intermediate, 150 | Machine Shop |
+| 5 | Derivatives at work | q24–q29 | Intermediate, 150 | Launch Gantry |
+| 6 | Best values and shortcuts | q30–q34 | Advanced, 200 | Design Studio |
+| 7 | From change to accumulation | q35–q40 | Advanced, 200 | Reservoir |
+
+**Sources.** The only allowed book is OpenStax Calculus Volume 1. A source title reads `OpenStax Calculus Volume 1 — 2.1 A Preview of Calculus` and its link is the section page, `https://openstax.org/books/calculus-volume-1/pages/<section-slug>`. Each `missions-*.js` keeps its sections in one `source` table at the top; open the page before you set `verified`.
+
+**Teaching.** The player has finished Foundations and nothing more (§2.3 applies from there): every calculus word and symbol (limit, lim, →, Δ, f′(x), dy/dx, ∫ …) is taught in the mission that first uses it. Angles are in radians; say so. A function is never an answer: ask for a slope, a value at a point, a coefficient. Words the missions teach have plain definitions in `game/glossary.js` (`CALC1`); a word is offered on the page once its mission's text uses it, and `qa/glossary.test.js` then requires that use. Add a row when a mission teaches a word that is not there.
+
+**Shared content rules** (`qa/pack-checks.js`, run by `node qa/generators.js --realm calc1` on the authored mission and 300 draws; any failure fails the command):
+
+- `tolerance` must reject the neighbour in the answer's last shown place, for the answers and the guided-step answers: 0.01 is right for whole numbers and one decimal; an answer shown with two decimals needs 0.005 or less; three decimals 0.0005.
+- no `+ 0` after a letter term, no written-out coefficient 1 (`1x`, `1t²`), no "1 seconds" / "1 metres" (draw so the count is at least 2, or use an abbreviated unit);
+- an answer of 1000 or more needs "without commas" in the prompt;
+- a hint must not end a sentence with `= answer.` or `+ answer.` in more than 12% of builds;
+- a review drill must reject a slip of one and of ten steps in the target's last place (§5: give the model a `tolerance` when its target is not a whole number or a short decimal);
+- the last rank below the top is held by all 40 concepts.
+
+**Ranks and achievements.** The ranks use Foundations' steps (`at` 0, 8, 24, 44, 68, 96, 128, 144, 160; `learnAt` 4, 10, 16, 22, 28, 34, 40), from OBSERVER to MASTER OF CHANGE. The collection has "Rate of climb" (`calc1-done`, the 40 concepts) and "Area under the curve" (`calc1-master`, all 160); the registry's 160 stands for "every mission" while the files fill up.
+
+**While the pack is filling up.** `node qa/harness.js --realm calc1` reports unwritten learn and practice missions as NOTEs. The checks that need a second chapter or every learn mission (the chapter-finish drop-downs, the `learnAt` play-through, the top rank with fewer missions than ranks) run once those missions exist. Mira's briefings are recorded after the text is final (`docs/VOICE.md`); until `game/voice/calc1/manifest.json` exists, `node tools/voice-lines.js --check` prints a NOTE for the pack and the game uses the device voice. After any change under `game/`, run `node tools/build-sw.js`.
+
+```sh
+node qa/show-mission.js q01 --realm calc1 --draw 3                # the learn sample, and three generated versions
+node qa/show-mission.js q01b --realm calc1 --draw 3               # the practice sample
+node qa/generators.js --realm calc1 --strict --draws 1000 q07     # one mission: generator, text, oracle
+node qa/generators.js --realm calc1 --strict --draws 1000         # every mission, and the content rules
+node qa/harness.js --realm calc1                                  # schema, teaching, chapters, experiments, variants, play-through
+node qa/harness.js --realm calc1 --complete --complete-practice   # at the end: all 40 learn and all 120 practice
+node qa/glossary.test.js                                          # glossary words are used where they are taught
+node tools/build-sw.js && node tools/build-sw.js --check          # the offline file list
+```

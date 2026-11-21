@@ -2,7 +2,8 @@
    node tools/voice-lines.js <pack> <out.json>   writes {id: text} for the recording script.
    node tools/voice-lines.js --index             rewrites game/voice/index.js from the recorded files.
    node tools/voice-lines.js --check             fails if a recording is missing, stale (the text changed since it
-                                                 was recorded) or not listed in game/voice/index.js.
+                                                 was recorded) or not listed in game/voice/index.js. A pack with no
+                                                 recordings at all (no manifest.json) is a note, not a failure.
    The recordings are made outside this repo with the open-source Kokoro voice model; see docs/VOICE.md. */
 const fs = require('fs'), vm = require('vm'), path = require('path'), crypto = require('crypto');
 const game = path.join(__dirname, '..', 'game');
@@ -15,10 +16,14 @@ function lines(pack) {
   const out = {}; for (const q of window.QUESTS) if (!q.parent) out[q.id] = window.Outpost.narration(q); return out;
 }
 const stamp = text => crypto.createHash('sha1').update(text).digest('hex').slice(0, 10);
-const PACKS = ['found', 'la'];
+const PACKS = ['found', 'la', 'calc1'];
+/* A pack is recorded once game/voice/<pack>/manifest.json exists (tools/voice/render.py writes it). Until then the
+   game uses the device voice for it, the pack is left out of game/voice/index.js, and --check reports it as a note,
+   not a failure. Once the manifest exists, every learn mission of the pack needs its clip. */
+const recorded = p => fs.existsSync(path.join(game, 'voice', p, 'manifest.json'));
 function index() {
   const all = {};
-  for (const p of PACKS) { const m = path.join(game, 'voice', p, 'manifest.json'); all[p] = {}; if (fs.existsSync(m)) for (const id of Object.keys(JSON.parse(fs.readFileSync(m, 'utf8'))).sort()) if (fs.existsSync(path.join(game, 'voice', p, id + '.m4a'))) all[p][id] = 1; }
+  for (const p of PACKS.filter(recorded)) { const m = path.join(game, 'voice', p, 'manifest.json'); all[p] = {}; if (fs.existsSync(m)) for (const id of Object.keys(JSON.parse(fs.readFileSync(m, 'utf8'))).sort()) if (fs.existsSync(path.join(game, 'voice', p, id + '.m4a'))) all[p][id] = 1; }
   return '/* Recorded briefings by Mira: which missions have a clip at voice/<pack>/<id>.m4a. Written by tools/voice-lines.js --index. */\nwindow.VG_VOICE = ' + JSON.stringify(all) + ';\n';
 }
 if (require.main === module) {
@@ -26,7 +31,8 @@ if (require.main === module) {
   if (a[0] === '--index') { fs.writeFileSync(path.join(game, 'voice', 'index.js'), index()); console.log('wrote game/voice/index.js'); }
   else if (a[0] === '--check') {
     let bad = 0, n = 0;
-    for (const p of PACKS) { const man = JSON.parse(fs.readFileSync(path.join(game, 'voice', p, 'manifest.json'), 'utf8'));
+    for (const p of PACKS) { if (!recorded(p)) { console.log(`NOTE: ${p} has no recorded briefings yet; its learn missions (${Object.keys(lines(p)).length} written) use the device voice.`); continue; }
+      const man = JSON.parse(fs.readFileSync(path.join(game, 'voice', p, 'manifest.json'), 'utf8'));
       for (const [id, text] of Object.entries(lines(p))) { n++; const f = path.join(game, 'voice', p, id + '.m4a');
         if (!fs.existsSync(f) || fs.statSync(f).size < 20000) { bad++; console.log('MISSING', p, id); } else if (man[id] !== stamp(text)) { bad++; console.log('STALE', p, id); } } }
     if (fs.readFileSync(path.join(game, 'voice', 'index.js'), 'utf8') !== index()) { bad++; console.log('game/voice/index.js is out of date'); }
