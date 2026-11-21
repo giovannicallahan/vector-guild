@@ -155,7 +155,13 @@ window.VARIANT_SETUP.q07 = t => `The problem statement for slider value t, witho
 window.VARIANT_POOL.q07 = [1, 2, 3, 4, 5];   // optional; default [-6..6] without 0
 ```
 
-A review drill (and the reward check after "Reveal solution") shows `VARIANT_SETUP[id](t)` and the experiment's `prompt`, and accepts an answer within 2% (at least 0.02) of the experiment's `target`; the answer box is labelled `values[0][0]`. The statement must describe the same numbers the experiment uses for that `t`, must be at least 8 characters, and must be tidy (same rules as §4). Use `VARIANT_POOL` to keep drills away from degenerate `t` values. Choose numbers so that a typical mistake is more than 2% away from the target. `game/variants.js` merges these tables; linear algebra's built-in table applies only to the `la` pack.
+A review drill (and the reward check after "Reveal solution") shows `VARIANT_SETUP[id](t)` and the experiment's `prompt`, and checks the typed answer against the experiment's `target` (rule below); the answer box is labelled `values[0][0]`. The statement must describe the same numbers the experiment uses for that `t`, must be at least 8 characters, and must be tidy (same rules as §4). Use `VARIANT_POOL` to keep drills away from degenerate `t` values. `game/variants.js` merges these tables; linear algebra's built-in table applies only to the `la` pack.
+
+How close the answer must be (`Variants.accept(target, model)` / `Variants.tolerance(target, model)`, used by the drill, the reward check and the concept bench):
+- An experiment model may return its own `tolerance` (a number > 0, absolute: `|typed − target| <= tolerance`). It wins in every pack.
+- Linear algebra without one: within 2% of the target, at least 0.02 (the 1.4.1 rule, unchanged).
+- Any other pack without one: a whole-number target, or a target with one to three decimal places, must be typed exactly (3507 does not accept 3570; 5.05 does not accept 5.15). Any other target (a repeating decimal, a root) is accepted within 2%, at least 0.02; for such a model choose numbers so that a typical mistake is more than 2% away, or give the model a `tolerance` and say in its `prompt` how to round.
+- The line under the question says which rule applies ("Type the exact whole number." / "Type the exact value." / "Answers within 2% are accepted."). `qa/harness.js` checks that a neighbouring whole number or decimal is rejected.
 
 ## 6. Oracle (`qa/realms/found/oracle-*.js`)
 

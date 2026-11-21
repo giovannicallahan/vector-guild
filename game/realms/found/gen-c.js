@@ -11,10 +11,11 @@ const sup = k => String(k).split('').map(d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[Numb
 const pairs = c => { const out = []; for (let u = 1; u * u <= c; u++) if (c % u === 0) out.push(`${n(u)} and ${n(c / u)}`); return out.join(', '); };
 window.MISSION_GEN = window.MISSION_GEN || {};
 Object.assign(window.MISSION_GEN, {
- /* Two filling tanks y = m1·x + b1 and y = m2·x + b2 that meet at a whole hour x0. */
+ /* Two filling tanks y = m1·x + b1 and y = m2·x + b2 that meet at a whole hour x0. The rates differ by at least 2:
+    with a difference of 1 the last step would read "x = answer" in hint 2 and in the first guided prompt. */
  q25: {
   canonical: { b1: 20, m1: 6, b2: 40, m2: 2 },
-  draw: R => { const x0 = R.int(2, 8), m1 = R.int(4, 9), m2 = R.int(1, m1 - 1), b1 = 5 * R.int(2, 8); return { b1, m1, b2: b1 + (m1 - m2) * x0, m2 }; },
+  draw: R => { const x0 = R.int(2, 8), m1 = R.int(4, 9), m2 = R.int(1, m1 - 2), b1 = 5 * R.int(2, 8); return { b1, m1, b2: b1 + (m1 - m2) * x0, m2 }; },
   build: ({ b1, m1, b2, m2 }) => { const d = m1 - m2, B = b2 - b1, x = B / d, y = m1 * x + b1; return {
    prompt: `Two water tanks are being filled. Tank A holds ${n(b1)} L and gains ${n(m1)} L each hour, so after x hours it holds y = ${cf(m1)}x + ${n(b1)} litres. Tank B holds ${n(b2)} L and gains ${n(m2)} L each hour, so y = ${cf(m2)}x + ${n(b2)}. On a graph the two lines cross where both tanks hold the same amount. Enter x, the hour when they match, then y, the litres each tank holds then.`,
    answer: [x, y],
@@ -68,7 +69,7 @@ Object.assign(window.MISSION_GEN, {
    return {
    prompt: `Three kinds of crate: ration boxes (x kg each), fuel cans (y kg each) and tool kits (z kg each). Load 1 is one of each and weighs ${n(a)} kg, so x + y + z = ${n(a)}. Load 2 is ${n(p)} ration boxes, one fuel can and one tool kit, ${n(b)} kg, so ${n(p)}x + y + z = ${n(b)}. Load 3 is one ration box, one fuel can and ${n(r)} tool kits, ${n(c)} kg, so x + y + ${n(r)}z = ${n(c)}. Enter x, y and z.`,
    answer: [x, y, z],
-   hints: [`Take load 1 away from load 2: y and z cancel, leaving ${cf(p - 1)}x = ${n(b - a)}.`, `Take load 1 away from load 3 to find z, then use load 1 to find y.`],
+   hints: [`Take load 1 away from load 2: y and z cancel, leaving ${p === 2 ? `x = ${n(b)} − ${n(a)}` : `${cf(p - 1)}x = ${n(b - a)}`}.`, `Take load 1 away from load 3 to find z, then use load 1 to find y.`],
    solution: `Load 2 − load 1: ${sol(p - 1, 'x', b, x)} Load 3 − load 1: ${sol(r - 1, 'z', c, z)} Load 1: ${n(x)} + y + ${n(z)} = ${n(a)}, so y = ${n(a)} − ${n(x)} − ${n(z)} = ${n(y)}. A ration box weighs ${n(x)} kg, a fuel can ${n(y)} kg and a tool kit ${n(z)} kg.`,
    guidance: [
     { prompt: `Take load 1 (x + y + z = ${n(a)}) away from load 2 (${n(p)}x + y + z = ${n(b)}). What is x?`, answer: [x], explanation: `y and z cancel: ${why(p - 1, 'x', x)}` },
@@ -97,7 +98,7 @@ Object.assign(window.MISSION_GEN, {
   canonical: { m: 4, k: 5, b: 3, p: 2 },
   draw: R => { const b = R.pick([2, 3]); return { m: R.int(2, 5), k: R.int(2, 5), b, p: R.int(2, b === 2 ? 4 : 3) }; },
   build: ({ m, k, b, p }) => { const e = m + k, pieces = Math.pow(2, e), s = Math.pow(b, p), v = 3 * p, bp = `${n(b)}${sup(p)}`; return {
-   prompt: `A sheet of alloy is cut in half, then every piece is cut in half again, ${n(m)} times in all: that makes 2${sup(m)} pieces. Then every piece is halved ${n(k)} more times, which multiplies the count by 2${sup(k)}. So there are 2${sup(m)} × 2${sup(k)} pieces. Write this as one power of 2 and enter the exponent, then enter the number of pieces. Next, a cube-shaped tank has sides of ${bp} = ${n(s)} dm, so it holds (${bp})³ cubic decimetres. Write this as one power of ${n(b)} and enter the exponent.`,
+   prompt: `A sheet of alloy is cut in half, then every piece is cut in half again, ${n(m)} times in all: that makes 2${sup(m)} pieces. Then every piece is halved ${n(k)} more times, which multiplies the count by 2${sup(k)}. So there are 2${sup(m)} × 2${sup(k)} pieces. Write this as one power of 2 and enter the exponent, then enter the number of pieces. Next, a cube-shaped tank has sides of ${bp} = ${n(s)} decimetres (a decimetre, dm for short, is a tenth of a metre), so it holds (${bp})³ cubic decimetres. Write this as one power of ${n(b)} and enter the exponent.`,
    answer: [e, pieces, v],
    hints: [`Multiplying powers of the same base adds the exponents: count all the 2s being multiplied together.`, `A power of a power multiplies the exponents: write out (${bp})³ as ${bp} × ${bp} × ${bp} and count the ${n(b)}s.`],
    solution: `2${sup(m)} × 2${sup(k)} is ${n(m)} twos times ${n(k)} twos, ${n(e)} twos in all: 2${sup(e)} = ${n(pieces)} pieces. (${bp})³ = ${bp} × ${bp} × ${bp}, three groups of ${n(p)} factors of ${n(b)}, so it is ${n(b)}${sup(v)}: the exponent is ${n(v)}. The tank holds ${n(s)} × ${n(s)} × ${n(s)} = ${n(s * s * s)} dm³.`,
@@ -112,10 +113,10 @@ Object.assign(window.MISSION_GEN, {
   canonical: { s: 12, k: 6, m: 2 },
   draw: R => ({ s: R.int(4, 15), k: R.int(2, 6), m: R.pick([2, 3, 5, 6, 7]) }),
   build: ({ s, k, m }) => { const A = s * s, K = k * k, N = K * m; return {
-   prompt: `A square floor plate has an area of ${n(A)} m². Enter the length of its side in metres. A diagonal brace in the yard measures √${n(N)} dm. Simplify √${n(N)} into the form k√m, where k is a whole number and m has no perfect square factor other than 1, and enter k, then m.`,
+   prompt: `A square floor plate has an area of ${n(A)} m². Enter the length of its side in metres. A diagonal brace in the yard measures √${n(N)} m. Simplify √${n(N)} into the form k√m, where k is a whole number and m has no perfect square factor other than 1, and enter k, then m.`,
    answer: [s, k, m],
    hints: [`Which whole number times itself gives ${n(A)}?`, `Try the perfect squares 4, 9, 16, 25, 36, 49 … and find the largest one that divides ${n(N)} exactly.`],
-   solution: `${n(s)} × ${n(s)} = ${n(A)}, so the side is √${n(A)} = ${n(s)} m. The largest perfect square that divides ${n(N)} is ${n(K)}, and ${n(N)} = ${n(K)} × ${n(m)}, so √${n(N)} = √${n(K)} × √${n(m)} = ${n(k)}√${n(m)} dm.`,
+   solution: `${n(s)} × ${n(s)} = ${n(A)}, so the side is √${n(A)} = ${n(s)} m. The largest perfect square that divides ${n(N)} is ${n(K)}, and ${n(N)} = ${n(K)} × ${n(m)}, so √${n(N)} = √${n(K)} × √${n(m)} = ${n(k)}√${n(m)} m.`,
    guidance: [
     { prompt: `The side of a square, times itself, gives the area ${n(A)} m². What is the side?`, answer: [s], explanation: `${n(s)} × ${n(s)} = ${n(A)}, so √${n(A)} = ${n(s)} m.` },
     { prompt: `What is the largest perfect square that divides ${n(N)} exactly?`, answer: [K], explanation: `${n(N)} ÷ ${n(K)} = ${n(m)}, and ${n(K)} = ${n(k)} × ${n(k)}. No larger perfect square divides ${n(N)}.` },
@@ -136,10 +137,11 @@ Object.assign(window.MISSION_GEN, {
     { prompt: `Add x² + ${cf(s)}x + ${n(ab)} and ${B}. Enter the x² coefficient, the x coefficient and the constant.`, answer: [1 + p, s + q, ab + r], explanation: `1 + ${n(p)} = ${n(1 + p)}, ${n(s)} + ${n(q)} = ${n(s + q)} and ${n(ab)} + ${n(r)} = ${n(ab + r)}.` }
    ] }; }
  },
- /* x² + (p + q)x + pq factored into (x + p)(x + q), p < q. */
+ /* x² + (p + q)x + pq factored into (x + p)(x + q), 2 ≤ p < q. With p = 1 the solution would print "1x", and a prime
+    constant would leave hint 2 listing only the answer pair. */
  q33: {
   canonical: { p: 4, q: 5 },
-  draw: R => { const p = R.int(1, 7); return { p, q: R.int(p + 1, 9) }; },
+  draw: R => { const p = R.int(2, 7); return { p, q: R.int(p + 1, 9) }; },
   build: ({ p, q }) => { const b = p + q, c = p * q; return {
    prompt: `A rectangular plate has an area of x² + ${n(b)}x + ${n(c)} m², and its sides are x plus one number and x plus another number, in metres. Factor the area into the form (x + number)(x + number) and enter the two numbers, smaller first.`,
    answer: [p, q],
@@ -155,7 +157,7 @@ Object.assign(window.MISSION_GEN, {
   canonical: { r: 2, d: 4 },
   draw: R => ({ r: R.int(1, 6), d: R.pick([2, 4, 6, 8]) }),
   build: ({ r, d }) => { const s = r + d, b = r + s, c = r * s, h = b / 2, k = h * h - b * h + c, depth = -k; return {
-   prompt: `The bottom of a drainage trough in the yard follows the curve y = x² − ${n(b)}x + ${n(c)}, where x is the distance along the floor and y the height above floor level, both in dm. Floor level is y = 0. Enter the two x values where the curve meets floor level, smaller first, then the x and the y of its lowest point, the vertex.`,
+   prompt: `The bottom of a drainage trough in the yard follows the curve y = x² − ${n(b)}x + ${n(c)}, where x is the distance along the floor and y the height above floor level, both in decimetres (dm, tenths of a metre). Floor level is y = 0. Enter the two x values where the curve meets floor level, smaller first, then the x and the y of its lowest point, the vertex.`,
    answer: [r, s, h, k],
    hints: [`Set y = 0 and factor: find two numbers that multiply to ${n(c)} and add to −${n(b)}.`, `The vertex is halfway between the two roots. Put its x into the rule to get its y.`],
    solution: `x² − ${n(b)}x + ${n(c)} = (x − ${n(r)})(x − ${n(s)}), because (−${n(r)}) × (−${n(s)}) = ${n(c)} and (−${n(r)}) + (−${n(s)}) = −${n(b)}. A product is 0 only when one factor is 0, so y = 0 at x = ${n(r)} and at x = ${n(s)}. The vertex is halfway: x = (${n(r)} + ${n(s)}) ÷ 2 = ${n(h)}. There y = ${n(h)}² − ${n(b)} × ${n(h)} + ${n(c)} = ${n(h * h)} − ${n(b * h)} + ${n(c)} = ${n(k)}, so the lowest point is ${n(depth)} dm below floor level.`,

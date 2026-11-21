@@ -18,10 +18,7 @@ Object.assign(window.VARIANT_SETUP, {
  q31: t => `A square floor plate has an area of ${(t + 11) * (t + 11)} m².`,
  q32: t => `A panel measures x + 3 m by x + ${t + 11} m, so its area is (x + 3)(x + ${t + 11}) m².`,
  q33: t => `A plate’s area is ${quad(t + 13, 2 * (t + 11))} m², and one side is x + 2 m.`,
- q34: t => `A trough follows y = ${quad(-2 * t, t * t - 4)}, which factors into two brackets with roots 2 apart on each side of the vertex.`,
+ q34: t => { const r = (t + 10) % 7 + 1, g = Math.floor((t + 10) / 7) + 1; return `A trough follows y = ${quad(-(2 * r + 2 * g), r * (r + 2 * g))}. Its two roots are ${2 * g} apart.`; },
  q35: t => `A plate of area x² + 5x + 6 m² is cut into a strip x + 2 m wide, and x = ${t + 11}.`
-});
-Object.assign(window.VARIANT_POOL, {
- q34: [-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]
 });
 })();

@@ -78,7 +78,7 @@ public class MainActivity extends Activity {
             }
             @Override public void onPageFinished(WebView view, String url) {
                 // Intercept the game's Blob download and let the system save picker write it.
-                view.evaluateJavascript("(function(){if(window.__vgSaveHook)return;window.__vgSaveHook=true;var old=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&this.href.startsWith('blob:')){fetch(this.href).then(r=>r.blob()).then(b=>{var f=new FileReader();f.onload=()=>AndroidSave.exportFile(this.download||'vector-guild-save.json',f.result.split(',')[1]);f.readAsDataURL(b)});return}return old.call(this)}})()", null);
+                view.evaluateJavascript("(function(){if(window.__vgSaveHook)return;window.__vgSaveHook=true;var old=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&this.href.startsWith('blob:')){fetch(this.href).then(r=>r.blob()).then(b=>{var f=new FileReader();f.onload=()=>AndroidSave.exportFile(this.download||'mathcosmos-save.json',f.result.split(',')[1]);f.readAsDataURL(b)});return}return old.call(this)}})()", null);
             }
         });
         webView.setWebChromeClient(new WebChromeClient() {
@@ -114,7 +114,9 @@ public class MainActivity extends Activity {
                 byte[] data = Base64.decode(encoded, Base64.DEFAULT);
                 runOnUiThread(() -> {
                     pendingSave = data;
-                    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("application/json").putExtra(Intent.EXTRA_TITLE, "vector-guild-save.json");
+                    String title = name == null ? "" : name.replaceAll("[\\\\/:*?\"<>|\\p{Cntrl}]", "").trim();
+                    if (title.isEmpty() || title.length() > 80 || !title.endsWith(".json")) title = "mathcosmos-save.json";
+                    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("application/json").putExtra(Intent.EXTRA_TITLE, title);
                     try { startActivityForResult(intent, SAVE_FILE); }
                     catch (Exception e) { pendingSave = null; Toast.makeText(MainActivity.this, "No app available to save the file", Toast.LENGTH_LONG).show(); }
                 });

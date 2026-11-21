@@ -100,10 +100,27 @@ function make(id,random=Math.random){
   const model=models[id];if(typeof model!=='function')return null;
   const pool=(POOL[id]||DEFAULT).filter(t=>t!==last[id]);
   const t=pool[Math.floor(random()*pool.length)%pool.length];last[id]=t;
-  const r=model(t),target=Number(r.target);
-  return {id,t,prompt:r.prompt,setup:r.setup,formula:r.formula,label:r.values[0][0],target,tolerance:Math.max(.02,Math.abs(target)*.02)};
+  const r=model(t),target=Number(r.target),rule=accept(target,r);
+  return {id,t,prompt:r.prompt,setup:r.setup,formula:r.formula,label:r.values[0][0],target,tolerance:rule.tolerance,exact:rule.exact,note:rule.note};
 }
+/* How close a typed answer must be to a model's target (docs/PACK-FORMAT.md section 5).
+   Linear algebra keeps the 1.4.1 rule: within 2% of the target, at least 0.02.
+   Other packs: a model's own `tolerance` (> 0) wins. Otherwise a whole-number target must be typed exactly,
+   and so must a target with one to three decimal places (5.05 accepts 5.05, not 5.04 or 5.15), because
+   a slip in whole-number or decimal arithmetic is rarely 2% away. Any other target (a repeating decimal,
+   a root) keeps the 2% rule. The concept bench uses the same rule. */
+const BAND=x=>Math.max(.02,Math.abs(x)*.02);
+function accept(target,r){
+  const own=r&&Number(r.tolerance);
+  if(Number.isFinite(own)&&own>0)return {tolerance:own,exact:own<BAND(target),note:own<BAND(target)?'Type the exact value.':'Answers close to the exact value are accepted.'};
+  if(!builtIn&&Number.isFinite(target)){
+    if(Number.isInteger(target))return {tolerance:1e-9,exact:true,note:'Type the exact whole number.'};
+    for(let d=1;d<=3;d++){const scaled=target*10**d;if(Math.abs(scaled-Math.round(scaled))<1e-7)return {tolerance:1e-6,exact:true,note:'Type the exact value.'}}
+  }
+  return {tolerance:BAND(target),exact:false,note:'Answers within 2% are accepted.'};
+}
+const tolerance=(target,r)=>accept(Number(target),r).tolerance;
 const check=(variant,guess)=>Number.isFinite(guess)&&Math.abs(guess-variant.target)<=variant.tolerance;
 const show=n=>Math.abs(n)<1e-10?'0':String(Number(Number(n).toPrecision(5)));
-window.Variants={make,check,clean,show,has:id=>typeof models[id]==='function'&&!!SETUP[id]};
+window.Variants={make,check,clean,show,tolerance,accept,has:id=>typeof models[id]==='function'&&!!SETUP[id]};
 })();

@@ -12,7 +12,7 @@ Object.assign(window.VARIANT_SETUP, {
  q15: t => `Simplify ${n(Math.abs(t) + 2)}(c + 4) + 3c to the form (number)c + (number).`,
  q16: t => `A leak took 18 L from a tank that held x litres. The gauge now reads ${n(40 + t)} L, so x − 18 = ${n(40 + t)}.`,
  q17: t => `Solve 3(x + 2) + 12 = ${n(3 * (t + 14) + 12)}.`,
- q18: t => `A sled may carry at most ${n(200 + 10 * t)} kg. The sled and driver weigh 74 kg and each can weighs 14 kg, so 14n + 74 ≤ ${n(200 + 10 * t)}. Cans come whole.`,
+ q18: t => `A sled may carry at most ${n(200 + 10 * t)} kg. The empty sled weighs 74 kg and each can weighs 14 kg, so 14n + 74 ≤ ${n(200 + 10 * t)}. Cans come whole.`,
  q19: t => `With the depot at (0, 0), x east and y north, a cache lies ${n(Math.abs(t))} km ${t < 0 ? 'west' : 'east'} and 4 km south of the depot.`,
  q20: t => { const k = Math.abs(t) + 1; return `A cable runs straight from ${vec([1, 2])} to ${vec([1 + 3 * k, 2 + 4 * k])} on a grid in kilometres.`; },
  q21: t => `A tank’s gauge read 86 L at hour 2 and ${n(86 + 4 * t)} L at hour 6.`,

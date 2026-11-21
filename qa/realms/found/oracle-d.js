@@ -26,19 +26,20 @@ Object.assign(window.ORACLE, {
     return [steps, deg];
   },
   /* P(s) = m s + c. Invert it numerically by bisection, then read a and b off two points of the inverse:
-     P⁻¹(w) = (w − a) ÷ b has slope 1 ÷ b and is 0 at w = a. The logged wattage is P at the hidden setting. */
+     P⁻¹(w) = (w − a) ÷ b has slope 1 ÷ b and is 0 at w = a. The setting is the inverse at the logged wattage p.y, the
+     number the prompt states; the hidden setting p.s is never read. */
   q38: p => {
-    const power = s => p.m * s + p.c, logged = power(p.s);
+    const power = s => p.m * s + p.c;
     const inv = w => solveUp(power, w, -1e4, 1e4);
     const w1 = 100, w2 = 1100, slope = (inv(w2) - inv(w1)) / (w2 - w1);
     const b = 1 / slope, a = w1 - b * inv(w1);
-    return [a, b, inv(logged)];
+    return [a, b, inv(p.y)];
   },
   /* Run the signal through the relays one at a time; for the second signal, keep adding relays until it reaches
-     the target strength. */
+     the target strength p.T that the prompt states (p.k is never read). */
   q39: p => {
     let s = p.S; for (let i = 0; i < p.n; i++) s *= p.b;
-    const target = p.S * Math.pow(p.b, p.k);
+    const target = p.T;
     let t = p.S, stages = 0; while (t < target && stages < 100) { t *= p.b; stages++; }
     return [s, t === target ? stages : NaN];
   },

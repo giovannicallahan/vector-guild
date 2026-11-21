@@ -63,9 +63,41 @@ function chooseMode(o){
 }
 /* Android Back: close the innermost open thing; null means nothing is open and Back should leave the app. */
 function backAction(s){s=s||{};return s.dialogOpen?'dialog':s.cardOpen?'card':s.listOpen?'list':null}
+/* What Back and Escape may close. A card cannot be open under the list, and a list shown because the
+   WebGL context is lost cannot be closed (there is no map to go back to), so Back then leaves the app. */
+function overlayState(s){
+  s=s||{};
+  return {dialogOpen:!!s.dialogOpen,cardOpen:!!s.cardOpen&&!s.listOverlay,listOpen:!!s.listOverlay&&!s.contextLost};
+}
+/* The Android wrapper saves through a system file picker: the file exists only after the player confirms,
+   under the name they pick, so the page must not claim a file was made. */
+var BACKUP_NAME='mathcosmos-save.json';
+function backupMessage(viaPicker){return viaPicker?'Choose where to save the backup.':'Backup file made: '+BACKUP_NAME+'.'}
+/* Star-map labels. items: [{x,y,w,h,depth,prev}] with x = left edge, y = wanted top edge, depth = larger is nearer
+   the camera, prev = the offset the label had last time (keeps it on the same side while the map turns).
+   Nearest labels keep their place; each later one moves up or down by the least amount that clears every
+   label already placed, staying between top and bottom. Returns the top edge for each item, in input order.
+   If a label has no free place at all it keeps its wanted place. */
+function placeLabels(items,top,bottom){
+  var order=items.map(function(_,i){return i}).sort(function(a,b){return items[b].depth-items[a].depth||a-b}),placed=[],out=[],EPS=1e-6;
+  order.forEach(function(i){
+    var it=items[i],lo=top,hi=Math.max(top,bottom-it.h),want=Math.max(lo,Math.min(hi,it.y)),
+        near=placed.filter(function(p){return p.x<it.x+it.w-EPS&&it.x<p.x+p.w-EPS}),cands=[want],best=null,bestCost=Infinity;
+    near.forEach(function(p){cands.push(p.y+p.h,p.y-it.h)});
+    cands.forEach(function(y){
+      if(y<lo-EPS||y>hi+EPS)return;
+      if(near.some(function(p){return y<p.y+p.h-EPS&&p.y<y+it.h-EPS}))return;
+      var cost=Math.abs(y-it.y)-((y-it.y)*(it.prev||0)>0?6:0);
+      if(cost<bestCost){bestCost=cost;best=y}
+    });
+    if(best==null)best=want;
+    placed.push({x:it.x,y:best,w:it.w,h:it.h});out[i]=best;
+  });
+  return out;
+}
 
 var Logic={solvedCount:solvedCount,progressText:progressText,enterHref:enterHref,partInfo:partInfo,nodeUnfinished:nodeUnfinished,
-  joinNames:joinNames,softLock:softLock,hasProgress:hasProgress,cardModel:cardModel,chooseMode:chooseMode,backAction:backAction};
+  joinNames:joinNames,softLock:softLock,hasProgress:hasProgress,cardModel:cardModel,chooseMode:chooseMode,backAction:backAction,overlayState:overlayState,backupMessage:backupMessage,placeLabels:placeLabels};
 if(typeof module==='object'&&module&&module.exports)module.exports=Logic;
 if(typeof window==='undefined'||typeof document==='undefined')return;
 root.VGShellLogic=Logic;
@@ -150,9 +182,9 @@ if(canBackup){
     try{
       var a=document.createElement('a');
       a.href=URL.createObjectURL(new Blob([JSON.stringify(Save.exportAll(),null,2)],{type:'application/json'}));
-      a.download='mathcosmos-save.json';document.body.appendChild(a);a.click();a.remove();
+      a.download=BACKUP_NAME;document.body.appendChild(a);a.click();a.remove();
       setTimeout(function(){URL.revokeObjectURL(a.href)},60000);
-      backupMsg('Backup file made: mathcosmos-save.json.');
+      backupMsg(backupMessage(!!root.AndroidSave));
     }catch(e){backupMsg('Could not make the backup file.',true)}
   });
   $('vg-import').addEventListener('click',function(){$('vg-file').click()});
@@ -188,9 +220,10 @@ if(choice.mode==='3d'){
   if(!renderer)choice={mode:'flat',intro:false};
 }
 
-var selected=null,lastLabel=null;
+var selected=null,lastLabel=null,contextLost=false;
+function openThings(){return overlayState({dialogOpen:!!(dlg&&dlg.open),cardOpen:!!selected,listOverlay:listOverlay,contextLost:contextLost})}
 window.VectorGuildBack=function(){
-  var a=backAction({dialogOpen:!!(dlg&&dlg.open),cardOpen:!!selected,listOpen:listOverlay});
+  var a=backAction(openThings());
   if(a==='dialog'){dlg.close();return true}
   if(a==='card'){closeCard();return true}
   if(a==='list'){closeList();return true}
@@ -234,7 +267,8 @@ function rand(seed){return function(){seed=(seed*16807)%2147483647;return (seed-
 
 /* ---------- 3D: wormhole ----------
    All rings, wall ribs and speed streaks are one LineSegments draw call and the glow beads one Points call;
-   the vertex shader moves, twists and bends them, so the CPU only updates a few uniforms per frame. */
+   the vertex shader moves, twists and bends them, so the CPU only updates a few uniforms per frame.
+   smoothstep edges are always written low, high: GLSL ES leaves the result undefined otherwise. */
 var DEPTH=300,RINGS=150,SEG=48,RIBS=8,STREAKS=520,GAP=DEPTH/RINGS;
 var TUNNEL_VS=[
  'uniform float uTravel;uniform float uTime;uniform float uDepth;uniform float uRadius;uniform float uStretch;uniform float uSize;',
@@ -249,7 +283,7 @@ var TUNNEL_VS=[
  '  vec4 mv=modelViewMatrix*vec4(p,z,1.0);',
  '  gl_Position=projectionMatrix*mv;',
  '  float d=-z;',
- '  vFade=smoothstep(uDepth*0.98,uDepth*0.38,d)*smoothstep(0.5,9.0,d);',
+ '  vFade=(1.0-smoothstep(uDepth*0.38,uDepth*0.98,d))*smoothstep(0.5,9.0,d);',
  '  vColor=aColor;',
  '  #ifdef POINTS',
  '  gl_PointSize=min(48.0,uSize*70.0/max(d,1.0));',
@@ -260,7 +294,7 @@ var TUNNEL_FS=[
  'void main(){',
  '  float a=vFade*uGain;',
  '  #ifdef POINTS',
- '  a*=smoothstep(0.5,0.0,length(gl_PointCoord-0.5));',
+ '  a*=1.0-smoothstep(0.0,0.5,length(gl_PointCoord-0.5));',
  '  #endif',
  '  gl_FragColor=vec4(vColor,clamp(a,0.0,1.0));',
  '}'].join('\n');
@@ -364,7 +398,7 @@ REALMS.forEach(function(r){
   var start=el('span','vg-start','· Start here');start.hidden=true;pill.appendChild(start);b.appendChild(pill);
   b.addEventListener('click',function(){if(selected===r.node)closeCard();else select(r.node)});
   labels.appendChild(b);
-  nodes[r.node]={holder:holder,shape:shape,orbit:orbit,btn:b,start:start,scale:1,w:0};
+  nodes[r.node]={holder:holder,shape:shape,orbit:orbit,btn:b,pill:pill,start:start,scale:1,w:0,dy:null,ty:0};
   mapRadius=Math.max(mapRadius,holder.position.distanceTo(centre)+3);
   (r.needs||[]).forEach(function(n){if(byNode[n])edgeArr.push.apply(edgeArr,byNode[n].pos.concat(r.pos))});
 });
@@ -395,19 +429,33 @@ closeCard=function(){
 };
 document.addEventListener('keydown',function(e){
   if(e.key!=='Escape'||(dlg&&dlg.open))return;
-  if(selected){closeCard();e.preventDefault()}else if(listOverlay){closeList();e.preventDefault()}
+  var a=backAction(openThings());
+  if(a==='card'){closeCard();e.preventDefault()}else if(a==='list'){closeList();e.preventDefault()}
 });
 
 /* ---------- List view over the map ---------- */
-var listBtn=$('vg-listbtn'),listBack=$('vg-list-back'),listAuto=false;
+var listBtn=$('vg-listbtn'),listBack=$('vg-list-back'),listNote=$('vg-list-note'),listTitle=$('vg-list-title'),listAuto=false;
+var NOTE_FAILED=listNote.textContent,NOTE_PAUSED='The star map is paused on this device, so the realms are listed here.';
+listTitle.tabIndex=-1;
+/* While the list covers the stage, the stage's buttons leave the Tab order and the accessibility tree.
+   inert does both; aria-hidden and tabindex cover WebViews without it. */
+function setStageInert(on){
+  if('inert' in stage)stage.inert=on;
+  if(on)stage.setAttribute('aria-hidden','true');else stage.removeAttribute('aria-hidden');
+  Array.prototype.forEach.call(stage.querySelectorAll('button'),function(b){if(on)b.setAttribute('tabindex','-1');else b.removeAttribute('tabindex')});
+}
+/* With the context lost there is no map to go back to: no "Back to map", and a line that says why. */
+function showPaused(){listBack.hidden=contextLost;listNote.textContent=contextLost?NOTE_PAUSED:NOTE_FAILED;listNote.hidden=!contextLost}
 function openList(auto){
   if(listOverlay)return;listOverlay=true;listAuto=!!auto;closeCard();
-  list.classList.remove('vg-sr');list.classList.add('is-overlay');listBack.hidden=false;setListTabbable(true);stop();
-  if(!auto){list.scrollTop=0;listBack.focus({preventScroll:true})}
+  list.classList.remove('vg-sr');list.classList.add('is-overlay');showPaused();setListTabbable(true);stop();
+  setStageInert(true);list.scrollTop=0;
+  (listBack.hidden?listTitle:listBack).focus({preventScroll:true});
 }
 closeList=function(){
-  if(!listOverlay)return;listOverlay=false;listAuto=false;
-  list.classList.remove('is-overlay');list.classList.add('vg-sr');listBack.hidden=true;setListTabbable(false);start();
+  if(!listOverlay||contextLost)return;listOverlay=false;listAuto=false;
+  list.classList.remove('is-overlay');list.classList.add('vg-sr');listBack.hidden=true;listNote.hidden=true;setListTabbable(false);
+  setStageInert(false);start();
   if(!listBtn.hidden)listBtn.focus({preventScroll:true});
 };
 listBtn.addEventListener('click',function(){openList(false)});
@@ -427,12 +475,26 @@ function resize(){
   camera.aspect=W/H;camera.updateProjectionMatrix();
   var half=Math.tan(58*Math.PI/360);mapDist=Math.max(mapRadius/half,mapRadius/(half*camera.aspect));
   tunnelU.uSize.value=Math.min(root.devicePixelRatio||1,2);
+  layoutMap();
+}
+/* Portrait: the map sphere is fitted to the narrow width, which leaves most of the height empty. Stretch the map
+   vertically into that height (each realm's shape is scaled back in mapFrame, so only the spacing grows) and
+   centre it in the space below the top bar. Labels are kept below the top bar in every layout. */
+var topBar=stage.querySelector('.vg-top'),labelTop=0,spreadY=1,rowH=36;
+function layoutMap(){
+  var tr=topBar.getBoundingClientRect(),sr=stage.getBoundingClientRect();
+  labelTop=Math.max(0,Math.min(H*0.4,tr.bottom-sr.top))+4;
+  var portrait=phase==='map'&&W<H;
+  spreadY=portrait?Math.max(1,Math.min(1.8,(H-labelTop)/W)):1;
+  pivot.scale.set(1,spreadY,1);
+  if(portrait)camera.setViewOffset(W,H,0,-Math.round(labelTop/2),W,H);else camera.clearViewOffset();
   REALMS.forEach(function(r){nodes[r.node].w=0});
 }
+var phase='tunnel';
 root.addEventListener('resize',resize);root.addEventListener('orientationchange',resize);resize();
 
 /* ---------- Phases ---------- */
-var phase='tunnel',clock=0,t0=0,mapT=0,mapFlash=false,travel=0,INTRO=6,v3=new THREE.Vector3();
+var clock=0,t0=0,mapT=0,mapFlash=false,travel=0,INTRO=6,v3=new THREE.Vector3();
 var narrow=root.matchMedia?root.matchMedia('(max-width: 650px)'):null;
 function ease(x){return x*x*(3-2*x)}
 function startTunnel(){
@@ -440,6 +502,7 @@ function startTunnel(){
   camera.position.set(0,0,0);camera.rotation.set(0,0,0);camera.fov=58;camera.updateProjectionMatrix();
   hint.textContent='Entering the wormhole';$('vg-skip').hidden=false;$('vg-replay').hidden=true;listBtn.hidden=true;closeCard();
   REALMS.forEach(function(r){nodes[r.node].btn.hidden=true});
+  layoutMap();
   call('setIntroSeen');
 }
 /* flashIn: the tunnel ran to its end, so the map fades in from the flash; a skip or a direct start does not flash. */
@@ -448,7 +511,8 @@ function startMap(flashIn){
   camera.fov=58;camera.updateProjectionMatrix();
   hint.textContent=narrow&&narrow.matches?'Drag to turn. Tap a realm.':'Drag to turn the map. Pick a realm.';
   var skip=$('vg-skip'),hadFocus=document.activeElement===skip;skip.hidden=true;$('vg-replay').hidden=reduced;listBtn.hidden=false;
-  REALMS.forEach(function(r){nodes[r.node].btn.hidden=false});
+  REALMS.forEach(function(r){var n=nodes[r.node];n.btn.hidden=false;n.dy=null});
+  layoutMap();
   if(hadFocus){var f=nodes[REALMS[0]&&REALMS[0].node];if(f)f.btn.focus({preventScroll:true})}
 }
 $('vg-skip').addEventListener('click',function(){startMap(false)});
@@ -481,24 +545,32 @@ function mapFrame(dt){
   camera.rotation.set(0,0,0);camera.position.set(0,0,mapDist*(reduced?1:2.4-1.4*e));camera.lookAt(0,0,0);
   if(!reduced&&nodes)REALMS.forEach(function(r){var o=nodes[r.node].orbit;if(o)o.rotation.y+=dt*0.6});
   pivot.updateMatrixWorld();
+  var shown=[],items=[];
   REALMS.forEach(function(r){
     var n=nodes[r.node];
     if(!reduced){n.shape.rotation.y+=dt*0.35;n.shape.rotation.x+=dt*0.12}
-    var target=selected===r.node?1.6:1;n.scale+=(target-n.scale)*Math.min(1,dt*8);n.holder.scale.setScalar(n.scale);
+    var target=selected===r.node?1.6:1;n.scale+=(target-n.scale)*Math.min(1,dt*8);n.holder.scale.set(n.scale,n.scale/spreadY,n.scale);
     n.holder.getWorldPosition(v3);var depth=v3.z;v3.project(camera);
-    if(v3.z>1){n.btn.style.opacity='0';n.btn.style.visibility='hidden';return}
+    if(v3.z>1){n.btn.style.opacity='0';n.btn.style.visibility='hidden';n.dy=null;return}
     n.btn.style.visibility='';
-    if(!n.w)n.w=n.btn.offsetWidth||120;
+    if(!n.w){n.w=n.btn.offsetWidth||120;rowH=Math.ceil(((n.pill.offsetHeight||28)+44)/2)+1}
     var x=(v3.x*0.5+0.5)*W,y=(-v3.y*0.5+0.5)*H+18,half=n.w/2;
     x=Math.max(half+4,Math.min(W-half-4,x));
-    n.btn.style.transform='translate('+(x-half).toFixed(1)+'px,'+y.toFixed(1)+'px)';
     n.btn.style.opacity=(0.5+0.5*Math.max(0,Math.min(1,(depth+18)/30))).toFixed(2);
     n.btn.style.zIndex=String(1000+Math.round(depth*10));
+    shown.push(n);items.push({x:x-half-3,y:y,w:n.w+6,h:rowH,depth:depth,prev:n.ty});
+  });
+  /* No two labels may cross: a pill is rowH apart from its neighbours, so its 44px touch area (shell.css)
+     reaches the next pill's edge and no further. Offsets ease in so labels do not jump while the map turns. */
+  var ys=placeLabels(items,labelTop,H-12),k=reduced?1:Math.min(1,dt*10);
+  shown.forEach(function(n,i){
+    var it=items[i];n.ty=ys[i]-it.y;n.dy=n.dy==null?n.ty:n.dy+(n.ty-n.dy)*k;
+    n.btn.style.transform='translate('+(it.x+3).toFixed(1)+'px,'+(it.y+n.dy-(44-rowH)/2).toFixed(1)+'px)';
   });
 }
 
 /* ---------- Loop: paused while hidden, while the list covers the map, and while the context is lost ---------- */
-var raf=0,last=0,running=false,contextLost=false;
+var raf=0,last=0,running=false;
 function frame(now){
   raf=0;if(!running)return;
   var dt=last?Math.min(0.05,Math.max(0,(now-last)/1000)):0;last=now;clock+=dt;
@@ -509,8 +581,9 @@ function frame(now){
 function start(){if(running||contextLost||listOverlay||document.hidden)return;running=true;last=0;raf=requestAnimationFrame(frame)}
 function stop(){running=false;if(raf){cancelAnimationFrame(raf);raf=0}}
 document.addEventListener('visibilitychange',function(){if(document.hidden)stop();else start()});
-canvas.addEventListener('webglcontextlost',function(e){e.preventDefault();contextLost=true;stop();if(phase==='tunnel')startMap(false);openList(true)},false);
-canvas.addEventListener('webglcontextrestored',function(){contextLost=false;resize();if(listAuto)closeList();else start()},false);
+canvas.addEventListener('webglcontextlost',function(e){e.preventDefault();contextLost=true;stop();if(phase==='tunnel')startMap(false);
+  if(listOverlay){var hadBack=document.activeElement===listBack;showPaused();if(hadBack)listTitle.focus({preventScroll:true})}else openList(true)},false);
+canvas.addEventListener('webglcontextrestored',function(){contextLost=false;resize();if(listAuto)closeList();else{if(listOverlay)showPaused();start()}},false);
 
 if(choice.intro)startTunnel();else startMap(false);
 start();

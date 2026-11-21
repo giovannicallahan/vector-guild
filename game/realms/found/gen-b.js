@@ -45,7 +45,7 @@ q15: {
  build: ({ k, s, m }) => { const ks = k * s, km = k + m; return {
   prompt: `Each supply kit holds one fuel can of c litres and a spare bottle of ${n(s)} L, so one kit holds c + ${n(s)} litres. The store has ${n(k)} kits and ${n(m)} loose cans: ${n(k)}(c + ${n(s)}) + ${n(m)}c litres in all. Simplify this to the form (number)c + (number). Enter the number in front of c, then the number on its own.`,
   answer: [km, ks],
-  hints: [`Distribute: ${n(k)}(c + ${n(s)}) means ${n(k)} lots of c and ${n(k)} lots of ${n(s)}, so it is ${n(k)}c + ${n(ks)}.`, `Combine the like terms ${n(k)}c and ${n(m)}c: both count cans of c litres.`],
+  hints: [`Distribute: ${n(k)}(c + ${n(s)}) means ${n(k)} lots of c and ${n(k)} lots of ${n(s)}. Work out ${n(k)} × ${n(s)} for the number on its own.`, `Combine the like terms ${n(k)}c and ${n(m)}c: both count cans of c litres.`],
   solution: `${n(k)}(c + ${n(s)}) + ${n(m)}c = ${n(k)}c + ${n(ks)} + ${n(m)}c = ${n(km)}c + ${n(ks)} litres.`,
   guidance: [
    { prompt: `Distribute: ${n(k)}(c + ${n(s)}) = ${n(k)}c + ?. What is the number on its own?`, answer: [ks], explanation: `The ${n(k)} multiplies both parts inside the brackets: ${n(k)} × ${n(s)} = ${n(ks)}.` },
@@ -91,7 +91,7 @@ q18: {
  build: ({ w, base, nmax, extra }) => { const room = w * nmax + extra, cap = base + room;
   const left = extra ? ` remainder ${n(extra)}` : '';
   return {
-  prompt: `The fuel sled may carry at most ${n(cap)} kg. The empty sled with its driver weighs ${n(base)} kg, and each full fuel can weighs ${n(w)} kg. With n cans on board the load must satisfy ${n(w)}n + ${n(base)} ≤ ${n(cap)}. Enter how many kilograms are left for cans once the sled and driver are on, then the largest whole number of cans the sled may carry.`,
+  prompt: `The fuel sled may carry at most ${n(cap)} kg. The empty sled weighs ${n(base)} kg, and each full fuel can weighs ${n(w)} kg. With n cans on board the load must satisfy ${n(w)}n + ${n(base)} ≤ ${n(cap)}. Enter how many kilograms are left for cans once the empty sled is counted, then the largest whole number of cans the sled may carry.`,
   answer: [room, nmax],
   hints: [`Subtract ${n(base)} from both sides: ${n(w)}n ≤ ${n(cap)} − ${n(base)}.`, `Divide both sides by ${n(w)}. Cans come whole, so take the largest whole number that is not more than the result.`],
   solution: `${n(w)}n + ${n(base)} ≤ ${n(cap)}, so ${n(w)}n ≤ ${n(room)}. ${n(room)} ÷ ${n(w)} = ${n(nmax)}${left}, so n can be at most ${n(nmax)}. Check: ${n(nmax)} cans weigh ${n(w * nmax)} kg, which fits, but ${n(nmax + 1)} cans would weigh ${n(w * (nmax + 1))} kg, more than ${n(room)} kg. The sled may carry at most ${n(nmax)} cans.`,
@@ -108,7 +108,7 @@ q19: {
  build: ({ a, b, p, q }) => ({
   prompt: `The map room grid has the depot at the origin (0, 0). x counts kilometres east (negative means west) and y counts kilometres north (negative means south). Cache 1 lies ${n(a)} km west and ${n(b)} km north of the depot: enter its x, then its y. Cache 2 is logged as ${vec([p, -q])}: enter how many km east it is, then how many km south, both as positive distances.`,
   answer: [-a, b, p, q],
-  hints: [`West is the negative x direction, so ${n(a)} km west is x = ${n(-a)}. North is the positive y direction.`, `In ${vec([p, -q])} the first number is east–west and the second is north–south; a negative y means south.`],
+  hints: [`West is the negative x direction, so a point ${n(a)} km west of the depot has a negative x. North is the positive y direction.`, `In ${vec([p, -q])} the first number is east–west and the second is north–south; a negative y means south.`],
   solution: `Cache 1 is at ${vec([-a, b])}: x = ${n(-a)} because it is west, and y = ${n(b)} because it is north. Cache 2 at ${vec([p, -q])} is ${n(p)} km east and ${n(q)} km south of the depot.`,
   guidance: [
    { prompt: `Cache 1 is ${n(a)} km west and ${n(b)} km north of the depot. What are its x and y?`, answer: [-a, b], explanation: `West makes x negative and north makes y positive, so cache 1 is at ${vec([-a, b])}.` },
@@ -140,7 +140,7 @@ q21: {
  draw: R => { const x1 = R.int(0, 4), run = R.int(2, 6), m = R.nz(-9, 9);
   return { x1, run, m, y1: m < 0 ? R.int(-m * run + 10, 120) : R.int(10, 120 - m * run) }; },
  build: ({ x1, run, m, y1 }) => { const x2 = x1 + run, rise = m * run, y2 = y1 + rise; return {
-  prompt: `The log for fuel tank C: at hour ${n(x1)} the gauge read ${n(y1)} L, and at hour ${n(x2)} it read ${n(y2)} L. On a graph with hours across and litres up these are the points ${vec([x1, y1])} and ${vec([x2, y2])}. Enter the rise (the change in litres, negative if the level fell), the run (the change in hours), and then the slope in litres per hour.`,
+  prompt: `The log for fuel tank C: at hour ${n(x1)} the gauge read ${n(y1)} L, and at hour ${n(x2)} it read ${n(y2)} L. The level changed at a steady rate between the readings. On a graph with hours across and litres up these are the points ${vec([x1, y1])} and ${vec([x2, y2])}. Enter the rise (the change in litres, negative if the level fell), the run (the change in hours), and then the slope in litres per hour.`,
   answer: [rise, run, m],
   hints: [`Rise = later litres − earlier litres = ${n(y2)} − ${n(y1)}. Run = later hour − earlier hour = ${n(x2)} − ${n(x1)}.`, 'Slope = rise ÷ run: divide your rise by your run, keeping the sign of the rise.'],
   solution: `Rise = ${n(y2)} − ${n(y1)} = ${n(rise)} L. Run = ${n(x2)} − ${n(x1)} = ${n(run)} hours. Slope = ${n(rise)} ÷ ${n(run)} = ${n(m)} L per hour: the tank ${m < 0 ? 'lost' : 'gained'} ${n(Math.abs(m))} L every hour.`,
@@ -167,10 +167,10 @@ q22: {
   ] }; }
 },
 
-/* Line through two points: whole slope m, whole intercept b; neither point has x = 0, which would state b outright. */
+/* Line through two points: whole slope m, whole non-zero intercept b (b = 0 would print "y = mx + 0"); neither point has x = 0, which would state b outright. */
 q23: {
  canonical: { m: 3, b: -1, x1: 2, run: 4 },
- draw: R => { const x1 = R.except(-3, 3, [0]); return { m: R.pick([-5, -4, -3, -2, 2, 3, 4, 5]), b: R.int(-8, 8), x1, run: R.except(1, 4, [-x1]) }; },
+ draw: R => { const x1 = R.except(-3, 3, [0]); return { m: R.pick([-5, -4, -3, -2, 2, 3, 4, 5]), b: R.nz(-8, 8), x1, run: R.except(1, 4, [-x1]) }; },
  build: ({ m, b, x1, run }) => { const x2 = x1 + run, y1 = m * x1 + b, y2 = m * x2 + b, rise = m * run; return {
   prompt: `A straight supply track on the map passes the pump at ${vec([x1, y1])} and the store at ${vec([x2, y2])}. Find its equation in the form y = mx + b. Enter m, then b.`,
   answer: [m, b],

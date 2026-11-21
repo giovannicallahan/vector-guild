@@ -146,6 +146,10 @@ function boot(storage = new Map()) {
   const storeWindow = { VG_SEED: curriculumWindow.VG_SEED, localStorage };
   vm.runInNewContext(storeSource, { window: storeWindow, Math, JSON });
   curriculumWindow.VGSave = storeWindow.VGSave; // app.js keeps the store it finds when it starts
+  /* Window listeners and reloads of this page load, so a test can fire pageshow or storage and count reloads. */
+  const listeners = {}, pageInfo = { reloads: 0 };
+  curriculumWindow.addEventListener = (type, fn) => { listeners[type] = fn; };
+  curriculumWindow.location = { href: '', reload() { pageInfo.reloads++; } };
   let activeId = null, mainInputs = [], guidedInputs = [];
   const elements = new Map();
   function element(selector) {
@@ -207,8 +211,13 @@ function boot(storage = new Map()) {
   };
   const instrumented = appSource.replace(/\}\)\(\);\s*$/, 'globalThis.__qa={normalize,mission,available:(id)=>available(quests.find(q=>q.id===id)),getState:()=>JSON.parse(JSON.stringify(state)),getMain:()=>__getMain(),getGuided:()=>__getGuided(),activeId:()=>activeId,variant:()=>activeVariant,rank,review,parseNumber,toolResult,level,current:()=>currentMission,reviewDue,pickReview,setState:(patch)=>Object.assign(state,patch)};})();');
   vm.runInNewContext(instrumented, context);
-  return { qa: context.__qa, el: element, dc, stage, guided, storage, curriculum: curriculumWindow.QUESTS };
+  return { qa: context.__qa, el: element, dc, stage, guided, storage, curriculum: curriculumWindow.QUESTS, fire: (type, event) => listeners[type] && listeners[type](event), page: pageInfo, store: storeWindow.VGSave };
 }
+/* A second page's view of the same storage (the star map, another tab): its own VGSave over the same Map. */
+boot.storeOver = storage => {
+  const w = { VG_SEED: 0, localStorage: { getItem: k => storage.has(k) ? storage.get(k) : null, setItem: (k, v) => storage.set(k, String(v)), removeItem: k => storage.delete(k) } };
+  vm.runInNewContext(storeSource, { window: w, Math, JSON }); return w.VGSave;
+};
 let forged = null, h = null, qa = null, el = null; // the linear algebra flows below share these
 if (isLA) {
   h = boot();
@@ -436,6 +445,24 @@ for (const q of quests) {
   }
   assert.ok(targets.size >= 2, `${q.id}: the predicted value changes with the numbers`);
   for (let i = 0; i < 20; i++) { const v = variants.make(q.id); assert.ok(Number.isFinite(v.target) && v.tolerance > 0 && variants.check(v, v.target), `${q.id}: generated variant is answerable`); }
+  /* How close a drill answer must be. Linear algebra: exactly the 1.4.1 rule (2% of the target, at least 0.02).
+     Other packs: a neighbouring whole number, or a neighbouring value in the target's last decimal place, is a
+     wrong answer (3570 for 3507, 5.15 for 5.05), so it must be rejected. The rule is checked here against the
+     model's raw target, independently of the drill generator. */
+  for (let t = -10; t <= 10; t++) {
+    const model = curriculumWindow.EXPERIMENTS[q.id](t), target = Number(model.target), tol = variants.tolerance(target, model), rule = variants.accept(target, model);
+    const drill = { target, tolerance: tol };
+    assert.ok(tol > 0 && variants.check(drill, target), `${q.id}@${t}: the target itself is accepted`);
+    if (isLA) { assert.equal(tol, Math.max(.02, Math.abs(target) * .02), `${q.id}@${t}: linear algebra keeps the 1.4.1 drill tolerance`); assert.equal(rule.exact, false); assert.equal(rule.note, 'Answers within 2% are accepted.'); continue; }
+    if (model.tolerance !== undefined) { assert.ok(Number.isFinite(model.tolerance) && model.tolerance > 0, `${q.id}@${t}: a model's own tolerance is a positive number`); assert.equal(tol, model.tolerance); continue; }
+    const places = [0, 1, 2, 3].find(d => Math.abs(target * 10 ** d - Math.round(target * 10 ** d)) < 1e-7);
+    if (places === undefined) { assert.equal(rule.exact, false, `${q.id}@${t}: an untidy target (${target}) keeps the 2% rule`); continue; }
+    const step = 10 ** -places;
+    assert.equal(rule.exact, true); assert.doesNotMatch(rule.note, /2%/, `${q.id}@${t}: the drill does not promise a 2% margin`);
+    for (const wrong of [target + step, target - step, target + 10 * step, target - 10 * step, target + .001, target - .001]) assert.equal(variants.check(drill, wrong), false, `${q.id}@${t}: ${wrong} is not accepted for ${target}`);
+    assert.ok(variants.check(drill, Number(target.toFixed(places))), `${q.id}@${t}: ${target.toFixed(places)} typed as shown is accepted`);
+  }
+  for (let i = 0; i < 20; i++) { const v = variants.make(q.id), rule = variants.accept(v.target, curriculumWindow.EXPERIMENTS[q.id](v.t)); assert.equal(v.tolerance, rule.tolerance, `${q.id}: a drill uses the shared tolerance rule`); assert.equal(v.note, rule.note); assert.equal(v.exact, rule.exact); }
 }
 if (isLA) {
 
@@ -511,6 +538,56 @@ if (!isLA) {
     drill.el('#review-answer').value = String(drill.qa.variant().target); drill.el('#review-check').onclick();
     assert.match(drill.el('#review-feedback').textContent, /^Correct/, 'a review drill accepts its own target'); assert.equal(drill.qa.getState().xp, xpBefore, 'drills pay no XP');
   }
+}
+
+{
+  /* A page that is still open (another tab, or restored from the back/forward cache) must not write its old
+     copy over a save that was replaced meanwhile: it reloads instead. Its own saves and other realms' saves
+     do not reload it. */
+  const KEY = 'vector-guild-save-v2', id = REALM.saveId || REALM.id, other = id === 'la' ? 'found' : 'la';
+  const firstId = quests[0].id, secondId = quests[1].id;
+  const tab = boot(new Map([[KEY, JSON.stringify({ v: 2, seed: 0, intro: true, realms: { [id]: { solved: [firstId], tools: [] } } })]]));
+  assert.equal(typeof tab.fire, 'function');
+  tab.fire('pageshow', { persisted: false }); tab.fire('pageshow', { persisted: true }); tab.fire('storage', { key: KEY }); tab.fire('storage', { key: 'unrelated' });
+  assert.equal(tab.page.reloads, 0, 'nothing changed in storage: no reload');
+  const elsewhere = () => boot.storeOver(tab.storage);
+  elsewhere().putRealm(other, { solved: ['q01'], tools: [] });
+  tab.fire('storage', { key: KEY }); assert.equal(tab.page.reloads, 0, 'another realm\'s save does not reload this page');
+  assert.equal(elsewhere().importAny({ v: 2, seed: 0, realms: { [id]: { solved: [firstId, secondId], tools: [] } } }).ok, true);
+  tab.fire('storage', { key: 'unrelated' }); assert.equal(tab.page.reloads, 0);
+  tab.fire('storage', { key: KEY }); assert.equal(tab.page.reloads, 1, 'a restored backup reloads the open realm page (storage event)');
+  tab.fire('pageshow', { persisted: true }); assert.equal(tab.page.reloads, 2, 'and a page restored from the back/forward cache');
+  tab.fire('storage', { key: null }); assert.equal(tab.page.reloads, 3, 'storage.clear() reports a null key');
+  assert.deepEqual(Array.from(JSON.parse(tab.storage.get(KEY)).realms[id].solved), [firstId, secondId], 'the restored slice is still in storage');
+  /* A changed seed alone also counts: the page's numbers would no longer match the save. */
+  const seeded = boot(new Map([[KEY, JSON.stringify({ v: 2, seed: 0, intro: true, realms: { [id]: { solved: [], tools: [] } } })]]));
+  const raw = JSON.parse(seeded.storage.get(KEY)); raw.seed = 12345; seeded.storage.set(KEY, JSON.stringify(raw));
+  seeded.fire('pageshow', { persisted: true }); assert.equal(seeded.page.reloads, 1);
+  /* A realm's own seed (a 1.x backup imported into an existing save) wins over the global seed, for that realm only. */
+  const own = boot(new Map([[KEY, JSON.stringify({ v: 2, seed: 5, seeds: { la: 777 }, intro: true, realms: { [id]: { solved: [], tools: [] } } })]]));
+  assert.equal(own.qa.getState().seed, id === 'la' ? 777 : 5, 'the realm page uses its own seed when the save has one');
+  const gen = quests.find(q => curriculumWindow.Gen?.has(q.id) && (q.prereqs || []).length === 0);
+  if (gen) { own.qa.mission(gen.id); assert.equal(own.qa.current().prompt, curriculumWindow.Gen.instance(gen, id === 'la' ? 777 : 5, 0).prompt, 'and its missions are built from that seed'); }
+  assert.equal(JSON.parse(own.storage.get(KEY)).seeds.la, 777, 'saving progress keeps the seed override');
+}
+
+if (!isLA) {
+  /* A review drill and the reward check after "Reveal solution" reject a neighbouring whole number. */
+  const all = { v: 2, seed: 0, intro: false, realms: { [REALM.saveId]: { solved: quests.map(q => q.id), tools: [] } } };
+  let wholeDrills = 0;
+  for (const q of quests) {
+    if (!curriculumWindow.Variants.has(q.id)) continue;
+    const drill = boot(new Map([['vector-guild-save-v2', JSON.stringify(all)]]));
+    drill.qa.review(q.id); const v = drill.qa.variant();
+    if (!Number.isInteger(v.target)) continue;
+    wholeDrills++;
+    assert.doesNotMatch(drill.dc._html, /within 2%/, `${q.id}: a whole-number drill does not promise a 2% margin`); assert.match(drill.dc._html, /exact whole number/);
+    drill.el('#review-answer').value = String(v.target + 1); drill.el('#review-check').onclick();
+    assert.match(drill.el('#review-feedback').textContent, /^Not quite/, `${q.id}: ${v.target + 1} is not accepted for ${v.target}`);
+    const slice = JSON.parse(drill.storage.get('vector-guild-save-v2')).realms[REALM.saveId];
+    assert.ok(slice.errors?.[q.id], `${q.id}: the miss is logged in the notebook`);
+  }
+  assert.ok(wholeDrills > 0, 'the pack has whole-number drills to check');
 }
 
 if (isLA) {

@@ -112,9 +112,57 @@ test('importAny: a 1.x backup becomes realms.la with its seed; other realms are 
   store.putRealm('found', { solved: ['q02'], tools: [] });
   const r = store.importAny({ solved: ['q01'], tools: [], xp: 100, reviews: { q01: 3 }, seed: 9 });
   assert.equal(r.ok, true); assert.equal(r.kind, 1);
-  assert.equal(store.seed(), 9);
+  assert.equal(store.seed('la'), 9, 'linear algebra keeps the numbers the backup had');
+  assert.equal(store.seed(), 1, 'the global seed is not changed'); assert.equal(store.seed('found'), 1, 'so Foundations keeps its numbers');
   assert.deepEqual(plain(store.realm('la')), { solved: ['q01'], tools: [], xp: 100, reviews: { q01: { n: 3, last: 0 } } });
   assert.deepEqual(plain(store.realm('found')), { solved: ['q02'], tools: [] });
+});
+
+test('importAny: a 1.x backup without a seed gives linear algebra the authored numbers and leaves other realms alone', () => {
+  const { store, storage } = page(new Map(), { VG_SEED: 1840221182 });
+  store.putRealm('found', { solved: ['q02'], tools: [], rolls: { q03: 1 } });
+  assert.equal(store.importAny({ solved: ['q01'], tools: [], xp: 5 }).ok, true);
+  assert.equal(store.seed('la'), 0); assert.equal(store.seed('found'), 1840221182); assert.equal(store.seed(), 1840221182);
+  /* The override is part of the save: another page, an export and a v2 import all keep it. */
+  assert.equal(page(storage).store.seed('la'), 0);
+  const backup = store.exportAll(); assert.deepEqual(plain(backup.seeds), { la: 0 });
+  const other = page(new Map(), { VG_SEED: 3 }).store; assert.equal(other.importAny(backup).ok, true);
+  assert.equal(other.seed('la'), 0); assert.equal(other.seed('found'), 1840221182);
+  /* A backup whose seed equals the global seed needs no override; resetting the realm drops one. */
+  store.importAny({ solved: [], tools: [], seed: 1840221182 }); assert.equal(store.exportAll().seeds, undefined);
+  store.importAny({ solved: [], tools: [], seed: 7 }); assert.equal(store.seed('la'), 7);
+  store.reset('la'); assert.equal(store.seed('la'), 1840221182); assert.equal(store.exportAll().seeds, undefined);
+  /* Invalid overrides in a stored or imported save are ignored. */
+  const odd = page(new Map([[V2, JSON.stringify({ v: 2, seed: 4, seeds: { la: -1, found: 'x', other: 2.5, ok: 6 }, realms: {} })]])).store;
+  assert.equal(odd.seed('la'), 4); assert.equal(odd.seed('found'), 4); assert.equal(odd.seed('ok'), 6); assert.deepEqual(plain(odd.exportAll().seeds), { ok: 6 });
+});
+
+test('importAny: a v2 backup with an unusable realm slice is refused and changes nothing', () => {
+  const { store, storage } = page(new Map(), { VG_SEED: 1 });
+  store.putRealm('found', { solved: ['q01', 'q02'], tools: [] }); store.putRealm('la', { solved: ['q01'], tools: [] });
+  const before = storage.get(V2);
+  const ok = { solved: ['q01'], tools: [] };
+  for (const realms of [{ found: {} }, { found: { solved: 'x', tools: [] } }, { found: { solved: [] } }, { found: { solved: [1, 2], tools: [] } }, { found: { solved: [], tools: [{}] } }, { la: ok, found: { tools: [] } }]) {
+    const r = store.importAny({ v: 2, seed: 1, realms });
+    assert.equal(r.ok, false, `refuses realms ${JSON.stringify(realms)}`); assert.match(r.error, /not a complete MathCosmos save/);
+    assert.equal(storage.get(V2), before, 'the stored save is untouched');
+  }
+  assert.deepEqual(plain(store.realm('found').solved), ['q01', 'q02']);
+  /* The stored save itself is still read leniently: a slice of a pack this build does not know is kept as it is. */
+  const odd = new Map([[V2, JSON.stringify({ v: 2, seed: 2, realms: { future: { anything: 1 } } })]]);
+  assert.deepEqual(plain(page(odd).store.realm('future')), { anything: 1 });
+});
+
+test('importAny: when the device cannot store the save, it says so and keeps the old progress', () => {
+  const storage = new Map([[V2, JSON.stringify({ v: 2, seed: 5, intro: false, realms: { la: { solved: ['q01'], tools: [], xp: 10 } } })]]);
+  const window = { localStorage: { getItem: k => storage.has(k) ? storage.get(k) : null, setItem() { throw Error('QuotaExceeded'); }, removeItem() {} } };
+  vm.runInNewContext(source, { window, Math, JSON });
+  const store = window.VGSave, before = JSON.stringify(store.exportAll());
+  const r2 = store.importAny({ v: 2, seed: 9, realms: { la: { solved: ['q01', 'q02'], tools: [], xp: 99 } } });
+  assert.equal(r2.ok, false); assert.match(r2.error, /could not store/);
+  const r1 = store.importAny({ solved: ['q01', 'q02', 'q03'], tools: [], xp: 999, seed: 3 });
+  assert.equal(r1.ok, false); assert.match(r1.error, /could not store/);
+  assert.equal(JSON.stringify(store.exportAll()), before); assert.equal(store.totalXp(), 10); assert.equal(store.seed('la'), 5);
 });
 
 test('importAny: garbage is refused and changes nothing', () => {
@@ -156,7 +204,9 @@ test('localStorage that throws: everything works in memory and nothing throws', 
   assert.equal(store.putRealm('la', { solved: ['q01'], tools: [], xp: 100 }), false, 'reports that nothing was stored');
   assert.deepEqual(plain(store.realm('la')), { solved: ['q01'], tools: [], xp: 100 }, 'kept in memory for this page');
   assert.equal(store.totalXp(), 100); assert.equal(store.introSeen(), false); store.setIntroSeen(); assert.equal(store.introSeen(), true);
-  assert.equal(store.importAny({ solved: [], tools: [] }).ok, true); store.reset('la'); store.resetAll();
+  const before = JSON.stringify(store.exportAll());
+  assert.equal(store.importAny({ solved: [], tools: [] }).ok, false, 'an import that cannot be stored is not applied');
+  assert.equal(JSON.stringify(store.exportAll()), before); store.reset('la'); store.resetAll();
   /* A window whose localStorage getter itself throws (blocked site data). */
   const blocked = { VG_SEED: 3 }; Object.defineProperty(blocked, 'localStorage', { get() { throw Error('blocked'); } });
   vm.runInNewContext(source, { window: blocked, Math, JSON });

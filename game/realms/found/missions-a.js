@@ -393,7 +393,7 @@ window.QUESTS.push(
   brief: 'The cooking stoves run on fuel from part-empty canisters, and the kitchen is combining them into one jerrycan.',
   lesson: 'Digits after the decimal point count tenths and hundredths; line up the points before adding or subtracting.',
   prompt: 'Three fuel canisters hold 2.75 L, 1.6 L and 0.85 L. They are emptied into one jerrycan that holds 8 L. Enter the total litres poured in, then how many more litres would fit in the jerrycan.',
-  answer: [5.2, 2.8], labels: ['litres poured', 'litres more that fit'], tolerance: 0.01,
+  answer: [5.2, 2.8], labels: ['litres poured', 'litres more that fit'], tolerance: 0.004, /* answers are exact hundredths: 0.01 would accept a neighbouring hundredth */
   hints: [
    'Give every amount two digits after the point (1.6 is 1.60), line up the points, and add as with whole numbers.',
    'Then subtract the total from 8, which is 8.00.'

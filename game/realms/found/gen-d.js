@@ -41,11 +41,12 @@ Object.assign(window.MISSION_GEN, {
     { prompt: `Feed those steps into the second machine: what is g(${n(P)})?`, answer: [D], explanation: `g multiplies by ${n(k)}: ${n(k)} × ${n(P)} = ${n(D)} degrees.` }
    ] }; }
  },
- /* q38 inverse of P(s) = m s + c: P⁻¹(w) = (w − c) ÷ m, evaluated at y = P(s). */
+ /* q38 inverse of P(s) = m s + c: P⁻¹(w) = (w − c) ÷ m, evaluated at y = P(s). The logged wattage y is a parameter,
+    so the oracle solves from the number the prompt states and not from the hidden setting. */
  q38: {
-  canonical: { m: 5, c: 20, s: 9 },
-  draw: R => { const m = R.int(2, 9); return { m, c: R.except(5, 40, [m]), s: R.int(2, 12) }; },
-  build: ({ m, c, s }) => { const y = m * s + c; return {
+  canonical: { m: 5, c: 20, s: 9, y: 65 },
+  draw: R => { const m = R.int(2, 9), c = R.except(5, 40, [m]), s = R.int(2, 12); return { m, c, s, y: m * s + c }; },
+  build: ({ m, c, s, y }) => { return {
    prompt: `Transmitter log. At setting s the transmitter draws P(s) = ${n(m)}s + ${n(c)} watts. Last night’s log shows ${n(y)} W but not the setting. Write the inverse rule in the form P⁻¹(w) = (w − a) ÷ b, and enter a, then b, then the setting P⁻¹(${n(y)}).`,
    answer: [c, m, s],
    hints: ['List what P does to s, in order, then undo the last step first.',`P⁻¹(${n(y)}) = (${n(y)} − ${n(c)}) ÷ ${n(m)} = ${n(y - c)} ÷ ${n(m)}.`],
@@ -56,11 +57,13 @@ Object.assign(window.MISSION_GEN, {
     { prompt: `What is (${n(y)} − ${n(c)}) ÷ ${n(m)}?`, answer: [s], explanation: `${n(y)} − ${n(c)} = ${n(y - c)}, and ${n(y - c)} ÷ ${n(m)} = ${n(s)}. Check: ${n(m)} × ${n(s)} + ${n(c)} = ${n(y)}.` }
    ] }; }
  },
- /* q39 exponential growth S × b^n through n stages, and the logarithm log_b(T ÷ S) = k. */
+ /* q39 exponential growth S × b^n through n stages, and the logarithm log_b(T ÷ S) = k. The target strength T is a
+    parameter, so the oracle counts stages up to the number the prompt states. With base 2 the stage counts start at 3:
+    2² = 2 × 2 and 4 ÷ 2 = 2, so the taught mistake (base × exponent, or factor ÷ base) would give the accepted answer. */
  q39: {
-  canonical: { b: 3, S: 4, n: 3, k: 4 },
-  draw: R => { const b = R.pick([2, 3, 5]), top = { 2: 6, 3: 4, 5: 3 }[b], e = R.int(2, top); return { b, S: R.int(2, 6), n: e, k: R.except(2, top, [e]) }; },
-  build: ({ b, S, n: e, k }) => { const be = b ** e, out = S * be, F = b ** k, T = S * F; return {
+  canonical: { b: 3, S: 4, n: 3, k: 4, T: 324 },
+  draw: R => { const b = R.pick([2, 3, 5]), top = { 2: 6, 3: 4, 5: 3 }[b], lo = b === 2 ? 3 : 2, e = R.int(lo, top), S = R.int(2, 6), k = R.except(lo, top, [e]); return { b, S, n: e, k, T: S * b ** k }; },
+  build: ({ b, S, n: e, k, T }) => { const be = b ** e, out = S * be, F = T / S; return {
    prompt: `Relay amplifiers. Each relay stage multiplies a signal’s strength by ${n(b)}. A signal of ${n(S)} units passes through ${n(e)} stages: enter its strength afterwards. A second signal of ${n(S)} units must reach ${n(T)} units: enter how many stages it needs.`,
    answer: [out, k],
    hints: [`Each stage multiplies by ${n(b)}, so after ${n(e)} stages the strength is ${n(S)} × ${n(b)}${sup(e)}, where ${n(b)}${sup(e)} means ${n(e)} copies of ${n(b)} multiplied together: ${times(b, e)}.`, `The second signal must grow by a factor of ${n(T)} ÷ ${n(S)} = ${n(F)}. Count how many ${n(b)}s you must multiply together to make ${n(F)}: that count is log${sub(b)} ${n(F)}.`],

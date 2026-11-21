@@ -1,4 +1,5 @@
-/* Shell logic: soft locks, progress text, card model, 3D/flat choice and Android Back.
+/* Shell logic: soft locks, progress text, card model, 3D/flat choice, Android Back, star-map label placement
+   and a few source checks (shader smoothstep order, list overlay guards).
    Loads game/shell/shell.js without a window (the page part returns early) and game/realms/registry.js in a vm.
    Run: node qa/shell.test.js (VERBOSE=1 lists each group). */
 const fs = require('node:fs');
@@ -9,8 +10,10 @@ const game = path.resolve(__dirname, '../game');
 
 /* require() runs shell.js as a CommonJS module with no window, so only the pure helpers load. */
 const L = require(game + '/shell/shell.js');
-for (const name of ['solvedCount', 'progressText', 'enterHref', 'softLock', 'hasProgress', 'cardModel', 'chooseMode', 'backAction']) assert.equal(typeof L[name], 'function', name + ' is exported');
+for (const name of ['solvedCount', 'progressText', 'enterHref', 'softLock', 'hasProgress', 'cardModel', 'chooseMode', 'backAction', 'overlayState', 'backupMessage', 'placeLabels']) assert.equal(typeof L[name], 'function', name + ' is exported');
 
+const shellSrc = fs.readFileSync(game + '/shell/shell.js', 'utf8');
+const shellCss = fs.readFileSync(game + '/shell/shell.css', 'utf8');
 const win = {};
 vm.runInNewContext(fs.readFileSync(game + '/realms/registry.js', 'utf8'), { window: win });
 const REALMS = JSON.parse(JSON.stringify(win.VG_REALMS || null)); /* copy into this realm so deepEqual sees plain arrays */
@@ -123,6 +126,88 @@ check(() => {
   assert.equal(L.backAction({ cardOpen: true, dialogOpen: true }), 'dialog');
   assert.equal(L.backAction({ listOpen: true }), 'list');
 }, 'Android Back');
+
+check(() => {
+  /* Back and Escape share overlayState: a card cannot be open under the list, and a list shown because the
+     WebGL context is lost has no map behind it, so Back leaves the app instead of showing a dead map. */
+  const act = s => L.backAction(L.overlayState(s));
+  assert.equal(act({}), null);
+  assert.equal(act({ cardOpen: true }), 'card');
+  assert.equal(act({ listOverlay: true }), 'list');
+  assert.equal(act({ listOverlay: true, cardOpen: true }), 'list', 'a card under the list is never the thing Back closes');
+  assert.equal(act({ listOverlay: true, contextLost: true }), null, 'context lost: the list cannot be closed');
+  assert.equal(act({ listOverlay: true, contextLost: true, dialogOpen: true }), 'dialog');
+  assert.equal(act({ contextLost: true, cardOpen: true }), 'card');
+}, 'Back with the list open and with the context lost');
+
+check(() => {
+  assert.equal(L.backupMessage(false), 'Backup file made: mathcosmos-save.json.');
+  const viaPicker = L.backupMessage(true);
+  assert.doesNotMatch(viaPicker, /made|saved|\.json/i, 'Android: no success claim and no file name before the picker is confirmed');
+  assert.match(viaPicker, /Choose where/);
+  assert.match(shellSrc, /backupMessage\(!!root\.AndroidSave\)/, 'the export handler asks whether the Android bridge is present');
+}, 'backup message');
+
+check(() => {
+  const hit = (a, b) => a.x < b.x + b.w - 1e-6 && b.x < a.x + a.w - 1e-6 && a.y < b.y + b.h - 1e-6 && b.y < a.y + a.h - 1e-6;
+  const rects = (items, ys) => items.map((it, i) => ({ x: it.x, y: ys[i], w: it.w, h: it.h }));
+  const clear = (items, ys, top, bottom, label) => {
+    const r = rects(items, ys);
+    for (let i = 0; i < r.length; i++) {
+      assert.ok(r[i].y >= top - 1e-6 && r[i].y + r[i].h <= bottom + 1e-6, label + ': label ' + i + ' stays on the stage');
+      for (let j = i + 1; j < r.length; j++) assert.ok(!hit(r[i], r[j]), label + ': labels ' + i + ' and ' + j + ' overlap');
+    }
+  };
+  /* Nothing in the way: nothing moves. */
+  const apart = [{ x: 0, y: 100, w: 80, h: 36, depth: 1 }, { x: 200, y: 100, w: 80, h: 36, depth: 0 }];
+  assert.deepEqual(L.placeLabels(apart, 0, 800), [100, 100]);
+  /* Two on the same spot: the nearer one keeps its place, the other moves by one row. */
+  const same = [{ x: 10, y: 300, w: 120, h: 36, depth: -5 }, { x: 40, y: 300, w: 120, h: 36, depth: 5 }];
+  const ys = L.placeLabels(same, 0, 800);
+  assert.equal(ys[1], 300, 'the nearer label is not moved');
+  assert.equal(Math.abs(ys[0] - 300), 36);
+  assert.equal(L.placeLabels(same.map((it, i) => i ? it : { ...it, y: 302, prev: -10 }), 0, 800)[0], 264, 'a label keeps the side it was on');
+  assert.equal(L.placeLabels(same, 290, 800)[0], 336, 'no room above: it goes below');
+  /* The measured failure: 11 nowrap pills (70-215px wide) in a 375px-wide portrait stage, all in one narrow band. */
+  let seed = 12345;
+  const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
+  const widths = [118, 84, 92, 215, 70, 132, 198, 196, 208, 96, 86];
+  for (let run = 0; run < 400; run++) {
+    const W = 375, top = 150, bottom = 800;
+    const items = widths.map(w => ({ x: Math.max(4, Math.min(W - w - 4, rnd() * W - w / 2)), y: 350 + rnd() * 180, w: w + 6, h: 36, depth: rnd() * 40 - 20, prev: rnd() * 80 - 40 }));
+    clear(items, L.placeLabels(items, top, bottom), top, bottom, 'portrait run ' + run);
+  }
+  /* Labels crowded against the top or the bottom edge still clear each other. */
+  for (let run = 0; run < 200; run++) {
+    const items = widths.map(w => ({ x: rnd() * 150, y: run % 2 ? rnd() * 60 : 760 + rnd() * 60, w: w + 6, h: 36, depth: rnd() }));
+    clear(items, L.placeLabels(items, 100, 800), 100, 800, 'edge run ' + run);
+  }
+  /* More labels than fit: still returns a place for each, inside the stage. */
+  const many = Array.from({ length: 30 }, (_, i) => ({ x: 0, y: 50, w: 100, h: 36, depth: i }));
+  const out = L.placeLabels(many, 0, 200);
+  assert.equal(out.length, 30);
+  assert.ok(out.every(y => y >= 0 && y <= 164));
+  /* Only the pill takes taps, and it keeps a 44px touch area. */
+  assert.match(shellCss, /\.vg-node\{[^}]*pointer-events:none/, '.vg-node box must not take taps');
+  assert.match(shellCss, /\.vg-pill\{[^}]*pointer-events:auto/);
+  assert.match(shellCss, /\.vg-pill::before\{[^}]*height:44px/);
+  assert.match(shellSrc, /placeLabels\(items,/, 'mapFrame runs the de-overlap pass');
+}, 'star-map labels never overlap');
+
+check(() => {
+  /* GLSL ES: smoothstep(edge0, edge1, x) is undefined unless edge0 < edge1. Edges here are numbers or uDepth*number. */
+  const calls = [...shellSrc.matchAll(/smoothstep\(([^,()]+),([^,()]+),/g)];
+  assert.ok(calls.length >= 3, 'found the shader smoothstep calls');
+  const val = e => { assert.match(e, /^(uDepth\*)?\d+(\.\d+)?$/, 'edge is a number or uDepth*number: ' + e); return e.startsWith('uDepth*') ? 300 * +e.slice(7) : +e; };
+  for (const c of calls) assert.ok(val(c[1]) < val(c[2]), 'smoothstep edges must ascend: ' + c[0]);
+}, 'shader smoothstep edges ascend');
+
+check(() => {
+  /* The list overlay takes the stage out of the Tab order, and a context-lost list cannot be closed. */
+  assert.match(shellSrc, /function openList\(auto\)\{[\s\S]*?setStageInert\(true\)/);
+  assert.match(shellSrc, /closeList=function\(\)\{\s*if\(!listOverlay\|\|contextLost\)return;[\s\S]*?setStageInert\(false\)/);
+  assert.match(shellSrc, /listBack\.hidden=contextLost/);
+}, 'list overlay guards');
 
 check(() => {
   /* Every registry node gets a card; every ready part links to realm.html with its own id. */

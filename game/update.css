@@ -1,13 +1,19 @@
 /* MathCosmos 1.3 additions. Loaded after styles.css and docking.css. */
 
 /* Touch targets: every control is at least 44 px in both directions. */
-.help-btn{width:44px;height:44px}
+.help-btn{width:44px;height:44px;flex:0 0 44px;min-width:44px}
+/* The round top-bar buttons keep their size; the status text on the left gives way instead. */
+.topbar{gap:10px}
+.top-stats{flex:0 0 auto}
+.top-stats>span{white-space:nowrap}
+.topbar>div:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .close{width:44px;height:44px}
 .icon-btn{min-width:44px;min-height:44px}
 .nav{min-height:44px}
 .secondary,.primary{min-height:44px}
 .text-link{min-height:44px;padding:0 4px}
-.tool-form input,.answer-grid input{min-height:44px}
+.tool-form input,.answer-grid input,.vector-edit input{min-height:44px}
+.operation-label select,section.concept-lab select,select[data-gl-model],select[data-gl-preset]{min-height:44px}
 .lesson-sources a{display:inline-block;padding:12px 0}
 .guide-list summary{min-height:44px}
 
@@ -59,8 +65,6 @@
   .board-grid{grid-template-columns:1fr}
 }
 @media(max-width:650px){
-  .outpost-scene .op-label{display:none}
-  .outpost-status{display:grid}
   .vg-board{padding:14px}
   .review-bar{padding:14px}
   .review-bar button{width:100%}
@@ -99,3 +103,19 @@
 .map-link span{color:var(--lime);font-size:15px}
 .map-link:hover,.map-link:focus-visible{border-color:var(--lime);color:var(--lime)}
 .chapter-empty{color:var(--muted);font-size:13px;padding:0 20px 18px}
+
+/* Text floor: nothing a player has to read is under 11 px. */
+.quest-top{font-size:11px;letter-spacing:.5px;gap:8px}
+.quest-top .status{white-space:nowrap}
+.sector-heading .sector-count,.guide-id,.tree-legend,.tree-node small,.art-label,.art-caption{font-size:11px}
+
+/* Outpost picture labels: 13 units in the 720-wide picture, so they stay at 11 px or more
+   wherever they show. Where the picture is narrower than about 610 px (phones, and the
+   first few widths after the sidebar moves to the side) the status list replaces them. */
+.outpost-scene .op-label text,.outpost-scene text.op-label{font-size:13px}
+.outpost-scene .op-label text:first-of-type{transform:translateY(-1px)}
+.outpost-scene .op-label text:last-of-type{transform:translateY(2px)}
+@media(max-width:760px),(min-width:951px) and (max-width:990px){
+  .outpost-scene .op-label{display:none}
+  .outpost-status{display:grid}
+}

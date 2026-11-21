@@ -31,9 +31,12 @@ a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 #vg-gl{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
 #vg-gl.dragging{cursor:grabbing}
 #vg-labels{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
-.vg-node{position:absolute;left:0;top:0;pointer-events:auto;min-height:44px;min-width:44px;padding:0 2px;margin:0;display:flex;align-items:center;justify-content:center;background:none;border:0;color:var(--ivory);will-change:transform,opacity}
+/* Only the pill takes taps: the button's 44px box is see-through and must not cover a pill behind it.
+   The pill's ::before keeps the touch area 44px high; shell.js spaces pills so that area never reaches another pill. */
+.vg-node{position:absolute;left:0;top:0;pointer-events:none;min-height:44px;min-width:44px;padding:0 2px;margin:0;display:flex;align-items:center;justify-content:center;background:none;border:0;color:var(--ivory);will-change:transform,opacity}
 .vg-node:focus-visible{outline:none}
-.vg-pill{display:inline-flex;align-items:center;gap:7px;font:700 11px/1.2 var(--mono);letter-spacing:1.2px;text-transform:uppercase;background:rgba(8,17,20,.72);border:1px solid var(--line);border-radius:999px;padding:7px 11px;white-space:nowrap;transition:border-color .2s,color .2s,background .2s}
+.vg-pill{position:relative;pointer-events:auto;display:inline-flex;align-items:center;gap:7px;font:700 11px/1.2 var(--mono);letter-spacing:1.2px;text-transform:uppercase;background:rgba(8,17,20,.72);border:1px solid var(--line);border-radius:999px;padding:7px 11px;white-space:nowrap;transition:border-color .2s,color .2s,background .2s}
+.vg-pill::before{content:'';position:absolute;left:-1px;right:-1px;top:50%;height:44px;transform:translateY(-50%)}
 .vg-node:hover .vg-pill{border-color:var(--cyan)}
 .vg-node:focus-visible .vg-pill{outline:2px solid var(--cyan);outline-offset:3px;border-color:var(--cyan)}
 .vg-node[aria-expanded="true"] .vg-pill{border-color:var(--lime);color:var(--lime);background:rgba(8,17,20,.94)}

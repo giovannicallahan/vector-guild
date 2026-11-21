@@ -165,7 +165,7 @@ window.QUESTS.push(
   brief: 'The mast’s guy wire is fixed, and the crew needs its angle and the height of the swinging boom before they hang the antenna.',
   lesson: 'In a right triangle, sin of an angle is opposite ÷ longest side and cos is adjacent ÷ longest side; on a circle of radius 1 they are the height and the across distance of the point at that angle.',
   prompt: 'Guy wire. A cable runs from the top of the signal mast, 24 m high, in a straight line to a ground anchor 18 m from the mast’s foot; the cable is 30 m long. Let θ be the angle between the cable and the ground at the anchor. Enter sin θ, then cos θ (each as a decimal or as a fraction). Then a boom 10 m long, fixed to a pivot, swings up from flat to the same angle θ: enter how high its tip rises above the pivot, in metres.',
-  answer: [0.8, 0.6, 8], labels: ['sin θ', 'cos θ', 'tip height (m)'], tolerance: 0.01,
+  answer: [0.8, 0.6, 8], labels: ['sin θ', 'cos θ', 'tip height (m)'], tolerance: 0.004, /* answers are exact hundredths (0.28, 3.84): 0.01 would accept a neighbouring hundredth */
   hints: ['Stand at the anchor. The mast is the side across from θ (opposite), the ground is the side touching θ (adjacent), and the cable is the longest side. sin θ = opposite ÷ longest; cos θ = adjacent ÷ longest.', 'On a circle of radius 1 the tip at angle θ is sin θ above the centre. A boom 10 m long is 10 times bigger, so its tip is 10 × sin θ high.'],
   solution: 'sin θ = 24 ÷ 30 = 0.8, and cos θ = 18 ÷ 30 = 0.6. The boom’s tip moves on a circle of radius 10 around the pivot, so its tip is 10 × sin θ = 10 × 0.8 = 8 m above the pivot.',
   xp: 200, prereqs: ['q39', 'q12', 'q20'],
