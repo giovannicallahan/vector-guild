@@ -1,4 +1,4 @@
-# Realm pack format (Vector Guild 2.0)
+# Realm pack format (MathCosmos 2.0)
 
 This is the contract for writing missions for a realm pack. It is written for the Foundations pack (`found`), but every pack follows it. Everything here is checked by `qa/harness.js` and `qa/generators.js`; if those pass, the game can play the mission.
 

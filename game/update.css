@@ -1,4 +1,4 @@
-/* Vector Guild 1.3 additions. Loaded after styles.css and docking.css. */
+/* MathCosmos 1.3 additions. Loaded after styles.css and docking.css. */
 
 /* Touch targets: every control is at least 44 px in both directions. */
 .help-btn{width:44px;height:44px}
@@ -45,7 +45,7 @@
 .board-card p{color:#bdd1c8;line-height:1.55;font-size:13px}
 .board-needs{list-style:none;margin:12px 0;padding:0;display:grid;gap:8px}
 .board-needs li{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;min-height:44px}
-.board-problem h4{font-size:10px;letter-spacing:1.6px;color:var(--lime);margin:14px 0 8px}
+.board-problem h4{font-size:11px;letter-spacing:1.6px;color:var(--lime);margin:14px 0 8px}
 .board-problem .primary{margin-top:14px}
 .board-feedback{min-height:20px;color:var(--lime)!important}
 .board-locked{color:var(--muted)!important;font-size:12px!important}
@@ -73,7 +73,7 @@
 .entry-note{font-size:12px;color:var(--muted);margin:10px 0 0}
 .entry-note .text-link{font-size:12px;min-height:0;padding:12px 4px;margin:-12px 0}
 .pitfall-ask{margin:14px 0;padding:14px;border:1px solid #6b5a3a;border-left:3px solid #f3c37b;background:#221f18;display:grid;gap:8px}
-.pitfall-ask b{font-size:10px;letter-spacing:1.6px;color:#f3c37b}
+.pitfall-ask b{font-size:11px;letter-spacing:1.6px;color:#f3c37b}
 .pitfall-ask p{margin:0;font-size:13px}
 .pit-chip{text-align:left;white-space:normal;line-height:1.4;padding:10px 12px}
 .pit-chip[aria-pressed=true]{border-color:#f3c37b;color:#f3c37b}
@@ -93,7 +93,7 @@
 @media(max-width:650px){.notebook{padding:14px}.notebook-list{grid-template-columns:1fr}}
 .reference-problem{margin:8px 0;padding:10px 12px;border-left:2px solid var(--cyan);background:#14262b;font-size:13px}
 
-/* Vector Guild 2.0: the way back to the star map, beside the brand. */
+/* MathCosmos 2.0: the way back to the star map, beside the brand. */
 .brand-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
 .map-link{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:22px;color:var(--ivory);text-decoration:none;font-size:12px;font-weight:600;letter-spacing:.3px}
 .map-link span{color:var(--lime);font-size:15px}

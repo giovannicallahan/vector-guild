@@ -5,7 +5,7 @@ window.REALM = {
  id: 'la',
  name: 'Linear algebra',
  saveId: 'la',
- pageTitle: 'Vector Guild — Engineering begins here',
+ pageTitle: 'MathCosmos — Engineering begins here',
  description: 'A hands-on linear algebra adventure for engineers.',
  /* null: chapters.js puts the missions in one prerequisite order and cuts it into these chapters. */
  chapters: null,

@@ -6,7 +6,7 @@ window.REALM = {
  id: 'found',
  name: 'Foundations',
  saveId: 'found',
- pageTitle: 'Vector Guild — Foundations',
+ pageTitle: 'MathCosmos — Foundations',
  description: 'Numbers, equations, functions and graphs from the very beginning, taught at the Kepler outpost.',
  /* Declared chapters, in campaign order. Tiers: chapters 1–2 Basic (100 XP), 3–5 Intermediate (150 XP), 6–7 Advanced (200 XP). */
  chapters: [

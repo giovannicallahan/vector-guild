@@ -1,4 +1,4 @@
-/* Vector Guild shell (index.html): wormhole intro, 3D star map of the realms, and a flat list of the same realms.
+/* MathCosmos shell (index.html): wormhole intro, 3D star map of the realms, and a flat list of the same realms.
    Reads window.VG_REALMS (realms/registry.js) and window.VGSave (save-store.js, contract in docs/SAVE-V2.md).
    The flat list is the fallback when three.js or WebGL is missing, the "List view" over the map, and the
    screen-reader copy of the map while 3D runs. The pure helpers below touch no DOM and no three.js;
@@ -150,9 +150,9 @@ if(canBackup){
     try{
       var a=document.createElement('a');
       a.href=URL.createObjectURL(new Blob([JSON.stringify(Save.exportAll(),null,2)],{type:'application/json'}));
-      a.download='vector-guild-save.json';document.body.appendChild(a);a.click();a.remove();
+      a.download='mathcosmos-save.json';document.body.appendChild(a);a.click();a.remove();
       setTimeout(function(){URL.revokeObjectURL(a.href)},60000);
-      backupMsg('Backup file made: vector-guild-save.json.');
+      backupMsg('Backup file made: mathcosmos-save.json.');
     }catch(e){backupMsg('Could not make the backup file.',true)}
   });
   $('vg-import').addEventListener('click',function(){$('vg-file').click()});
@@ -161,7 +161,7 @@ if(canBackup){
     var rd=new FileReader();
     rd.onerror=function(){backupMsg('Could not read that file.',true)};
     rd.onload=function(){
-      var obj;try{obj=JSON.parse(String(rd.result))}catch(err){backupMsg('That file is not a Vector Guild save.',true);return}
+      var obj;try{obj=JSON.parse(String(rd.result))}catch(err){backupMsg('That file is not a MathCosmos save.',true);return}
       if(!root.confirm('Restore this backup? It replaces the progress saved on this device.'))return;
       var res;try{res=Save.importAny(obj)||{}}catch(err){res={ok:false,error:String(err&&err.message||err)}}
       if(res.ok){refresh();backupMsg('Save restored.')}else backupMsg('Not restored: '+(res.error||'the file was not accepted.'),true);

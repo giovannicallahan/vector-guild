@@ -1,4 +1,4 @@
-# Vector Guild for Android
+# MathCosmos for Android
 
 Offline Android WebView app. Game files live in `game/` and are copied into the APK on each build. JavaScript progress is stored on the device; Save & settings includes JSON backup import and export using Android's file picker.
 

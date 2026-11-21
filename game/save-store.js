@@ -63,7 +63,7 @@ window.VGSave = (() => {
   function importAny(o) {
     if (isV2(o)) { const d = tidyV2(o); cache = d; write(d); return { ok: true, error: null, kind: 2 }; }
     if (isV1(o)) { const d = current(), v = fromV1(o); d.realms.la = v.realms.la; d.seed = v.seed; cache = d; write(d); return { ok: true, error: null, kind: 1 }; }
-    return { ok: false, error: 'That file is not a Vector Guild save.' };
+    return { ok: false, error: 'That file is not a MathCosmos save.' };
   }
   function reset(id) { const d = current(); delete d.realms[id]; cache = d; return write(d); }
   /* Everything goes, including the seed and the intro flag. The 1.x entry is still left alone. */

@@ -1,4 +1,4 @@
-/* Vector Guild shell (index.html): wormhole intro, 3D star map and the flat realm list.
+/* MathCosmos shell (index.html): wormhole intro, 3D star map and the flat realm list.
    Colours, type, eyebrow labels and button shapes follow styles.css. Phone breakpoints: 950px and 650px. */
 :root{--void:#081114;--bg:#111c20;--panel:#19262a;--panel2:#1d2c30;--line:#354448;--muted:#91a29f;--ivory:#edf0dd;--lime:#d4f36a;--cyan:#8cddd4;--amber:#ffbf5e;--violet:#b69cff;--warn:#ff9466;
   --display:'Space Grotesk',sans-serif;--body:'DM Sans',sans-serif;--mono:monospace}
@@ -13,15 +13,15 @@ a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .vg-sr{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
 
 /* Eyebrow labels and buttons, as in styles.css */
-.vg-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.6px;color:var(--lime);text-transform:uppercase;display:flex;align-items:center;gap:9px}
+.vg-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--lime);text-transform:uppercase;display:flex;align-items:center;gap:9px}
 .vg-eyebrow:before{content:'';width:22px;height:1px;background:currentColor}
 .vg-primary,.vg-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:0;border-radius:0;background:var(--lime);color:#17221c;font:800 12px/1.2 var(--body);letter-spacing:.4px;text-decoration:none;text-align:center}
 .vg-primary:hover{background:#e1fa90}
 .vg-secondary{background:transparent;border:1px solid #66766c;color:var(--ivory)}
 .vg-secondary:hover{border-color:var(--ivory)}
-.vg-ghost{min-height:44px;padding:0 14px;font:700 10px/1 var(--body);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);background:rgba(8,17,20,.72);border:1px solid var(--line);border-radius:3px}
+.vg-ghost{min-height:44px;padding:0 14px;font:700 11px/1 var(--body);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);background:rgba(8,17,20,.72);border:1px solid var(--line);border-radius:3px}
 .vg-ghost:hover{color:var(--ivory);border-color:var(--ivory)}
-.vg-xp{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 4px;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted)}
+.vg-xp{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 4px;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted)}
 .vg-xp i{color:var(--lime);font-style:normal;font-size:15px}.vg-xp b{color:var(--ivory)}
 .vg-mark{width:36px;height:36px;min-width:36px;border:1px solid var(--lime);color:var(--lime);display:grid;place-items:center;font-size:33px;line-height:1;position:relative}
 .vg-mark i{font:normal 11px sans-serif;position:absolute}
@@ -33,7 +33,7 @@ a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 #vg-labels{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
 .vg-node{position:absolute;left:0;top:0;pointer-events:auto;min-height:44px;min-width:44px;padding:0 2px;margin:0;display:flex;align-items:center;justify-content:center;background:none;border:0;color:var(--ivory);will-change:transform,opacity}
 .vg-node:focus-visible{outline:none}
-.vg-pill{display:inline-flex;align-items:center;gap:7px;font:700 10px/1.2 var(--mono);letter-spacing:1.2px;text-transform:uppercase;background:rgba(8,17,20,.72);border:1px solid var(--line);border-radius:999px;padding:7px 11px;white-space:nowrap;transition:border-color .2s,color .2s,background .2s}
+.vg-pill{display:inline-flex;align-items:center;gap:7px;font:700 11px/1.2 var(--mono);letter-spacing:1.2px;text-transform:uppercase;background:rgba(8,17,20,.72);border:1px solid var(--line);border-radius:999px;padding:7px 11px;white-space:nowrap;transition:border-color .2s,color .2s,background .2s}
 .vg-node:hover .vg-pill{border-color:var(--cyan)}
 .vg-node:focus-visible .vg-pill{outline:2px solid var(--cyan);outline-offset:3px;border-color:var(--cyan)}
 .vg-node[aria-expanded="true"] .vg-pill{border-color:var(--lime);color:var(--lime);background:rgba(8,17,20,.94)}
@@ -47,7 +47,7 @@ a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .vg-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;min-width:0}
 .vg-brand{display:flex;align-items:center;gap:12px;min-width:0}
 .vg-brand strong{display:block;font:700 17px/1 var(--display);letter-spacing:-.5px}
-.vg-brand .vg-hint{display:block;margin-top:7px;font-size:10px;font-weight:700;letter-spacing:1.4px;color:var(--muted);text-transform:uppercase}
+.vg-brand .vg-hint{display:block;margin-top:7px;font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--muted);text-transform:uppercase}
 .vg-tools{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px;pointer-events:auto;min-width:0}
 
 /* Realm card (3D detail sheet) and realm entries in the list share these rules */
@@ -108,7 +108,7 @@ dialog.vg-dialog::backdrop{background:#091113cf}
   .vg-mark{width:30px;height:30px;min-width:30px;font-size:27px}
   .vg-card{align-self:stretch;width:auto;max-height:56%;padding:16px}
   .vg-realm h2{font-size:21px}
-  .vg-pill{font-size:9px;letter-spacing:.8px;padding:6px 9px}
+  .vg-pill{font-size:11px;letter-spacing:.8px;padding:6px 9px}
   .vg-modal{padding:20px}
   .vg-actions>*{flex:1 1 auto}
 }
