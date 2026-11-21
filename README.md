@@ -61,3 +61,16 @@ Version 2.0 turns the game into realms. Linear algebra is now one realm pack and
 - **Foundations (`game/realms/found/`):** 7 chapters and 40 missions (q01–q40), each with a generator, an independent oracle (`qa/realms/found/`), a concept-bench experiment and a review drill; OpenStax sources; no workshop or contracts. The format for content authors is in `docs/PACK-FORMAT.md`.
 
 Checks: `node qa/harness.js` and `node qa/generators.js --strict --draws 1000` (linear algebra, as before); `node qa/harness.js --realm found` and `node qa/generators.js --realm found --strict --draws 1000`; `node qa/save-store.test.js`; `node qa/shell.test.js`. `node qa/harness.js --realm found --complete` also fails if a declared mission is missing. `qa/generators.js` now fails when a mission has no generator or no oracle. The Playwright scripts were updated for `realm.html` and the 2.0 save but were not run (they do not run on this Mac). The Android app files are unchanged and no APK was built.
+
+## Version 2.2
+
+Version 2.2 adds practice missions to Foundations, drop-down chapters, the home page after the wormhole and a brighter realm page. Saves from 2.1 and earlier load unchanged; save keys, the app id and the linear algebra numbers are the same.
+
+- **Practice missions (`game/realms/found/practice-1.js` to `practice-8.js`):** each of the 40 concepts has three optional practice missions (`q01b` a new setting, `q01c` an applied word problem, `q01d` a challenge), 120 in all, so Foundations has 160 missions. Each has its own generator and its own oracle (`qa/realms/found/oracle-p1.js` to `oracle-p8.js`). A practice mission unlocks when its concept is learned and inherits its lesson, bench and tier. A chapter is complete on its learn missions alone and mastered when its practice is solved too. The format is in `docs/PACK-FORMAT.md`, section 10.
+- **Ranks:** Foundations ranks count every solved mission and the top rank needs all 160. A rank below the top is also held by concepts learned alone (`learnAt`), so a 2.1 save keeps its rank up to the second-highest rank. Linear algebra ranks are unchanged.
+- **Drop-downs:** campaign, skill tree, field guide and artifacts show one drop-down per chapter, in both realms.
+- **Home page (`game/shell/home.js`):** the wormhole ends on a home page with one card per realm, a Collection button, Replay intro and save backup. The soft-lock note on a realm follows the learn missions of the realm it builds on, not its optional practice.
+- **Look (`game/life.css`, `game/life.js`):** chapter colours, larger text (12px floor, 16px body), a short burst and counting numbers on a solve; all motion is off under reduced motion.
+- **Collection:** one new achievement, "Bedrock" (every Foundations mission, practice included). "Solid ground" keeps its 2.1 meaning: every concept learned.
+
+Checks: the 2.0 commands, plus `node qa/harness.js --realm found --complete --complete-practice` (fails if any of the 120 practice missions is missing), `node qa/styles.test.js`, `node qa/collection.test.js`, `node qa/realm-collection.test.js`, `node qa/collection-data.test.js` and `node qa/home.test.js`. The Playwright scripts were not run. The Android version is 2.2 (versionCode 9); no APK was built.

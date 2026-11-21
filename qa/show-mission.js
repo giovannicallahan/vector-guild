@@ -1,7 +1,8 @@
 /* Print a mission as authored, and optionally as generated.
    Usage: node qa/show-mission.js q12            authored fields (including lesson and worked example)
           node qa/show-mission.js q12 --draw 3   authored prompt plus three generated versions
-          node qa/show-mission.js q01 --realm found   a mission of another pack (default la) */
+          node qa/show-mission.js q01 --realm found   a mission of another pack (default la)
+          node qa/show-mission.js q01b --realm found  a practice mission: its own fields, and what it takes from its parent */
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
@@ -18,7 +19,7 @@ if (!q) { console.error('unknown mission ' + id); process.exit(1); }
 const drawAt = process.argv.indexOf('--draw');
 const pick = m => ({ prompt: m.prompt, answer: m.answer, hints: m.hints, solution: m.solution, guidance: m.guidance });
 if (drawAt < 0) {
-  console.log(JSON.stringify({ id: q.id, topic: q.topic, title: q.title, tier: q.tier, labels: q.labels, tolerance: q.tolerance, brief: q.brief, lesson: q.lesson, ...pick(q), teaching: q.teaching }, null, 1));
+  console.log(JSON.stringify({ id: q.id, ...(q.parent ? { parent: q.parent, kind: q.kind, inherited: 'topic, tier, xp, sector, lesson, teaching and sources below come from ' + q.parent } : {}), topic: q.topic, title: q.title, tier: q.tier, labels: q.labels, tolerance: q.tolerance, brief: q.brief, lesson: q.lesson, ...pick(q), teaching: q.teaching }, null, 1));
 } else {
   console.log('AUTHORED', JSON.stringify(pick(q), null, 1));
   const count = Number(process.argv[drawAt + 1]) || 3;

@@ -79,10 +79,11 @@ No perk changes XP, answers, hints shown or what counts as solved.
 
 ## Achievements
 
-About 28, defined in `game/collection/achievements.js`, each `{id, name, text, reward, test(ctx)}`
+About 29, defined in `game/collection/achievements.js`, each `{id, name, text, reward, test(ctx)}`
 where `ctx` is built only from the save (all realm slices, `meta`, the realm registry and the figure
 list). Cover: first solve; 5, 10, 25, 50 and 100 missions; first first-try star; 10 and 25 stars; one
-chapter; three chapters; Foundations finished; linear algebra finished; missions solved in two
+chapter; three chapters; every Foundations concept learned (its 40 learn missions); every Foundations
+mission solved, practice included (160); linear algebra finished; missions solved in two
 realms; first drill; 10 drills; first pull; 5, 15 and 30 different figures; a legendary; a figure at
 5 stars; a figure equipped; every figure of one field; a landmark bought; every landmark of a realm.
 Rewards run from 15 to 150 stardust. Names are plain and friendly; no jargon.

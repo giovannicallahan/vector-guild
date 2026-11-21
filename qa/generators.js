@@ -1,9 +1,11 @@
 /* Checks for mission generators and their independent oracles, for one realm pack.
-   Usage: node qa/generators.js [id ...]      e.g. node qa/generators.js q01 q02
+   Usage: node qa/generators.js [id ...]      e.g. node qa/generators.js q01 q02 q01b
    Options: --realm ID (or a bare pack id; default la)  --draws N (default 300)
             --strict (text differences at canonical parameters fail)
    The pack's scripts come from game/realms/packs.js. Oracles: qa/oracle-*.js for linear algebra,
    qa/realms/<id>/oracle-*.js for any other pack. A mission without a generator or an oracle fails.
+   Practice missions (q01b ..., docs/PACK-FORMAT.md "Practice missions") are missions like any other here: each
+   needs its own generator and its own oracle (qa/realms/found/oracle-p1.js ... oracle-p8.js).
    Exit code 0 only if every checked mission passes. */
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -13,7 +15,7 @@ const args = process.argv.slice(2);
 const strict = args.includes('--strict');
 const drawsAt = args.indexOf('--draws');
 const draws = drawsAt >= 0 ? Number(args[drawsAt + 1]) : 300;
-const only = args.filter((a, i) => /^q\d+$/.test(a) && (drawsAt < 0 || i !== drawsAt + 1));
+const only = args.filter((a, i) => /^q\d+[a-z]?$/.test(a) && (drawsAt < 0 || i !== drawsAt + 1));
 
 const window = {};
 const load = file => vm.runInNewContext(fs.readFileSync(file, 'utf8'), { window, Math, console });
@@ -89,6 +91,8 @@ for (const q of QUESTS) {
   else console.log(`ok   ${q.id} ${q.topic}${ORACLE[q.id] ? ' [oracle agrees]' : ''}${uniqueNotes.length ? ` (${uniqueNotes.length} note${uniqueNotes.length > 1 ? 's' : ''})` : ''}`);
   if (uniqueNotes.length) console.log('  note: ' + uniqueNotes.join('\n  note: '));
 }
-console.log(`\n${realm}: ${checked - failed} of ${checked} generators pass; ${withOracle} checked against an independent oracle; ${missing.length} missions have no generator${missing.length ? ': ' + missing.join(' ') : ''}; ${noOracle.length} have no oracle${noOracle.length ? ': ' + noOracle.join(' ') : ''}.`);
+const practiceCount = QUESTS.filter(q => q.parent && (!only.length || only.includes(q.id))).length;
+if (only.length && only.some(id => !QUESTS.some(q => q.id === id))) { console.log(`FAIL unknown mission id: ${only.filter(id => !QUESTS.some(q => q.id === id)).join(' ')}`); failed++; }
+console.log(`\n${realm}: ${checked - failed} of ${checked} generators pass${practiceCount ? ` (${practiceCount} of them practice missions)` : ''}; ${withOracle} checked against an independent oracle; ${missing.length} missions have no generator${missing.length ? ': ' + missing.join(' ') : ''}; ${noOracle.length} have no oracle${noOracle.length ? ': ' + noOracle.join(' ') : ''}.`);
 if (!checked && !missing.length) console.log('No missions were checked.');
 process.exitCode = failed || missing.length ? 1 : 0;

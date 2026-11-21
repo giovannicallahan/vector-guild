@@ -7,6 +7,8 @@
      - a passed review drill pays once; a missed one pays nothing; a bought landmark is settled
      - second look keeps the first-try star for one wrong first check per mission, and says so
      - no perk and no award changes XP, skill points, answers or what counts as solved
+     - a practice mission (docs/PACK-FORMAT.md, "Practice missions") pays like any first solve, and a chapter is
+       paid on its learn missions alone
      - a page without the collection scripts plays exactly as before
    The figures here are a small fixture, so this test does not depend on game/collection/figures.js. */
 'use strict';
@@ -142,6 +144,21 @@ function suite(realm) {
       assert.equal(p.qa.getState().xp, xpOf(chapterOne), 'XP is the sum of the missions\' XP'); assert.equal(p.qa.getState().points, chapterOne.length);
       p.clear(); assert.deepEqual(page(p.storage).events(), [], 'the chapter is not paid again');
     }
+  });
+
+  const practice = quests.filter(q => q.parent);
+  if (practice.length) test('a practice mission pays 10 + 5 like any first solve; the chapter is paid on its learn missions alone', () => {
+    const p0 = practice[0], learn = quests.filter(q => !q.parent).map(q => q.id), upTo = learn.slice(0, learn.indexOf(p0.parent) + 1);
+    const p = page(save({ solved: upTo, tools: [] })); p.clear();
+    p.qa.mission(p0.id); assert.match(right(p), /Mission complete/);
+    assert.deepEqual(plain(p.events()), [{ type: 'solve', realm: sid, qid: p0.id, dust: 10 }, { type: 'star', realm: sid, qid: p0.id, dust: 5 }]);
+    assert.equal(p.qa.getState().xp, xpOf(upTo) + H.byId[p0.parent].xp, 'a practice mission gives the XP of its concept\'s tier');
+    assert.match(p.el('.feedback')._html, /PRACTICE COMPLETE.*\+1 skill point · \+15 stardust</);
+    /* Chapter one: every learn mission but the last, and no practice at all. The last learn solve finishes the chapter. */
+    const last = chapterOne[chapterOne.length - 1], q = page(save({ solved: chapterOne.slice(0, -1), tools: [] })); q.clear();
+    open(q, last); right(q);
+    assert.deepEqual(types(q.events()), ['solve:10', 'star:5', 'chapter:25'], 'the chapter is complete without any practice mission');
+    assert.ok(chapters[0].practice.every(id => !q.qa.getState().solved.includes(id)));
   });
 
   test('the stardust perk adds 10% (rounded up) to mission stardust and nothing to XP', () => {

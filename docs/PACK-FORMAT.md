@@ -1,4 +1,4 @@
-# Realm pack format (MathCosmos 2.0)
+# Realm pack format (MathCosmos 2.2)
 
 This is the contract for writing missions for a realm pack. It is written for the Foundations pack (`found`), but every pack follows it. Everything here is checked by `qa/harness.js` and `qa/generators.js`; if those pass, the game can play the mission.
 
@@ -6,7 +6,7 @@ This is the contract for writing missions for a realm pack. It is written for th
 
 - `game/realm.html?realm=<pack id>` loads exactly one pack. The script list, in load order, is `window.VG_PACKS[<id>].scripts` in `game/realms/packs.js`; `realm.html` adds `app.js` last. An unknown id goes back to the star map (`index.html`).
 - All files are plain classic scripts: no modules, no build step, no network, no libraries. Each file is wrapped in `(function(){ 'use strict'; ... })();` and adds to a shared global.
-- Only one pack is loaded per page, so every pack uses **local ids** `q01`, `q02`, ... Progress is saved per realm (`docs/SAVE-V2.md`).
+- Only one pack is loaded per page, so every pack uses **local ids** `q01`, `q02`, ... for its learn missions, one per concept, and `q01b`, `q01c`, `q01d` for the practice missions of a concept (§10). Progress is saved per realm (`docs/SAVE-V2.md`); a save lists solved ids, so ids never change.
 - `realms/<id>/pack.js` sets `window.REALM` (chapters, sectors, ranks, copy). Content authors do not edit it, except to correct a chapter's mission list with the engine owner.
 
 ### Foundations files
@@ -17,17 +17,18 @@ This is the contract for writing missions for a realm pack. It is written for th
 | `game/realms/found/gen-a.js` … `gen-d.js` | generators (§3) | `window.MISSION_GEN` |
 | `game/realms/found/experiments-a.js` … `experiments-d.js` | concept-bench models (§4) | `window.EXPERIMENTS` |
 | `game/realms/found/variants-a.js` … `variants-d.js` | review-drill statements (§5) | `window.VARIANT_SETUP`, `window.VARIANT_POOL` |
-| `qa/realms/found/oracle-<anything>.js` | independent answer oracles (§6) | `window.ORACLE` |
+| `game/realms/found/practice-1.js` … `practice-8.js` | practice missions **and** their generators (§10) | `window.PRACTICE` (push), `window.MISSION_GEN` |
+| `qa/realms/found/oracle-<anything>.js` | independent answer oracles (§6); `oracle-p1.js` … `oracle-p8.js` hold the practice ones | `window.ORACLE` |
 
 The letters are only containers: a mission, its generator, experiment and variant may go in any of the four files of each kind. Keep one author per file to avoid edit clashes. The stub files already contain the registration boilerplate; add entries inside the `push(...)` or `Object.assign(..., { ... })`.
 
-Load order inside the Foundations pack: `pack.js`, `missions-*`, `gen-core.js`, `gen-*`, `gameplay.js`, `experiments-*`, `variants-*`, `variants.js`, `concept-lab.js`, `chapters.js`. So a generator may use `window.Gen` only inside its functions (it is defined before `gen-*` load, so top-level `const G = window.Gen` is also fine), and `variants-*.js` must run before `game/variants.js` (they do).
+Load order inside the Foundations pack: `pack.js`, `missions-*`, `gen-core.js`, `gen-*`, `gameplay.js`, `experiments-*`, `variants-*`, `practice-*`, `variants.js`, `concept-lab.js`, `chapters.js`. `chapters.js` must stay after the practice files: it is what turns their entries into missions. So a generator may use `window.Gen` only inside its functions (it is defined before `gen-*` load, so top-level `const G = window.Gen` is also fine), and `variants-*.js` must run before `game/variants.js` (they do).
 
 The temporary `sample.js` and `oracle-sample.js` that proved this format were removed once all 40 missions were written; `missions-a.js` (q01) and `missions-b.js` (q16) now show the same patterns.
 
 ### Foundations ids, chapters, tiers, sectors
 
-The id of each mission is fixed by `REALM.chapters` in `game/realms/found/pack.js`:
+The id of each learn mission is fixed by `REALM.chapters` in `game/realms/found/pack.js` (practice missions take their chapter, tier, XP and sector from their learn mission, §10):
 
 | Ch | Name | Ids | Tier, XP | Sector (mission `sector` field) |
 |---|---|---|---|---|
@@ -47,7 +48,7 @@ Every field below is required unless marked optional. Text is plain Unicode (no 
 
 ```js
 {
-  id: 'q07',                       // fixed by the chapter table; /^q\d{2}$/
+  id: 'q07',                       // fixed by the chapter table; /^q\d{2}$/ (a practice mission, §10, adds a letter: q07b)
   title: 'Splitting the ration bars',  // mission name
   topic: 'What a fraction means',  // concept name, shown on cards and in the field guide
   tier: 'Basic',                   // the chapter's tier (table above)
@@ -179,7 +180,7 @@ Object.assign(window.ORACLE, {
 
 ## 7. Answers and input
 
-- Answers are numbers. The answer box accepts `12`, `-3`, `2.5`, `2,5` (a comma is a **decimal point**), `7/6`, `-3/4` and `1 1/2`. So never ask for or print `6,038`: a player typing it gets 6.038. Write large numbers without separators and say "type it without commas" where it matters.
+- Answers are numbers. The answer box accepts `12`, `-3`, `2.5`, `2,5` (a comma is a **decimal point**), `7/6`, `-3/4` and `1 1/2`. So never ask for or print `6,038`. Write large numbers without separators. A player who types a correct whole number with thousands commas anyway (`6,038` for 6038) is not marked wrong: when the decimal reading does not fit the wanted value and the grouped reading does, the engine takes the grouped one (`readNumber` in app.js; main answer, guided steps, review drills and the reward check). A decimal comma that fits always wins, so `1,432` is still right for 1.432.
 - When the reduced form of a fraction is the point, ask for the numerator and the denominator in two separate answer boxes (and say "in lowest terms"); a single box would accept any equal value.
 - `tolerance` is absolute. Use 0.01 for exact answers; for rounded answers say how to round and size the tolerance to it.
 
@@ -192,7 +193,8 @@ node qa/generators.js --realm found --strict --draws 1000 q07   # one mission: g
 node qa/generators.js --realm found --strict --draws 1000       # every mission in the pack
 node qa/show-mission.js q07 --realm found --draw 3              # print the mission and three generated versions
 node qa/harness.js --realm found                                # schema, teaching, chapters, experiments, variants, play-through
-node qa/harness.js --realm found --complete                     # also require all 40 declared missions (use at the end)
+node qa/harness.js --realm found --complete                     # also require all 40 declared learn missions
+node qa/harness.js --realm found --complete --complete-practice # and all 120 practice missions (§10; use at the end)
 node qa/save-store.test.js                                      # save format tests (engine; not content)
 ```
 
@@ -202,4 +204,162 @@ To play a mission: serve the game folder (`python3 -m http.server 8801 --directo
 
 ## 9. Pack config (`window.REALM`), for reference
 
-`id`, `name`, `saveId`, `pageTitle`, `description`; `chapters` (list of `{name, blurb, tier, ids}`) or `null` with `computedChapters` (linear algebra only); `sectors` (`{name, purpose}`, one per chapter); `landmarks` (`{name, at:[x, y], art}`, one per chapter, SVG drawn on the outpost ridge); `landmarkCost`; `ranks` (`{at, title}` rising from 0, the last with `top: true`, reached at the mission count); `tiers`; `tierXp` (optional); `sourceRule` `{publisherPattern, label}`; `features` `{workshop, contracts, board, docking, handson, labs}` (a script whose feature is off is not in `VG_PACKS` and is never called); `mentor` `{name, role, cardEyebrow, opening(q, purpose), closing}`; `copy` (outpost and page text); `help` (HTML of the help dialog).
+`id`, `name`, `saveId`, `pageTitle`, `description`; `chapters` (list of `{name, blurb, tier, ids}`) or `null` with `computedChapters` (linear algebra only); `sectors` (`{name, purpose}`, one per chapter); `landmarks` (`{name, at:[x, y], art}`, one per chapter, SVG drawn on the outpost ridge); `landmarkCost`; `practice` (optional, `{kinds: {b: 'setting', c: 'applied', d: 'challenge'}}`: the practice letters and kinds, §10); `ranks` (`{at, title}` rising from 0, the last with `top: true`, reached at the full mission count, learn and planned practice together: 160 for Foundations; while fewer missions are written the engine scales the steps down to the missions that exist; a rank other than the top one may add `learnAt`, a number of concepts learned that also holds the rank, so a save from before practice existed keeps its rank; the campaign strip then shows whichever is nearer, "N NEW CONCEPTS TO <rank>" or "N MISSIONS TO <rank>", because practice does not move a count of concepts); `tiers`; `tierXp` (optional); `sourceRule` `{publisherPattern, label}`; `features` `{workshop, contracts, board, docking, handson, labs}` (a script whose feature is off is not in `VG_PACKS` and is never called); `mentor` `{name, role, cardEyebrow, opening(q, purpose), closing}`; `copy` (outpost and page text; two optional functions replace the celebration after a first solve when mission titles are not names of parts: `heading(q)`, by default "<title> module installed ✦", and `consequence(q, purpose)`, the mentor's line, by default "Design verified: <solution> We can now install the <title> module in <sector> and <purpose>."; Foundations sets both, linear algebra neither); `help` (HTML of the help dialog).
+
+## 10. Practice missions
+
+Every concept has one **learn** mission (`q01` … `q40`, §2, unchanged) and three **practice** missions for the same skill. A practice mission's id is the learn id and one lowercase letter:
+
+| Letter | `kind` | What it is |
+|---|---|---|
+| `b` | `'setting'` | The same skill in a new real-world setting. Same difficulty as the learn mission. |
+| `c` | `'applied'` | An applied word problem with two or three steps. It has two or three guided steps. |
+| `d` | `'challenge'` | Harder numbers, or the skill combined with **one** earlier concept (name it in `uses`). |
+
+The letters and kinds are declared in `REALM.practice.kinds` (`{ b: 'setting', c: 'applied', d: 'challenge' }`). The id pattern is `/^q\d{2}[a-z]?$/`: no letter is a learn mission, a letter is practice.
+
+### 10.1 How practice behaves in the game
+
+- A practice mission **unlocks when its parent is solved** (`q01b`, `q01c` and `q01d` all open when `q01` is solved). Nothing else locks or unlocks it.
+- Practice is **optional depth**. The next concept's learn mission depends only on its own `prereqs`, exactly as before. A chapter is **complete** when all its learn missions are solved: that unlocks its landmark, pays the chapter stardust and opens the next chapter's drop-down, even if the player had closed it by hand earlier (they can close it again). The drop-down a mission was opened from stays open when its dialog closes, so the finished chapter does not shut over the mission just solved and its new practice. A chapter is **mastered** when every practice mission in it is solved as well; that is shown on the chapter and changes nothing else.
+- A practice mission opens **straight on the problem**. The parent's lesson (summary, intuition, steps, worked example, pitfalls, sources) is collapsed above it behind "Review the lesson". There is no "I'm ready to try" step.
+- Rewards are those of any mission: the XP of the tier (`REALM.tierXp`), one skill point, a first-try ★ for a solve on the first check with no help, 10 stardust (+5 with the ★). Solved practice counts in the mission total, the level and the rank; the top rank needs all 160 missions.
+- A miss is logged in the error notebook under the **concept** (the parent's id), and review drills are per concept, so a practice mission adds no drill of its own.
+- The "next mission" on the main path is always a learn mission. After a learn mission the player is offered "Practise this skill"; after a practice mission, the next practice mission of the same concept.
+
+### 10.2 What a practice mission inherits, and what it supplies
+
+**Inherited from the parent (do not write these; the harness fails if you do):** `topic`, `tier`, `xp`, `sector`, the chapter, `lesson`, `teaching` (intuition, steps, worked example, pitfalls), `sources`, the experiment (concept bench, §4) and the variant (review drill, §5). `prereqs` is set to `[parent]`. A practice mission has no `artifact`.
+
+**Supplied by the practice mission (all required):**
+
+| Field | Rule |
+|---|---|
+| `id` | parent id + letter: `'q01b'` |
+| `parent` | the learn mission's id: `'q01'` (must equal the id without its letter) |
+| `kind` | `'setting'` for `b`, `'applied'` for `c`, `'challenge'` for `d` |
+| `title` | its own mission name; no two missions in the pack share a title |
+| `brief` | one sentence, what the outpost needs; not the parent's brief |
+| `prompt` | the problem with its numbers; say what to enter and in which order. It must differ from the parent's prompt (and from its sibling practice prompts) by more than its numbers: a new situation, not the same sentence with other digits |
+| `answer`, `labels` | as in §2: finite numbers, one label each. The number of answers need not match the parent's |
+| `tolerance` | as in §2 and §7 (0.01 for exact answers) |
+| `hints` | at least 1. Hints must not hand over the answers: the harness fails a mission whose hints contain every asked-for answer in most builds |
+| `solution` | full worked solution for these numbers |
+| `guidance` | at least 2 guided steps, each `{prompt, answer, labels, explanation}`; exactly 2 or 3 for kind `'applied'` |
+| `uses` | optional, kind `'challenge'` only: the id of the one earlier learn mission whose idea is mixed in (it must come before the parent in the campaign). The dialog then says "This one also uses …" |
+
+No other field is allowed. The teaching rules of §2.3 apply to the **parent's** position: a practice mission of `q05` may use only what `q01`–`q05` taught (a challenge may use any concept up to its parent, never a later one). Settings stay in the parent's sector of the outpost.
+
+Each practice mission also needs **its own generator** in `window.MISSION_GEN[id]` with the contract of §3 (`canonical`, `draw(R)`, `build(p)`; `build(canonical)` reproduces the authored text exactly) and **its own independent oracle** (§6).
+
+### 10.3 Files and assignment
+
+Practice missions live in eight files, one author each. File N covers concepts q(5N−4) … q(5N), three practice missions each (b, c, d): 15 missions per file, 120 in all.
+
+| N | Missions and generators (`game/realms/found/`) | Oracles (`qa/realms/found/`) | Concepts | Practice ids |
+|---|---|---|---|---|
+| 1 | `practice-1.js` | `oracle-p1.js` | q01–q05 | q01b q01c q01d q02b q02c q02d q03b q03c q03d q04b q04c q04d q05b q05c q05d |
+| 2 | `practice-2.js` | `oracle-p2.js` | q06–q10 | q06b q06c q06d q07b q07c q07d q08b q08c q08d q09b q09c q09d q10b q10c q10d |
+| 3 | `practice-3.js` | `oracle-p3.js` | q11–q15 | q11b q11c q11d q12b q12c q12d q13b q13c q13d q14b q14c q14d q15b q15c q15d |
+| 4 | `practice-4.js` | `oracle-p4.js` | q16–q20 | q16b q16c q16d q17b q17c q17d q18b q18c q18d q19b q19c q19d q20b q20c q20d |
+| 5 | `practice-5.js` | `oracle-p5.js` | q21–q25 | q21b q21c q21d q22b q22c q22d q23b q23c q23d q24b q24c q24d q25b q25c q25d |
+| 6 | `practice-6.js` | `oracle-p6.js` | q26–q30 | q26b q26c q26d q27b q27c q27d q28b q28c q28d q29b q29c q29d q30b q30c q30d |
+| 7 | `practice-7.js` | `oracle-p7.js` | q31–q35 | q31b q31c q31d q32b q32c q32d q33b q33c q33d q34b q34c q34d q35b q35c q35d |
+| 8 | `practice-8.js` | `oracle-p8.js` | q36–q40 | q36b q36c q36d q37b q37c q37d q38b q38c q38d q39b q39c q39d q40b q40c q40d |
+
+Each `practice-N.js` registers its missions **and** their generators; each `oracle-pN.js` holds one oracle per practice id. Both stubs exist with the boilerplate ready; add entries inside them and nowhere else. `game/realms/packs.js` already lists the eight files (after `variants-d.js`, before `variants.js`), and `qa/generators.js` loads every `oracle-*.js`.
+
+The boilerplate at the top of each `practice-N.js`:
+
+```js
+(function(){
+'use strict';
+const G = window.Gen, { n, plus, par } = G;          // §3 helpers
+const PRACTICE = window.PRACTICE = window.PRACTICE || [];
+const GEN = window.MISSION_GEN = window.MISSION_GEN || {};
+/* Registers one practice mission and its generator {canonical, draw(R), build(p)}. */
+const add = (mission, generator) => { PRACTICE.push(mission); GEN[mission.id] = generator; };
+
+add({ /* mission */ }, { /* generator */ });
+// ...
+})();
+```
+
+`game/chapters.js` (loaded last) turns every entry of `window.PRACTICE` into a full mission in `window.QUESTS`: it copies the inherited fields from the parent, sets `prereqs: [parent]`, and places the practice missions right after their learn mission in the campaign order. `window.CHAPTERS[i].ids` stays the chapter's learn missions; `window.CHAPTERS[i].practice` lists its practice missions.
+
+### 10.4 The worked sample: `q01b`
+
+In `game/realms/found/practice-1.js` (parent `q01`, place value: rivets in crates, asking for the hundreds digit; the practice moves to the seed locker and asks for the tens digit):
+
+```js
+add({
+ id: 'q01b', parent: 'q01', kind: 'setting',
+ title: 'The seed locker count',
+ brief: 'Seed stock for the greenhouse has arrived in sacks, trays and packets, and the locker label needs one number for all of it.',
+ prompt: 'Seed locker count: sacks of 1000 seeds, 7; trays of 100, 0; packets of 10, 5; loose seeds, 3. Enter the total number of seeds (type it without commas). Then enter how many seeds the tens digit of your total stands for.',
+ answer: [7053, 50], labels: ['total seeds', 'tens digit stands for'], tolerance: 0.01,
+ hints: [
+  'Write one digit for each place: thousands first, then hundreds, tens and ones. A place with nothing in it still needs a 0.',
+  'The tens digit is the second digit from the right. Each ten is 10 seeds.'
+ ],
+ solution: 'Thousands 7, hundreds 0, tens 5, ones 3: written in that order the number is 7053. The tens digit is 5, so it stands for 5 tens, which is 50 seeds.',
+ guidance: [
+  { prompt: 'Write the digits in order: thousands 7, hundreds 0, tens 5, ones 3. What number do they make?', answer: [7053], labels: ['total seeds'], explanation: 'The digits 7, 0, 5, 3 in that order make 7053. Each digit sits in the place it counts.' },
+  { prompt: 'The tens digit is 5, and each ten is 10 seeds. How many seeds does a tens digit of 5 stand for?', answer: [50], labels: ['seeds'], explanation: 'A tens digit of 5 means 5 tens, which is 50 seeds.' }
+ ]
+}, {
+ /* Not the numbers of the q01 worked example (4, 0, 6, 1 → 4061), which is shown above this mission as "Review the lesson". */
+ canonical: { a: 7, b: 0, c: 5, d: 3 },
+ /* The tens digit is at least 2, so "6 tens" reads naturally and the second answer is never 0. A draw never repeats
+    the thousands, hundreds and tens of the worked example. */
+ draw: R => { let p; do { p = { a: R.int(1, 9), b: R.int(0, 9), c: R.int(2, 9), d: R.int(0, 9) }; } while (p.a === 4 && p.b === 0 && p.c === 6); return p; },
+ build: ({ a, b, c, d }) => { const total = 1000 * a + 100 * b + 10 * c + d, tens = 10 * c; return {
+  prompt: `Seed locker count: sacks of 1000 seeds, ${n(a)}; trays of 100, ${n(b)}; packets of 10, ${n(c)}; loose seeds, ${n(d)}. Enter the total number of seeds (type it without commas). Then enter how many seeds the tens digit of your total stands for.`,
+  answer: [total, tens],
+  hints: ['Write one digit for each place: thousands first, then hundreds, tens and ones. A place with nothing in it still needs a 0.', 'The tens digit is the second digit from the right. Each ten is 10 seeds.'],
+  solution: `Thousands ${n(a)}, hundreds ${n(b)}, tens ${n(c)}, ones ${n(d)}: written in that order the number is ${n(total)}. The tens digit is ${n(c)}, so it stands for ${n(c)} tens, which is ${n(tens)} seeds.`,
+  guidance: [
+   { prompt: `Write the digits in order: thousands ${n(a)}, hundreds ${n(b)}, tens ${n(c)}, ones ${n(d)}. What number do they make?`, answer: [total], explanation: `The digits ${n(a)}, ${n(b)}, ${n(c)}, ${n(d)} in that order make ${n(total)}. Each digit sits in the place it counts.` },
+   { prompt: `The tens digit is ${n(c)}, and each ten is 10 seeds. How many seeds does a tens digit of ${n(c)} stand for?`, answer: [tens], explanation: `A tens digit of ${n(c)} means ${n(c)} tens, which is ${n(tens)} seeds.` }
+  ] }; }
+});
+```
+
+Its oracle in `qa/realms/found/oracle-p1.js`:
+
+```js
+Object.assign(window.ORACLE, {
+  /* Write the four counts side by side as text and read the number; count the packets' seeds ten at a time. */
+  q01b: p => {
+    const total = Number(String(p.a) + String(p.b) + String(p.c) + String(p.d));
+    let inPackets = 0; for (let i = 0; i < p.c; i++) inPackets += 10;
+    return [total, inPackets];
+  },
+});
+```
+
+Note what the sample does **not** contain: `topic`, `tier`, `sector`, `xp`, `lesson`, `teaching`, `sources`, `prereqs`, an experiment or a variant.
+
+### 10.5 What the checks require
+
+`node qa/harness.js --realm found` checks every practice mission that exists:
+
+- schema: the id is `parent + letter`, the letter is in `REALM.practice.kinds` and `kind` matches it; every required field of §10.2 is present and no other field is;
+- the parent exists and is a learn mission of the pack; no learn mission lists a practice mission in `prereqs`;
+- inheritance: `topic`, `tier`, `sector`, `lesson`, `teaching`, `sources`, `xp` and the chapter are the parent's; `prereqs` is `[parent]`; there is no `artifact`, no experiment and no variant under the practice id;
+- everything §2.1 requires of a mission that is not inherited (texts, numeric answers, labels, tolerance, at least two guided steps, the worked example's numbers differ from the prompt's);
+- `title` is unique in the pack, `brief` is not the parent's, and the prompt with its numbers removed differs from the parent's and from each sibling's;
+- `'applied'` has two or three guided steps; `uses` is only on a `'challenge'` and names an earlier learn mission;
+- a generator exists, and over the canonical build and 40 draws the hints do not contain every asked-for answer (a number the prompt already states does not count);
+- a play-through: locked before the parent is solved, then straight to the problem with "Review the lesson", XP by tier, the first-try ★, the miss logged under the concept, chapters complete on learn missions alone, the top rank only with every mission.
+
+A planned practice mission that is not written yet is a **NOTE**, not a failure, so the realm stays shippable while the files fill up. `--complete-practice` turns the note into a failure; use it when all 120 are in.
+
+`node qa/generators.js --realm found --strict --draws 1000` treats a practice mission like any other mission: it **fails** one without a generator or without an oracle, compares `build(canonical)` with the authored text, and checks every draw against the oracle. `qa/realms/found/oracle-pack-checks.js` (tolerance against the answer's precision, "+ 0", a written-out coefficient 1, a hint ending in "= answer.") also runs on practice missions.
+
+```sh
+node qa/generators.js --realm found --strict --draws 1000 q01b   # one practice mission
+node qa/show-mission.js q01b --realm found --draw 3              # print it, and three generated versions
+node qa/harness.js --realm found                                 # all checks; missing practice is a NOTE
+node qa/harness.js --realm found --complete --complete-practice  # at the end: all 40 learn and all 120 practice
+```

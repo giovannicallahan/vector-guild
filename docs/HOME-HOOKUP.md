@@ -1,5 +1,10 @@
 # Hooking the home view into the shell
 
+> Status (2.2): these edits are done; `game/index.html` loads the home view. Two things differ from the text below.
+> The Collection action is a button drawn by `VGCollectionUI.chip` that opens the overlay (not an `href`), and Back
+> goes through `backAction` in `game/shell/shell.js` (collection, backup dialog, home details panel, then leave).
+> The rest is kept as a record of the hookup.
+
 `game/shell/home.js` and `game/shell/home.css` are finished and tested on their own through
 `game/home-preview.html`. Nothing loads them from `game/index.html` yet. These are the edits that make the
 wormhole end on the home view instead of the star map. Line references are to the files as they were when

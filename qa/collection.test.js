@@ -116,7 +116,7 @@ test('chapters are paid on the realm page that knows them, once each', () => {
   const realmPage = page(new Map([[V2, JSON.stringify({ v: 2, seed: 7, realms: { la: slice(['q01', 'q02', 'zz9']) } })]]), { REALM: { id: 'la', saveId: 'la' }, QUESTS: [{ id: 'q01' }, { id: 'q02' }, { id: 'q03' }], CHAPTERS: [{ index: 0, name: 'One', ids: ['q01', 'q02'] }, { index: 1, name: 'Two', ids: ['q03'] }, { index: 2, name: 'Empty', ids: [] }] });
   const ev = realmPage.C.settle();
   eq(types(ev).filter(t => !t.startsWith('achievement')), ['solve', 'solve', 'chapter'], 'an id that is not a mission of this realm is not paid; an empty chapter is never complete');
-  eq(plain(realmPage.C.pageRealm()), { id: 'la', missions: 3, ids: ['q01', 'q02', 'q03'], chapters: [{ index: 0, name: 'One', ids: ['q01', 'q02'] }, { index: 1, name: 'Two', ids: ['q03'] }, { index: 2, name: 'Empty', ids: [] }] });
+  eq(plain(realmPage.C.pageRealm()), { id: 'la', missions: 3, learn: 3, ids: ['q01', 'q02', 'q03'], chapters: [{ index: 0, name: 'One', ids: ['q01', 'q02'] }, { index: 1, name: 'Two', ids: ['q03'] }, { index: 2, name: 'Empty', ids: [] }] });
 });
 
 test('a star is only paid for a solved mission, and lists with duplicates or junk pay once', () => {
@@ -379,8 +379,15 @@ test('achievement thresholds: one short is not enough; progress counts up and is
     eq(plain(a.progress(at({ [field]: goal - 1 }))), { have: goal - 1, need: goal }); eq(plain(a.progress(at({ [field]: goal + 50 }))), { have: goal, need: goal });
   }
   /* Finished realms need the mission count from the registry (or from the realm page). */
-  S.putRealm('found', slice(ids(39))); assert.equal(C.context().realms.found.finished, false); assert.equal(C.context().realms.found.missions, 40);
-  S.putRealm('found', slice(ids(40))); assert.equal(C.context().realms.found.finished, true); assert.equal(C.context().realms.la, undefined);
+  /* Foundations: 40 learn missions (complete) and 160 missions with practice (finished). A practice id ends in a letter. */
+  const withPractice = n => ids(40).concat(ids(40).flatMap(q => ['b', 'c', 'd'].map(l => q + l)).slice(0, n));
+  S.putRealm('found', slice(ids(39).concat(['q01b', 'q01c']))); assert.equal(C.context().realms.found.complete, false, 'practice does not stand in for a concept'); assert.equal(C.context().practice, 2);
+  assert.equal(C.context().realms.found.missions, 160); assert.equal(C.context().realms.found.learn, 40);
+  S.putRealm('found', slice(ids(40))); assert.equal(C.context().realms.found.complete, true); assert.equal(C.context().realms.found.finished, false); assert.equal(C.context().realms.la, undefined);
+  assert.equal(A.find(a => a.id === 'found-done').test(C.context()), true); assert.equal(A.find(a => a.id === 'found-master').test(C.context()), false);
+  S.putRealm('found', slice(withPractice(119))); assert.equal(C.context().realms.found.finished, false);
+  S.putRealm('found', slice(withPractice(120))); assert.equal(C.context().realms.found.finished, true); assert.equal(A.find(a => a.id === 'found-master').test(C.context()), true);
+  S.putRealm('found', slice(ids(40)));
   S.putRealm('mystery', slice(ids(500))); assert.equal(C.context().realms.mystery.finished, false, 'a realm with no known mission count is never "finished"');
   /* Every landmark of a realm: the realm finished, its chapters paid, and as many landmarks as chapters. */
   S.putRealm('found', slice(ids(40), [], { landmarks: [0, 1, 2, 3, 4, 5] })); C.settle(FOUND); assert.equal(C.context().landmarkRealm, false); assert.equal(C.context().landmarks, 6);

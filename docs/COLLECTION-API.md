@@ -139,15 +139,17 @@ Built from the save only (realm slices, `meta`), plus the registry's mission cou
 ```
 { solved, stars, chapters, landmarks,     // totals over every realm
   realmsWithSolves,                       // realms with at least one solved mission
-  realms: { <id>: { solved, stars, chapters, landmarks, missions, finished } },
-  landmarkRealm,                          // one finished realm has as many landmarks as chapters
+  practice,                               // practice missions solved (ids like q01b); part of `solved`
+  realms: { <id>: { solved, stars, chapters, landmarks, missions, finished, learn, learned, complete } },
+  landmarkRealm,                          // one realm with every concept learned has as many landmarks as chapters
   drills, pulls,
   figures, copiesMax, legendary, equipped,
   fieldBest: {have, need}, fieldDone }
 ```
 
 - `chapters` counts chapters already paid (`meta.paid[realm].chapters`), so it grows on realm pages.
-- `missions` comes from `VG_REALMS` (or the realm page); `finished` = solved count reaches it.
+- `missions` comes from `VG_REALMS` (or the realm page) and counts learn and practice missions; `finished` = solved count reaches it.
+- `learn` is the number of learn missions (the registry part's `learn`, or the realm page's count; equal to `missions` for a realm without practice); `learned` counts solved ids that are not practice ids (`q01b`); `complete` = `learned` reaches `learn`. Chapters and landmarks depend on learn missions only (docs/PACK-FORMAT.md §10).
 - `fieldBest` is the field closest to complete. Fields with a single figure are ignored when a larger field exists.
 
 ## Other

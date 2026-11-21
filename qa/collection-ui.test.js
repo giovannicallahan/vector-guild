@@ -23,7 +23,7 @@ const FIGURES = Array.from({ length: 12 }, (_, i) => ({ id: 'f' + i, name: 'Figu
 function makePage(storage = new Map()) {
   const doc = { activeElement: null };
   class Node {
-    constructor(tag) { this.tagName = String(tag).toUpperCase(); this.nodeType = 1; this.children = []; this.parentNode = null; this.attrs = {}; this.listeners = {}; this.style = {}; this.className = ''; this._text = ''; this.id = ''; this.hidden = false; this.disabled = false; this.tabIndex = 0; this.open = false; this.modal = false; this.title = '';
+    constructor(tag) { this.tagName = String(tag).toUpperCase(); this.nodeType = 1; this.children = []; this.parentNode = null; this.attrs = {}; this.listeners = {}; this.style = { setProperty(k, v) { this[k] = String(v); }, removeProperty(k) { delete this[k]; }, getPropertyValue(k) { return this[k] || ''; } }; this.className = ''; this._text = ''; this.id = ''; this.hidden = false; this.disabled = false; this.tabIndex = 0; this.open = false; this.modal = false; this.title = '';
       const self = this; this.classList = { add: c => { if (!self.classList.contains(c)) self.className = (self.className + ' ' + c).trim(); }, remove: c => { self.className = self.className.split(/\s+/).filter(x => x && x !== c).join(' '); }, contains: c => self.className.split(/\s+/).includes(c), toggle: (c, on) => { if (on) self.classList.add(c); else self.classList.remove(c); } }; }
     get childNodes() { return this.children; }
     get firstChild() { return this.children[0] || null; }
@@ -44,6 +44,7 @@ function makePage(storage = new Map()) {
     get isConnected() { return doc.body.contains(this); }
     walk(out = []) { for (const c of this.children) if (c.nodeType === 1) { out.push(c); c.walk(out); } return out; }
     querySelectorAll(sel) { return sel === '[data-figure]' ? this.walk().filter(n => n.getAttribute('data-figure') !== null) : []; }
+    querySelector() { return null; }
     matches(sel) { return sel === ':modal' ? this.modal : false; }
     showModal() { this.open = true; this.modal = true; }
     close() { if (!this.open) return; this.open = false; this.modal = false; this.emit('close'); }

@@ -3,6 +3,9 @@
           node qa/harness.js --realm found      another pack: every generic per-mission check, with that pack's
           node qa/harness.js found              chapters, source rule and ranks, and a play-through of its first mission
    Option: --complete  fail when a pack declares chapter missions that are not written yet (otherwise a note).
+           --complete-practice  fail when a planned practice mission is not written yet (otherwise a note).
+   Practice missions (docs/PACK-FORMAT.md, "Practice missions") are checked wherever a pack has them: schema, parent,
+   kind, what they inherit, hints, prompts, unlocking, the straight-to-the-problem dialog and the drop-down menus.
    The pack's scripts are read from game/realms/packs.js in the order realm.html loads them, with the scripts every
    realm page shares (VG_REALM_SHARED: the collection) around them. Every page load below has the collection running,
    so the linear algebra checks also prove that it changes no XP, answer or unlock.
@@ -19,7 +22,7 @@ vm.runInNewContext(read('realms/packs.js'), { window: packsWindow });
 const PACKS = packsWindow.VG_PACKS, SHARED = packsWindow.VG_REALM_SHARED;
 const realmAt = args.indexOf('--realm');
 const realm = realmAt >= 0 ? args[realmAt + 1] : (args.find(a => !a.startsWith('--') && Object.prototype.hasOwnProperty.call(PACKS, a)) || 'la');
-const complete = args.includes('--complete');
+const complete = args.includes('--complete'), completePractice = args.includes('--complete-practice');
 if (!Object.prototype.hasOwnProperty.call(PACKS, realm)) { console.error(`FAIL: unknown realm "${realm}"; packs in game/realms/packs.js: ${Object.keys(PACKS).join(', ')}`); process.exit(1); }
 const pack = PACKS[realm], isLA = realm === 'la';
 const byId = {};
@@ -51,6 +54,9 @@ if (isLA) assert.ok(curriculumWindow.VisualLab && curriculumWindow.Graph2D, '3D 
 for (const q of curriculumWindow.QUESTS) byId[q.id] = q;
 const quests = curriculumWindow.QUESTS;
 const questCount = quests.length;
+/* Learn missions (one per concept) and practice missions (those with a parent). Linear algebra has only learn missions. */
+const learn = quests.filter(q => !q.parent), practice = quests.filter(q => q.parent);
+if (isLA) assert.equal(practice.length, 0, 'linear algebra has no practice missions: its 68 missions are unchanged');
 
 /* Pack configuration: every field the engine reads is present, and a feature that is off has no script. */
 const declared = Array.isArray(REALM.chapters) ? REALM.chapters : null;
@@ -78,8 +84,9 @@ assert.ok(quests.every(q => q.sources?.length && q.sources.every(s => /^https:\/
 assert.ok(quests.every(q => q.sources.some(s => REALM.sourceRule.publisherPattern.test(s.title))), `every mission has a per-lesson ${REALM.sourceRule.label} link`);
 if (isLA) assert.ok(curriculumWindow.CURRICULUM_SCOPE?.includes(`${questCount}-mission`), 'field guide scope follows actual quest count');
 assert.ok(curriculumWindow.ConceptLab && curriculumWindow.EXPERIMENTS, 'predict-first experiment runner and models load');
-assert.ok(quests.every(q => typeof curriculumWindow.EXPERIMENTS[q.id] === 'function'), 'every mission has a topic-specific experiment model');
-for (const q of quests) for (let t = -10; t <= 10; t++) {
+assert.ok(learn.every(q => typeof curriculumWindow.EXPERIMENTS[q.id] === 'function'), 'every learn mission has a topic-specific experiment model');
+assert.ok(practice.every(q => typeof curriculumWindow.EXPERIMENTS[q.parent] === 'function' && curriculumWindow.EXPERIMENTS[q.id] === undefined), 'a practice mission uses its parent\'s experiment and registers none of its own');
+for (const q of learn) for (let t = -10; t <= 10; t++) {
   const model = curriculumWindow.EXPERIMENTS[q.id](t);
   assert.ok(model.prompt && model.formula && model.values?.length >= 2, `${q.id}@${t}: experiment completeness`);
   assert.ok(model.values.every(([,v]) => Number.isFinite(v)), `${q.id}@${t}: numeric outputs finite`);
@@ -89,7 +96,7 @@ for (const q of quests) for (let t = -10; t <= 10; t++) {
 const sectorNames = REALM.sectors.map(s => s.name);
 for (const q of quests) {
   for (const key of ['id', 'title', 'topic', 'tier', 'sector', 'brief', 'lesson', 'prompt', 'solution']) assert.ok(typeof q[key] === 'string' && q[key].trim(), `${q.id}: ${key} text`);
-  assert.ok(/^q\d{2}$/.test(q.id), `${q.id}: local id of the form q01`);
+  assert.ok((q.parent ? /^q\d{2}[a-z]$/ : /^q\d{2}$/).test(q.id), `${q.id}: local id of the form q01 (learn) or q01b (practice)`);
   assert.ok(REALM.tiers.includes(q.tier), `${q.id}: tier "${q.tier}" is one of ${REALM.tiers.join(', ')}`);
   assert.ok(sectorNames.includes(q.sector), `${q.id}: sector "${q.sector}" is one of the pack\'s sectors`);
   assert.ok(Array.isArray(q.answer) && q.answer.length > 0 && q.answer.every(Number.isFinite), `${q.id}: numeric answers`);
@@ -181,7 +188,17 @@ function boot(storage = new Map(), page = {}) {
     });
     return elements.get(selector);
   }
-  const content = element('#content'); content.querySelectorAll = () => [];
+  /* The drop-down buttons of the page as drawn: enough of a button for render() to wire and for a test to press.
+     Pressing one (toggles().find(...).onclick()) is a player opening or closing that drop-down. */
+  let ddButtons = [];
+  const content = element('#content'); content.querySelectorAll = sel => {
+    if (sel !== '.dd-toggle') return [];
+    ddButtons = [...String(content.innerHTML || '').matchAll(/class="dd-toggle" id="([^"]+)" data-dd="([^"]+)" aria-expanded="(true|false)" aria-controls="([^"]+)"/g)].map(m => {
+      let open = m[3] === 'true';
+      return { id: m[1], dataset: { dd: m[2] }, onclick: null, getAttribute: n => n === 'aria-expanded' ? String(open) : n === 'aria-controls' ? m[4] : null, setAttribute(n, v) { if (n === 'aria-expanded') open = v === 'true'; } };
+    });
+    return ddButtons;
+  };
   const dc = element('#dialog-content');
   const stage = element('#mission-stage');
   Object.defineProperty(stage, 'innerHTML', { get() { return this._html; }, set(html) {
@@ -209,14 +226,18 @@ function boot(storage = new Map(), page = {}) {
   dc.querySelectorAll = sel => sel === '#mission-stage > .mission-panel > .answer-grid input' ? mainInputs : [];
   Object.defineProperty(dc, 'innerHTML', { get() { return this._html || ''; }, set(html) {
     this._html = html;
-    const id = (html.match(/OPERATION \/ (Q\d+)/) || [])[1]?.toLowerCase();
+    const id = (html.match(/OPERATION \/ (Q\d+[A-Z]?)/) || [])[1]?.toLowerCase();
     if (id) { activeId = id; mainInputs = []; guidedInputs = []; stage._html = html; guided._html = ''; }
   }});
-  const dialog = element('#dialog'); dialog.showModal = () => {}; dialog.close = () => {};
+  /* The dialog keeps its listeners, so a test can close it as the browser would (closeDialog fires "close"). */
+  const dialogListeners = {};
+  const dialog = element('#dialog'); dialog.showModal = () => {}; dialog.close = () => {}; dialog.addEventListener = (type, fn) => { dialogListeners[type] = fn; };
   const document = {
     querySelector: s => s === '#content' ? content : s === '#dialog' ? dialog : s === '#dialog-content' ? dc :
       s === '#mission-stage' ? stage : s === '#guided' ? guided : element(s),
     querySelectorAll: () => [], createElement: () => element('created'),
+    getElementById: id => ddButtons.find(b => b.id === id) || { hidden: false },
+    activeElement: null,
   };
   const context = {
     window: pageWindow, Outpost: curriculumWindow.Outpost,
@@ -230,9 +251,11 @@ function boot(storage = new Map(), page = {}) {
     __getMain: () => mainInputs, __getGuided: () => guidedInputs,
     alert() {}, confirm: () => true, Blob: class {}, URL: { createObjectURL(){}, revokeObjectURL(){} }, console,
   };
-  const instrumented = appSource.replace(/\}\)\(\);\s*$/, 'globalThis.__qa={normalize,mission,available:(id)=>available(quests.find(q=>q.id===id)),getState:()=>JSON.parse(JSON.stringify(state)),getMain:()=>__getMain(),getGuided:()=>__getGuided(),activeId:()=>activeId,variant:()=>activeVariant,rank,review,parseNumber,toolResult,level,current:()=>currentMission,reviewDue,pickReview,render,setState:(patch)=>Object.assign(state,patch)};})();');
+  const instrumented = appSource.replace(/\}\)\(\);\s*$/, 'globalThis.__qa={normalize,mission,available:(id)=>available(quests.find(q=>q.id===id)),getState:()=>JSON.parse(JSON.stringify(state)),getMain:()=>__getMain(),getGuided:()=>__getGuided(),activeId:()=>activeId,variant:()=>activeVariant,rank,review,next:()=>next()?.id||null,show:(v)=>{view=v;render();return content.innerHTML},parseNumber,toolResult,level,current:()=>currentMission,reviewDue,pickReview,render,setState:(patch)=>Object.assign(state,patch),readNumber,nextRoll:(id,shown)=>nextRoll(byId.get(id),shown),roll:(id)=>state.rolls[id]||0};})();');
   vm.runInNewContext(instrumented, context);
-  return { qa: context.__qa, el: element, dc, stage, guided, storage, curriculum: curriculumWindow.QUESTS, fire: (type, event) => listeners[type] && listeners[type](event), page: pageInfo, store: storeWindow.VGSave, window: pageWindow, collection: pageWindow.VGCollection };
+  /* focusOn(id, key): the player's focus is on mission id's card, inside the drop-down with that key. */
+  const focusOn = (questId, key) => { document.activeElement = questId ? { dataset: { quest: questId }, closest: sel => sel === '.dd-panel' && key ? { getAttribute: n => n === 'aria-labelledby' ? (ddButtons.find(b => b.dataset.dd === key) || {}).id : null } : null } : null; };
+  return { toggles: () => ddButtons, closeDialog: () => dialogListeners.close && dialogListeners.close(), focusOn, qa: context.__qa, el: element, dc, stage, guided, storage, curriculum: curriculumWindow.QUESTS, fire: (type, event) => listeners[type] && listeners[type](event), page: pageInfo, store: storeWindow.VGSave, window: pageWindow, collection: pageWindow.VGCollection };
 }
 /* A second page's view of the same storage (the star map, another tab): its own VGSave over the same Map. */
 boot.storeOver = storage => {
@@ -290,6 +313,15 @@ if (isLA) {
   assert.match(el('.feedback')._html, /build-payoff/);
   assert.match(el('.feedback')._html, /INSTALLATION COMPLETE/);
   assert.match(el('.feedback')._html, /installed/);
+  /* Each answer field says whether it is right, in words that fit any pack (not "component"). */
+  assert.equal(el('#answer-status-0').textContent, '✓ This one is right');
+  /* Numbers as typed. A comma is a decimal point ("1,5"), and also a thousands separator when that is what fits. */
+  assert.equal(qa.parseNumber('1,5'), 1.5); assert.equal(qa.readNumber('1,5', x => Math.abs(x - 1.5) <= .01), 1.5);
+  assert.equal(qa.readNumber('1,432', x => Math.abs(x - 1432) <= .01), 1432, 'a correct whole number with a thousands comma is read as that number');
+  assert.equal(qa.readNumber('1,432', x => Math.abs(x - 1.432) <= .01), 1.432, 'a decimal comma still wins when it fits');
+  assert.equal(qa.readNumber('1,432', x => Math.abs(x - 7) <= .01), 1.432, 'a wrong answer keeps the decimal reading');
+  assert.equal(qa.readNumber('−12,345,678'), -12345678); assert.equal(qa.readNumber('1,234.5', x => x === 1234.5), 1234.5);
+  assert.ok(Number.isNaN(qa.readNumber('1,43,2')) && Number.isNaN(qa.readNumber('1 432')) && qa.readNumber('12,34') === 12.34 && qa.readNumber('7/6') === 7 / 6);
   assert.equal(typeof el('#next-mission').onclick, 'function', 'payoff includes next-mission action');
   assert.equal(typeof el('#see-outpost').onclick, 'function', 'payoff includes outpost action');
   const resumed = boot(h.storage);
@@ -446,16 +478,20 @@ if (isLA) assert.ok(chapters.every(c => c.ids.length >= 6 && c.ids.length <= 10)
 else {
   assert.ok(declared.every(c => c.ids.length >= 5 && c.ids.length <= 6), 'each declared chapter has five or six missions');
   assert.equal(new Set(declared.flatMap(c => c.ids)).size, declared.flatMap(c => c.ids).length, 'no mission is declared in two chapters');
-  assert.ok(quests.every(q => declared.some(c => c.ids.includes(q.id))), 'every mission belongs to a declared chapter');
+  assert.ok(learn.every(q => declared.some(c => c.ids.includes(q.id))), 'every learn mission belongs to a declared chapter');
   for (const q of quests) assert.equal(q.sector, REALM.sectors[q.chapter].name, `${q.id}: sector matches its chapter (${REALM.sectors[q.chapter].name})`);
   for (const [i, c] of declared.entries()) if (c.tier) for (const id of chapters[i].ids) assert.equal(byId[id].tier, c.tier, `${id}: chapter ${i + 1} missions are ${c.tier}`);
 }
-assert.deepEqual(Array.from(quests.map(q => q.id)), Array.from(chapters.flatMap(c => c.ids)), 'campaign order follows the chapters');
+assert.deepEqual(Array.from(learn.map(q => q.id)), Array.from(chapters.flatMap(c => c.ids)), 'campaign order follows the chapters');
+/* A concept's practice missions follow its learn mission, in id order; a chapter lists them apart from its learn missions. */
+assert.deepEqual(Array.from(quests.map(q => q.id)), Array.from(learn.flatMap(q => [q.id, ...practice.filter(p => p.parent === q.id).map(p => p.id).sort()])), 'practice missions follow their learn mission');
+for (const c of chapters) assert.deepEqual(Array.from(c.practice), Array.from(practice.filter(p => c.ids.includes(p.parent)).map(p => p.id)), `${c.name}: chapter.practice lists the practice missions of its concepts`);
 
 // Variants: every mission has a problem statement without float noise or doubled signs, and
 // generated questions have finite targets that actually vary.
 const variants = curriculumWindow.Variants;
-for (const q of quests) {
+assert.ok(practice.every(q => !variants.has(q.id) && variants.has(q.parent)), 'a practice mission uses its parent\'s review drill and registers none of its own');
+for (const q of learn) {
   assert.ok(variants.has(q.id), `${q.id}: variant statement exists`);
   const targets = new Set();
   for (let t = -10; t <= 10; t++) {
@@ -526,13 +562,17 @@ if (isLA) {
 /* Packs other than linear algebra: the declared campaign is complete (or reported as not yet written),
    ranks reach the top at the declared mission count, and the engine plays the pack's first mission through
    with its own save slice. */
-let missing = [];
+let missing = [], missingPractice = [], plannedPractice = [];
 if (!isLA) {
   const ids = declared.flatMap(c => c.ids);
   missing = ids.filter(id => !byId[id]);
   // Copy out of the vm realm: strict deepEqual compares Array prototypes, so a vm-made [] never equals [].
   if (complete) assert.deepEqual(Array.from(missing), [], 'every declared mission is written');
-  assert.equal(ranks[ranks.length - 1].at, ids.length, 'the top rank needs every declared mission');
+  /* Planned practice: one mission per declared concept and per letter of REALM.practice.kinds. */
+  plannedPractice = ids.flatMap(id => Object.keys(REALM.practice?.kinds || {}).sort().map(letter => id + letter));
+  missingPractice = plannedPractice.filter(id => !byId[id]);
+  if (completePractice) assert.deepEqual(Array.from(missingPractice), [], 'every planned practice mission is written');
+  assert.equal(ranks[ranks.length - 1].at, ids.length + plannedPractice.length, 'the top rank needs every declared mission, learn and practice');
   for (const name of ['Docking', 'Contracts', 'Board', 'HandsOn', 'VisualLab', 'Graph2D']) if (!pack.scripts.some(f => ({ Docking: 'docking.js', Contracts: 'contracts.js', Board: 'board.js', HandsOn: 'handson.js', VisualLab: 'lab3d.js', Graph2D: 'graph-lab.js' })[name] === f)) assert.equal(curriculumWindow[name], undefined, `${name} is not loaded`);
   const fill = (inputs, values) => { assert.equal(inputs.length, values.length); inputs.forEach((x, i) => x.value = String(values[i])); };
   const first = quests[0], play = boot();
@@ -558,6 +598,189 @@ if (!isLA) {
     const xpBefore = drill.qa.getState().xp; drill.qa.review(); assert.match(drill.dc._html, /REVIEW DRILL/);
     drill.el('#review-answer').value = String(drill.qa.variant().target); drill.el('#review-check').onclick();
     assert.match(drill.el('#review-feedback').textContent, /^Correct/, 'a review drill accepts its own target'); assert.equal(drill.qa.getState().xp, xpBefore, 'drills pay no XP');
+  }
+}
+
+/* ---------- Practice missions (docs/PACK-FORMAT.md, "Practice missions") ---------- */
+{
+  const raw = Array.from(curriculumWindow.PRACTICE || []), kinds = REALM.practice?.kinds || null, Gen = curriculumWindow.Gen;
+  const OWN = ['id', 'parent', 'kind', 'title', 'brief', 'prompt', 'answer', 'labels', 'tolerance', 'hints', 'solution', 'guidance'], OPTIONAL = ['uses'];
+  const INHERITED = ['topic', 'tier', 'sector', 'lesson', 'teaching', 'sources', 'xp', 'chapter'];
+  assert.ok(!raw.length || kinds, 'a pack with practice missions declares REALM.practice.kinds');
+  if (kinds) for (const [letter, kind] of Object.entries(kinds)) assert.ok(/^[a-z]$/.test(letter) && ['setting', 'applied', 'challenge'].includes(kind), `REALM.practice.kinds.${letter}: a lowercase letter and one of setting, applied, challenge`);
+  assert.equal(practice.length, raw.length, `every entry of window.PRACTICE became a mission; these have no learn mission as parent, or reuse an id: ${raw.filter(p => !byId[p?.id]?.parent).map(p => p?.id).join(' ') || 'none'}`);
+  assert.equal(new Set(raw.map(p => p.id)).size, raw.length, 'practice ids are unique');
+  const position = new Map(quests.map((q, i) => [q.id, i])), noDigits = text => String(text).replace(/[\d.,−-]+/g, '#').replace(/\s+/g, ' ').trim();
+  const reEsc = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), token = a => new RegExp(`(?<![\\d.−])${reEsc(Gen.n(a))}(?![\\d/]|\\.\\d)`);
+  const titles = new Map(); for (const q of quests) { assert.ok(!titles.has(q.title), `${q.id}: the title "${q.title}" is already used by ${titles.get(q.title)}`); titles.set(q.title, q.id); }
+  for (const p of raw) {
+    const q = byId[p.id], parent = byId[p.parent], letter = String(p.id).slice(-1);
+    /* Schema: its own fields and nothing else. */
+    assert.ok(/^q\d{2}[a-z]$/.test(p.id), `${p.id}: a practice id is its parent's id and one lowercase letter (q01b)`);
+    assert.ok(parent && !parent.parent, `${p.id}: parent "${p.parent}" is a learn mission of this pack`);
+    assert.equal(p.id.slice(0, -1), p.parent, `${p.id}: the id starts with the parent's id`);
+    assert.ok(Object.prototype.hasOwnProperty.call(kinds, letter), `${p.id}: letter "${letter}" is one of ${Object.keys(kinds).join(', ')}`);
+    assert.equal(p.kind, kinds[letter], `${p.id}: kind is "${kinds[letter]}" for letter ${letter}`);
+    for (const key of OWN) assert.ok(key in p, `${p.id}: supplies ${key}`);
+    for (const key of Object.keys(p)) assert.ok(OWN.includes(key) || OPTIONAL.includes(key), `${p.id}: "${key}" is not a practice field (${INHERITED.includes(key) || ['prereqs', 'artifact'].includes(key) ? 'it comes from the parent' : 'unknown'})`);
+    for (const key of ['title', 'brief', 'prompt', 'solution']) assert.ok(typeof p[key] === 'string' && p[key].trim(), `${p.id}: ${key} text`);
+    /* Inheritance: teaching, sources, tier, XP, sector and chapter are the parent's own; it unlocks on the parent alone. */
+    for (const key of INHERITED) assert.equal(q[key], parent[key], `${p.id}: ${key} is inherited from ${parent.id}`);
+    assert.deepEqual(Array.from(q.prereqs), [parent.id], `${p.id}: unlocks when ${parent.id} is solved`);
+    assert.equal(q.artifact, undefined, `${p.id}: practice missions carry no artifact`);
+    assert.ok(!learn.some(l => (l.prereqs || []).includes(p.id)), `${p.id}: no learn mission depends on a practice mission`);
+    /* Its own problem: a new title, brief and prompt, not the parent's problem with other numbers. */
+    assert.notEqual(p.brief, parent.brief, `${p.id}: its own brief`);
+    assert.notEqual(noDigits(p.prompt), noDigits(parent.prompt), `${p.id}: the prompt differs from the parent's prompt by more than its numbers`);
+    for (const other of raw) if (other !== p && other.parent === p.parent) assert.notEqual(noDigits(other.prompt), noDigits(p.prompt), `${p.id}: the prompt differs from ${other.id}'s prompt by more than its numbers`);
+    if (p.kind === 'applied') assert.ok(p.guidance.length >= 2 && p.guidance.length <= 3, `${p.id}: an applied problem has two or three guided steps`);
+    if (p.uses !== undefined) { assert.equal(p.kind, 'challenge', `${p.id}: only a challenge names an earlier concept in "uses"`); assert.ok(byId[p.uses] && !byId[p.uses].parent && position.get(p.uses) < position.get(parent.id), `${p.id}: uses "${p.uses}" is a learn mission earlier than ${parent.id}`); }
+    /* Its own generator, and hints that leave the answering to the player. A number the prompt states does not count;
+       a chance match in one build does not either, so the rule is about most builds. */
+    assert.ok(Gen.has(p.id), `${p.id}: has its own generator in window.MISSION_GEN`);
+    let builds = 0, leaks = 0;
+    for (let roll = 0; roll <= 40; roll++) {
+      const m = roll ? Gen.instance(q, 777, roll) : Gen.instance(q, 0, 0);
+      if (m === q && roll) continue; // a failed build is reported by qa/generators.js
+      builds++;
+      const asked = m.answer.filter(a => !token(a).test(m.prompt));
+      if (asked.length && asked.every(a => m.hints.some(h => token(a).test(h)))) leaks++;
+    }
+    assert.ok(leaks <= builds / 2, `${p.id}: the hints contain every answer in ${leaks} of ${builds} builds`);
+  }
+  if (practice.length) {
+    /* Play-through. A practice mission is locked until its parent is solved, then goes straight to the problem with
+       the parent's lesson behind "Review the lesson"; it pays XP by tier, a skill point and stardust like any mission. */
+    const KEY = 'vector-guild-save-v2', sid = REALM.saveId || REALM.id, p0 = practice[0], parent = byId[p0.parent];
+    const saved = ids => new Map([[KEY, JSON.stringify({ v: 2, seed: 0, intro: true, realms: { [sid]: { solved: ids, tools: [] } } })]]);
+    const upTo = learn.slice(0, learn.indexOf(parent) + 1).map(q => q.id), xpOf = ids => ids.reduce((n, id) => n + byId[id].xp, 0);
+    const fill = (inputs, values) => { assert.equal(inputs.length, values.length); inputs.forEach((x, i) => x.value = String(values[i])); };
+    const locked = boot(saved(upTo.slice(0, -1)));
+    assert.equal(locked.qa.available(p0.id), false, `${p0.id} is locked until ${parent.id} is solved`);
+    locked.qa.mission(p0.id); assert.equal(locked.qa.getMain().length, 0, 'a locked practice mission shows no answer boxes'); assert.match(locked.stage._html, /Locked\. Complete /);
+    const lockedHome = locked.el('#content').innerHTML;
+    assert.match(lockedHome, new RegExp(`class="practice-chip locked" data-quest="${p0.id}"[^>]*aria-label="[^"]*Locked[^"]*"[^>]*>.*?◇ LOCKED`), 'a locked practice chip says so in text and to a screen reader');
+    assert.equal(boot(saved([p0.id])).qa.getState().solved.length, 0, 'a save that claims a practice mission without its parent loses the claim');
+    const run = boot(saved(upTo)), after = learn[learn.indexOf(parent) + 1];
+    assert.deepEqual(Array.from(run.qa.getState().solved), Array.from(upTo), 'a save with learn missions only loads unchanged');
+    assert.equal(run.qa.available(p0.id), true); if (after) { assert.equal(run.qa.available(after.id), (after.prereqs || []).every(id => upTo.includes(id)), 'the next concept depends only on its own prerequisites'); assert.equal(run.qa.next(), learn.find(q => !upTo.includes(q.id) && (q.prereqs || []).every(id => upTo.includes(id))).id, 'the next mission on the main path is a learn mission, not practice'); }
+    assert.match(run.el('#content').innerHTML, new RegExp(`class="practice-chip ready" data-quest="${p0.id}"`));
+    run.qa.mission(p0.id);
+    assert.equal(run.qa.getMain().length, p0.answer.length, 'a practice mission opens on the problem, with no "I\'m ready" step');
+    assert.match(run.stage._html, /<details class="lesson-review"><summary>Review the lesson<\/summary>/, 'the parent\'s lesson is collapsed behind "Review the lesson"');
+    assert.ok(run.stage._html.includes(parent.teaching.example.answer.replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')), 'and it is the parent\'s worked example');
+    assert.doesNotMatch(run.stage._html, /01 \/ LEARN/); assert.match(run.dc._html, new RegExp(`PRACTICE OPERATION / ${p0.id.toUpperCase()}<`));
+    fill(run.qa.getMain(), p0.answer.map(x => x + 7)); run.el('#submit-answer').onclick();
+    assert.equal(run.qa.getState().errors[parent.id]?.n, 1, 'a miss on a practice mission is logged under its concept'); assert.equal(run.qa.getState().errors[p0.id], undefined);
+    fill(run.qa.getMain(), p0.answer); run.el('#submit-answer').onclick();
+    assert.match(run.el('.feedback').textContent, /Mission complete/); assert.match(run.el('.feedback')._html, /PRACTICE COMPLETE/);
+    assert.equal(run.qa.getState().xp, xpOf(upTo) + REALM.tierXp[parent.tier], 'a practice mission pays the XP of its tier'); assert.equal(run.qa.getState().points, upTo.length + 1);
+    assert.deepEqual(Array.from(run.qa.getState().clean), [], 'a solve after a miss earns no first-try star');
+    assert.ok(JSON.parse(run.storage.get(KEY)).realms[sid].solved.includes(p0.id), 'the practice id is saved in the realm\'s slice');
+    assert.ok(JSON.parse(run.storage.get(KEY)).meta.paid[sid].solved.includes(p0.id), 'stardust is paid for a practice solve like any first solve');
+    assert.deepEqual(Array.from(boot(run.storage).qa.getState().solved), [...upTo, p0.id], 'practice progress survives a reload');
+    const starred = boot(saved(upTo)); starred.qa.mission(p0.id); fill(starred.qa.getMain(), p0.answer); starred.el('#submit-answer').onclick();
+    assert.deepEqual(Array.from(starred.qa.getState().clean), [p0.id], 'a first-check solve of a practice mission earns the star'); assert.ok(JSON.parse(starred.storage.get(KEY)).meta.paid[sid].clean.includes(p0.id), 'and the star is paid');
+    /* Chapters are complete on their learn missions alone; mastered needs the practice too. Ranks need everything. */
+    const learned = boot(saved(learn.map(q => q.id)));
+    const built = learned.qa.normalize({ solved: learn.map(q => q.id), tools: [], landmarks: chapters.map((_, i) => i) });
+    assert.equal(built.landmarks.length, Math.min(chapters.length, Math.floor(learn.length / REALM.landmarkCost)), 'every chapter is complete, so its landmark can be built, with no practice mission solved');
+    assert.equal((learned.el('#content').innerHTML.match(/✦ COMPLETE/g) || []).length, chapters.length); assert.doesNotMatch(learned.el('#content').innerHTML, /★ MASTERED/);
+    assert.equal(learned.qa.next(), practice[0].id, 'with every concept learned, practice is what comes next');
+    assert.notEqual(learned.qa.rank(), ranks[ranks.length - 1].title, 'the top rank needs the practice missions too');
+    /* learnAt: a rank is also held by that many concepts learned alone, so a save from before practice existed keeps its rank. */
+    const byLearn = ranks.filter(r => r.learnAt !== undefined);
+    assert.ok(byLearn.every((r, i) => !r.top && Number.isInteger(r.learnAt) && r.learnAt > 0 && r.learnAt <= r.at && r.learnAt <= learn.length && (i === 0 || r.learnAt > byLearn[i - 1].learnAt)), 'learnAt rises, never asks more than `at`, and is not on the top rank');
+    for (const r of byLearn) {
+      assert.equal(boot(saved(learn.slice(0, r.learnAt).map(q => q.id))).qa.rank(), r.title, `${r.learnAt} concepts learned hold the rank ${r.title}`);
+      assert.notEqual(boot(saved(learn.slice(0, r.learnAt - 1).map(q => q.id))).qa.rank(), r.title, `${r.learnAt - 1} concepts do not reach ${r.title}`);
+    }
+    if (byLearn.length) {
+      const some = boot(saved(learn.slice(0, byLearn[0].learnAt - 1).map(q => q.id)));
+      assert.match(some.el('#content').innerHTML, new RegExp('>1 NEW CONCEPT TO ' + byLearn[0].title + ' ·'), 'the strip counts the fewest steps to the next rank and says they are concepts');
+      /* The strip names what it counts. Practice does not move a count of concepts, so a count labelled MISSIONS must go
+         down with every practice mission solved, and a count labelled NEW CONCEPTS must be the concepts still to learn. */
+      const at = Math.min(2, byLearn.length - 1), r1 = byLearn[at], held = learn.slice(0, at ? byLearn[at - 1].learnAt : 0).map(q => q.id), drills = practice.filter(p => held.includes(p.parent)).map(p => p.id);
+      const gap = ids => { const m = boot(saved(ids)).el('#content').innerHTML.match(/<small>(\d+) (MISSIONS?|NEW CONCEPTS?) TO ([^<]*?) · \d+ XP TO NEXT LEVEL<\/small>/); assert.ok(m, 'the strip states the gap to the next rank'); return { n: Number(m[1]), unit: m[2], title: m[3] }; };
+      let before = null, sawMissions = 0, sawConcepts = 0;
+      for (let p = 0; p <= drills.length; p++) {
+        const g = gap(held.concat(drills.slice(0, p)));
+        assert.equal(/S$/.test(g.unit), g.n !== 1, 'singular for one, plural otherwise: ' + g.n + ' ' + g.unit);
+        if (g.title !== r1.title) break; // promoted by missions solved
+        if (/CONCEPT/.test(g.unit)) { sawConcepts++; assert.equal(g.n, r1.learnAt - held.length, 'a count of concepts is the concepts still to learn'); }
+        else { sawMissions++; if (before && /MISSION/.test(before.unit)) assert.equal(g.n, before.n - 1, 'solving a practice mission lowers a count of MISSIONS by one'); assert.equal(g.n, r1.at - held.length - p); }
+        if (before && before.n === g.n) assert.match(before.unit, /CONCEPT/, 'a count that practice leaves unchanged was never labelled MISSIONS');
+        before = g;
+      }
+      assert.ok(sawConcepts > 1 && sawMissions > 1, 'both ways of counting were seen (' + sawConcepts + ' concept counts, ' + sawMissions + ' mission counts)');
+    }
+    const everything = boot(saved(quests.map(q => q.id)));
+    assert.equal(everything.qa.rank(), ranks[ranks.length - 1].title, 'every mission solved reaches the top rank');
+    assert.equal(everything.qa.getState().xp, xpOf(quests.map(q => q.id)));
+    const full = chapters.filter(c => c.practice.length).length;
+    assert.equal((everything.el('#content').innerHTML.match(/★ MASTERED/g) || []).length, full, 'a chapter with all its practice solved shows as mastered');
+    /* Review drills are per concept: a practice mission never enters the pool. */
+    assert.ok(!practice.some(q => everything.qa.pickReview().id === q.id));
+  }
+}
+
+/* ---------- Drop-down menus: one per chapter in the campaign, the skill tree, the field guide and the artifacts ---------- */
+{
+  const KEY = 'vector-guild-save-v2', sid = REALM.saveId || REALM.id;
+  const toggles = html => [...html.matchAll(/<button type="button" class="dd-toggle" id="([^"]+)" data-dd="([^"]+)" aria-expanded="(true|false)" aria-controls="([^"]+)">/g)].map(m => ({ id: m[1], key: m[2], open: m[3] === 'true', panel: m[4] }));
+  const wellFormed = (html, view) => {
+    const list = toggles(html);
+    for (const t of list) {
+      const panel = html.match(new RegExp(`<div class="dd-panel" id="${t.panel}" role="region" aria-labelledby="${t.id}"( hidden)?>`));
+      assert.ok(panel, `${view}: drop-down ${t.key} controls a labelled panel`);
+      assert.equal(!panel[1], t.open, `${view}: ${t.key} is ${t.open ? 'shown' : 'hidden'} exactly when aria-expanded says so`);
+    }
+    assert.equal(new Set(list.map(t => t.id)).size, list.length, `${view}: drop-down ids are unique`);
+    assert.doesNotMatch(html, /<details class="sector chapter"/, `${view}: chapters are button drop-downs`);
+    return list;
+  };
+  const fresh = boot(), home = wellFormed(fresh.el('#content').innerHTML, 'campaign');
+  assert.equal(home.length, chapters.length, 'the campaign has one drop-down per chapter');
+  assert.deepEqual(home.filter(t => t.open).map(t => t.key), ['campaign:0'], 'a new player sees only the first chapter open');
+  for (const q of learn) assert.ok(fresh.el('#content').innerHTML.includes(`data-quest="${q.id}"`), `${q.id} is in the campaign list`);
+  /* Only the chapter with the next unsolved learn mission starts open, whatever practice is left behind it. */
+  const firstTwo = chapters[0].ids.concat(chapters[1].ids.slice(0, 1));
+  const later = boot(new Map([[KEY, JSON.stringify({ v: 2, seed: 0, intro: true, realms: { [sid]: { solved: firstTwo, tools: [] } } })]]));
+  const laterHome = later.el('#content').innerHTML;
+  assert.deepEqual(wellFormed(laterHome, 'campaign').filter(t => t.open).map(t => t.key), ['campaign:1']);
+  const c0 = chapters[0], count = laterHome.match(/data-dd="campaign:0".*?<span class="dd-count">(.*?)<\/span><span class="dd-bar/)[1];
+  assert.ok(count.startsWith(`${c0.ids.length} / ${c0.ids.length} ${isLA ? 'complete' : 'learned'}${c0.practice.length ? ` · 0 / ${c0.practice.length} practice` : ''}`), `chapter 1 count reads "${count}"`);
+  assert.match(laterHome, /data-dd="campaign:0".*?<span class="dd-bar dd-bar-learn" aria-hidden="true"><i style="width:100%"><\/i><\/span>/, 'a progress bar shows the learn share');
+  for (const view of ['skills', 'guide', 'artifacts']) {
+    const html = later.qa.show(view), list = wellFormed(html, view).filter(t => t.key.startsWith(view + ':'));
+    if (view !== 'artifacts') assert.equal(list.length, chapters.length, `${view}: one drop-down per chapter`);
+    else assert.equal(list.length, chapters.filter(c => c.ids.some(id => byId[id].artifact)).length, 'artifacts: one drop-down per chapter that has artifacts');
+    assert.ok(list.filter(t => t.open).length <= 1, `${view}: at most one drop-down starts open`);
+    if (view === 'skills') for (const q of learn) assert.ok(html.includes(`<button class="tree-node `) && html.includes(`data-quest="${q.id}"`), `${q.id} is in the skill tree`);
+    if (view === 'guide') { assert.equal((html.match(/<span class="guide-id">/g) || []).length, learn.length, 'the field guide lists each concept once'); }
+    if (view === 'artifacts') assert.equal((html.match(/<article class="card">/g) || []).length, quests.filter(q => q.artifact).length);
+  }
+  later.qa.show('campaign');
+  if (chapters.length > 1 && chapters[0].ids.length > 1) {
+    /* Finishing a chapter. The player looked into chapter 2 and closed it, then solved the last learn mission of
+       chapter 1 from its open drop-down. When the dialog closes: chapter 2 is now the current chapter and opens
+       (a remembered "closed" does not hide it), and chapter 1 stays open, so focus returns to the mission's card
+       and the practice it unlocked is in view. */
+    const last = chapters[0].ids[chapters[0].ids.length - 1], most = chapters[0].ids.slice(0, -1);
+    const open = h => toggles(h.el('#content').innerHTML).filter(t => t.open).map(t => t.key), press = (h, key) => h.toggles().find(b => b.dataset.dd === key).onclick();
+    const solveLast = h => { h.qa.mission(last); if (!h.qa.getMain().length) h.el('#ready').onclick(); h.qa.getMain().forEach((x, i) => x.value = String(byId[last].answer[i])); h.el('#submit-answer').onclick(); assert.ok(h.qa.getState().solved.includes(last), last + ' is solved'); h.closeDialog(); };
+    const start = () => boot(new Map([[KEY, JSON.stringify({ v: 2, seed: 0, intro: true, realms: { [sid]: { solved: most, tools: [] } } })]]));
+    const a = start(); assert.deepEqual(open(a), ['campaign:0']);
+    press(a, 'campaign:1'); press(a, 'campaign:1'); a.qa.render(); assert.deepEqual(open(a), ['campaign:0'], 'chapter 2 was opened and closed again');
+    a.focusOn(last, 'campaign:0'); solveLast(a);
+    assert.deepEqual(wellFormed(a.el('#content').innerHTML, 'campaign').filter(t => t.open).map(t => t.key), ['campaign:0', 'campaign:1'], 'the finished chapter stays open and the new current chapter opens');
+    press(a, 'campaign:1'); a.qa.render(); assert.deepEqual(open(a), ['campaign:0'], 'the player can still close the current chapter afterwards');
+    press(a, 'campaign:0'); a.qa.render(); assert.deepEqual(open(a), [], 'and the finished one');
+    /* Opened from somewhere that is not a drop-down (the next-mission button): only the default applies. */
+    const b = start(); press(b, 'campaign:1'); press(b, 'campaign:1'); b.focusOn(null); solveLast(b);
+    assert.deepEqual(open(b), ['campaign:1'], 'the chapter that becomes current opens even if it was closed by hand earlier');
+    /* A chapter that was not just made current keeps what the player chose. */
+    const c = start(); press(c, 'campaign:0'); c.qa.render(); assert.deepEqual(open(c), [], 'closing the current chapter is remembered');
   }
 }
 
@@ -593,6 +816,25 @@ if (!isLA) {
 }
 
 if (!isLA) {
+  /* First solve of the first mission, with its answers typed the way a beginner might: thousands commas where they fit.
+     No miss is logged, the first-try star is kept, and the celebration reads as a sentence (titles here are scenes,
+     not parts: nothing is a "module" and nothing is "installed"). */
+  const first = learn[0], run = boot();
+  run.qa.mission(first.id); run.el('#ready').onclick();
+  const grouped = x => Number.isInteger(x) && Math.abs(x) >= 1000 ? String(x).replace(/\B(?=(\d{3})+$)/g, ',') : String(x);
+  assert.ok(first.answer.some(x => grouped(x).includes(',')), first.id + ' has an answer of 1000 or more, so this check types a comma');
+  run.qa.getMain().forEach((x, i) => x.value = grouped(first.answer[i])); run.el('#submit-answer').onclick();
+  assert.match(run.el('.feedback').textContent, /Mission complete/, 'a correct answer typed with a thousands comma is accepted');
+  assert.equal(run.qa.getState().errors[first.id], undefined, 'and logs no miss'); assert.deepEqual(Array.from(run.qa.getState().clean), [first.id], 'and keeps the first-try star');
+  const payoff = run.el('.feedback')._html.split('<svg')[0];
+  assert.ok(payoff.includes('<h3>You learned: ' + first.topic + ' ✦</h3>'), 'the celebration heading names the concept');
+  assert.doesNotMatch(payoff, /module|installed ✦|Design verified/, 'no linear algebra wording in the celebration');
+  assert.ok(payoff.includes('That is right. ') && payoff.includes(first.sector + ' has a new part now, so we can '), 'the mentor line is a plain sentence');
+  for (const q of learn) { const line = curriculumWindow.Outpost.consequence(q), head = curriculumWindow.Outpost.heading(q); assert.ok(!/module|undefined/.test(line + head) && line.includes(q.solution) && head.includes(q.topic), q.id + ': celebration text'); assert.ok(!line.includes(q.title.toLowerCase()) || q.solution.includes(q.title.toLowerCase()), q.id + ': the title is not lower-cased into the sentence'); }
+  /* A wrong answer is still a miss, comma or not, and the field text has no jargon. */
+  const miss = boot(); miss.qa.mission(first.id); miss.el('#ready').onclick();
+  miss.qa.getMain().forEach(x => x.value = '9,999'); miss.el('#submit-answer').onclick();
+  assert.equal(miss.qa.getState().errors[first.id]?.n, 1); assert.equal(miss.el('#answer-status-0').textContent, 'Try this one again');
   /* A review drill and the reward check after "Reveal solution" reject a neighbouring whole number. */
   const all = { v: 2, seed: 0, intro: false, realms: { [REALM.saveId]: { solved: quests.map(q => q.id), tools: [] } } };
   let wholeDrills = 0;
@@ -611,6 +853,32 @@ if (!isLA) {
   assert.ok(wholeDrills > 0, 'the pack has whole-number drills to check');
 }
 
+{
+  /* After "Reveal solution" the mission must come back as a different problem: two rolls can draw the same numbers,
+     and the answer has just been shown. For every generated mission and many seeds, the roll chosen after a reveal
+     never repeats the prompt, and repeats the answers only where the mission has few different answers. */
+  const Gen = curriculumWindow.Gen, page = boot(), same = (a, b) => JSON.stringify(a.answer) === JSON.stringify(b.answer);
+  const cases = []; for (const q of quests) if (Gen.has(q.id)) for (let seed = 1; seed <= 120; seed++) cases.push([q, seed]);
+  if (!isLA) cases.push([byId.q08b, 4], [byId.q40d, 2], [byId.q40b, 18]); // identical consecutive rolls found in review
+  let repeats = 0, plainNext = 0;
+  for (const [q, seed] of cases) {
+    const shown = Gen.instance(q, seed, 0); if (shown === q) continue;
+    if (Gen.instance(q, seed, 1).prompt === shown.prompt) plainNext++;
+    page.qa.setState({ seed, rolls: {} }); page.qa.nextRoll(q.id, shown);
+    const roll = page.qa.roll(q.id), next = Gen.instance(q, seed, roll);
+    assert.ok(Number.isInteger(roll) && roll >= 1 && roll <= 24, q.id + ' seed ' + seed + ': the roll moves on, within bounds');
+    assert.notEqual(next.prompt, shown.prompt, q.id + ' seed ' + seed + ': the mission after a reveal is a different problem');
+    if (same(next, shown)) { repeats++; let distinct = new Set(); for (let r = 1; r <= 24; r++) distinct.add(JSON.stringify(Gen.instance(q, seed, r).answer)); assert.ok(distinct.size < 5, q.id + ' seed ' + seed + ': the revealed answers come back although the mission has ' + distinct.size + ' different answers'); }
+  }
+  if (!isLA) assert.ok(plainNext >= 3, 'the plain next roll would have repeated the problem in the review cases');
+  /* Through the page: reveal, reopen, and the problem on screen has changed; the save keeps one integer per mission. */
+  const g = quests.find(q => Gen.has(q.id) && !(q.prereqs || []).length), ui = boot();
+  ui.qa.setState({ seed: 4 }); ui.qa.mission(g.id); ui.el('#ready').onclick(); const shownPrompt = ui.qa.current().prompt;
+  ui.el('#solution-btn').onclick(); assert.ok(ui.qa.roll(g.id) >= 1);
+  ui.qa.mission(g.id); assert.notEqual(ui.qa.current().prompt, shownPrompt, 'reopening after a reveal gives a new problem');
+  assert.ok(Number.isInteger(JSON.parse(ui.storage.get('vector-guild-save-v2')).realms[REALM.saveId || REALM.id].rolls[g.id]));
+}
+
 if (isLA) {
   // Review drill: a correct fresh-numbers answer is recorded once and pays no XP.
   const drill = boot(new Map([['vector-guild-save-v1', JSON.stringify({ solved: ['q01','q02','q03'], tools: [] })]]));
@@ -619,7 +887,8 @@ if (isLA) {
   console.log(`PASS: ${questCount}-mission teaching/guidance/schema/reachability audit; chapters, variants, contract board, economy and ranks; 68 interactive experiments and 3D/2D formulas; sourced lessons; outpost mentor; guided help; rewards/payoff; old and new save persistence/unlocks; import normalization.`);
   console.log(`NOTE: offline imports cannot authenticate an entirely forged closed completion list (${forged.solved.length}/${questCount} accepted; XP recomputed).`);
 } else {
-  console.log(`PASS: ${REALM.name} (${realm}): ${questCount}-mission teaching/guidance/schema/reachability audit; declared chapters, sectors, tiers and ranks; ${REALM.sourceRule.label} sources; experiments and variants; narration; first-mission play-through with its own save slice.`);
+  console.log(`PASS: ${REALM.name} (${realm}): ${questCount}-mission teaching/guidance/schema/reachability audit (${learn.length} learn + ${practice.length} practice); declared chapters, sectors, tiers and ranks; ${REALM.sourceRule.label} sources; experiments and variants; narration; first-mission play-through with its own save slice; practice missions and drop-down menus.`);
   if (missing.length) console.log(`NOTE: ${missing.length} of ${declared.flatMap(c => c.ids).length} declared missions are not written yet: ${missing.join(' ')}. Run with --complete to require them.`);
+  if (missingPractice.length) { const concepts = [...new Set(missingPractice.map(id => id.slice(0, 3)))]; console.log(`NOTE: ${missingPractice.length} of ${plannedPractice.length} planned practice missions are not written yet (${concepts.length} concepts: ${concepts[0]}${concepts.length > 1 ? '–' + concepts[concepts.length - 1] : ''}). Run with --complete-practice to require them.`); }
 }
 module.exports = { boot, realm, REALM, quests, byId, chapters, curriculumWindow };

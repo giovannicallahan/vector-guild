@@ -192,9 +192,9 @@ async function seedPage(page, exceptId) {
     const seeded = [...firstChapter, 'q10', 'q11', 'q43', 'q12', 'q13', 'q15', 'q18', 'q20'];
     await late.addInitScript(data => { if (!localStorage.getItem(data.key)) localStorage.setItem(data.key, JSON.stringify({ solved: data.solved, tools: [] })); }, { key, solved: seeded });
     await late.goto('http://127.0.0.1:8771/realm.html');
-    assert.equal(await late.locator('details.chapter').count(), 8, 'eight chapters');
-    assert.equal(await late.locator('details.chapter[open]').count(), 1, 'only the current chapter is open');
-    assert.match(await late.locator('details.chapter[open] h3').innerText(), /Systems and spaces/);
+    assert.equal(await late.locator('#content .dd-toggle').count(), 8, 'eight chapters');
+    assert.equal(await late.locator('#content .dd-toggle[aria-expanded="true"]').count(), 1, 'only the current chapter is open');
+    assert.match(await late.locator('#content .dd-toggle[aria-expanded="true"] .dd-name').innerText(), /Systems and spaces/);
     const navBoxes = await late.locator('nav .nav').evaluateAll(els => els.map(e => { const b = e.getBoundingClientRect(); return b.left >= 0 && b.right <= innerWidth && b.height >= 44; }));
     assert.deepEqual(navBoxes, Array(6).fill(true), 'all six sections are on screen and tappable at 360 px');
     assert.ok(await late.locator('#begin').evaluate(e => e.getBoundingClientRect().top + scrollY) < 740, 'the next-mission button is on the first screen');
@@ -210,7 +210,7 @@ async function seedPage(page, exceptId) {
     await late.locator('#ready-top').click(); assert.equal(await late.locator('#answer-0').count(), 1, 'skip link opens the problem');
     // The in-mission labs open on practice numbers.
     await late.locator('#dialog .close').click();
-    await late.locator('details.chapter').first().locator('summary').click(); // finished chapters start collapsed
+    await late.locator('#content .dd-toggle').first().click(); // finished chapters start collapsed
     await late.locator('[data-quest="q01"]').click(); await late.locator('.mission-visual > summary').click();
     assert.doesNotMatch(await late.locator('.mission-visual .space-output').innerText(), /A\+B = \(2, 3, 2\)/, 'the 3D bench does not preload the q01 answer');
     await late.locator('#dialog .close').click();
@@ -241,7 +241,7 @@ async function seedPage(page, exceptId) {
     assert.match(await late.locator('#dialog .eyebrow').innerText(), /Q14[\s\S]*YOUR CHOICE/);
     await late.locator('#dialog .close').click(); await late.locator('[data-view="campaign"]').click();
     // The hands-on widget is offered on its missions and nowhere else.
-    await late.locator('details.chapter').nth(2).locator('summary').click(); // q18 lives in chapter 3, which starts collapsed
+    await late.locator('#content .dd-toggle').nth(2).click(); // q18 lives in chapter 3, which starts collapsed
     await late.locator('[data-quest="q18"]').click(); await late.locator('#ready-top').click();
     assert.equal(await late.locator('#dialog .hands-on').count(), 1, 'q18 has a hands-on widget');
     await late.locator('#dialog [data-slider="s"]').focus(); await late.keyboard.press('ArrowRight');

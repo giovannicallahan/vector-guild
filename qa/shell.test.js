@@ -1,5 +1,6 @@
 /* Shell logic: soft locks, progress text, card model, 3D/flat choice, Android Back, star-map label placement
-   and a few source checks (shader smoothstep order, list overlay guards). Also the collection interface
+   and a few source checks (shader smoothstep order, list overlay guards, the hand-over to the home view).
+   Mission counts are read from the registry, never written here. Also the collection interface
    (game/collection/ui.js): its pure helpers, how the shell loads and wires it, and its style rules.
    Loads game/shell/shell.js without a window (the page part returns early) and game/realms/registry.js in a vm.
    Run: node qa/shell.test.js (VERBOSE=1 lists each group). */
@@ -22,6 +23,10 @@ assert.ok(Array.isArray(REALMS) && REALMS.length > 0, 'registry loads');
 const node = id => REALMS.find(r => r.node === id);
 const saveWith = slices => id => slices[id] || null;
 const ids = n => Array.from({ length: n }, (_, i) => 'q' + String(i + 1).padStart(2, '0'));
+/* How many missions each ready part has: whatever the registry says today. */
+const count = id => { for (const r of REALMS) for (const p of r.parts) if (p.id === id) return p.missions; throw new Error('no part ' + id); };
+const FOUND = count('found'), LA = count('la');
+assert.ok(FOUND > 1 && LA > 1, 'both ready parts have missions');
 let checks = 0;
 const check = (fn, label) => { fn(); checks++; if (process.env.VERBOSE) console.log('ok -', label); };
 
@@ -62,11 +67,17 @@ check(() => {
 }, 'soft lock with no progress');
 
 check(() => {
-  const partway = saveWith({ found: { solved: ids(39), xp: 500 } });
-  assert.equal(L.softLock(node('alg'), REALMS, partway).locked, true, '39 of 40 is not finished');
-  const done = saveWith({ found: { solved: ids(40), xp: 520 } });
+  /* Foundations has optional practice missions (ids ending in a letter): the lock follows its learn missions alone. */
+  const LEARN = REALMS.find(r => r.node === 'found').parts[0].learn || FOUND;
+  const practice = ids(LEARN - 1).map(id => id + 'b');
+  const partway = saveWith({ found: { solved: ids(LEARN - 1).concat(practice), xp: 500 } });
+  assert.equal(L.softLock(node('alg'), REALMS, partway).locked, true, 'one concept short is not finished, however much practice is solved');
+  const learned = saveWith({ found: { solved: ids(LEARN), xp: 500 } });
+  assert.equal(L.softLock(node('alg'), REALMS, learned).locked, false, 'every concept learned unlocks Algebra without any practice');
+  assert.equal(L.softLock(node('diff'), REALMS, saveWith({ la: { solved: ids(LA - 1) } })).locked, true, 'a pack without practice still needs every mission');
+  const done = saveWith({ found: { solved: ids(FOUND), xp: 520 } });
   assert.equal(L.softLock(node('alg'), REALMS, done).locked, false, 'finished Foundations unlocks Algebra');
-  const both = saveWith({ found: { solved: ids(40) }, la: { solved: ids(68) } });
+  const both = saveWith({ found: { solved: ids(FOUND) }, la: { solved: ids(LA) } });
   assert.equal(L.softLock(node('diff'), REALMS, both).locked, false);
   const broken = id => { throw new Error('storage ' + id); };
   assert.equal(L.softLock(node('alg'), REALMS, broken).locked, true, 'a throwing save reads as no progress');
@@ -90,7 +101,8 @@ check(() => {
   assert.equal(found.startHere, true);
   assert.equal(found.single, true);
   assert.equal(found.parts[0].href, 'realm.html?realm=found');
-  assert.equal(found.parts[0].text, '0 / 40 solved');
+  assert.equal(found.parts[0].text, '0 / ' + FOUND + ' solved');
+  assert.equal(found.parts[0].total, FOUND, 'the count comes from the registry');
   assert.equal(found.lock.locked, false);
   const foundLater = L.cardModel(node('found'), REALMS, saveWith({ la: { solved: ['q01'], xp: 10 } }));
   assert.equal(foundLater.startHere, false, 'Start here is only for a player with no progress');
@@ -100,7 +112,7 @@ check(() => {
   assert.equal(alg.single, false);
   assert.equal(alg.enterLabel, 'Enter anyway');
   assert.deepEqual(alg.parts.map(p => [p.id, p.ready, p.text, p.href]), [
-    ['la', true, '12 / 68 solved', 'realm.html?realm=la'],
+    ['la', true, '12 / ' + LA + ' solved', 'realm.html?realm=la'],
     ['abstract', false, 'Not built yet', null]]);
   assert.equal(alg.started, true);
 
@@ -126,6 +138,15 @@ check(() => {
   assert.equal(L.backAction({ cardOpen: true }), 'card');
   assert.equal(L.backAction({ cardOpen: true, dialogOpen: true }), 'dialog');
   assert.equal(L.backAction({ listOpen: true }), 'list');
+  /* Home view: collection overlay, then the backup dialog, then the details panel, then leave. */
+  assert.equal(L.backAction({ homePanelOpen: true }), 'home');
+  assert.equal(L.backAction({ homePanelOpen: true, dialogOpen: true }), 'dialog');
+  assert.equal(L.backAction({ homePanelOpen: true, dialogOpen: true, collectionOpen: true }), 'collection');
+  const home = s => L.backAction(L.overlayState({ homeOn: true, ...s }));
+  assert.equal(home({}), null, 'home view with nothing open: Back leaves the app');
+  assert.equal(home({ homePanelOpen: true }), 'home');
+  assert.equal(home({ homePanelOpen: true, collectionOpen: true }), 'collection');
+  assert.equal(home({ cardOpen: true, listOverlay: true }), null, 'the star map\'s card and list do not exist under the home view');
 }, 'Android Back');
 
 check(() => {
@@ -220,8 +241,66 @@ check(() => {
   }
 }, 'registry coverage');
 
-/* ---------- Collection: button, overlay wiring and the interface helpers (docs/COLLECTION.md) ---------- */
+/* ---------- Home view: what the wormhole leads into (docs/HOME-HOOKUP.md) ---------- */
 const indexHtml = fs.readFileSync(game + '/index.html', 'utf8');
+const homeSrc = fs.readFileSync(game + '/shell/home.js', 'utf8');
+
+check(() => {
+  /* Loaded as a classic script after three.js and before shell.js, with its styles and its host element. */
+  const scripts = [...indexHtml.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1]);
+  assert.ok(scripts.indexOf('shell/home.js') > scripts.indexOf('shell/vendor/three.min.js'));
+  assert.ok(scripts.indexOf('shell/home.js') < scripts.indexOf('shell/shell.js'));
+  assert.ok(scripts.indexOf('collection/ui.js') < scripts.indexOf('shell/shell.js'));
+  assert.match(indexHtml, /<link rel="stylesheet" href="shell\/shell\.css"><link rel="stylesheet" href="shell\/home\.css">/);
+  assert.match(indexHtml, /<div id="vg-home"><\/div>/);
+  /* Every way out of the tunnel goes through startMap, which hands over to the home view first. */
+  assert.match(shellSrc, /function startMap\(flashIn\)\{\s*if\(showHome\(flashIn\)\)\{[^}]*phase='home';stop\(\);[^}]*stage\.hidden=true/);
+  /* Focus goes to the home heading when the stage held it, or when the tunnel ended by itself with nothing focused;
+     the active element is read before the stage is hidden. The condition is run here with stand-in elements. */
+  {
+    const m = /var a=document\.activeElement,move=([^;]+);\s*phase='home';stop\(\);[^;]*;stage\.hidden=true;\s*if\(move\)\{var h1=document\.getElementById\('vgh-title'\);if\(h1\)h1\.focus\(\{preventScroll:true\}\)\}/.exec(shellSrc);
+    assert.ok(m, 'startMap reads focus before hiding the stage and moves it to #vgh-title');
+    const skip = { id: 'skip' }, inStage = { id: 'collection' }, outside = { id: 'dialog' }, body = { id: 'body' };
+    const move = (a, flashIn) => !!new Function('a', 'flashIn', '$', 'stage', 'document', 'return ' + m[1])(
+      a, flashIn, () => skip, { contains: x => x === skip || x === inStage }, { body });
+    assert.equal(move(skip, false), true, 'Skip intro had focus');
+    assert.equal(move(inStage, true), true, 'a stage button had focus when the tunnel ended');
+    assert.equal(move(inStage, false), true, 'a stage button had focus on a skip');
+    assert.equal(move(body, true), true, 'tunnel ended by itself, nothing focused');
+    assert.equal(move(null, true), true, 'tunnel ended by itself, no active element');
+    assert.equal(move(body, false), false, 'a direct start leaves focus alone');
+    assert.equal(move(outside, true), false, 'focus outside the stage is left alone');
+    assert.equal(move(outside, false), false);
+  }
+  assert.match(shellSrc, /if\(choice\.mode==='flat'\)\{\s*document\.body\.classList\.add\('vg-flat'\);\s*if\(showHome\(false\)\)\{document\.body\.classList\.remove\('vg-booting'\);return\}/, 'no WebGL: the home view with its flat icons');
+  assert.match(shellSrc, /if\(!root\.VGHome\|\|typeof root\.VGHome\.mount!=='function'\|\|!homeHost\)return false/, 'home.js missing: the star map and list still work');
+  assert.match(shellSrc, /catch\(e\)\{try\{root\.VGHome\.unmount\(\)\}catch\(err\)\{\}replayBtn=null;return false\}/, 'a home view that throws falls back too');
+  /* The stopped stage stays stopped, and a lost context does not open the list over the home view. */
+  assert.match(shellSrc, /function start\(\)\{if\(running\|\|contextLost\|\|listOverlay\|\|homeOn\|\|document\.hidden\)return/);
+  assert.match(shellSrc, /'webglcontextlost',function\(e\)\{[^}]*if\(!homeOn&&phase==='tunnel'\)startMap\(false\);if\(homeOn\)return;/);
+  assert.match(shellSrc, /'webglcontextrestored',function\(\)\{[^}]*if\(homeOn\)return;/);
+  /* Actions: Collection opens the overlay (a button drawn by the collection chip, not a link), Replay intro, backup. */
+  assert.match(shellSrc, /\{label:'Collection',place:'top',className:'vg-coll',setup:function\(b\)\{CollUI\.chip\(b,\{label:'Collection'\}\)\}\}/);
+  assert.doesNotMatch(shellSrc, /label:'Collection'[^}]*href/, 'Collection is not a link to a page');
+  assert.match(homeSrc, /if\(typeof a\.setup==='function'\)/);
+  assert.match(require(game + '/collection/ui.js') && fs.readFileSync(game + '/collection/ui.js', 'utf8'), /if \(c\.press\) node\.addEventListener\('click', function \(e\) \{[^}]*open\(\); \}\)/, 'pressing a chip button opens the overlay');
+  assert.match(shellSrc, /label:'Replay intro',onClick:replayIntro/);
+  assert.match(shellSrc, /label:'Back up or restore save',onClick:openBackup/);
+  assert.match(shellSrc, /function canReplay\(\)\{return !!renderer&&!reduced&&!contextLost\}/, 'no replay under reduced motion or without WebGL');
+  /* Back: the panel after the collection and the dialog. Progress: read again on return from a realm. */
+  assert.match(shellSrc, /if\(a==='home'\)return !!root\.VGHome\.back\(\);/);
+  assert.match(shellSrc, /function refresh\(\)\{[^}]*if\(homeOn\)root\.VGHome\.refresh\(\);settleAwards\(\)\}/);
+  assert.match(shellSrc, /addEventListener\('pageshow',function\(e\)\{if\(e\.persisted\)refresh\(\)\}\)/);
+  assert.match(shellSrc, /addEventListener\('storage',/);
+  assert.match(shellSrc, /addEventListener\('visibilitychange',function\(\)\{if\(!document\.hidden\)refresh\(\)\}\)/);
+  /* Nothing in the shell knows how many missions a realm has. */
+  for (const [name, src] of [['index.html', indexHtml], ['shell.js', shellSrc], ['home.js', homeSrc]]) {
+    assert.doesNotMatch(src, new RegExp('\\b(' + [FOUND, LA, FOUND + LA, 40, 108].join('|') + ')\\b[^;\\n]{0,12}(missions|solved)'), name + ' has no hard-coded mission count');
+    assert.doesNotMatch(src, /missions\s*[:=]\s*\d/, name + ' sets no mission count');
+  }
+}, 'home view: loaded, wired, falls back, counts from the registry');
+
+/* ---------- Collection: button, overlay wiring and the interface helpers (docs/COLLECTION.md) ---------- */
 const uiSrc = fs.readFileSync(game + '/collection/ui.js', 'utf8');
 const uiCss = fs.readFileSync(game + '/collection/collection.css', 'utf8');
 const U = require(game + '/collection/ui.js'); /* no window: only the pure helpers load */
@@ -313,10 +392,29 @@ check(() => {
 }, 'collection: source links and emblems');
 
 check(() => {
-  /* Text is 11px or more, controls are 44px or more, motion can be switched off, and the page cannot scroll sideways. */
+  /* Text is 12px or more (body 16px), controls are 44px or more, motion can be switched off, and the page cannot scroll sideways. */
   const sizes = [...uiCss.matchAll(/font(?:-size)?:[^;}]*?(\d+(?:\.\d+)?)px/g)].map(m => +m[1]);
   assert.ok(sizes.length > 20, 'found the font sizes');
-  assert.ok(Math.min(...sizes) >= 11, 'smallest text is ' + Math.min(...sizes) + 'px');
+  assert.ok(Math.min(...sizes) >= 12, 'smallest text is ' + Math.min(...sizes) + 'px');
+  assert.match(uiCss, /\.vgc-root\{[^}]*font:16px\/1\.5 var\(--vgc-body\)/, 'body text is 16px');
+  /* Rarity colour tints the whole tile, card and reveal; no thick line on one side of anything. */
+  /* (The tab underline and the drop-down's drawn arrow are the two places a 2px or 3px side line is meant.) */
+  for (const rule of uiCss.split('}')) {
+    if (/^\s*\.vgc-root \.vgc-tab\{|summary::before\{/.test(rule)) continue;
+    assert.doesNotMatch(rule, /border-(top|left|right|bottom):\s*[2-9]/, 'no one-sided accent border: ' + rule.trim().slice(0, 60));
+  }
+  for (const sel of ['.vgc-tile', '.vgc-reveal', '.vgc-card-top']) assert.match(uiCss, new RegExp('\\.vgc-root \\' + sel + '\\{[^}]*border:1px solid var\\(--vgc-e\\)[^}]*var\\(--vgc-t\\)'), sel + ' is tinted by rarity');
+  for (const r of ['common', 'rare', 'legendary']) assert.match(uiCss, new RegExp('\\.vgc-root \\.is-' + r + '\\{--vgc-r:[^;]+;--vgc-t:[^;]+;--vgc-e:[^}]+\\}'));
+  /* The reveal: lines draw in, a burst in the rarity colour; none of it under reduced motion. */
+  assert.match(uiSrc, /function drawIn\(box\) \{[\s\S]{0,200}if \(!svg \|\| still\(\)\) return;/, 'no draw-in under reduced motion');
+  assert.match(uiSrc, /sh\.style\.strokeDasharray = ''; sh\.style\.strokeDashoffset = ''; sh\.style\.animation = '';/, 'the emblem is left as it was written');
+  assert.match(uiCss, /\.vgc-root \.vgc-burst i\{[^}]*opacity:0\}/, 'sparks are invisible unless animated');
+  assert.match(uiCss, /@keyframes vgc-draw\{to\{stroke-dashoffset:0\}\}/);
+  /* Coloured progress bars; long lists fold into drop-downs. */
+  assert.match(uiCss, /\.vgc-root \.vgc-ach-side \.vgc-bar span\{background:linear-gradient\(90deg,var\(--vgc-amber\),var\(--vgc-cyan\) 55%,var\(--vgc-lime\)\)/);
+  assert.match(uiSrc, /dropDown\('', 'Not found yet \(' \+ missing \+ '\)'/);
+  assert.match(uiSrc, /dropDown\('is-earned', 'Earned \(' \+ earned \+ '\)'/);
+  assert.match(uiCss, /\.vgc-root \.vgc-more>summary\{[^}]*min-height:(4[4-9]|[5-9]\d)px/);
   for (const sel of ['.vgc-primary,.vgc-root .vgc-secondary', '.vgc-tab', '.vgc-back', '.vgc-link']) {
     const rule = uiCss.split('\n').find(l => l.startsWith('.vgc-root ' + sel + '{'));
     assert.ok(rule && /min-height:(4[4-9]|[5-9]\d)px/.test(rule), sel + ' is at least 44px high');
