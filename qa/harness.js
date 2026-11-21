@@ -29,7 +29,7 @@ const byId = {};
 /* Scripts that need a real browser page are left to the Playwright checks (qa/handson-browser.js). */
 const browserOnly = new Set(['handson.js', 'collection/ui.js']);
 /* The collection is loaded on every realm page: data and logic before the pack, page code just before app.js. */
-assert.deepEqual(Array.from(SHARED.before), ['realms/registry.js', 'collection/figures.js', 'collection/achievements.js', 'collection/core.js'], 'the collection data and core load before the pack');
+assert.deepEqual(Array.from(SHARED.before), ['voice/index.js', 'realms/registry.js', 'collection/figures.js', 'collection/achievements.js', 'collection/core.js'], 'the collection data and core load before the pack');
 assert.deepEqual(Array.from(SHARED.after), ['collection/ui.js', 'daily.js'], 'the collection interface and the daily review card load after the pack, before app.js');
 assert.deepEqual(Array.from(SHARED.styles), ['collection/collection.css', 'daily.css']);
 {

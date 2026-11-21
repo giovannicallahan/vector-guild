@@ -20,7 +20,8 @@ function listFiles() {
       if (e.name.startsWith('.')) continue;
       const r = rel ? rel + '/' + e.name : e.name;
       if (e.isDirectory()) walk(path.join(dir, e.name), r);
-      else if (e.isFile() && !EXCLUDE.has(r)) out.push(r);
+      /* Mira's recorded clips (26 MB) are not stored for offline use: offline, the game falls back to the device voice. */
+      else if (e.isFile() && !EXCLUDE.has(r) && !/^voice\/[^/]+\//.test(r)) out.push(r);
     }
   })(game, '');
   return out.sort();
