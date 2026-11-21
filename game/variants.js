@@ -12,7 +12,11 @@ const T=t=>Math.max(-10,Math.min(10,Math.round(Number(t)||0)));
 const clean=s=>String(s)
   .replace(/\d+\.\d{6,}/g,m=>String(Number(Number(m).toPrecision(6))))
   .replace(/\+\s*-(?=[\d.])/g,'−').replace(/−\s*-(?=[\d.])/g,'+').replace(/(?<![A-Za-z])-(?=[\d.])/g,'−');
-const SETUP={
+/* Linear algebra's statements are built in. Other packs supply theirs through window.VARIANT_SETUP and
+   window.VARIANT_POOL (registered by their variants-*.js files, which load before this file); a pack may
+   also add to or override the built-in table that way. The built-in tables apply only to linear algebra. */
+const builtIn=(window.REALM?.id||'la')==='la';
+const LA_SETUP={
 q01:t=>`Thrusters deliver impulses u=(${3+t},−1,2) and v=(−1,4,0) N·s.`,
 q02:t=>`A cable displacement is r=(3,${4+t},0) m.`,
 q03:t=>`Force F=(4,−2,1) N moves a panel by d=(3,${1+t},2) m.`,
@@ -85,7 +89,8 @@ q68:t=>`f(x)=½xᵀdiag(2,4)x−(2,4)·x, x₀=(${t},0) and step α=0.25. Take o
 /* Parameter pools. The default keeps numbers small; listed pools avoid
    degenerate or unwieldy cases (zero vectors, 3¹⁰, awkward angles). */
 const DEFAULT=[-6,-5,-4,-3,-2,-1,1,2,3,4,5,6];
-const POOL={q05:[-3,-2,-1,1,2,3],q07:[-10,-5,5],q25:[1,2,4,5],q57:[1,2,3],q02:[-8,-4,-3,-1,1,2,4],q19:[-3,-2,-1,1,2,3]};
+const LA_POOL={q05:[-3,-2,-1,1,2,3],q07:[-10,-5,5],q25:[1,2,4,5],q57:[1,2,3],q02:[-8,-4,-3,-1,1,2,4],q19:[-3,-2,-1,1,2,3]};
+const SETUP=Object.assign({},builtIn?LA_SETUP:{},window.VARIANT_SETUP||{}),POOL=Object.assign({},builtIn?LA_POOL:{},window.VARIANT_POOL||{});
 for(const id of Object.keys(models)){
   const base=models[id];
   models[id]=t=>{const r=base(t),setup=SETUP[id]?clean(SETUP[id](T(t))):'';return {...r,prompt:clean(r.prompt),formula:clean(r.formula),setup};};

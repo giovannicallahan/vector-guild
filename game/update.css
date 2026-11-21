@@ -92,3 +92,10 @@
 .nb-none{color:var(--muted)!important}
 @media(max-width:650px){.notebook{padding:14px}.notebook-list{grid-template-columns:1fr}}
 .reference-problem{margin:8px 0;padding:10px 12px;border-left:2px solid var(--cyan);background:#14262b;font-size:13px}
+
+/* Vector Guild 2.0: the way back to the star map, beside the brand. */
+.brand-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.map-link{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:22px;color:var(--ivory);text-decoration:none;font-size:12px;font-weight:600;letter-spacing:.3px}
+.map-link span{color:var(--lime);font-size:15px}
+.map-link:hover,.map-link:focus-visible{border-color:var(--lime);color:var(--lime)}
+.chapter-empty{color:var(--muted);font-size:13px;padding:0 20px 18px}

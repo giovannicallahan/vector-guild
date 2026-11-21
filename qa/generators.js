@@ -1,6 +1,9 @@
-/* Checks for mission generators (game/gen-*.js) and their independent oracles (qa/oracle-*.js).
+/* Checks for mission generators and their independent oracles, for one realm pack.
    Usage: node qa/generators.js [id ...]      e.g. node qa/generators.js q01 q02
-   Options: --draws N (default 300)  --strict (text differences at canonical parameters fail)
+   Options: --realm ID (or a bare pack id; default la)  --draws N (default 300)
+            --strict (text differences at canonical parameters fail)
+   The pack's scripts come from game/realms/packs.js. Oracles: qa/oracle-*.js for linear algebra,
+   qa/realms/<id>/oracle-*.js for any other pack. A mission without a generator or an oracle fails.
    Exit code 0 only if every checked mission passes. */
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -14,10 +17,17 @@ const only = args.filter((a, i) => /^q\d+$/.test(a) && (drawsAt < 0 || i !== dra
 
 const window = {};
 const load = file => vm.runInNewContext(fs.readFileSync(file, 'utf8'), { window, Math, console });
-for (const file of ['curriculum.js', 'extra-quests.js', 'chapters.js', 'gen-core.js']) load(path.join(game, file));
-for (const file of fs.readdirSync(game).filter(f => /^gen-[a-z]\.js$/.test(f)).sort()) load(path.join(game, file));
+const packs = {}; vm.runInNewContext(fs.readFileSync(path.join(game, 'realms/packs.js'), 'utf8'), { window: packs });
+const own = id => Object.prototype.hasOwnProperty.call(packs.VG_PACKS, id);
+const realmAt = args.indexOf('--realm');
+const realm = realmAt >= 0 ? args[realmAt + 1] : (args.find(a => !a.startsWith('--') && own(a)) || 'la');
+if (!own(realm)) { console.error(`unknown realm "${realm}"; packs: ${Object.keys(packs.VG_PACKS).join(', ')}`); process.exit(1); }
+/* The whole pack loads, as on the page, except a script that needs a real browser page. */
+for (const file of packs.VG_PACKS[realm].scripts) if (file !== 'handson.js') load(path.join(game, file));
 window.ORACLE = {};
-for (const file of fs.readdirSync(__dirname).filter(f => /^oracle-[a-z]\.js$/.test(f)).sort()) load(path.join(__dirname, file));
+const oracleDir = realm === 'la' ? __dirname : path.join(__dirname, 'realms', realm);
+const oracleName = realm === 'la' ? /^oracle-[a-z]\.js$/ : /^oracle-.+\.js$/;
+if (fs.existsSync(oracleDir)) for (const file of fs.readdirSync(oracleDir).filter(f => oracleName.test(f)).sort()) load(path.join(oracleDir, file));
 
 const { Gen, MISSION_GEN, ORACLE, QUESTS } = window;
 const bad = /NaN|undefined|Infinity|[=(,:·]\s*null\b|\[object|[+−]\s*-|(?<![A-Za-z])-\d|\d\.\d{5,}|[+−]\s*[+−]\d|\(\s*\)/;
@@ -26,12 +36,13 @@ const sameList = (a, b) => a.length === b.length && a.every((x, i) => close(x, b
 const texts = m => [m.prompt, ...m.hints, m.solution, ...m.guidance.flatMap(g => [g.prompt, g.explanation])];
 
 let failed = 0, checked = 0, withOracle = 0;
-const missing = [];
+const missing = [], noOracle = [];
 for (const q of QUESTS) {
   if (only.length && !only.includes(q.id)) continue;
   const g = MISSION_GEN[q.id];
-  if (!g) { missing.push(q.id); continue; }
+  if (!g) { missing.push(q.id); console.log(`FAIL ${q.id} ${q.topic}\n  - no generator in MISSION_GEN`); continue; }
   checked++;
+  if (!ORACLE[q.id]) noOracle.push(q.id);
   const problems = [], notes = [];
   try {
     for (const key of ['canonical', 'draw', 'build']) if (!(key in g)) throw Error(`generator lacks ${key}`);
@@ -71,11 +82,13 @@ for (const q of QUESTS) {
       const expected = ORACLE[q.id](JSON.parse(JSON.stringify(g.canonical)));
       if (!sameList(Array.from(expected), q.answer)) problems.push(`oracle(canonical) ${JSON.stringify(expected)} ≠ authored ${JSON.stringify(q.answer)}`);
     }
+    else problems.push(`no oracle: add ORACLE.${q.id} to ${path.relative(path.resolve(__dirname, '..'), oracleDir) || '.'}/oracle-*.js`);
   } catch (error) { problems.push(error.message); }
   const uniqueNotes = [...new Set(notes)].slice(0, 6);
   if (problems.length) { failed++; console.log(`FAIL ${q.id} ${q.topic}\n  - ${problems.join('\n  - ')}`); }
   else console.log(`ok   ${q.id} ${q.topic}${ORACLE[q.id] ? ' [oracle agrees]' : ''}${uniqueNotes.length ? ` (${uniqueNotes.length} note${uniqueNotes.length > 1 ? 's' : ''})` : ''}`);
   if (uniqueNotes.length) console.log('  note: ' + uniqueNotes.join('\n  note: '));
 }
-console.log(`\n${checked - failed} of ${checked} generators pass; ${withOracle} checked against an independent oracle; ${missing.length} missions have no generator${missing.length ? ': ' + missing.join(' ') : ''}.`);
-process.exitCode = failed ? 1 : 0;
+console.log(`\n${realm}: ${checked - failed} of ${checked} generators pass; ${withOracle} checked against an independent oracle; ${missing.length} missions have no generator${missing.length ? ': ' + missing.join(' ') : ''}; ${noOracle.length} have no oracle${noOracle.length ? ': ' + noOracle.join(' ') : ''}.`);
+if (!checked && !missing.length) console.log('No missions were checked.');
+process.exitCode = failed || missing.length ? 1 : 0;

@@ -17,7 +17,7 @@ const missions = sourceWindow.QUESTS;
 const missionById = new Map(missions.map(q => [q.id, q]));
 const server = http.createServer((req, res) => {
   const relative = decodeURIComponent(new URL(req.url, 'http://localhost').pathname).replace(/^\/+/, '');
-  const file = path.resolve(game, relative || 'index.html');
+  const file = path.resolve(game, relative || 'realm.html');
   if (file !== game && !file.startsWith(game + path.sep)) { res.writeHead(403).end(); return; }
   fs.readFile(file, (error, data) => {
     if (error) { res.writeHead(404).end(); return; }
@@ -42,13 +42,13 @@ async function closeMission(page) {
   await page.locator('#dialog .close').click();
   await page.waitForFunction(() => !document.querySelector('#dialog').open);
   await page.waitForFunction(k => {
-    const save = JSON.parse(localStorage.getItem(k) || '{}');
+    const save = JSON.parse(localStorage.getItem(k) || '{}').realms?.la || {};
     const expected = ['q01','q02','q06'].filter(id => (save.solved || []).includes(id)).length;
     return document.querySelector('.vg-contracts [role="progressbar"]')?.getAttribute('aria-valuenow') === String(expected);
-  }, key);
+  }, 'vector-guild-save-v2');
 }
 async function solvedState(page) {
-  return page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), key);
+  return page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}').realms?.la || {}, 'vector-guild-save-v2');
 }
 async function seedPage(page, exceptId) {
   const solved = missions.map(q => q.id).filter(id => id !== exceptId);
@@ -67,7 +67,7 @@ async function seedPage(page, exceptId) {
     const ctx = await newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const page = await ctx.newPage(); const errors = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto('http://127.0.0.1:8771/index.html');
+    await page.goto('http://127.0.0.1:8771/realm.html');
     await openMission(page, 'q01');
     await fillAnswers(page, [2, 3.02, 2]);
     await page.locator('#submit-answer').click();
@@ -133,7 +133,7 @@ async function seedPage(page, exceptId) {
     // does not solve the mission or change rewards.
     const q07ctx = await newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
     const q07page = await q07ctx.newPage(); await seedPage(q07page, 'q07');
-    await q07page.goto('http://127.0.0.1:8771/index.html');
+    await q07page.goto('http://127.0.0.1:8771/realm.html');
     const q07Before = await solvedState(q07page);
     await openMission(q07page, 'q07');
     assert.match(await q07page.locator('.flight-status').innerText(), /Now you have the controls/);
@@ -145,7 +145,7 @@ async function seedPage(page, exceptId) {
     // q48: transfer sequence remains optional and the homogeneous coordinate is tested.
     const q48ctx = await newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
     const q48page = await q48ctx.newPage(); await seedPage(q48page, 'q48');
-    await q48page.goto('http://127.0.0.1:8771/index.html'); await openMission(q48page, 'q48');
+    await q48page.goto('http://127.0.0.1:8771/realm.html'); await openMission(q48page, 'q48');
     assert.equal(await q48page.locator('.flight-help[open]').count(), 0, 'Mira strategy starts optional and collapsed');
     await fillAnswers(q48page, missionById.get('q48').answer); await submitAndWait(q48page);
     const q48Axes = await q48page.locator('.flight-axis > div').allInnerTexts();
@@ -158,7 +158,7 @@ async function seedPage(page, exceptId) {
     // no save rewards; feasibility, best-effort retention, and optimal effort work.
     const q29ctx = await newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
     const q29page = await q29ctx.newPage(); await seedPage(q29page, 'q29');
-    await q29page.goto('http://127.0.0.1:8771/index.html');
+    await q29page.goto('http://127.0.0.1:8771/realm.html');
     assert.match(await q29page.locator('.ct-allocation-locked').innerText(), /Complete q29/);
     await openMission(q29page, 'q29'); await fillAnswers(q29page, missionById.get('q29').answer); await submitAndWait(q29page);
     const rewardState = await solvedState(q29page);
@@ -191,7 +191,7 @@ async function seedPage(page, exceptId) {
     const firstChapter = missions.filter(q => q.chapter === 0).map(q => q.id);
     const seeded = [...firstChapter, 'q10', 'q11', 'q43', 'q12', 'q13', 'q15', 'q18', 'q20'];
     await late.addInitScript(data => { if (!localStorage.getItem(data.key)) localStorage.setItem(data.key, JSON.stringify({ solved: data.solved, tools: [] })); }, { key, solved: seeded });
-    await late.goto('http://127.0.0.1:8771/index.html');
+    await late.goto('http://127.0.0.1:8771/realm.html');
     assert.equal(await late.locator('details.chapter').count(), 8, 'eight chapters');
     assert.equal(await late.locator('details.chapter[open]').count(), 1, 'only the current chapter is open');
     assert.match(await late.locator('details.chapter[open] h3').innerText(), /Systems and spaces/);

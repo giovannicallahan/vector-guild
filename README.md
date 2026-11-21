@@ -50,3 +50,14 @@ A correction release from an outside review of 1.4.
 - **q16 wording:** the prompt now asks for the allowed vector with the given z, then for the dimension of the whole intersection, counted before z is fixed.
 - **Levels:** one level per 300 XP, shown beside the rank and on the campaign strip, and announced when crossed.
 - **Mira's spoken briefing** includes the concept explanation again. The written card stays short because the lesson is printed below it.
+
+## Version 2.0 (engine)
+
+Version 2.0 turns the game into realms. Linear algebra is now one realm pack and plays exactly as 1.4.1 (same text, layout and numbers for the same seed); Foundations is a second pack of 40 missions. This section covers the engine; the star map is described with the shell.
+
+- **One pack per page:** `game/realm.html?realm=<id>` (default `la`) loads the scripts listed for that pack in `game/realms/packs.js`, then `app.js`. An unknown pack returns to the star map (`index.html`). The brand link and Android Back step outwards: dialog, campaign, star map. A "Star map" control sits beside the brand.
+- **Pack config:** `game/realms/<id>/pack.js` sets `window.REALM`: chapters, sectors, landmarks and their cost, ranks, tiers, source rule, features, mentor and page text. `app.js`, `gameplay.js`, `chapters.js` and `variants.js` read it. Tools a pack does not use (workshop, contracts, board, docking, hands-on widgets, 3D and 2D labs) are not loaded or called.
+- **Save format 2 (`game/save-store.js`, `docs/SAVE-V2.md`):** one save holds every realm, each with its own slice; the seed is shared. A 1.x save is migrated into the linear algebra slice on first run and the 1.x entry is never changed. Export writes every realm; import takes a 2.0 or a 1.x backup; reset clears the current realm only.
+- **Foundations (`game/realms/found/`):** 7 chapters and 40 missions (q01–q40), each with a generator, an independent oracle (`qa/realms/found/`), a concept-bench experiment and a review drill; OpenStax sources; no workshop or contracts. The format for content authors is in `docs/PACK-FORMAT.md`.
+
+Checks: `node qa/harness.js` and `node qa/generators.js --strict --draws 1000` (linear algebra, as before); `node qa/harness.js --realm found` and `node qa/generators.js --realm found --strict --draws 1000`; `node qa/save-store.test.js`; `node qa/shell.test.js`. `node qa/harness.js --realm found --complete` also fails if a declared mission is missing. `qa/generators.js` now fails when a mission has no generator or no oracle. The Playwright scripts were updated for `realm.html` and the 2.0 save but were not run (they do not run on this Mac). The Android app files are unchanged and no APK was built.

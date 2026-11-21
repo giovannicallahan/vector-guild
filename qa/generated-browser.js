@@ -23,7 +23,7 @@ const vm = require('vm');
     const p = await c.newPage();
     p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
     p.on('pageerror', e => errs.push(e.message));
-    await p.goto('file://' + root + '/index.html');
+    await p.goto('file://' + root + '/realm.html');
     await p.waitForTimeout(250);
     return p;
   };
@@ -58,7 +58,7 @@ const vm = require('vm');
   // A fresh save with a random seed: play the first six missions straight through.
   let p = await mk(555);
   for (const id of ['q01', 'q02', 'q03', 'q04', 'q05', 'q06']) console.log('fresh', JSON.stringify(await solve(p, id)));
-  console.log('state', await p.evaluate(() => { const s = JSON.parse(localStorage.getItem('vector-guild-save-v1')); return JSON.stringify({ solved: s.solved.length, xp: s.xp, clean: s.clean.length, seed: s.seed }); }));
+  console.log('state', await p.evaluate(() => { const all = JSON.parse(localStorage.getItem('vector-guild-save-v2')), s = { ...all.realms.la, seed: all.seed }; return JSON.stringify({ solved: s.solved.length, xp: s.xp, clean: s.clean.length, seed: s.seed }); }));
 
   // Widgets in missions, and the notebook.
   p = await mk(555, { solved: all.slice(0, 40), tools: [], seed: 555, errors: { q18: { n: 3, last: Date.now() - 2 * 86400000, pit: { 0: 2, 1: 1 } }, q21: { n: 1, last: Date.now(), pit: {} } }, reviews: { q18: { n: 2, last: Date.now() - 86400000 }, q02: { n: 1, last: Date.now() - 3 * 86400000 } } });

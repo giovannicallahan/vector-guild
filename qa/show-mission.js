@@ -1,14 +1,17 @@
 /* Print a mission as authored, and optionally as generated.
    Usage: node qa/show-mission.js q12            authored fields (including lesson and worked example)
-          node qa/show-mission.js q12 --draw 3   authored prompt plus three generated versions */
+          node qa/show-mission.js q12 --draw 3   authored prompt plus three generated versions
+          node qa/show-mission.js q01 --realm found   a mission of another pack (default la) */
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const game = path.resolve(__dirname, '../game');
 const window = {};
 const load = file => vm.runInNewContext(fs.readFileSync(path.join(game, file), 'utf8'), { window, Math, console });
-for (const file of ['curriculum.js', 'extra-quests.js', 'chapters.js', 'gen-core.js']) load(file);
-for (const file of fs.readdirSync(game).filter(f => /^gen-[a-z]\.js$/.test(f)).sort()) load(file);
+const packs = {}; vm.runInNewContext(fs.readFileSync(path.join(game, 'realms/packs.js'), 'utf8'), { window: packs });
+const realmAt = process.argv.indexOf('--realm'), realm = realmAt >= 0 ? process.argv[realmAt + 1] : 'la';
+if (!Object.prototype.hasOwnProperty.call(packs.VG_PACKS, realm)) { console.error('unknown realm ' + realm); process.exit(1); }
+for (const file of packs.VG_PACKS[realm].scripts) if (file !== 'handson.js') load(file);
 const id = process.argv[2];
 const q = window.QUESTS.find(x => x.id === id);
 if (!q) { console.error('unknown mission ' + id); process.exit(1); }
