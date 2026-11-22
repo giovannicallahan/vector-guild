@@ -16,3 +16,4 @@ button:disabled{opacity:.45;cursor:not-allowed} #settings-mobile{display:none}@m
 @media(max-width:650px){#mira-brief:not(.open){display:-webkit-box;-webkit-line-clamp:4;line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}.brief-more{display:inline-block;margin:0 0 10px;padding:8px 0;min-height:44px}}
 .clamp-more{display:none}
 @media(max-width:650px){.clampable:not(.open){display:-webkit-box;-webkit-line-clamp:5;line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:4px}.clamp-more{display:inline-block;margin:0 0 6px;padding:8px 0;min-height:44px}}
+.prompt-part+.prompt-part{margin-top:-4px}

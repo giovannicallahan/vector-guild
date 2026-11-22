@@ -263,7 +263,7 @@
 
   /* ---------- the page ---------- */
   /* Blocks of lesson, prompt, hint and solution text. Each term becomes a button once per block. */
-  const BLOCKS = '.teaching, .guide-body, .hint, #objective-heading ~ p:not([class]):not([style])';
+  const BLOCKS = '.teaching, .guide-body, .hint, .prompt-part, #objective-heading ~ p:not([class]):not([style])';
   const NEVER = 'a, button, input, textarea, select, option, label, code, pre, kbd, svg, canvas, summary, h1, h2, h3, h4, [contenteditable], .gloss-pop';
   let pop = null, trigger = null, listening = false, count = 0;
   const doc = () => window.document || null;
