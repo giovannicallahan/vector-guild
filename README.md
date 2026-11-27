@@ -1,5 +1,7 @@
 # MathCosmos for Android
 
+**Current: version 2.5.3, 592 missions in three realms** — Linear algebra 272 (68 concepts, each with one learn and three practice missions), Foundations 160, Calculus 1 160. Sections further down describe each version in turn; "68 missions" there means versions up to 1.4.1.
+
 Offline Android WebView app. Game files live in `game/` and are copied into the APK on each build. JavaScript progress is stored on the device; Save & settings includes JSON backup import and export using Android's file picker.
 
 Build with JDK 17 or 21, Android SDK Platform 37, Android build tools, Gradle 9.6.0, and Android Gradle Plugin 9.5.1:
