@@ -1,7 +1,7 @@
 /* MathCosmos shell (index.html): the wormhole intro, which ends on the home view (shell/home.js, window.VGHome).
    Reads window.VG_REALMS (realms/registry.js) and window.VGSave (save-store.js, contract in docs/SAVE-V2.md).
-   The home view is what the player sees: with or without WebGL, it has its own flat icons. The 3D star map and
-   the flat list further down are the fallback for when home.js did not load, and are never started otherwise.
+   The home view is what the player sees: with or without WebGL, it has its own flat icons. The 3D star map is opened
+   from the home view ("3D star map"; "Home" goes back); it and the flat list are also the fallback when home.js did not load.
    The pure helpers below touch no DOM and no three.js; qa/shell.test.js runs them under Node. */
 (function(root){
 'use strict';
@@ -238,8 +238,13 @@ function webglAvailable(){
     return true;
   }catch(e){return false}
 }
+/* The intro plays once each time the app or a tab is opened, not on the way back from a realm: sessionStorage lasts
+   as long as the WebView or the tab does. Where it cannot be used, the saved "seen once" flag decides as before. */
+var INTRO_KEY='vg-intro-run';
+function introThisRun(){try{return root.sessionStorage.getItem(INTRO_KEY)==='1'}catch(e){return !!call('introSeen',true)}}
+function markIntroRun(){try{root.sessionStorage.setItem(INTRO_KEY,'1')}catch(e){}}
 var hasThree=!!(THREE&&THREE.WebGLRenderer),
-    choice=chooseMode({forceFlat:forceFlat,three:hasThree,webgl:hasThree&&!forceFlat&&webglAvailable(),introSeen:!!call('introSeen',true),reducedMotion:reduced});
+    choice=chooseMode({forceFlat:forceFlat,three:hasThree,webgl:hasThree&&!forceFlat&&webglAvailable(),introSeen:introThisRun(),reducedMotion:reduced});
 var renderer=null,canvas=$('vg-gl');
 if(choice.mode==='3d'){
   try{renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:(root.devicePixelRatio||1)<2,powerPreference:'default'})}catch(e){renderer=null}
@@ -250,13 +255,20 @@ var selected=null,lastLabel=null,contextLost=false;
 
 /* ---------- Home view (shell/home.js): what the wormhole leads into ----------
    showHome returns false when home.js did not load; the star map or the flat list is used then. */
-var homeHost=$('vg-home'),homeOn=false,replayBtn=null,arriveTimer=0;
+var homeHost=$('vg-home'),homeOn=false,replayBtn=null,mapBtn=null,mapMode=false,arriveTimer=0;
 function homePanelOpen(){try{return homeOn&&!!root.VGHome.isOpen()}catch(e){return false}}
 function canReplay(){return !!renderer&&!reduced&&!contextLost}
-function syncReplay(){if(replayBtn)replayBtn.hidden=!canReplay()}
+function syncReplay(){if(replayBtn)replayBtn.hidden=!canReplay();if(mapBtn)mapBtn.hidden=!renderer||contextLost}
+/* The 3D star map, opened from the home page: every realm as a shape in space, picked by tapping it. "Home" goes back. */
+function openMap(){
+  if(!homeOn||!renderer||contextLost)return;
+  mapMode=true;root.VGHome.unmount();homeOn=false;replayBtn=null;mapBtn=null;stage.hidden=false;resize();startMap(false);start();
+  $('vg-homebtn').focus({preventScroll:true});
+}
+function closeMap(){if(!mapMode)return;mapMode=false;closeCard();if(listOverlay)closeList();startMap(false)}
 function replayIntro(){
   if(!homeOn||!canReplay())return;
-  root.VGHome.unmount();homeOn=false;replayBtn=null;stage.hidden=false;resize();startTunnel();start();
+  root.VGHome.unmount();homeOn=false;replayBtn=null;mapBtn=null;stage.hidden=false;resize();startTunnel();start();
   $('vg-skip').focus({preventScroll:true});
 }
 function showHome(arrive){
@@ -264,6 +276,7 @@ function showHome(arrive){
   var actions=[];
   /* The Collection button is drawn by collection/ui.js: emblem, the word and the stardust count. Pressing it opens the overlay. */
   if(hasColl)actions.push({label:'Collection',place:'top',className:'vg-coll',setup:function(b){CollUI.chip(b,{label:'Collection'})}});
+  if(renderer)actions.push({label:'3D star map',place:'top',onClick:openMap,setup:function(b){mapBtn=b;syncReplay()}});
   if(renderer)actions.push({label:'Replay intro',onClick:replayIntro,setup:function(b){replayBtn=b;syncReplay()}});
   if(canBackup)actions.push({label:'Back up or restore save',onClick:openBackup});
   try{root.VGHome.mount(homeHost,{realms:REALMS,save:Save,three:forceFlat?null:THREE,actions:actions})}
@@ -283,6 +296,7 @@ window.VectorGuildBack=function(){
   if(a==='home')return !!root.VGHome.back();
   if(a==='card'){closeCard();return true}
   if(a==='list'){closeList();return true}
+  if(mapMode&&!homeOn){closeMap();return true}
   return false;
 };
 var closeCard=function(){},closeList=function(){},refreshMap=function(){};
@@ -560,14 +574,15 @@ function ease(x){return x*x*(3-2*x)}
 function startTunnel(){
   phase='tunnel';t0=clock;travel=0;tunnel.visible=true;map.visible=false;stars.visible=false;scene.fog.density=0.008;
   camera.position.set(0,0,0);camera.rotation.set(0,0,0);camera.fov=58;camera.updateProjectionMatrix();
-  hint.textContent='Entering the wormhole';$('vg-skip').hidden=false;$('vg-replay').hidden=true;listBtn.hidden=true;closeCard();
+  hint.textContent='Entering the wormhole';$('vg-skip').hidden=false;$('vg-replay').hidden=true;$('vg-homebtn').hidden=true;listBtn.hidden=true;closeCard();
   REALMS.forEach(function(r){nodes[r.node].btn.hidden=true});
   layoutMap();
-  call('setIntroSeen');
+  call('setIntroSeen');markIntroRun();
 }
 /* flashIn: the tunnel ran to its end, so the map fades in from the flash; a skip or a direct start does not flash. */
 function startMap(flashIn){
-  if(showHome(flashIn)){
+  $('vg-homebtn').hidden=!mapMode;
+  if(!mapMode&&showHome(flashIn)){
     /* Hiding the stage drops focus from any of its buttons, and when the tunnel ends by itself nothing may be focused:
        either way move to the home heading so the change of page is announced. A direct start (no tunnel) with nothing
        focused is left alone, and so is focus outside the stage (the backup dialog, the Collection). */
@@ -585,6 +600,7 @@ function startMap(flashIn){
   if(hadFocus){var f=nodes[REALMS[0]&&REALMS[0].node];if(f)f.btn.focus({preventScroll:true})}
 }
 $('vg-skip').addEventListener('click',function(){startMap(false)});
+$('vg-homebtn').addEventListener('click',closeMap);
 $('vg-replay').addEventListener('click',function(){if(!reduced)startTunnel()});
 if(reducedMQ){var onMQ=function(e){reduced=e.matches;syncReplay();if(phase==='map')$('vg-replay').hidden=reduced;if(reduced&&phase==='tunnel')startMap(false)};
   if(reducedMQ.addEventListener)reducedMQ.addEventListener('change',onMQ);else if(reducedMQ.addListener)reducedMQ.addListener(onMQ)}

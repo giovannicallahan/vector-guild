@@ -267,7 +267,7 @@ check(() => {
   assert.match(indexHtml, /<link rel="stylesheet" href="shell\/shell\.css"><link rel="stylesheet" href="shell\/home\.css">/);
   assert.match(indexHtml, /<div id="vg-home"><\/div>/);
   /* Every way out of the tunnel goes through startMap, which hands over to the home view first. */
-  assert.match(shellSrc, /function startMap\(flashIn\)\{\s*if\(showHome\(flashIn\)\)\{[^}]*phase='home';stop\(\);[^}]*stage\.hidden=true/);
+  assert.match(shellSrc, /function startMap\(flashIn\)\{\s*\$\('vg-homebtn'\)\.hidden=!mapMode;\s*if\(!mapMode&&showHome\(flashIn\)\)\{[^}]*phase='home';stop\(\);[^}]*stage\.hidden=true/);
   /* Focus goes to the home heading when the stage held it, or when the tunnel ended by itself with nothing focused;
      the active element is read before the stage is hidden. The condition is run here with stand-in elements. */
   {

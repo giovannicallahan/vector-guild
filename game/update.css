@@ -263,3 +263,6 @@ button.gloss:focus-visible{outline:2px solid var(--cyan);outline-offset:-11px}
 @media(prefers-reduced-motion:reduce){.gloss-pop{animation:none}}
 /* The result heading takes focus so it is read out; it is not a control, so it shows no focus ring. */
 .skip-payoff h3:focus,.skip-fail h3:focus{outline:none}
+
+/* Phones: a concept's three practice missions sit on one line as letter buttons (the title is in the button's label and on the mission page), and the skip offer is its button alone. */
+@media(max-width:650px){.practice-row{flex-wrap:nowrap;align-items:center}.practice-label{flex:1 1 auto}.practice-chip{flex:0 0 auto;min-width:52px;justify-content:center;gap:6px;padding:6px 10px}.practice-chip .pc-text,.practice-chip .pc-state{display:none}.practice-chip.done::after{content:'✓';font-weight:700;color:var(--cyan)}.practice-chip.locked::after{content:'◇';color:#d8ba85}.skip-offer p{display:none}}
