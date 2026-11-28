@@ -43,8 +43,9 @@ Object.assign(window.ORACLE, {
   },
   /* lambda = v / f; harmonic n = 2L / lambda (loops); nodes = loops + 1. */
   q13b: p => {
-    /* the printed shaking frequency is not a parameter; it is the harmonic's own, f = n v / 2L (n is the only way to recover it) */
-    const f = p.n * p.v / (2 * p.L), lam = p.v / f, n = 2 * p.L / lam;
+    /* lambda = v / f; the number of half-wavelengths that fit in L is the harmonic number; nodes = loops + 1 */
+    const lam = p.v / p.f, n = p.L / (lam / 2);
+    if (Math.abs(n - Math.round(n)) > 1e-9) throw new Error('loops do not fit the rope');
     return [rd(lam, 6), Math.round(n), Math.round(n) + 1];
   },
   /* Fundamental f1 = v / 2L so v = 2 L f1; F = mu v^2; node spacing = lambda / 2 = L / h. */

@@ -175,17 +175,17 @@ practice({ id: 'q17c', parent: 'q17', kind: 'applied', title: 'Tightening the ha
 /* q17d (uses q14): a pipe in the air at T °C sounding its hp-th harmonic, and the length of a string whose hs-th harmonic matches it.
    The string speed is a whole number; the speed of sound, the note and the length are off ties and do not change if the
    earlier answer is rounded first. */
-const m17d = ({ T, Lp, shut, hp, mu, vs, hs: h }) => { const k = shut ? 4 : 2, v = sound(T), f = hp * v / (k * Lp), Ls = h * vs / (2 * f),
- f2 = hp * rd(v, 2) / (k * Lp), Ls2 = h * vs / (2 * rd(f, 2)); return { k, v, f, Ls, f2, Ls2, F: G.tidy(mu * vs * vs) }; };
+const m17d = ({ T, Lp, shut, hp, mu, F, hs: h }) => { const k = shut ? 4 : 2, vs = G.tidy(Math.sqrt(F / mu)), v = sound(T), f = hp * v / (k * Lp), Ls = h * vs / (2 * f),
+ f2 = hp * rd(v, 2) / (k * Lp), Ls2 = h * vs / (2 * rd(f, 2)); return { k, v, f, Ls, f2, Ls2, vs }; };
 practice({ id: 'q17d', parent: 'q17', kind: 'challenge', uses: 'q14', title: 'Matching a string in the changed air',
  brief: 'The hall’s air is not at the usual 343 m/s temperature, so a pipe sounds differently, and the string beside it must be cut to match.',
  labels: ['speed of sound (m/s)', 'pipe frequency (Hz)', 'string length (m)'], tolerance: 0.0005 },
  [['speed of sound (m/s)'], ['pipe frequency (Hz)'], ['string length (m)']], {
- canonical: { T: 24, Lp: 0.9, shut: true, hp: 3, mu: 0.01, vs: 150, hs: 2 },
- draw: R => tries(() => { const shut = R.bool(); return { T: R.int(2, 38), Lp: R.int(40, 150) / 100, shut, hp: R.pick(shut ? [1, 3, 5] : [1, 2, 3, 4]), mu: R.pick([0.002, 0.004, 0.005, 0.008, 0.01, 0.02]), vs: R.int(80, 350), hs: R.int(1, 4) }; },
-  p => { const m = m17d(p); return exact(m.F, 1) && m.f < 1000 && m.f > 60 && m.Ls >= 0.2 && m.Ls <= 2.5 && !edge(m.v, 2) && !edge(m.f, 2) && !edge(m.Ls, 3) && rd(m.f, 2) === rd(m.f2, 2) && rd(m.Ls, 3) === rd(m.Ls2, 3) && !same(p, { T: 24, Lp: 0.9, shut: true, hp: 3, mu: 0.01, vs: 150, hs: 2 }); },
-  { T: 24, Lp: 0.9, shut: true, hp: 3, mu: 0.01, vs: 150, hs: 2 }),
- build: p => { const { T, Lp, shut, hp, mu, vs, hs: h } = p, { k, v, f, Ls, F } = m17d(p); return {
+ canonical: { T: 24, Lp: 0.9, shut: true, hp: 3, mu: 0.01, F: 225, hs: 2 },
+ draw: R => tries(() => { const shut = R.bool(), mu = R.pick([0.002, 0.004, 0.005, 0.008, 0.01, 0.02]), vs = R.int(80, 350); return { T: R.int(2, 38), Lp: R.int(40, 150) / 100, shut, hp: R.pick(shut ? [1, 3, 5] : [1, 2, 3, 4]), mu, F: G.tidy(mu * vs * vs), hs: R.int(1, 4) }; },
+  p => { const m = m17d(p); return exact(p.F, 1) && Number.isInteger(m.vs) && m.f < 1000 && m.f > 60 && m.Ls >= 0.2 && m.Ls <= 2.5 && !edge(m.v, 2) && !edge(m.f, 2) && !edge(m.Ls, 3) && rd(m.f, 2) === rd(m.f2, 2) && rd(m.Ls, 3) === rd(m.Ls2, 3) && !same(p, { T: 24, Lp: 0.9, shut: true, hp: 3, mu: 0.01, F: 225, hs: 2 }); },
+  { T: 24, Lp: 0.9, shut: true, hp: 3, mu: 0.01, F: 225, hs: 2 }),
+ build: p => { const { T, Lp, shut, hp, mu, F, hs: h } = p, { k, v, f, Ls, vs } = m17d(p); return {
   prompt: `On a day when the air in the assembly hall is at ${n(T)} °C, the speed of sound at T °C is v = 331 × √(1 + T ÷ 273) m/s. A pipe ${n(Lp)} m long, ${ends(shut)}, is sounding its ${ord(hp)} harmonic. A string fixed at both ends, with linear mass density ${n(mu)} kg/m under a tension of ${n(F)} N, must sound its ${ord(h)} harmonic at that same frequency. Enter the speed of sound in m/s to 2 decimal places, the frequency of the pipe’s note in Hz to 2 decimal places, and the length of the string in metres to 3 decimal places.`,
   answer: [rd(v, 2), rd(f, 2), rd(Ls, 3)],
   hints: [`Put the temperature into v = 331 × √(1 + T ÷ 273). A pipe ${shut ? 'closed at one end' : 'open at both ends'} has harmonics nv ÷ (${k}L) for ${shut ? 'odd n' : 'n = 1, 2, 3, …'}, using this hall’s speed of sound.`, 'On the string v = √(F_T ÷ μ), a different speed, and its nth harmonic is nv ÷ (2L). Set that equal to the pipe’s note and solve for the string’s length.'],
@@ -254,7 +254,7 @@ practice({ id: 'q18d', parent: 'q18', kind: 'challenge', uses: 'q16', title: 'A 
   p => { const m = m18d(p); return m.fh < 1000 && exact(m.fh, 1) && m.fb >= 0.5 && m.fb <= 7 && Number.isInteger(m.count) && !same(p, { Lp: 0.7, shut: false, h: 3, fk: 738, t: 6 }); },
   { Lp: 0.7, shut: false, h: 3, fk: 738, t: 6 }),
  build: p => { const { Lp, shut, h, fk, t } = p, { k, fh, fb, count } = m18d(p); return {
-  prompt: `The siren tower’s pipe is ${n(Lp)} m long and ${ends(shut)}. ${rule(Lp, shut)}Sound travels at 343 m/s. Mira sounds the pipe’s ${ord(h)} harmonic together with a tuning fork of ${n(fk)} Hz and listens for beats. Enter the frequency of the pipe’s ${ord(h)} harmonic in Hz, then the beat frequency in Hz, then the number of beats she hears in ${n(t)} s.`,
+  prompt: `The siren tower’s pipe is ${n(Lp)} m long and ${ends(shut)}. ${rule(Lp, shut)}Sound travels at 343 m/s. Mira sounds the pipe’s ${ord(h)} harmonic together with a tuning fork of ${n(fk)} Hz and listens for beats. Enter the frequency of the pipe’s ${ord(h)} harmonic in Hz, then the beat frequency in Hz (both come out exact, with at most one decimal place, so no rounding is needed), then the number of beats she hears in ${n(t)} s.`,
   answer: [fh, fb, count],
   hints: [`The nth harmonic of this pipe is n × 343 ÷ (${k}L). Put in n and the length.`, 'The beat frequency is the difference of the two frequencies taken as positive, and the beats in a stretch of time are the beat frequency times the time.'],
   solution: `The ${ord(h)} harmonic is ${n(h)} × 343 ÷ (${k} × ${n(Lp)}) = ${n(fh)} Hz. The beat frequency is |${n(fh)} − ${n(fk)}| = ${n(fb)} Hz. In ${n(t)} s that is ${n(fb)} × ${n(t)} = ${n(count)} beats.`,
@@ -325,7 +325,7 @@ practice({ id: 'q19d', parent: 'q19', kind: 'challenge', uses: 'q16', title: 'A 
   p => { const m = m19d(p); return m.fs < 800 && m.fa < 1000 && !edge(m.fa, 1) && !edge(m.fl, 1) && !same(p, { Lp: 0.7, shut: true, h: 3, vs: 16 }); },
   { Lp: 0.7, shut: true, h: 3, vs: 16 }),
  build: p => { const { Lp, shut, h, vs } = p, { k, fs, fa, fl } = m19d(p); return {
-  prompt: `The siren on a rover is a pipe ${n(Lp)} m long, ${ends(shut)}, sounding its ${ord(h)} harmonic. ${rule(Lp, shut)}The rover drives along the track at ${n(vs)} m/s. Mira stands still beside the track, and sound travels at 343 m/s. Enter the frequency of the siren in Hz, then the frequency she hears while the rover comes towards her, then the frequency she hears after it has passed and is moving away, the last two in Hz to 1 decimal place.`,
+  prompt: `The siren on a rover is a pipe ${n(Lp)} m long, ${ends(shut)}, sounding its ${ord(h)} harmonic. ${rule(Lp, shut)}The rover drives along the track at ${n(vs)} m/s. Mira stands still beside the track, and sound travels at 343 m/s. Enter the frequency of the siren in Hz, then the frequency she hears while the rover comes towards her, then the frequency she hears after it has passed and is moving away, each in Hz to 1 decimal place (the siren’s own frequency comes out exact at 1 decimal place, so it needs no rounding).`,
   answer: [fs, rd(fa, 1), rd(fl, 1)],
   hints: [`The nth harmonic of this pipe is n × 343 ÷ (${k}L). That is the frequency of the siren itself, as heard on the rover.`, 'Then, for a source moving past a still listener, f_o = f_s × v ÷ (v − v_s) while it comes towards her and f_o = f_s × v ÷ (v + v_s) while it moves away.'],
   solution: `The ${ord(h)} harmonic is f_s = ${n(h)} × 343 ÷ (${k} × ${n(Lp)}) = ${n(fs)} Hz. Coming towards her: f_o = ${n(fs)} × 343 ÷ (343 − ${n(vs)}) = ${n(fs)} × 343 ÷ ${n(V - vs)} ${eq(fa, 1)} Hz. Moving away: f_o = ${n(fs)} × 343 ÷ (343 + ${n(vs)}) = ${n(fs)} × 343 ÷ ${n(V + vs)} ${eq(fl, 1)} Hz.`,
@@ -395,7 +395,7 @@ practice({ id: 'q20d', parent: 'q20', kind: 'challenge', title: 'One rover chasi
   p => { const m = m20d(p); return p.vo !== p.vs && m.f1 < 1000 && !edge(m.f1, 1) && !edge(m.f2, 1) && !(p.fs === 500 && p.vo === 10) && !same(p, { fs: 700, vo: 30, vs: 18, lis: true }); },
   { fs: 700, vo: 30, vs: 18, lis: true }),
  build: p => { const { fs, vo, vs, lis } = p, { top, bot, f1, f2 } = m20d(p); return {
-  prompt: `Two rovers drive the same way along a straight stretch of the track, one behind the other. The rover with the siren sounds ${n(fs)} Hz and drives at ${n(vs)} m/s. Mira’s rover drives at ${n(vo)} m/s and is ${lis ? 'behind' : 'ahead of'} the siren rover. Both speeds are measured against the ground, and sound travels at 343 m/s in the still air. Enter the frequency Mira hears while both rovers are driving, then the frequency she hears if she stops her rover while the siren rover keeps its speed, both in Hz to 1 decimal place.`,
+  prompt: `Two rovers drive the same way along a straight stretch of the track, one behind the other. The rover with the siren sounds ${n(fs)} Hz and drives at ${n(vs)} m/s. Mira’s rover drives at ${n(vo)} m/s in the same direction, ${lis ? 'behind the siren rover: she is following it, so the siren is in front of her and moving away from her, while she moves towards it' : 'in front of the siren rover: it is following her, so the siren is behind her and moving towards her, while she moves away from it'}. Both speeds are measured against the ground, and sound travels at 343 m/s in the still air. Enter the frequency Mira hears while both rovers are driving, then the frequency she hears if she stops her rover while the siren rover keeps its speed, both in Hz to 1 decimal place.`,
   answer: [rd(f1, 1), rd(f2, 1)],
   hints: ['In f_o = f_s × (v ± v_o) ÷ (v ∓ v_s), the top is v + v_o when the listener moves towards the source and v − v_o when she moves away. The bottom is v − v_s when the source moves towards the listener and v + v_s when it moves away.', 'Decide for each rover whether it is moving towards or away from the other one along the line between them. A listener who has stopped has v_o = 0.'],
   solution: `${lis ? 'Mira is behind the siren rover, so she moves towards it while it moves away from her' : 'Mira is ahead of the siren rover, so she moves away from it while it moves towards her'}. So f_o = ${n(fs)} × (343 ${lis ? '+' : '−'} ${n(vo)}) ÷ (343 ${lis ? '+' : '−'} ${n(vs)}) = ${n(fs)} × ${n(top)} ÷ ${n(bot)} ${eq(f1, 1)} Hz. When she stops, v_o = 0 and f_o = ${n(fs)} × 343 ÷ ${n(bot)} ${eq(f2, 1)} Hz.`,

@@ -16,6 +16,8 @@ const say = (x, dp, u = '') => exact(x, dp) ? `= ${n(rd(x, dp))}${u}` : dp >= 4 
 /* "≈ 0.6660" for a value used on unrounded, "= 0.24" when it is exact at four places. */
 const eq4 = x => exact(x, 4) ? `= ${n(x)}` : `≈ ${n(x)}`;
 const V = 343;
+/* "1 wavelength", "2.5 wavelengths". */
+const wl = w => `${n(w)} wavelength${w === 1 ? '' : 's'}`;
 /* Indices of refraction from OpenStax University Physics Volume 3, Table 1.1 (589 nm light); air is taken as 1.00. */
 const MAT = { 1: 'air', 1.333: 'fresh water', 1.309: 'ice', 1.52: 'crown glass', 1.66: 'flint glass', 2.419: 'diamond', 1.458: 'fused quartz',
  1.49: 'polystyrene', 1.51: 'Plexiglas', 1.434: 'fluorite', 1.923: 'zircon', 1.544: 'crystalline quartz', 1.361: 'ethanol', 1.473: 'glycerine' };
@@ -48,20 +50,22 @@ Object.assign(window.MISSION_GEN, {
    ] }; }
  },
  /* Two speakers in phase at f Hz; the wavelength 343 ÷ f is short (f from the list), and the path difference is k half
-    wavelengths, so k even is loud and k odd is quiet. Not the worked example (343 Hz, 3 m and 4.5 m). */
+    wavelengths (k drawn, then forgotten: the params are f, r1 and r2 = r1 + kλ/2, all printed), so k even is loud and k odd
+    is quiet. Not the worked example (343 Hz, 3 m and 4.5 m). */
  q22: {
-  canonical: { f: 686, r1: 2.4, k: 6 },
-  draw: R => guard(() => ({ f: R.pick([196, 245, 343, 490, 686, 980, 1372]), r1: R.int(150, 600) / 100, k: R.int(1, 9) }), p => !(p.f === 343 && p.r1 === 3 && p.k === 3), { f: 686, r1: 2.4, k: 6 }),
-  build: ({ f, r1, k }) => { const lam = G.tidy(V / f), dr = G.tidy(k * lam / 2), r2 = G.tidy(r1 + dr), w = k / 2, loud = k % 2 === 0 ? 1 : 0; return {
+  canonical: { f: 686, r1: 2.4, r2: 3.9 },
+  draw: R => guard(() => { const f = R.pick([196, 245, 343, 490, 686, 980, 1372]), r1 = R.int(150, 600) / 100, k = R.int(1, 9); return { f, r1, r2: G.tidy(r1 + k * G.tidy(V / f) / 2) }; },
+   p => !(p.f === 343 && p.r1 === 3 && p.r2 === 4.5), { f: 686, r1: 2.4, r2: 3.9 }),
+  build: ({ f, r1, r2 }) => { const lam = G.tidy(V / f), dr = G.tidy(r2 - r1), w = G.tidy(dr / lam), loud = Number.isInteger(w) ? 1 : 0; return {
    prompt: `Two speakers at the edge of the Rover Track are wired to the same signal generator, so they send out the same ${n(f)} Hz tone in phase. Sound travels at 343 m/s. A marshal stands ${n(r1)} m from speaker A and ${n(r2)} m from speaker B. Enter the path difference in metres, then the path difference in wavelengths, then 1 if the marshal’s spot is loud (constructive interference) or 0 if it is quiet (destructive interference).`,
    answer: [dr, w, loud],
    hints: ['The path difference is the longer distance minus the shorter one. One wavelength is the speed of sound divided by the frequency.', 'A path difference of a whole number of wavelengths means crest meets crest and the sound is loud; a whole number and a half means crest meets trough and the sound cancels.'],
-   solution: `The path difference is ${n(r2)} − ${n(r1)} = ${n(dr)} m. One wavelength is 343 ÷ ${n(f)} = ${n(lam)} m, so the path difference is ${n(dr)} ÷ ${n(lam)} = ${n(w)} wavelengths. ${loud ? 'That is a whole number of wavelengths, so crests from the two speakers arrive together: constructive interference, a loud spot (1).' : 'That is a whole number and a half, so a crest from one speaker arrives with a trough from the other: destructive interference, a quiet spot (0).'}`,
+   solution: `The path difference is ${n(r2)} − ${n(r1)} = ${n(dr)} m. One wavelength is 343 ÷ ${n(f)} = ${n(lam)} m, so the path difference is ${n(dr)} ÷ ${n(lam)} = ${wl(w)}. ${loud ? 'That is a whole number of wavelengths, so crests from the two speakers arrive together: constructive interference, a loud spot (1).' : 'That is a whole number and a half, so a crest from one speaker arrives with a trough from the other: destructive interference, a quiet spot (0).'}`,
    guidance: [
     { prompt: `The marshal is ${n(r1)} m from A and ${n(r2)} m from B. What is the path difference, in metres?`, answer: [dr], explanation: `${n(r2)} − ${n(r1)} = ${n(dr)} m: the sound from B travels that much farther.` },
     { prompt: `What is the wavelength of a ${n(f)} Hz tone when sound travels at 343 m/s, in metres?`, answer: [lam], explanation: `λ = v ÷ f = 343 ÷ ${n(f)} = ${n(lam)} m.` },
-    { prompt: `How many wavelengths is a path difference of ${n(dr)} m?`, answer: [w], explanation: `${n(dr)} ÷ ${n(lam)} = ${n(w)} wavelengths.` },
-    { prompt: `The path difference is ${n(w)} wavelengths. Enter 1 if the spot is loud, or 0 if it is quiet.`, answer: [loud], explanation: loud ? `${n(w)} is a whole number, so the two waves arrive in step and add: loud, 1.` : `${n(w)} is a whole number and a half, so the two waves arrive opposite and cancel: quiet, 0.` }
+    { prompt: `How many wavelengths is a path difference of ${n(dr)} m?`, answer: [w], explanation: `${n(dr)} ÷ ${n(lam)} = ${wl(w)}.` },
+    { prompt: `The path difference is ${wl(w)}. Enter 1 if the spot is loud, or 0 if it is quiet.`, answer: [loud], explanation: loud ? `${n(w)} is a whole number, so the two waves arrive in step and add: loud, 1.` : `${n(w)} is a whole number and a half, so the two waves arrive opposite and cancel: quiet, 0.` }
    ] }; }
  },
  /* Heard frequencies fa (approaching) and fr (receding) from a rover passing a listener at rest. vs = 343(fa − fr) ÷ (fa + fr),
@@ -141,7 +145,7 @@ Object.assign(window.MISSION_GEN, {
   draw: R => guard(() => ({ I0: R.int(20, 400), a: R.int(15, 125) / 100, b: R.int(15, 125) / 100 }), ({ I0, a, b }) => {
    const I2 = I0 / 2 * Math.cos(a) ** 2, I3 = I2 * Math.cos(b) ** 2; return I3 >= 0.5 && a !== 1 && b !== 1 && !(I0 === 80 && a === 0.4 && b === 0.9) && ok(I2, 2) && ok(I3, 2); }, { I0: 240, a: 0.5, b: 0.7 }),
   build: ({ I0, a, b }) => { const I1 = I0 / 2, ca = Math.cos(a) ** 2, cb = Math.cos(b) ** 2, I2 = I1 * ca, I3 = I2 * cb; return {
-   prompt: `Unpolarised light of intensity ${n(I0)} W/m² shines on a stack of three polarising filters. The axis of the second filter is turned ${n(a)} radians from the axis of the first, and the axis of the third is turned a further ${n(b)} radians from the second, the same way round. Enter the intensity after the first filter, after the second and after the third, each in W/m² to 2 decimal places. Use unrounded values from one filter to the next.`,
+   prompt: `Unpolarised light of intensity ${n(I0)} W/m² shines on a stack of three polarising filters. The axis of the second filter is turned ${n(a)} radians from the axis of the first, and the axis of the third is turned a further ${n(b)} radians on from the second, the same way round, so the angle between the axes of the second and third filters is ${n(b)} radians. Enter the intensity after the first filter, after the second and after the third, each in W/m² to 2 decimal places. Use unrounded values from one filter to the next.`,
    answer: [rd(I1, 2), rd(I2, 2), rd(I3, 2)],
    hints: ['A polarising filter passes half the intensity of unpolarised light, and the light that leaves it is polarised along the filter’s axis.', 'Malus’s law: polarised light through a filter whose axis is at θ to its polarisation leaves with I = I₀ cos² θ, where I₀ is the intensity just before that filter.'],
    solution: `After the first filter the light is polarised and has half the intensity: ${n(I0)} ÷ 2 = ${n(I1)} W/m². The second filter is at ${n(a)} rad to that polarisation, and cos²(${n(a)}) ≈ ${n(ca)}, so I₂ = ${n(I1)} × cos²(${n(a)}) ${say(I2, 2, ' W/m²')}. The third filter is at ${n(b)} rad to the second, and cos²(${n(b)}) ≈ ${n(cb)}, so I₃ = I₂ × cos²(${n(b)}) ${say(I3, 2, ' W/m²')}.`,
@@ -160,7 +164,7 @@ Object.assign(window.MISSION_GEN, {
   build: ({ kind, f, d }) => { const o = OPTIC[kind], di = f * d / (d - f), m = -di / d, real = di > 0 ? 1 : 0,
    where = o.mirror ? (real ? 'in front of the mirror, where the light really meets' : 'behind the mirror, where the light only seems to come from') : (real ? 'on the far side of the lens, where the light really meets' : 'on the same side as the lamp, where the light only seems to come from');
    return {
-   prompt: `A small lamp stands ${n(d)} cm in front of a ${o.name}. Its focal length is f = ${n(f)} cm (a ${o.name} has a ${o.sign} focal length). Enter the image distance dᵢ in centimetres to 1 decimal place, with a minus sign if the image is virtual, then the magnification m to 2 decimal places, with its sign.`,
+   prompt: `A small lamp stands ${n(d)} cm in front of a ${o.name}. Its focal length is f = ${n(f)} cm (a ${o.name} has a ${o.sign} focal length). Enter the image distance dᵢ in centimetres to 1 decimal place, with a minus sign if the image is virtual, then the magnification m to 2 decimal places, with its sign, worked out from the unrounded image distance.`,
    answer: [rd(di, 1), rd(m, 2)],
    hints: ['Rearrange 1/d₀ + 1/dᵢ = 1/f to 1/dᵢ = 1/f − 1/d₀, then take the reciprocal. Keep the sign of f.', 'The magnification is m = −dᵢ ÷ d₀. A negative m means the image is upside down; a size above 1 means it is larger than the lamp.'],
    solution: `1/dᵢ = 1/${par(f)} − 1/${n(d)}, so dᵢ = ${par(f)} × ${n(d)} ÷ (${n(d)} − ${par(f)}) = ${n(f * d)} ÷ ${par(d - f)} ${say(di, 1, ' cm')}. ${real ? 'It is positive, so the image is real' : 'It is negative, so the image is virtual'}: ${where}. The magnification is m = −dᵢ ÷ d₀ = −${par(di)} ÷ ${n(d)} ${say(m, 2)}: the image is ${m < 0 ? 'upside down' : 'upright'} and ${Math.abs(m) > 1 ? 'larger' : 'smaller'} than the lamp.`,
@@ -178,7 +182,7 @@ Object.assign(window.MISSION_GEN, {
    ({ f, d, h, nn, a }) => { const di = f * d / (d - f), c = Math.asin(1 / nn); return Math.abs(d - f) >= 3 && a !== 1 && Math.abs(a - c) > 0.03 && !(f === 20 && d === 30) && ok(di, 1) && ok(-h * di / d, 2) && ok(c, 3); },
    { f: 25, d: 40, h: 3, nn: 1.51, a: 0.8 }),
   build: ({ f, d, h, nn, a }) => { const name = MAT[nn], di = f * d / (d - f), m = -di / d, hi = h * m, sc = 1 / nn, c = Math.asin(sc), trap = a > c ? 1 : 0; return {
-   prompt: `On the telescope lens bench, a target ${n(h)} cm tall stands ${n(d)} cm in front of a converging lens with focal length ${n(f)} cm. The lens is made of ${name} (index of refraction ${n(nn)}) and has a flat back face in air (take n = 1.00 for air). Enter the image distance in cm to 1 decimal place (negative if the image is virtual), then the image height in cm to 2 decimal places (negative if the image is upside down). Then a stray ray inside the lens strikes the flat back face at ${n(a)} radians from the normal: enter 1 if it is totally internally reflected, or 0 if it escapes into the air.`,
+   prompt: `On the telescope lens bench, a target ${n(h)} cm tall stands ${n(d)} cm in front of a converging lens with focal length ${n(f)} cm. The lens is made of ${name} (index of refraction ${n(nn)}) and has a flat back face in air (take n = 1.00 for air). Enter the image distance in cm to 1 decimal place (negative if the image is virtual), then the image height in cm to 2 decimal places (negative if the image is upside down), worked out from the unrounded image distance. Then a stray ray inside the lens strikes the flat back face at ${n(a)} radians from the normal: enter 1 if it is totally internally reflected, or 0 if it escapes into the air.`,
    answer: [rd(di, 1), rd(hi, 2), trap],
    hints: ['Use the thin-lens equation 1/d₀ + 1/dᵢ = 1/f for the image distance, then hᵢ = m × h₀ with m = −dᵢ ÷ d₀.', 'For the stray ray, find the critical angle from sin θc = n₂ ÷ n₁ with the glass as n₁, and compare the ray’s angle with it.'],
    solution: `dᵢ = f × d₀ ÷ (d₀ − f) = ${n(f)} × ${n(d)} ÷ ${par(d - f)} ${say(di, 1, ' cm')}, so the image is ${di > 0 ? 'real, on the far side of the lens' : 'virtual, on the same side as the target'}. m = −dᵢ ÷ d₀ ${eq4(m)}, so hᵢ = m × ${n(h)} ${say(hi, 2, ' cm')}: ${hi < 0 ? 'upside down' : 'upright'}. For the stray ray, sin θc = 1.00 ÷ ${n(nn)} ${eq4(sc)}, so θc ${say(c, 3, ' rad')}. The ray strikes at ${n(a)} rad, ${trap ? 'more than θc, so it is totally internally reflected: 1.' : 'less than θc, so part of it escapes into the air: 0.'}`,

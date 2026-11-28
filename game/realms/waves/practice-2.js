@@ -37,6 +37,8 @@ const clear = (x, d) => { if (exactAt(x, d)) return true; const s = Math.abs(x) 
 const fy = (x, d) => exactAt(x, d) ? n(rd(x, d)) : fx(x, d);
 const eq = (x, d) => exactAt(x, d) ? '=' : '≈';
 const tid = x => Math.round(x * 1e6) / 1e6;
+/* 'a' or 'an' before a number read aloud: 'an 8', 'an 11.5', 'an 18', 'a 3', 'a 110'. */
+const anN = x => { const i = String(Math.floor(Math.abs(x))); return (/^8/.test(i) || (/^1[18]$/.test(i)) ? 'an ' : 'a ') + n(x); };
 /* A bounded retry: at most 1000 tries, then the canonical parameters. */
 const retry = (make, ok, canon) => { for (let i = 0; i < 1000; i++) { const p = make(); if (ok(p)) return p; } return { ...canon }; };
 
@@ -50,14 +52,14 @@ const OK06b = ({ m, b, k, A0, t }) => { const e = b * t / (2 * m), A = A0 * Math
  return exactAt(e, 2) && A >= 0.5 && clear(A, 2) && clear(w0 / TAU, 2) && rd(wd / TAU, 2) === rd(w0 / TAU, 2) && light && !(m === 1 && b === 0.2 && k === 100); };
 mk({
  id: 'q06b', parent: 'q06', kind: 'setting', title: 'The tiltmeter plate',
- brief: 'The tiltmeter plate in the quake station rings after every tremor, and Mira needs its best-driven frequency and how fast the ringing dies.',
+ brief: 'The tiltmeter plate in the Quake Station rings after every tremor, and Mira needs its best-driven frequency and how fast the ringing dies.',
  labels: ['driving frequency (Hz)', 'amplitude (mm)'], tolerance: 0.005,
  gl: [['natural frequency (Hz)'], ['bt/2m'], ['amplitude (mm)']]
 }, {
  canonical: { m: 5, b: 0.8, k: 80, A0: 12, t: 5 },
  draw: R => retry(() => ({ m: R.int(1, 20) / 2, b: R.int(1, 20) / 10, k: 10 * R.int(2, 60), A0: R.int(4, 25), t: R.int(2, 30) }), OK06b, { m: 5, b: 0.8, k: 80, A0: 12, t: 5 }),
  build: ({ m, b, k, A0, t }) => { const e = tid(b * t / (2 * m)), A = A0 * Math.exp(-e), w0 = Math.sqrt(k / m), f0 = w0 / TAU; return {
-  prompt: `The tiltmeter plate at the quake station is a ${n(m)} kg plate resting on springs with a total stiffness of k = ${n(k)} N/m. A damper with damping constant b = ${n(b)} kg/s stops it ringing. A tremor shoves the plate ${n(A0)} mm from rest and lets go, and its amplitude then shrinks as A(t) = A₀e^(−bt/2m), where A₀ is the starting amplitude. Enter the driving frequency that would make the plate swing hardest, in hertz to 2 decimal places: the damping is light, so use the natural frequency f₀ = √(k/m) ÷ 2π. Then enter the amplitude ${n(t)} s after the release, in mm to 2 decimal places.`,
+  prompt: `The tiltmeter plate at the Quake Station is ${anN(m)} kg plate resting on springs with a total stiffness of k = ${n(k)} N/m. A damper with damping constant b = ${n(b)} kg/s stops it ringing. A tremor shoves the plate ${n(A0)} mm from rest and lets go, and its amplitude then shrinks as A(t) = A₀e^(−bt/2m), where A₀ is the starting amplitude. Enter the driving frequency that would make the plate swing hardest, in hertz to 2 decimal places: the damping is light, so use the natural frequency f₀ = √(k/m) ÷ 2π. Then enter the amplitude ${n(t)} s after the release, in mm to 2 decimal places.`,
   answer: [rd(f0, 2), rd(A, 2)],
   hints: ['Resonance needs the driving frequency to equal the natural frequency: find ω₀ = √(k/m) in radians per second, then divide by 2π to get hertz.', 'Work out bt/2m with m in kilograms, b in kg/s and t in seconds, then multiply A₀ by e to the power of minus that number. The amplitude stays in millimetres.'],
   solution: `ω₀ = √(${n(k)} ÷ ${n(m)}) ${eq(w0, 4)} ${n(tid(w0))} rad/s, so f₀ = ω₀ ÷ 2π ≈ ${fx(f0, 2)} Hz: driving the plate at this frequency gives resonance. Then bt/2m = ${n(b)} × ${n(t)} ÷ (2 × ${n(m)}) = ${n(e)}, so A = ${n(A0)}e^(−${n(e)}) ≈ ${fx(A, 2)} mm.`,
@@ -80,7 +82,7 @@ mk({
  canonical: { f: 0.6, m: 5, b: 1.9, A0: 8, t: 5 },
  draw: R => retry(() => ({ f: R.pick([0.4, 0.5, 0.6, 0.8, 1, 1.2, 1.5, 2, 2.5, 3]), m: R.int(2, 20) / 2, b: R.int(1, 20) / 10, A0: R.int(4, 20), t: R.int(2, 30) }), OK06c, { f: 0.6, m: 5, b: 1.9, A0: 8, t: 5 }),
  build: ({ f, m, b, A0, t }) => { const w = TAU * f, k = m * w * w, e = tid(b * t / (2 * m)), A = A0 * Math.exp(-e); return {
-  prompt: `Distant quarry blasts make the ground at the quake station shake at ${n(f)} Hz. Mira hangs a ${n(m)} kg sensor mass from a spring and wants the shaking to drive it at resonance, so its natural frequency must equal ${n(f)} Hz. The natural angular frequency is ω₀ = √(k/m), and it also equals 2π times the natural frequency in hertz. Squaring ω₀ = √(k/m) gives k = mω₀². Enter the spring constant k that does this, in N/m to 1 decimal place, working from the unrounded ω₀. Later the blasting stops and a damper with damping constant b = ${n(b)} kg/s is fitted. The mass is pulled ${n(A0)} cm from rest and let go, and its amplitude shrinks as A(t) = A₀e^(−bt/2m). Enter the amplitude ${n(t)} s after the release, in cm to 2 decimal places.`,
+  prompt: `Distant quarry blasts make the ground at the Quake Station shake at ${n(f)} Hz. Mira hangs ${anN(m)} kg sensor mass from a spring and wants the shaking to drive it at resonance, so its natural frequency must equal ${n(f)} Hz. The natural angular frequency is ω₀ = √(k/m), and it also equals 2π times the natural frequency in hertz. Squaring ω₀ = √(k/m) gives k = mω₀². Enter the spring constant k that does this, in N/m to 1 decimal place, working from the unrounded ω₀. Later the blasting stops and a damper with damping constant b = ${n(b)} kg/s is fitted. The mass is pulled ${n(A0)} cm from rest and let go, and its amplitude shrinks as A(t) = A₀e^(−bt/2m). Enter the amplitude ${n(t)} s after the release, in cm to 2 decimal places.`,
   answer: [rd(k, 1), rd(A, 2)],
   hints: ['Resonance needs the natural frequency to equal the driving frequency, so ω₀ is 2π times that frequency in radians per second. Then k = mω₀², with m in kilograms.', 'For the amplitude, work out bt/2m first (kg/s times s divided by kg has no unit), then multiply A₀ by e to the power of minus that number.'],
   solution: `ω₀ = 2π × ${n(f)} ${eq(w, 2)} ${fx(w, 2)} rad/s, so k = mω₀² = ${n(m)} × ${fy(w, 4)}² ≈ ${fx(k, 1)} N/m. Then bt/2m = ${n(b)} × ${n(t)} ÷ (2 × ${n(m)}) = ${n(e)}, so A = ${n(A0)}e^(−${n(e)}) ≈ ${fx(A, 2)} cm.`,
@@ -104,7 +106,7 @@ mk({
  canonical: { f: 0.25, m: 3, b: 0.6, A0: 12, t: 13 },
  draw: R => retry(() => ({ f: R.pick(F06d), m: R.int(2, 20) / 2, b: R.int(1, 20) / 10, A0: R.int(4, 25), t: R.int(2, 30) }), OK06d, { f: 0.25, m: 3, b: 0.6, A0: 12, t: 13 }),
  build: ({ f, m, b, A0, t }) => { const T = tid(1 / f), L = g * (T / TAU) * (T / TAU), e = tid(b * t / (2 * m)), A = A0 * Math.exp(-e); return {
-  prompt: `A ${n(m)} kg sensor bob hangs from a long cable at the quake station and swings like a simple pendulum, with period T = 2π√(L/g), where L is the cable length and g = 9.8 m/s². Ground swell at ${n(f)} Hz drives it, and Mira wants resonance: the bob's natural frequency, 1 ÷ T, must equal ${n(f)} Hz. Enter the cable length L that does this, in metres to 3 decimal places (turn the period rule round: L = g(T ÷ 2π)²). A damper with damping constant b = ${n(b)} kg/s is also fitted. When the swell stops, the bob is pulled ${n(A0)} cm aside and let go, and its amplitude shrinks as A(t) = A₀e^(−bt/2m), the same rule as for a mass on a spring when the damping is light. Enter the amplitude ${n(t)} s after the release, in cm to 2 decimal places.`,
+  prompt: `${anN(m)[0].toUpperCase() + anN(m).slice(1)} kg sensor bob hangs from a long cable at the Quake Station and swings like a simple pendulum, with period T = 2π√(L/g), where L is the cable length and g = 9.8 m/s². Ground swell at ${n(f)} Hz drives it, and Mira wants resonance: the bob's natural frequency, 1 ÷ T, must equal ${n(f)} Hz. Enter the cable length L that does this, in metres to 3 decimal places (turn the period rule round: L = g(T ÷ 2π)²). A damper with damping constant b = ${n(b)} kg/s is also fitted. When the swell stops, the bob is pulled ${n(A0)} cm aside and let go, and its amplitude shrinks as A(t) = A₀e^(−bt/2m), the same rule as for a mass on a spring when the damping is light. Enter the amplitude ${n(t)} s after the release, in cm to 2 decimal places.`,
   answer: [rd(L, 3), rd(A, 2)],
   hints: ['At resonance the natural frequency equals the driving frequency, so the period is T = 1 ÷ the frequency in hertz. Then L = g(T ÷ 2π)².', 'For the amplitude, work out bt/2m with m in kilograms, b in kg/s and t in seconds, then multiply A₀ by e to the power of minus that number.'],
   solution: `T = 1 ÷ ${n(f)} = ${n(T)} s, so L = g(T ÷ 2π)² = 9.8 × (${n(T)} ÷ 2π)² ${eq(L, 3)} ${fx(L, 3)} m. Then bt/2m = ${n(b)} × ${n(t)} ÷ (2 × ${n(m)}) = ${n(e)}, so A = ${n(A0)}e^(−${n(e)}) ≈ ${fx(A, 2)} cm.`,
@@ -173,7 +175,7 @@ mk({
  canonical: { m: 2.5, k: 340, v: 15 },
  draw: R => retry(() => ({ m: R.int(1, 20) / 2, k: 10 * R.int(2, 80), v: 5 * R.int(2, 24) }), OK07d, { m: 2.5, k: 340, v: 15 }),
  build: ({ m, k, v }) => { const w = Math.sqrt(k / m), f = w / TAU, lam = v / f; return {
-  prompt: `A shaker at the foot of a mast cable is a ${n(m)} kg mass on a spring with k = ${n(k)} N/m, bolted to the cable so that the cable follows the mass as it swings. The mass swings at its natural angular frequency ω = √(k/m) in rad/s, which is a frequency f = ω ÷ 2π in hertz. Every wave on the cable travels at ${n(v)} m/s. Enter the frequency of the waves the shaker sends up, in hertz to 3 decimal places. Then enter their wavelength in metres to 3 decimal places, working from the unrounded frequency.`,
+  prompt: `A shaker at the foot of a mast cable is ${anN(m)} kg mass on a spring with k = ${n(k)} N/m, bolted to the cable so that the cable follows the mass as it swings. The mass swings at its natural angular frequency ω = √(k/m) in rad/s, which is a frequency f = ω ÷ 2π in hertz. Every wave on the cable travels at ${n(v)} m/s. Enter the frequency of the waves the shaker sends up, in hertz to 3 decimal places. Then enter their wavelength in metres to 3 decimal places, working from the unrounded frequency.`,
   answer: [rd(f, 3), rd(lam, 3)],
   hints: ['Find ω = √(k/m) in radians per second first, then divide by 2π to turn it into hertz.', 'The cable carries every wave at the same speed, so the wavelength is the speed divided by the frequency: λ = v ÷ f.'],
   solution: `ω = √(${n(k)} ÷ ${n(m)}) ${eq(w, 3)} ${fx(w, 3)} rad/s, so f = ω ÷ 2π ${eq(f, 3)} ${fx(f, 3)} Hz. Then λ = v ÷ f = ${n(v)} ÷ ${fy(f, 4)} ${eq(lam, 3)} ${fx(lam, 3)} m.`,
@@ -259,6 +261,8 @@ mk({
 /* ---- q09 Wave speed on a stretched cable, v = √(T/μ) [V1 16.3] ---- */
 
 /* A hanging weight H gives the tension 9.8H; v = √(F/μ); then the weight for another speed, H₂ = μv₂² ÷ 9.8. Not the worked example (μ = 0.01, 64 N). */
+/* μ is drawn with three decimals; the printed wire mass M = μL is then the parameter, and build works μ = M ÷ L back out. */
+const withM = ({ mu, ...p }) => ({ M: tid(mu * p.L), ...p });
 const OK09b = ({ mu, L, H, v2 }) => { const F = g * H, v = Math.sqrt(F / mu), H2 = mu * v2 * v2 / g;
  return exactAt(F, 2) && clear(v, 2) && clear(H2, 2) && H2 >= 0.5 && H2 <= 200 && Math.abs(v - v2) > 4 && !(mu === 0.01 && F === 64); };
 mk({
@@ -267,9 +271,9 @@ mk({
  labels: ['wave speed (m/s)', 'hanging mass (kg)'], tolerance: 0.005,
  gl: [['tension (N)'], ['wave speed (m/s)'], ['hanging mass (kg)']]
 }, {
- canonical: { mu: 0.025, L: 16, H: 5, v2: 60 },
- draw: R => retry(() => ({ mu: R.int(4, 60) / 1000, L: R.int(5, 40), H: R.int(2, 40) / 2, v2: 5 * R.int(3, 24) }), OK09b, { mu: 0.025, L: 16, H: 5, v2: 60 }),
- build: ({ mu, L, H, v2 }) => { const M = tid(mu * L), F = tid(g * H), v = Math.sqrt(F / mu), H2 = mu * v2 * v2 / g; return {
+ canonical: { M: 0.4, L: 16, H: 5, v2: 60 },
+ draw: R => withM(retry(() => ({ mu: R.int(4, 60) / 1000, L: R.int(5, 40), H: R.int(2, 40) / 2, v2: 5 * R.int(3, 24) }), OK09b, { mu: 0.025, L: 16, H: 5, v2: 60 })),
+ build: ({ M, L, H, v2 }) => { const mu = tid(M / L), F = tid(g * H), v = Math.sqrt(F / mu), H2 = mu * v2 * v2 / g; return {
   prompt: `An antenna wire at the rover pad is ${n(L)} m long with a mass of ${n(M)} kg. One end is fixed and the other runs over a pulley and carries a hanging mass of ${n(H)} kg, so the tension in the wire is the weight of that mass, mg with g = 9.8 m/s². Enter the speed of a pulse along the wire, in m/s to 2 decimal places. Then enter the hanging mass, in kg to 2 decimal places, that would make pulses travel at ${n(v2)} m/s.`,
   answer: [rd(v, 2), rd(H2, 2)],
   hints: ['Find the linear mass density μ = mass ÷ length, and the tension as the weight of the hanging mass, F = mg in newtons. Then v = √(F/μ).', 'For a chosen speed, F = μv². The tension is the weight of the hanging mass, so divide that tension by g to get the mass.'],
@@ -290,9 +294,9 @@ mk({
  labels: ['wave speed (m/s)', 'tension (N)'], tolerance: 0.0005,
  gl: [['wave speed (m/s)'], ['linear mass density (kg/m)'], ['tension (N)']]
 }, {
- canonical: { mu: 0.04, L: 30, t: 0.8 },
- draw: R => retry(() => ({ mu: R.int(4, 80) / 1000, L: 5 * R.int(3, 30), t: R.int(3, 40) / 10 }), OK09c, { mu: 0.04, L: 30, t: 0.8 }),
- build: ({ mu, L, t }) => { const M = tid(mu * L), v = 2 * L / t, F = mu * v * v; return {
+ canonical: { M: 1.2, L: 30, t: 0.8 },
+ draw: R => withM(retry(() => ({ mu: R.int(4, 80) / 1000, L: 5 * R.int(3, 30), t: R.int(3, 40) / 10 }), OK09c, { mu: 0.04, L: 30, t: 0.8 })),
+ build: ({ M, L, t }) => { const mu = tid(M / L), v = 2 * L / t, F = mu * v * v; return {
   prompt: `A guy cable on the mast is ${n(L)} m long and has a mass of ${n(M)} kg. Mira flicks its foot, and the pulse runs up to the top, reflects there and returns to her hand after ${n(t)} s in all, travelling at one steady speed. Enter the wave speed in m/s to 2 decimal places. Then enter the tension in the cable, in newtons to 1 decimal place, working from the unrounded speed.`,
   answer: [rd(v, 2), rd(F, 1)],
   hints: ['The pulse runs the length of the cable twice, up and back, in the time given. The speed is that total distance divided by the time.', 'Find the linear mass density μ = mass ÷ length. Then square both sides of v = √(F_T/μ) to get the tension F_T = μv².'],
@@ -313,9 +317,9 @@ mk({
  labels: ['wavelength (m)', 'new tension (N)'], tolerance: 0.0005,
  gl: [['wave speed (m/s)'], ['wavelength (m)'], ['new tension (N)']]
 }, {
- canonical: { mu: 0.02, L: 25, F: 120, f: 6, lam2: 1.5 },
- draw: R => retry(() => ({ mu: R.int(4, 60) / 1000, L: R.int(5, 40), F: 10 * R.int(5, 60), f: R.int(3, 30) / 2, lam2: R.int(3, 60) / 10 }), OK09d, { mu: 0.02, L: 25, F: 120, f: 6, lam2: 1.5 }),
- build: ({ mu, L, F, f, lam2 }) => { const M = tid(mu * L), v = Math.sqrt(F / mu), lam = v / f, F2u = mu * f * lam2 * (f * lam2), F2 = rd(F2u, 2); return {
+ canonical: { M: 0.5, L: 25, F: 120, f: 6, lam2: 1.5 },
+ draw: R => withM(retry(() => ({ mu: R.int(4, 60) / 1000, L: R.int(5, 40), F: 10 * R.int(5, 60), f: R.int(3, 30) / 2, lam2: R.int(3, 60) / 10 }), OK09d, { mu: 0.02, L: 25, F: 120, f: 6, lam2: 1.5 })),
+ build: ({ M, L, F, f, lam2 }) => { const mu = tid(M / L), v = Math.sqrt(F / mu), lam = v / f, F2u = mu * f * lam2 * (f * lam2), F2 = rd(F2u, 2); return {
   prompt: `A cable ${n(L)} m long with a mass of ${n(M)} kg is pulled with a tension of ${n(F)} N, and a shaker at its foot runs at ${n(f)} Hz. Enter the wavelength of the waves on the cable, in metres to 3 decimal places, working from the unrounded speed. Then Mira changes the tension but leaves the shaker at ${n(f)} Hz, and wants the wavelength to be ${n(lam2)} m. Enter the tension that gives this, in newtons to 2 decimal places.`,
   answer: [rd(lam, 3), F2],
   hints: ['Find μ = mass ÷ length and the speed v = √(F_T/μ); then the wavelength is λ = v ÷ f, since v = fλ.', 'With the frequency fixed, the wanted wavelength fixes the speed through v = fλ. Then the tension is F_T = μv².'],
@@ -341,12 +345,12 @@ mk({
  canonical: { I1: 0.18, r1: 15, r2: 52 },
  draw: R => retry(() => ({ I1: R.int(2, 60) / 100, r1: R.int(3, 30), r2: R.int(3, 60) }), OK10b, { I1: 0.18, r1: 15, r2: 52 }),
  build: ({ I1, r1, r2 }) => { const a = 4 * Math.PI * r1 * r1, P = a * I1, a2 = 4 * Math.PI * r2 * r2, I2 = P / a2; return {
-  prompt: `The beacon on the ridge sends its signal out evenly in all directions, and nothing absorbs or blocks it, so at a distance r its power P is spread over a sphere of area 4πr². A receiver ${n(r1)} m from the beacon measures an intensity of ${n(I1)} W/m². Enter the total power of the beacon, in watts to 1 decimal place, using the unrounded sphere area. Then enter the intensity a receiver would measure ${n(r2)} m from the beacon, in W/m² to 3 decimal places.`,
+  prompt: `The radio beacon on the ridge sends its signal out evenly in all directions, and nothing absorbs or blocks it. Radio waves spread out just as the sound from a horn does, so at a distance r the beacon's power P is spread over a sphere of area 4πr² and the intensity is I = P ÷ 4πr². A receiver ${n(r1)} m from the beacon measures an intensity of ${n(I1)} W/m². Enter the total power of the beacon, in watts to 1 decimal place, using the unrounded sphere area. Then enter the intensity a receiver would measure ${n(r2)} m from the beacon, in W/m² to 3 decimal places.`,
   answer: [rd(P, 1), rd(I2, 3)],
   hints: ['The intensity is the power per square metre, I = P ÷ 4πr², so the power is the intensity times the area of the sphere at that distance.', 'The same power now covers a sphere of area 4πr² with the new r, so divide the power by that area. Or scale the first intensity by (r₁ ÷ r₂)².'],
   solution: `At ${n(r1)} m the sphere has area 4π × ${n(r1)}² ${eq(a, 1)} ${fx(a, 1)} m², so P = I × area = ${n(I1)} × ${fx(a, 3)} ≈ ${fx(P, 1)} W. At ${n(r2)} m the area is 4π × ${n(r2)}² ≈ ${fx(a2, 1)} m², so I = P ÷ area = ${fx(P, 3)} ÷ ${fx(a2, 3)} ${eq(I2, 3)} ${fx(I2, 3)} W/m².`,
   guidance: [
-   { prompt: `What is the area 4πr² of the sphere through the receiver at ${n(r1)} m, in m² to 1 decimal place?`, answer: [rd(a, 1)], explanation: `4π × ${n(r1)}² ${eq(a, 1)} ${fx(a, 1)} m².` },
+   { prompt: `What is the area 4πr² of the sphere through the receiver at ${n(r1)} m, in m² to 1 decimal place${a >= 1000 ? ' (type it without commas)' : ''}?`, answer: [rd(a, 1)], explanation: `4π × ${n(r1)}² ${eq(a, 1)} ${fx(a, 1)} m².` },
    { prompt: `What is the beacon's power P = I × area, in watts to 1 decimal place?`, answer: [rd(P, 1)], explanation: `P = ${n(I1)} × ${fx(a, 3)} ≈ ${fx(P, 1)} W.` },
    { prompt: `What is the intensity ${n(r2)} m from the beacon, in W/m² to 3 decimal places?`, answer: [rd(I2, 3)], explanation: `The area there is 4π × ${n(r2)}² ≈ ${fx(a2, 1)} m², so I = ${fx(P, 3)} ÷ ${fx(a2, 3)} ${eq(I2, 3)} ${fx(I2, 3)} W/m².` }
   ] }; }
@@ -378,7 +382,7 @@ mk({
 
 /* Challenge with q09: v = √(F_T/μ), P = ½μA²ω²v, and the amplitude that carries a different power, A₂ = √(2P₂ ÷ (μω²v)) (power goes as A²). */
 const OK10d = ({ mu, F, A, f, P2 }) => { const v = Math.sqrt(F / mu), w = TAU * f, P = 0.5 * mu * (A / 100) * (A / 100) * w * w * v, A2 = 100 * Math.sqrt(2 * P2 / (mu * w * w * v));
- return clear(v, 2) && clear(P, 3) && P >= 0.05 && P < 500 && rd(0.5 * mu * (A / 100) * (A / 100) * w * w * rd(v, 2), 3) === rd(P, 3) && clear(A2, 2) && A2 >= 0.5 && A2 <= 40 && Math.abs(A2 - A) > 0.5 && !(mu === 0.1 && A === 1); };
+ return clear(v, 2) && clear(P, 3) && P >= 0.05 && P < 500 && rd(0.5 * mu * (A / 100) * (A / 100) * w * w * rd(v, 2), 3) === rd(P, 3) && clear(A2, 2) && rd(A * Math.sqrt(P2 / rd(P, 3)), 2) === rd(A2, 2) && A2 >= 0.5 && A2 <= 40 && Math.abs(A2 - A) > 0.5 && !(mu === 0.1 && A === 1); };
 mk({
  id: 'q10d', parent: 'q10', kind: 'challenge', uses: 'q09', title: 'Matching a power budget',
  brief: 'A cable is under a known tension, not a known wave speed, and Mira must find the power it carries and how big a swing a bigger budget needs.',

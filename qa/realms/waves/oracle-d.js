@@ -28,7 +28,8 @@ Object.assign(window.ORACLE, {
   },
   /* lam nm, N fringes → move = N·λ/2 (nm) in μm. k is the number of fringes in the return move (the prompt's printed
      distance is k·λ/2 in μm; fringes = distance ÷ (λ/2)). */
-  q33: p => [rnd(p.N * p.lam / 2 / 1000, 3), p.k],
+  /* X is the second move in μm: each fringe is a move of λ/2, so the count is X·1000 ÷ (λ/2). */
+  q33: p => [rnd(p.N * p.lam / 2 / 1000, 3), rnd(2 * p.X * 1000 / p.lam, 6)],
   /* a in μm, lam nm, m order, D in m. Dark: sin θ = mλ/a, θ by arcsin. Central band: 2·D·tan θ1, small-angle, mm. */
   q34: p => {
     const th = Math.asin(p.m * p.lam * NM / (p.a * UM));

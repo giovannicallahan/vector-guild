@@ -13,16 +13,14 @@ Object.assign(window.ORACLE, {
   /* Mach number vs/343; the cone half-angle is the angle in the right triangle with hypotenuse M and short side 1
      (sin θ = 1/M), found by bisection from the unrounded M. p.vs = source speed in m/s. */
   q21: p => { const M = p.vs / V; return [rnd(M, 2), rnd(arcsin(1 / M), 3)]; },
-  /* p.f = tone (Hz), p.r1 = distance to A (m), p.k = how many half-wavelengths the generator put between the
-     distances (a hidden index: the prompt prints only r2 = r1 + k·λ/2, rounded to 3 places as printed).
+  /* p.f = tone (Hz), p.r1 = distance to A (m), p.r2 = distance to B (m), both printed.
      Loud when the path difference is a whole number of wavelengths, quiet when a whole number and a half. */
   q22: p => {
     const lam = V / p.f;
-    const r2 = rnd(p.r1 + p.k * lam / 2, 3);
-    const diff = rnd(r2 - p.r1, 3);
+    const diff = Math.abs(p.r2 - p.r1);
     const nl = diff / lam;
     const loud = Math.abs(nl - Math.round(nl)) < 1e-6 ? 1 : 0;
-    return [diff, rnd(nl, 3), loud];
+    return [rnd(diff, 3), rnd(nl, 3), loud];
   },
   /* p.fa = pitch heard approaching, p.fr = pitch heard receding. Find the speed u whose two sirens agree: the own
      frequency from "approaching" (fa·(343−u)/343) equals that from "receding" (fr·(343+u)/343). Bisection on u. */

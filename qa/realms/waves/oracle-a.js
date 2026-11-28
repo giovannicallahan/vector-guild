@@ -54,18 +54,18 @@ Object.assign(window.ORACLE, {
     const k = TAU / p.lam, w = TAU * p.f;
     return [rnd(k, 3), rnd(w, 3), rnd(p.A * Math.sin(k * p.x - w * p.t), 2)];
   },
-  /* The printed mass is μ × L (the generator chooses μ). Speed v = √(F/μ); the tension for a target speed is
+  /* The printed mass M and length L give μ = M ÷ L. Speed v = √(F/μ); the tension for a target speed is
      searched for as the F whose speed reaches v2. */
   q09: p => {
-    const mass = p.mu * p.L, mu = mass / p.L;
+    const mu = p.M / p.L;
     const speed = F => Math.sqrt(F / mu);
     return [rnd(mu, 6), rnd(speed(p.F), 2), rnd(solveUp(speed, p.v2, 0, 1e9), 6)];
   },
-  /* P = ½ μ A² ω² v with A in metres. The horn's intensity falls as 1/r²; the prompt's second distance is s × r1. */
+  /* P = ½ μ A² ω² v with A in metres. The horn's intensity falls as 1/r²: find its power at r1, spread it over 4πr2². */
   q10: p => {
     const A = p.A / 100, w = TAU * p.f;
     const P = 0.5 * p.mu * A * A * w * w * p.v;
-    const r2 = p.r1 * p.s;
+    const r2 = p.r2;
     const power = p.I1 * 4 * Math.PI * p.r1 * p.r1;
     return [rnd(P, 2), rnd(power / (4 * Math.PI * r2 * r2), 3)];
   }

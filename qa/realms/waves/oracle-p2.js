@@ -30,12 +30,12 @@ Object.assign(window.ORACLE, {
     const f = p.v / p.lam, w = TAU * f, k = TAU / p.lam;
     return [rd(w, 3), rd(p.A * w, 2), rd(p.A * Math.sin(k * p.x - w * p.t), 2)];
   },
-  /* mu = linear density (kg/m; the wire mass printed is mu L); F = H g; v = sqrt(F/mu); H = mu v2^2 / g. */
-  q09b: p => [rd(Math.sqrt(p.H * G / p.mu), 2), rd(p.mu * p.v2 * p.v2 / G, 2)],
+  /* mu = printed wire mass M ÷ length L (kg/m); F = H g; v = sqrt(F/mu); H = mu v2^2 / g. */
+  q09b: p => { const mu = p.M / p.L; return [rd(Math.sqrt(p.H * G / mu), 2), rd(mu * p.v2 * p.v2 / G, 2)]; },
   /* Round trip 2L in t: v = 2L/t; F = mu v^2. */
-  q09c: p => { const v = 2 * p.L / p.t; return [rd(v, 2), rd(p.mu * v * v, 1)]; },
+  q09c: p => { const v = 2 * p.L / p.t, mu = p.M / p.L; return [rd(v, 2), rd(mu * v * v, 1)]; },
   /* v = sqrt(F/mu); lam = v/f; new F = mu (lam2 f)^2. */
-  q09d: p => [rd(Math.sqrt(p.F / p.mu) / p.f, 3), rd(p.mu * Math.pow(p.lam2 * p.f, 2), 2)],
+  q09d: p => { const mu = p.M / p.L; return [rd(Math.sqrt(p.F / mu) / p.f, 3), rd(mu * Math.pow(p.lam2 * p.f, 2), 2)]; },
   /* P = I 4 pi r1^2; inverse square for the new intensity. */
   q10b: p => [rd(p.I1 * 4 * Math.PI * p.r1 * p.r1, 1), rd(p.I1 * p.r1 * p.r1 / (p.r2 * p.r2), 3)],
   /* A in cm -> metres; P = 1/2 mu A^2 w^2 v; time = E / P. */

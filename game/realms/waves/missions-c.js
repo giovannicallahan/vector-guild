@@ -269,7 +269,7 @@ window.QUESTS.push(
   id: 'q27', title: 'Dimming the beam with filters', topic: 'Polarisation and Malus’s law, I = I₀ cos² θ', tier: 'Intermediate', sector: 'Lens Workshop',
   brief: 'The solar telescope needs its light cut down to a safe, exact level, and the workshop only has polarising filters to do it.',
   lesson: 'A polarising filter halves unpolarised light and leaves it polarised along its axis; each later filter at angle θ to that passes I = I₀ cos² θ.',
-  prompt: 'Unpolarised light of intensity 240 W/m² shines on a stack of three polarising filters. The axis of the second filter is turned 0.5 radians from the axis of the first, and the axis of the third is turned a further 0.7 radians from the second, the same way round. Enter the intensity after the first filter, after the second and after the third, each in W/m² to 2 decimal places. Use unrounded values from one filter to the next.',
+  prompt: 'Unpolarised light of intensity 240 W/m² shines on a stack of three polarising filters. The axis of the second filter is turned 0.5 radians from the axis of the first, and the axis of the third is turned a further 0.7 radians on from the second, the same way round, so the angle between the axes of the second and third filters is 0.7 radians. Enter the intensity after the first filter, after the second and after the third, each in W/m² to 2 decimal places. Use unrounded values from one filter to the next.',
   answer: [120,92.42,54.06], labels: ['after filter 1 (W/m²)', 'after filter 2 (W/m²)', 'after filter 3 (W/m²)'], tolerance: 0.005,
   hints: [
    'A polarising filter passes half the intensity of unpolarised light, and the light that leaves it is polarised along the filter’s axis.',
@@ -307,7 +307,7 @@ window.QUESTS.push(
   id: 'q28', title: 'Where the image lands', topic: 'Mirrors and thin lenses: 1/d₀ + 1/dᵢ = 1/f and magnification', tier: 'Intermediate', sector: 'Lens Workshop',
   brief: 'Each new lens and mirror from the grinder gets a bench test, and the crew have to say in advance where the image of the test lamp will appear.',
   lesson: 'For a thin lens or a curved mirror, 1/d₀ + 1/dᵢ = 1/f gives the image distance, and m = −dᵢ ÷ d₀ gives the magnification; the signs say real or virtual, upright or inverted.',
-  prompt: 'A small lamp stands 20 cm in front of a converging lens. Its focal length is f = 12 cm (a converging lens has a positive focal length). Enter the image distance dᵢ in centimetres to 1 decimal place, with a minus sign if the image is virtual, then the magnification m to 2 decimal places, with its sign.',
+  prompt: 'A small lamp stands 20 cm in front of a converging lens. Its focal length is f = 12 cm (a converging lens has a positive focal length). Enter the image distance dᵢ in centimetres to 1 decimal place, with a minus sign if the image is virtual, then the magnification m to 2 decimal places, with its sign, worked out from the unrounded image distance.',
   answer: [30,-1.5], labels: ['image distance (cm)', 'magnification (no unit)'], tolerance: 0.005,
   hints: [
    'Rearrange 1/d₀ + 1/dᵢ = 1/f to 1/dᵢ = 1/f − 1/d₀, then take the reciprocal. Keep the sign of f.',
@@ -345,7 +345,7 @@ window.QUESTS.push(
   id: 'q29', title: 'The telescope lens bench', topic: 'Chapter review: a telescope lens bench', tier: 'Intermediate', sector: 'Lens Workshop',
   brief: 'The first telescope lens is finished, and before it goes up to the dome it has to pass one full test on the bench.',
   lesson: 'A lens is a piece of refracting glass: the thin-lens equation places its image and sets its size, and the critical angle says which stray rays stay trapped inside it.',
-  prompt: 'On the telescope lens bench, a target 3 cm tall stands 40 cm in front of a converging lens with focal length 25 cm. The lens is made of Plexiglas (index of refraction 1.51) and has a flat back face in air (take n = 1.00 for air). Enter the image distance in cm to 1 decimal place (negative if the image is virtual), then the image height in cm to 2 decimal places (negative if the image is upside down). Then a stray ray inside the lens strikes the flat back face at 0.8 radians from the normal: enter 1 if it is totally internally reflected, or 0 if it escapes into the air.',
+  prompt: 'On the telescope lens bench, a target 3 cm tall stands 40 cm in front of a converging lens with focal length 25 cm. The lens is made of Plexiglas (index of refraction 1.51) and has a flat back face in air (take n = 1.00 for air). Enter the image distance in cm to 1 decimal place (negative if the image is virtual), then the image height in cm to 2 decimal places (negative if the image is upside down), worked out from the unrounded image distance. Then a stray ray inside the lens strikes the flat back face at 0.8 radians from the normal: enter 1 if it is totally internally reflected, or 0 if it escapes into the air.',
   answer: [66.7,-5,1], labels: ['image distance (cm)', 'image height (cm)', 'trapped (1) or escapes (0)'], tolerance: 0.0005,
   hints: [
    'Use the thin-lens equation 1/d₀ + 1/dᵢ = 1/f for the image distance, then hᵢ = m × h₀ with m = −dᵢ ÷ d₀.',

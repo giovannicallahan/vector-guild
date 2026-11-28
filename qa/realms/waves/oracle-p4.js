@@ -46,7 +46,7 @@ Object.assign(window.ORACLE, {
   /* hp = pipe harmonic number, hs = string harmonic number; vs = the string's wave speed in m/s, so the printed tension is mu vs^2. */
   q17d: p => {
     const v = vAir(p.T), f = p.hp * v / ((p.shut ? 4 : 2) * p.Lp);
-    const Ft = p.mu * p.vs * p.vs, vstr = Math.sqrt(Ft / p.mu);
+    const vstr = Math.sqrt(p.F / p.mu);   // F is the printed tension
     return [rd(v, 2), rd(f, 2), rd(p.hs * vstr / (2 * f), 3)];
   },
   /* c swells in t seconds; the siren is lower or higher (up) than the tower's f1. */

@@ -74,11 +74,13 @@ Object.assign(window.MISSION_GEN, {
    ] }; }
  },
  /* Each fringe that passes means the mirror moved λ ÷ 2. λ is even, so λ ÷ 2 is a whole number of nanometres and both
-    shifts are exact to 3 decimal places of a micrometre. Not the worked example (500 nm, 40 fringes). */
+    shifts are exact to 3 decimal places of a micrometre. The second move X (μm) is a parameter, printed as drawn; the draw
+    makes it a whole number of half wavelengths. Not the worked example (500 nm, 40 fringes). */
  q33: {
-  canonical: { lam: 546, N: 150, k: 100 },
-  draw: R => retry(() => ({ lam: 2 * R.int(200, 350), N: R.int(20, 400), k: R.int(20, 400) }), p => p.N !== p.k && !(p.lam === 500 && p.N === 40), { lam: 546, N: 150, k: 100 }),
-  build: ({ lam, N, k }) => { const h = lam / 2, s1 = N * h / 1000, s2 = k * h / 1000; return {
+  canonical: { lam: 546, N: 150, X: 27.3 },
+  draw: R => retry(() => { const lam = 2 * R.int(200, 350); return { lam, N: R.int(20, 400), X: rd(R.int(20, 400) * lam / 2000, 3) }; },
+   p => Math.round(2000 * p.X / p.lam) !== p.N && !(p.lam === 500 && p.N === 40), { lam: 546, N: 150, X: 27.3 }),
+  build: ({ lam, N, X }) => { const h = lam / 2, s1 = N * h / 1000, s2 = X, k = Math.round(1000 * X / h); return {
    prompt: `The Fringe Lab’s Michelson interferometer is lit by a lamp of wavelength ${n(lam)} nm. As one mirror is slowly moved, ${n(N)} bright fringes pass the mark in the eyepiece. Enter how far the mirror moved, in micrometres (μm) to 3 decimal places. Then the mirror is moved ${n(s2)} μm the other way: enter how many fringes pass the mark.`,
    answer: [s1, k],
    hints: ['Light goes to the moving mirror and back, so moving the mirror by Δd changes the path by 2Δd. One fringe passes for each wavelength of path change.', 'So one fringe means the mirror moved λ ÷ 2, and m fringes mean Δd = mλ ÷ 2. 1 μm is 1000 nm.'],
@@ -170,7 +172,7 @@ Object.assign(window.MISSION_GEN, {
    p => { const th = 0.122 * p.lam / p.Dc, s = p.L * th / 1e6; return !tie(th, 2) && !tie(s, 2) && rd(p.L * rd(th, 2) / 1e6, 2) === rd(s, 2) && s >= 0.1 && !(p.lam === 500 && p.Dc === 10); },
    { lam: 550, Dc: 25, L: 380000 }),
   build: ({ lam, Dc, L }) => { const th = 0.122 * lam / Dc, s = L * th / 1e6; return {
-   prompt: `The Crystal Observatory’s telescope has a round opening ${n(Dc)} cm across and looks at two lamps on a moon ${n(L)} km away, in light of wavelength ${n(lam)} nm. By the Rayleigh criterion, enter the smallest angle between two points that the telescope can still tell apart, in microradians (1 μrad = 10⁻⁶ rad) to 2 decimal places; then the smallest distance between the two lamps that it can still separate, in kilometres to 2 decimal places.`,
+   prompt: `The Crystal Observatory’s telescope has a round opening ${n(Dc)} cm across and looks at two lamps on a moon ${n(L)} km away, in light of wavelength ${n(lam)} nm. By the Rayleigh criterion, enter the smallest angle between two points that the telescope can still tell apart, in microradians (1 μrad = 10⁻⁶ rad) to 2 decimal places; then the smallest distance between the two lamps that it can still separate, in kilometres to 2 decimal places, worked out from the unrounded angle.`,
    answer: [rd(th, 2), rd(s, 2)],
    hints: ['The Rayleigh criterion: two points are just told apart when θ = 1.22λ ÷ D, with λ and the diameter D in metres and θ in radians.', 'The angle is tiny, so the distance between the two points is about their distance away times θ in radians.'],
    solution: `λ = ${n(lam)} × 10⁻⁹ m and D = ${n(Dc / 100)} m. θ = 1.22 × ${n(lam)} × 10⁻⁹ ÷ ${n(Dc / 100)} rad. One microradian is 10⁻⁶ rad, so in microradians that is 1.22 × ${n(lam)} ÷ ${n(Dc / 100)} ÷ 1000 ${val(th, 2, 'μrad')}. The separation is s = Lθ, with θ in radians: ${n(L)} km × θ ${val(s, 2, 'km')}.`,
@@ -198,12 +200,12 @@ Object.assign(window.MISSION_GEN, {
  },
  /* The spot's distance y (cm) is a parameter, printed to 2 places; the draw makes it from a whole-number wavelength.
     The wavelength found from y is within 0.3 nm of a whole number, and θ rounded to 4 places gives the same whole
-    number. The second order must exist (sin θ₂ < 0.9). Not the worked example (N = 400, D = 1, y = 20.62). */
+    number. The second order must exist (sin θ₂ < 0.9), and θ₂ rounded to 4 places gives the same second spot. Not the worked example (N = 400, D = 1, y = 20.62). */
  q40: {
   canonical: { N: 500, D: 1.2, y: 36.98 },
   draw: R => retry(() => { const N = R.pick([250, 300, 500, 600, 625, 800]), D = R.pick([0.5, 0.8, 1, 1.2, 1.5, 2]), lam = R.int(400, 700), d = 1e6 / N;
     return { N, D, y: rd(100 * D * Math.tan(Math.asin(lam / d)), 2) }; },
-   p => { const c = lamp(p), lr = (1e6 / p.N) * Math.sin(rd(c.th, 4)); return c.s2 < 0.9 && Math.abs(c.lam - c.L) < 0.3 && Math.round(lr) === c.L && !tie(c.th2, 3) && !tie(c.y2, 1) && c.y2 < 500 && !(p.N === 400 && p.D === 1); },
+   p => { const c = lamp(p), lr = (1e6 / p.N) * Math.sin(rd(c.th, 4)); return c.s2 < 0.9 && Math.abs(c.lam - c.L) < 0.3 && Math.round(lr) === c.L && !tie(c.th2, 3) && !tie(c.y2, 1) && rd(100 * p.D * Math.tan(rd(c.th2, 4)), 1) === rd(c.y2, 1) && c.y2 < 500 && !(p.N === 400 && p.D === 1); },
    { N: 500, D: 1.2, y: 36.98 }),
   build: p => { const { N, D, y } = p, c = lamp(p); return {
    prompt: `To identify a lamp, the Crystal Observatory shines it through a grating with ${n(N)} lines per millimetre onto a flat screen ${n(D)} m away, square to the beam. The first-order bright line lands ${n(y)} cm from the centre. Enter the lamp’s wavelength, in nanometres to the nearest nanometre; then, using that whole-number wavelength, how far from the centre the second-order line lands, in centimetres to 1 decimal place.`,

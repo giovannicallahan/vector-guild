@@ -265,7 +265,7 @@ mk({
  gl: [['wavelength in the oil (nm)'], ['shift per fringe (nm)'], ['mirror shift (μm)']]
 }, {
  canonical: { lam: 560, nIdx: 1.25, N: 250 },
- draw: R => retry(() => ({ lam: 10 * R.int(40, 70), nIdx: R.pick([1.2, 1.25, 1.5, 1.6, 2]), N: R.int(20, 400) }), okQ33d, { lam: 560, nIdx: 1.25, N: 250 }),
+ draw: R => retry(() => ({ lam: 10 * R.int(40, 70), nIdx: R.pick([1.25, 1.4, 1.5, 1.6]), N: R.int(20, 400) }), okQ33d, { lam: 560, nIdx: 1.25, N: 250 }),
  build: ({ lam, nIdx, N }) => { const ln = lam / nIdx, h = ln / 2, tot = N * h / 1000; return {
   prompt: `For a test, the Fringe Lab fills both arms of its Michelson interferometer with a clear oil of index n = ${n(nIdx)}. In the oil the light has wavelength λ ÷ n, where λ = ${n(lam)} nm is the wavelength in air. The light goes to the moving mirror and back, so its path changes by twice the mirror’s move, and one bright fringe passes the mark each time that path changes by one wavelength in the oil. ${n(N)} bright fringes pass. Enter the wavelength of the light in the oil, in nanometres to 1 decimal place; then enter how far the mirror moved, in micrometres (μm) to 3 decimal places.`,
   answer: [rd(ln, 1), rd(tot, 3)],

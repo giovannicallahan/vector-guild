@@ -23,7 +23,8 @@ Object.assign(window.ORACLE, {
   },
   /* near: nearer distance. The far distance is near + (k/2) wavelengths (k is a count of half-wavelengths; the far distance
      in the prompt is that sum, to 2 decimal places, so the printed gap can differ slightly from the exact one). Loud when the path difference is a whole number of wavelengths, i.e. k even. */
-  q22b: p => { const lam = C / p.f; return [rd(lam, 3), rd(p.k / 2 * lam, 3), p.k % 2 === 0 ? 1 : 0]; },
+  /* near, far: the two printed distances (m). Loud when the difference is a whole number of wavelengths. */
+  q22b: p => { const lam = C / p.f, d = Math.abs(p.far - p.near), w = d / lam; return [rd(lam, 3), rd(d, 3), Math.abs(w - Math.round(w)) < 1e-6 ? 1 : 0]; },
   /* Path difference (m + 1/2) wavelengths (the printed multiple); distance from B = r1 + difference. */
   q22c: p => { const lam = C / p.f, d = (p.m + 0.5) * lam; return [rd(lam, 3), rd(d, 3), rd(p.r1 + d, 3)]; },
   /* v from the printed formula; wavelength = v/f; distance from B = r1 + w wavelengths. */

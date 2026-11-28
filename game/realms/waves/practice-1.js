@@ -40,6 +40,10 @@ const ap4 = x => `${eq(x, 4)} ${r4(x)}`;
 const tid = x => Math.round(x * 1e6) / 1e6;
 const whole = x => Math.abs(x - Math.round(x)) < 1e-9;
 /* A bounded retry: at most 1000 tries, then the canonical parameters. */
+/* 'a' or 'an' before a number read aloud: 'an 8', 'an 11.5', 'an 18', 'a 3', 'a 110'. */
+/* A count of swings with the right noun: '1 swing', '4 swings'. */
+const swg = c => n(c) + (c === 1 ? ' swing' : ' swings');
+const anN = x => { const i = String(Math.floor(Math.abs(x))); return (/^8/.test(i) || (/^1[18]$/.test(i)) ? 'an ' : 'a ') + n(x); };
 const retry = (make, ok, canon) => { for (let i = 0; i < 1000; i++) { const p = make(); if (ok(p)) return p; } return { ...canon }; };
 /* '1 second', '2.5 seconds'. */
 const secs = x => n(x) + (x === 1 ? ' second' : ' seconds');
@@ -83,7 +87,7 @@ mk({
   prompt: `Two seismometer arms swing at the Quake Station. Arm A makes ${n(N)} full swings in ${secs(tA)}. Arm B takes ${secs(TB)} for each full swing. Enter the frequency of arm A and then of arm B, both in hertz. Then enter how many more full swings the faster arm makes than the slower arm in a window of ${secs(W)}.`,
   answer: [fA, fB, d],
   hints: ['For arm A, the period is the time divided by the number of swings; arm B already has its period. Each frequency is 1 divided by the period.', 'In a window of time an arm makes (frequency × time) full swings. Work out the count for each arm and subtract the smaller from the larger.'],
-  solution: `Arm A: T = ${n(tA)} ÷ ${n(N)} = ${n(TA)} s, so f = 1 ÷ ${n(TA)} = ${n(fA)} Hz. Arm B: f = 1 ÷ ${n(TB)} = ${n(fB)} Hz. In ${n(W)} s arm A makes ${n(fA)} × ${n(W)} = ${n(cA)} swings and arm B makes ${n(fB)} × ${n(W)} = ${n(cB)} swings. Arm ${fast} is the faster, and it makes ${n(Math.max(cA, cB))} − ${n(Math.min(cA, cB))} = ${n(d)} more swings.`,
+  solution: `Arm A: T = ${n(tA)} ÷ ${n(N)} = ${n(TA)} s, so f = 1 ÷ ${n(TA)} = ${n(fA)} Hz. Arm B: f = 1 ÷ ${n(TB)} = ${n(fB)} Hz. In ${n(W)} s arm A makes ${n(fA)} × ${n(W)} = ${swg(cA)} and arm B makes ${n(fB)} × ${n(W)} = ${swg(cB)}. Arm ${fast} is the faster, and it makes ${n(Math.max(cA, cB))} − ${n(Math.min(cA, cB))} = ${n(d)} more ${d === 1 ? 'swing' : 'swings'}.`,
   guidance: [
    { prompt: `Arm A makes ${n(N)} full swings in ${secs(tA)}. What is its frequency, in hertz?`, answer: [fA], explanation: `T = ${n(tA)} ÷ ${n(N)} = ${n(TA)} s, so f = 1 ÷ ${n(TA)} = ${n(fA)} Hz.` },
    { prompt: `Arm B takes ${secs(TB)} for one full swing. What is its frequency, in hertz?`, answer: [fB], explanation: `f = 1 ÷ T = 1 ÷ ${n(TB)} = ${n(fB)} Hz.` },
@@ -109,7 +113,7 @@ mk({
   guidance: [
    { prompt: `The drill turns ${n(rpm)} times in 60 seconds. How many turns is that each second, in hertz?`, answer: [f], explanation: `${n(rpm)} ÷ 60 = ${n(f)} Hz.` },
    { prompt: `What is the period 1 ÷ ${n(f)} in milliseconds (multiply seconds by 1000)?`, answer: [Tms], explanation: `1 ÷ ${n(f)} = ${n(T)} s, and ${n(T)} × 1000 = ${n(Tms)} ms.` },
-   { prompt: `How many full turns does the drill make in ${n(m)} minutes?`, answer: [turns], explanation: `${n(rpm)} turns each minute × ${n(m)} minutes = ${n(turns)} turns.` }
+   { prompt: `How many full turns does the drill make in ${n(m)} minutes (type it without commas)?`, answer: [turns], explanation: `${n(rpm)} turns each minute × ${n(m)} minutes = ${n(turns)} turns.` }
   ] }; }
 });
 
@@ -126,7 +130,7 @@ mk({
  canonical: { m: 3, T: 1.5 },
  draw: R => retry(() => ({ m: R.int(2, 30) / 2, T: R.int(4, 30) / 10 }), okQ02b, { m: 3, T: 1.5 }),
  build: ({ m, T }) => { const w = TAU / T, k = m * w * w; return {
-  prompt: `Mira hangs a ${n(m)} kg sensor pod on an unlabelled spring in the quake shed and times it: one full bob takes ${n(T)} s. Enter the angular frequency ω = 2π/T in radians per second. Then enter the spring constant k in N/m. Squaring ω = √(k/m) and multiplying by m gives k = mω²; use the unrounded ω for it. Give both answers to 2 decimal places.`,
+  prompt: `Mira hangs ${anN(m)} kg sensor pod on an unlabelled spring in the quake shed and times it: one full bob takes ${n(T)} s. Enter the angular frequency ω = 2π/T in radians per second. Then enter the spring constant k in N/m. Squaring ω = √(k/m) and multiplying by m gives k = mω²; use the unrounded ω for it. Give both answers to 2 decimal places.`,
   answer: [rd(w, 2), rd(k, 2)],
   hints: ['One full bob is 2π radians and takes the period, so ω is 2π divided by T.', 'Square both sides of ω = √(k/m) to get ω² = k/m, so k = mω². Keep every digit of ω on the calculator until the end.'],
   solution: `ω = 2π ÷ T = 2π ÷ ${n(T)} ${eq(w, 2)} ${fx(w, 2)} rad/s. Then k = mω² = ${n(m)} × (2π ÷ ${n(T)})² ${eq(k, 2)} ${fx(k, 2)} N/m.`,
@@ -149,7 +153,7 @@ mk({
  canonical: { k: 100, m1: 2, dm: 2 },
  draw: R => retry(() => ({ k: 10 * R.int(5, 40), m1: R.int(2, 20) / 2, dm: R.int(1, 10) / 2 }), okQ02c, { k: 100, m1: 2, dm: 2 }),
  build: ({ k, m1, dm }) => { const M = tid(m1 + dm), w1 = Math.sqrt(k / m1), T1 = TAU / w1, w2 = Math.sqrt(k / M), T2 = TAU / w2, dT = T2 - T1; return {
-  prompt: `A spring with spring constant k = ${n(k)} N/m carries a ${n(m1)} kg seismometer pod. Mira then bolts a ${n(dm)} kg camera onto the same pod, and the spring is not changed. Enter the angular frequency ω = √(k/m) of the pod before the camera is added, in radians per second, then its period after the camera is added, in seconds, then how many seconds longer that new period is than the old one. Give each answer to 2 decimal places and work from unrounded values.`,
+  prompt: `A spring with spring constant k = ${n(k)} N/m carries ${anN(m1)} kg seismometer pod. Mira then bolts ${anN(dm)} kg camera onto the same pod, and the spring is not changed. Enter the angular frequency ω = √(k/m) of the pod before the camera is added, in radians per second, then its period after the camera is added, in seconds, then how many seconds longer that new period is than the old one. Give each answer to 2 decimal places and work from unrounded values.`,
   answer: [rd(w1, 2), rd(T2, 2), rd(dT, 2)],
   hints: ['ω = √(k/m), where m is the whole mass the spring carries at that moment. The camera adds to the pod mass.', 'The period is 2π divided by ω, found with the new total mass. The difference is the new period minus the old one.'],
   solution: `Before: ω = √(${n(k)} ÷ ${n(m1)}) ${eq(w1, 2)} ${fx(w1, 2)} rad/s, so the old period is 2π ÷ ω ≈ ${fx(T1, 2)} s. With the camera the mass is ${n(m1)} + ${n(dm)} = ${n(M)} kg, so ω = √(${n(k)} ÷ ${n(M)}) ${ap4(w2)} rad/s and the new period is 2π ÷ ω ≈ ${fx(T2, 2)} s. The new period is ${fx(T2, 2)} − ${fx(T1, 2)} = ${fx(dT, 2)} s longer.`,
@@ -269,7 +273,7 @@ mk({
  canonical: { k: 160, A: 0.3, m: 2 },
  draw: R => retry(() => ({ k: 40 * R.int(1, 10), A: tid(0.05 * R.int(2, 10)), m: R.int(1, 8) / 2 }), okQ04b, { k: 160, A: 0.3, m: 2 }),
  build: ({ k, A, m }) => { const E = tid(0.5 * k * A * A), v = Math.sqrt(2 * E / m); return {
-  prompt: `A spring-loaded sampler arm at the Quake Station has a ${n(m)} kg head on a spring with k = ${n(k)} N/m. With no friction the head swings back and forth with a total energy of ${n(E)} J. Enter the amplitude of the swing in metres. Then enter the greatest speed of the head in m/s to 2 decimal places.`,
+  prompt: `A spring-loaded sampler arm at the Quake Station has ${anN(m)} kg head on a spring with k = ${n(k)} N/m. With no friction the head swings back and forth with a total energy of ${n(E)} J. Enter the amplitude of the swing in metres. Then enter the greatest speed of the head in m/s to 2 decimal places.`,
   answer: [A, rd(v, 2)],
   hints: ['At the end of a swing the head stops for an instant, so all the energy is in the spring: E = ½kA². Solve that for A.', 'At equilibrium none of the energy is in the spring, so all of it is kinetic: E = ½mv². Solve that for v.'],
   solution: `At the end of a swing all the energy is in the spring: E = ½kA², so A = √(2E ÷ k) = √(2 × ${n(E)} ÷ ${n(k)}) = ${n(A)} m. At equilibrium all of it is kinetic: ½mv² = E, so v = √(2E ÷ m) = √(2 × ${n(E)} ÷ ${n(m)}) ${eq(v, 2)} ${fx(v, 2)} m/s.`,
@@ -331,14 +335,14 @@ mk({
 const okQ05b = ({ L, T }) => { const gl = 4 * Math.PI * Math.PI * L / (T * T), Te = TAU * Math.sqrt(L / g); return gl >= 3 && gl <= 20 && clear(gl, 2) && clear(Te, 2); };
 mk({
  id: 'q05b', parent: 'q05', kind: 'setting', title: 'Gravity at the new site',
- brief: 'Mira is checking the pull of gravity at a new site and has only a cord, a bob and a stopwatch.',
+ brief: 'Mira is checking the pull of gravity at a survey camp on another world and has only a cord, a bob and a stopwatch.',
  labels: ['local g (m/s²)', 'period with g = 9.8 (s)'], tolerance: 0.005,
  gl: [['local g (m/s²)'], ['period with g = 9.8 (s)']]
 }, {
  canonical: { L: 1.5, T: 2.4 },
  draw: R => retry(() => ({ L: R.int(5, 40) / 10, T: R.int(10, 40) / 10 }), okQ05b, { L: 1.5, T: 2.4 }),
  build: ({ L, T }) => { const gl = 4 * Math.PI * Math.PI * L / (T * T), Te = TAU * Math.sqrt(L / g); return {
-  prompt: `Mira hangs a small heavy bob on a light cord ${n(L)} m long at a new site beside the Quake Station, lets it swing through a small angle and times it: one full swing takes ${n(T)} s. Squaring T = 2π√(L/g) and solving for g gives g = 4π²L ÷ T². Enter the local g in m/s², to 2 decimal places. Then enter the period in seconds, to 2 decimal places, that the same pendulum would have if g were 9.8 m/s².`,
+  prompt: `Mira hangs a small heavy bob on a light cord ${n(L)} m long at a survey camp on another world, where gravity is not the same as at the Quake Station, lets it swing through a small angle and times it: one full swing takes ${n(T)} s. Squaring T = 2π√(L/g) and solving for g gives g = 4π²L ÷ T². Enter the local g in m/s², to 2 decimal places. Then enter the period in seconds, to 2 decimal places, that the same pendulum would have back at the Quake Station, where g = 9.8 m/s².`,
   answer: [rd(gl, 2), rd(Te, 2)],
   hints: ['Square both sides of T = 2π√(L/g) to get T² = 4π²L ÷ g, then swap g and T² to solve for g.', 'The cord is the same, so only g changes: put g = 9.8 into T = 2π√(L/g).'],
   solution: `g = 4π²L ÷ T² = 4π² × ${n(L)} ÷ ${n(tid(T * T))} ${eq(gl, 2)} ${fx(gl, 2)} m/s². With g = 9.8 m/s² the same cord gives T = 2π√(${n(L)} ÷ 9.8) ${eq(Te, 2)} ${fx(Te, 2)} s.`,
@@ -350,7 +354,7 @@ mk({
 
 /* q05c: the cord length of a clock. The present period, the length for a wanted period and the amount to cut (cm);
    the cut is the same whether taken from the rounded or the unrounded wanted length. */
-const WANT = [1, 1.2, 1.5, 1.6, 1.8, 2];
+const WANT = [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.2, 2.4, 2.5];
 const okQ05c = ({ L1, Tt }) => { const T1 = TAU * Math.sqrt(L1 / g), Lt = g * (Tt / TAU) * (Tt / TAU), cut = (L1 - Lt) * 100;
  return clear(T1, 2) && clear(Lt, 3) && clear(cut, 1) && cut >= 1 && tid((L1 - rd(Lt, 3)) * 100) !== undefined && rd((L1 - rd(Lt, 3)) * 100, 1) === rd(cut, 1) && Math.abs(T1 - Tt) > 0.05; };
 mk({

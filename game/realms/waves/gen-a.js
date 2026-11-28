@@ -32,13 +32,13 @@ Object.assign(window.MISSION_GEN, {
   canonical: { N: 12, T: 2.5 },
   draw: R => retry(() => ({ N: R.int(5, 40), T: R.pick(PERIODS) }), p => !(p.N === 20 && p.T === 0.4), { N: 12, T: 2.5 }),
   build: ({ N, T }) => { const t = tid(N * T), f = tid(1 / T); return {
-   prompt: `The seismometer arm at the Quake Station swings back and forth. Mira counts ${n(N)} full swings, each one out and back again, in ${n(t)} seconds. Enter the period of one swing in seconds, then the frequency in hertz (Hz), the number of swings per second.`,
+   prompt: `The seismometer arm at the Quake Station swings back and forth. Mira counts ${n(N)} full swings, each one out and back again, in ${n(t)} ${t === 1 ? 'second' : 'seconds'}. Enter the period of one swing in seconds, then the frequency in hertz (Hz), the number of swings per second.`,
    answer: [T, f],
    hints: ['The period is the time for one full swing: share the total time equally between the swings.', 'The frequency is the number of swings in each second. It is 1 divided by the period, f = 1/T.'],
    solution: `The period is the total time divided by the number of swings: T = ${n(t)} ÷ ${n(N)} = ${n(T)} s. The frequency is the number of swings per second: f = ${n(N)} ÷ ${n(t)} = ${n(f)} Hz. As a check, 1 ÷ T = 1 ÷ ${n(T)} = ${n(f)}.`,
    guidance: [
-    { prompt: `${n(N)} full swings take ${n(t)} seconds, all the same length. How long does one swing take, in seconds?`, answer: [T], explanation: `Each swing takes the same time, so T = ${n(t)} ÷ ${n(N)} = ${n(T)} s.` },
-    { prompt: `One swing takes ${n(T)} s. How many swings happen in each second, in hertz?`, answer: [f], explanation: `f = 1 ÷ T = 1 ÷ ${n(T)} = ${n(f)} Hz, the same as ${n(N)} swings ÷ ${n(t)} seconds.` }
+    { prompt: `${n(N)} full swings take ${n(t)} ${t === 1 ? 'second' : 'seconds'}, all the same length. How long does one swing take, in seconds?`, answer: [T], explanation: `Each swing takes the same time, so T = ${n(t)} ÷ ${n(N)} = ${n(T)} s.` },
+    { prompt: `One swing takes ${n(T)} s. How many swings happen in each second, in hertz?`, answer: [f], explanation: `f = 1 ÷ T = 1 ÷ ${n(T)} = ${n(f)} Hz, the same as ${n(N)} swings ÷ ${n(t)} ${t === 1 ? 'second' : 'seconds'}.` }
    ] }; }
  },
  /* ω = √(k/m) and T = 2π/ω to 2 places, both clear of a rounding edge, and the period from the rounded ω rounds the
@@ -163,10 +163,12 @@ Object.assign(window.MISSION_GEN, {
  /* μ = M ÷ L with three decimals at most, v to 2 places clear of a rounding edge, and the new tension μv₂² below 1000 N.
     Not the worked example (μ = 0.01, 64 N). */
  q09: {
-  canonical: { mu: 0.03, L: 20, F: 150, v2: 80 },
-  draw: R => retry(() => ({ mu: R.int(4, 60) / 1000, L: R.int(5, 40), F: 10 * R.int(5, 60), v2: 10 * R.int(3, 12) }),
-   p => clear(Math.sqrt(p.F / p.mu), 2) && p.mu * p.v2 * p.v2 < 1000 && Math.abs(Math.sqrt(p.F / p.mu) - p.v2) > 5 && !(p.mu === 0.01 && p.F === 64), { mu: 0.03, L: 20, F: 150, v2: 80 }),
-  build: ({ mu, L, F, v2 }) => { const M = tid(mu * L), v = Math.sqrt(F / mu), F2 = tid(mu * v2 * v2); return {
+  canonical: { M: 0.6, L: 20, F: 150, v2: 80 },
+  /* μ is drawn with three decimals, then the printed mass M = μL is the parameter (μ = M ÷ L is worked out in build). */
+  draw: R => { const p = retry(() => ({ mu: R.int(4, 60) / 1000, L: R.int(5, 40), F: 10 * R.int(5, 60), v2: 10 * R.int(3, 12) }),
+   p => clear(Math.sqrt(p.F / p.mu), 2) && p.mu * p.v2 * p.v2 < 1000 && Math.abs(Math.sqrt(p.F / p.mu) - p.v2) > 5 && !(p.mu === 0.01 && p.F === 64), { mu: 0.03, L: 20, F: 150, v2: 80 });
+   return { M: tid(p.mu * p.L), L: p.L, F: p.F, v2: p.v2 }; },
+  build: ({ M, L, F, v2 }) => { const mu = tid(M / L), v = Math.sqrt(F / mu), F2 = tid(mu * v2 * v2); return {
    prompt: `A guy cable on the comms mast is ${n(L)} m long and has a mass of ${n(M)} kg. It is pulled tight with a tension of ${n(F)} N. Enter its linear mass density in kg/m, then the speed of a wave pulse along it in m/s to 2 decimal places. Then enter the tension, in newtons, that would make pulses travel at ${n(v2)} m/s.`,
    answer: [mu, rd(v, 2), F2],
    hints: ['The linear mass density is μ = mass ÷ length, in kg/m. The wave speed is v = √(F_T/μ), with the tension F_T in newtons.', 'To reach a chosen speed, square both sides of v = √(F_T/μ) and solve for the tension: F_T = μv².'],
@@ -180,11 +182,12 @@ Object.assign(window.MISSION_GEN, {
  /* P to 2 places, clear of a rounding edge and below 1000 W; the horn's far distance is a whole number of times the
     near one, and I₂ to 3 places, clear of a rounding edge and at least 0.005. Not the worked example. */
  q10: {
-  canonical: { mu: 0.05, A: 2, f: 5, v: 40, I1: 0.8, r1: 5, s: 4 },
-  draw: R => retry(() => ({ mu: R.int(2, 20) / 100, A: R.int(2, 8), f: R.int(2, 20), v: 5 * R.int(4, 20), I1: R.int(2, 50) / 10, r1: R.int(2, 10), s: R.int(2, 6) }), p => {
-   const w = TAU * p.f, P = 0.5 * p.mu * (p.A / 100) * (p.A / 100) * w * w * p.v, I2 = p.I1 / (p.s * p.s);
-   return clear(P, 2) && P >= 0.1 && P < 1000 && clear(I2, 3) && I2 >= 0.005 && !(p.mu === 0.1 && p.f === 10); }, { mu: 0.05, A: 2, f: 5, v: 40, I1: 0.8, r1: 5, s: 4 }),
-  build: ({ mu, A, f, v, I1, r1, s }) => { const w = TAU * f, Am = tid(A / 100), P = 0.5 * mu * Am * Am * w * w * v, r2 = r1 * s, I2 = I1 / (s * s); return {
+  canonical: { mu: 0.05, A: 2, f: 5, v: 40, I1: 0.8, r1: 5, r2: 20 },
+  /* The far distance r2 is a parameter, drawn as a whole number s = 2…6 times r1. */
+  draw: R => retry(() => { const r1 = R.int(2, 10); return { mu: R.int(2, 20) / 100, A: R.int(2, 8), f: R.int(2, 20), v: 5 * R.int(4, 20), I1: R.int(2, 50) / 10, r1, r2: r1 * R.int(2, 6) }; }, p => {
+   const w = TAU * p.f, P = 0.5 * p.mu * (p.A / 100) * (p.A / 100) * w * w * p.v, I2 = p.I1 * (p.r1 / p.r2) * (p.r1 / p.r2);
+   return clear(P, 2) && P >= 0.1 && P < 1000 && clear(I2, 3) && I2 >= 0.005 && !(p.mu === 0.1 && p.f === 10); }, { mu: 0.05, A: 2, f: 5, v: 40, I1: 0.8, r1: 5, r2: 20 }),
+  build: ({ mu, A, f, v, I1, r1, r2 }) => { const w = TAU * f, Am = tid(A / 100), P = 0.5 * mu * Am * Am * w * w * v, s = Math.round(r2 / r1), I2 = I1 / (s * s); return {
    prompt: `A wave on a mast cable with linear mass density ${n(mu)} kg/m travels at ${n(v)} m/s. Mira drives it at ${n(f)} Hz with amplitude ${n(A)} cm. Enter the average power the wave carries, in watts to 2 decimal places, from P = ½μA²ω²v with the angular frequency ω = 2πf in rad/s and A in metres. Then a horn on the mast top sends sound out evenly in all directions, and its intensity is ${n(I1)} W/m² at ${n(r1)} m. Enter the intensity at ${n(r2)} m from the horn, in W/m² to 3 decimal places.`,
    answer: [rd(P, 2), rd(I2, 3)],
    hints: ['Change the amplitude to metres (divide by 100) and find ω = 2πf before you put the numbers into P = ½μA²ω²v.', 'The same power spreads over a sphere of area 4πr², so the intensity falls as 1/r²: going twice as far divides it by 4.'],

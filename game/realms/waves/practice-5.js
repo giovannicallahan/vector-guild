@@ -38,6 +38,8 @@ const say = (x, dp, u = '') => exact(x, dp) ? `= ${n(rd(x, dp))}${u}` : dp >= 4 
 /* "≈ 0.6660" for a value used unrounded, "= 0.24" when it is exact at four places. */
 const eq4 = x => exact(x, 4) ? `= ${n(x)}` : `≈ ${n(x)}`;
 const tid = x => Math.round(x * 1e9) / 1e9;
+/* "1 wavelength", "2.5 wavelengths". */
+const wl = w => `${n(w)} wavelength${w === 1 ? '' : 's'}`;
 const guard = (make, fits, fallback) => { for (let i = 0; i < 1000; i++) { const p = make(); if (fits(p)) return p; } return { ...fallback }; };
 const tq = T => T < 0 ? `1 − ${n(-T)} ÷ 273` : `1 + ${n(T)} ÷ 273`;
 const speedT = T => 331 * Math.sqrt(1 + T / 273);
@@ -105,7 +107,7 @@ mk({
  draw: R => guard(() => { const fs = R.int(30, 90) * 10; return { fs, fh: fs + R.int(5, 40) * 10, k: R.pick([2, 2.5, 3, 4, 5, 6]) }; },
   ({ fs, fh, k }) => { const v1 = V * (1 - fs / fh), M = k * v1 / V; return v1 >= 50 && v1 <= 250 && M >= 1.15 && M <= 3.2 && ok(v1, 1) && ok(M, 2) && ok(Math.asin(1 / M), 3); }, { fs: 450, fh: 600, k: 5 }),
  build: ({ fs, fh, k }) => { const v1 = V * (1 - fs / fh), v2 = k * v1, M = v2 / V, s = V / v2, th = Math.asin(s); return {
-  prompt: `A scout drone flies straight towards a listener standing at rest beside the Rover Track, sounding a steady siren whose own frequency is ${n(fs)} Hz. She hears ${n(fh)} Hz. Sound travels at 343 m/s, there is no wind, and the drone is slower than sound. Then its booster fires and, on the same straight line, it flies ${n(k)} times as fast as before. Enter its speed before the boost in m/s to 1 decimal place, then its Mach number after the boost to 2 decimal places, then the half-angle of its shock cone after the boost in radians to 3 decimal places. Use unrounded values from one step to the next.`,
+  prompt: `A scout drone flies straight towards a listener standing at rest beside the Rover Track, sounding a steady siren whose own frequency is ${n(fs)} Hz. She hears ${n(fh)} Hz. Sound travels at v = 343 m/s, there is no wind, and the drone is slower than sound. A source moving at speed v_s straight towards a still listener is heard at f = f_s × v ÷ (v − v_s), where f_s is its own frequency. Then its booster fires and, on the same straight line, it flies ${n(k)} times as fast as before. Enter its speed before the boost in m/s to 1 decimal place, then its Mach number after the boost to 2 decimal places, then the half-angle of its shock cone after the boost in radians to 3 decimal places. Use unrounded values from one step to the next.`,
   answer: [rd(v1, 1), rd(M, 2), rd(th, 3)],
   hints: ['For a source coming towards a listener at rest, f_heard = f_s × v ÷ (v − v_s). Rearrange it to find v_s.', 'After the boost the speed is the multiple times the old speed. Divide by 343 for the Mach number, and use sin θ = 1 ÷ M with arcsin in radians for the cone.'],
   solution: `Before the boost, ${n(fh)} = ${n(fs)} × 343 ÷ (343 − v_s), so v_s = 343 × (1 − ${n(fs)} ÷ ${n(fh)}) ${say(v1, 1, ' m/s')}. After the boost the speed is ${n(k)} × ${n(v1)} ${eq4(v2)} m/s, so M = ${n(v2)} ÷ 343 ${say(M, 2)}. The cone has sin θ = 1 ÷ M ${eq4(s)}, so θ = arcsin(${n(s)}) ${say(th, 3, ' radians')}.`,
@@ -126,18 +128,18 @@ mk({
  labels: ['wavelength (m)', 'path difference (m)', 'loud (1) or quiet (0)'], tolerance: 0.0005,
  gl: [['wavelength (m)'], ['path difference (m)'], ['loud (1) or quiet (0)']]
 }, {
- canonical: { f: 245, near: 2.8, k: 5, farIsP: true },
- draw: R => guard(() => ({ f: R.pick(TONES_B), near: R.int(150, 700) / 100, k: R.int(1, 9), farIsP: R.bool() }),
-  ({ f, near, k }) => near + k * V / f / 2 <= 12, { f: 245, near: 2.8, k: 5, farIsP: true }),
- build: ({ f, near, k, farIsP }) => { const lam = tid(V / f), dr = tid(k * lam / 2), far = tid(near + dr), P = farIsP ? far : near, Q = farIsP ? near : far, w = k / 2, loud = k % 2 === 0 ? 1 : 0; return {
+ canonical: { f: 245, near: 2.8, far: 6.3, farIsP: true },
+ draw: R => guard(() => { const f = R.pick(TONES_B), near = R.int(150, 700) / 100; return { f, near, far: tid(near + R.int(1, 9) * tid(V / f) / 2), farIsP: R.bool() }; },
+  ({ far }) => far <= 12, { f: 245, near: 2.8, far: 6.3, farIsP: true }),
+ build: ({ f, near, far, farIsP }) => { const lam = tid(V / f), dr = tid(far - near), P = farIsP ? far : near, Q = farIsP ? near : far, w = tid(dr / lam), loud = Number.isInteger(w) ? 1 : 0; return {
   prompt: `Two loudspeakers, P and Q, stand either side of the finish gate of the Rover Track. One signal generator drives both, so they play the same ${n(f)} Hz tone in phase. Sound travels at 343 m/s. A photographer stands ${n(P)} m from P and ${n(Q)} m from Q. Enter the wavelength of the tone in metres, then the path difference in metres (the longer distance minus the shorter), then 1 if her spot is loud (the two waves reinforce) or 0 if it is quiet (they cancel).`,
   answer: [lam, dr, loud],
   hints: ['The wavelength comes from v = fλ. The path difference is the longer distance minus the shorter one, whichever speaker that is.', 'Divide the path difference by the wavelength. A whole number of wavelengths means loud; a whole number and a half means quiet.'],
-  solution: `λ = 343 ÷ ${n(f)} = ${n(lam)} m. The path difference is ${n(far)} − ${n(near)} = ${n(dr)} m, which is ${n(dr)} ÷ ${n(lam)} = ${n(w)} wavelengths. ${loud ? 'That is a whole number of wavelengths, so crest meets crest: a loud spot (1).' : 'That is a whole number and a half of wavelengths, so crest meets trough and the waves cancel: a quiet spot (0).'}`,
+  solution: `λ = 343 ÷ ${n(f)} = ${n(lam)} m. The path difference is ${n(far)} − ${n(near)} = ${n(dr)} m, which is ${n(dr)} ÷ ${n(lam)} = ${wl(w)}. ${loud ? 'That is a whole number of wavelengths, so crest meets crest: a loud spot (1).' : 'That is a whole number and a half of wavelengths, so crest meets trough and the waves cancel: a quiet spot (0).'}`,
   guidance: [
    { prompt: `What is the wavelength of a ${n(f)} Hz tone when sound travels at 343 m/s, in metres?`, answer: [lam], explanation: `λ = v ÷ f = 343 ÷ ${n(f)} = ${n(lam)} m.` },
    { prompt: `The photographer is ${n(P)} m from P and ${n(Q)} m from Q. What is the path difference, in metres?`, answer: [dr], explanation: `${n(far)} − ${n(near)} = ${n(dr)} m.` },
-   { prompt: `The path difference is ${n(w)} wavelengths. Enter 1 if the spot is loud, or 0 if it is quiet.`, answer: [loud], explanation: loud ? `${n(w)} is a whole number, so the waves arrive in step and add: loud, 1.` : `${n(w)} is a whole number and a half, so a crest from one speaker arrives with a trough from the other: quiet, 0.` }
+   { prompt: `The path difference is ${wl(w)}. Enter 1 if the spot is loud, or 0 if it is quiet.`, answer: [loud], explanation: loud ? `${n(w)} is a whole number, so the waves arrive in step and add: loud, 1.` : `${n(w)} is a whole number and a half, so a crest from one speaker arrives with a trough from the other: quiet, 0.` }
   ] }; }
 });
 
@@ -151,13 +153,13 @@ mk({
  canonical: { f: 490, r1: 3.2, m: 2 },
  draw: R => ({ f: R.pick(TONES), r1: R.int(200, 700) / 100, m: R.int(0, 5) }),
  build: ({ f, r1, m }) => { const w = m + 0.5, lam = tid(V / f), dr = tid(w * lam), r2 = tid(r1 + dr); return {
-  prompt: `Two speakers, A and B, at the start line of the Rover Track play the same ${n(f)} Hz tone in phase from one signal generator. Sound travels at 343 m/s. A technician wants to put a microphone at a spot ${n(r1)} m from A where the two sounds cancel, with B the farther speaker and the path difference exactly ${n(w)} wavelengths. Enter the wavelength of the tone in metres, then the path difference in metres, then how far the spot is from B in metres.`,
+  prompt: `Two speakers, A and B, at the start line of the Rover Track play the same ${n(f)} Hz tone in phase from one signal generator. Sound travels at 343 m/s. A technician wants to put a microphone at a spot ${n(r1)} m from A where the two sounds cancel, with B the farther speaker and the path difference exactly ${wl(w)}. Enter the wavelength of the tone in metres, then the path difference in metres, then how far the spot is from B in metres. All three come out exact, with at most 3 decimal places.`,
   answer: [lam, dr, r2],
   hints: ['The wavelength comes from v = fλ, and the path difference is the number of wavelengths times one wavelength.', 'The path difference is the farther distance minus the nearer one, so B’s distance is A’s distance plus the path difference.'],
   solution: `λ = 343 ÷ ${n(f)} = ${n(lam)} m. The path difference is ${n(w)} × ${n(lam)} = ${n(dr)} m: a whole number and a half of wavelengths, so crest meets trough and the sound cancels. B is the farther speaker, so its distance is ${n(r1)} + ${n(dr)} = ${n(r2)} m.`,
   guidance: [
    { prompt: `What is the wavelength of a ${n(f)} Hz tone when sound travels at 343 m/s, in metres?`, answer: [lam], explanation: `λ = v ÷ f = 343 ÷ ${n(f)} = ${n(lam)} m.` },
-   { prompt: `What is a path difference of ${n(w)} wavelengths, in metres?`, answer: [dr], explanation: `${n(w)} × ${n(lam)} = ${n(dr)} m.` },
+   { prompt: `What is a path difference of ${wl(w)}, in metres?`, answer: [dr], explanation: `${n(w)} × ${n(lam)} = ${n(dr)} m.` },
    { prompt: `The spot is ${n(r1)} m from A, and B is ${n(dr)} m farther. How far is the spot from B, in metres?`, answer: [r2], explanation: `${n(r1)} + ${n(dr)} = ${n(r2)} m.` }
   ] }; }
 });
@@ -173,14 +175,14 @@ mk({
  draw: R => guard(() => ({ T: R.int(-15, 35), f: R.int(20, 100) * 10, r1: R.int(200, 700) / 100, w: R.pick([1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5]) }),
   ({ T, f, r1, w }) => { const v = speedT(T), lam = v / f; return ok(v, 2) && ok(lam, 3) && ok(r1 + w * lam, 3); }, { T: 12, f: 400, r1: 3.2, w: 2.5 }),
  build: ({ T, f, r1, w }) => { const q = 1 + T / 273, v = speedT(T), lam = v / f, dr = w * lam, r2 = r1 + dr; return {
-  prompt: `The air at the Rover Track is at ${n(T)} °C, and in air at T_C degrees Celsius sound travels at v = 331 √(1 + T_C ÷ 273) m/s. Two speakers, A and B, play the same ${n(f)} Hz tone in phase. A marshal stands ${n(r1)} m from A, and B is farther away, so that the path difference at her spot is exactly ${n(w)} wavelengths. Enter the speed of sound in m/s to 2 decimal places, then the wavelength of the tone in metres to 3 decimal places (from the unrounded speed), then her distance from B in metres to 3 decimal places (from the unrounded wavelength).`,
+  prompt: `The air at the Rover Track is at ${n(T)} °C, and in air at T_C degrees Celsius sound travels at v = 331 √(1 + T_C ÷ 273) m/s. Two speakers, A and B, play the same ${n(f)} Hz tone in phase. A marshal stands ${n(r1)} m from A, and B is farther away, so that the path difference at her spot is exactly ${wl(w)}. Enter the speed of sound in m/s to 2 decimal places, then the wavelength of the tone in metres to 3 decimal places (from the unrounded speed), then her distance from B in metres to 3 decimal places (from the unrounded wavelength).`,
   answer: [rd(v, 2), rd(lam, 3), rd(r2, 3)],
   hints: ['Put the temperature into v = 331 √(1 + T_C ÷ 273); a temperature below 0 °C makes the fraction negative. The wavelength is then λ = v ÷ f.', 'The path difference in metres is the number of wavelengths times λ, and B’s distance is A’s distance plus the path difference.'],
   solution: `${tq(T)} ${eq4(q)}, so v = 331 × √${n(q)} ${say(v, 2, ' m/s')}. The wavelength is λ = ${n(v)} ÷ ${n(f)} ${say(lam, 3, ' m')}. The path difference is ${n(w)} × ${n(lam)} ${eq4(dr)} m, so her distance from B is ${n(r1)} + ${n(dr)} ${say(r2, 3, ' m')}.`,
   guidance: [
    { prompt: `Put ${n(T)} °C into v = 331 √(1 + T_C ÷ 273). What is the speed of sound in m/s, to 2 decimal places?`, answer: [rd(v, 2)], explanation: `${tq(T)} ${eq4(q)}, so v = 331 × √${n(q)} ${say(v, 2, ' m/s')}.` },
    { prompt: `Divide the unrounded speed by the frequency, ${n(f)} Hz. What is the wavelength in metres, to 3 decimal places?`, answer: [rd(lam, 3)], explanation: `λ = v ÷ f = ${n(v)} ÷ ${n(f)} ${say(lam, 3, ' m')}.` },
-   { prompt: `The path difference is ${n(w)} wavelengths and A is ${n(r1)} m away. Using the unrounded wavelength, how far is she from B, in metres to 3 decimal places?`, answer: [rd(r2, 3)], explanation: `The path difference is ${n(w)} × ${n(lam)} ${eq4(dr)} m, so B’s distance is ${n(r1)} + ${n(dr)} ${say(r2, 3, ' m')}.` }
+   { prompt: `The path difference is ${wl(w)} and A is ${n(r1)} m away. Using the unrounded wavelength, how far is she from B, in metres to 3 decimal places?`, answer: [rd(r2, 3)], explanation: `The path difference is ${n(w)} × ${n(lam)} ${eq4(dr)} m, so B’s distance is ${n(r1)} + ${n(dr)} ${say(r2, 3, ' m')}.` }
   ] }; }
 });
 
@@ -266,7 +268,7 @@ mk({
  draw: R => guard(() => ({ v: R.int(120, 250) / 100, lam: R.int(400, 700) }),
   ({ v, lam }) => !(v === 2.25 && lam === 500) && ok(3 / v, 3) && ok(lam * v / 3, 1), { v: 2.1, lam: 550 }),
  build: ({ v, lam }) => { const nn = 3 / v, li = lam / nn; return {
-  prompt: `A technician in the Lens Workshop times light crossing a sample of an unlabelled clear material and finds that it travels at ${fx(v, 2)} in units of 10⁸ m/s. Take c = 3.00 × 10⁸ m/s. Enter the material’s index of refraction (no unit) to 3 decimal places. Then enter the wavelength, in nanometres to 1 decimal place, that a beam of ${n(lam)} nm in a vacuum has inside the sample. Use the unrounded index of refraction for the wavelength.`,
+  prompt: `A technician in the Lens Workshop times light crossing a sample of an unlabelled clear material and finds that it travels at ${fx(v, 2)} × 10⁸ m/s. Take c = 3.00 × 10⁸ m/s. Enter the material’s index of refraction (no unit) to 3 decimal places. Then enter the wavelength, in nanometres to 1 decimal place, that a beam of ${n(lam)} nm in a vacuum has inside the sample. Use the unrounded index of refraction for the wavelength.`,
   answer: [rd(nn, 3), rd(li, 1)],
   hints: ['The index of refraction compares the speed of light in a vacuum with its speed in the material: n = c ÷ v. In units of 10⁸ m/s, c is 3.00.', 'The frequency stays the same when light enters the sample, so the wavelength shrinks by the same factor as the speed: λ inside = λ in a vacuum ÷ n.'],
   solution: `n = c ÷ v = 3.00 ÷ ${fx(v, 2)} ${say(nn, 3)}. Inside the sample the wavelength is ${n(lam)} ÷ ${n(nn)} ${say(li, 1, ' nm')}.`,
@@ -332,7 +334,7 @@ mk({
 }, {
  canonical: { n1: 1, n2: 2.419, a: 0.6 },
  draw: R => guard(() => ({ n1: R.pick(PAIRS), n2: R.pick(PAIRS), a: R.int(15, 130) / 100 }),
-  ({ n1, n2, a }) => { const t1 = Math.PI / 2 - a, s = n1 * Math.sin(t1) / n2; return n1 !== n2 && s < 0.95 && ok(t1, 3) && ok(s, 3) && ok(Math.asin(s), 3); }, { n1: 1, n2: 2.419, a: 0.6 }),
+  ({ n1, n2, a }) => { const t1 = Math.PI / 2 - a, s = n1 * Math.sin(t1) / n2; return n1 !== n2 && n2 !== 1 && s < 0.95 && ok(t1, 3) && ok(s, 3) && ok(Math.asin(s), 3); }, { n1: 1, n2: 2.419, a: 0.6 }),
  build: ({ n1, n2, a }) => { const A = NAME[n1], B = NAME[n2], t1 = Math.PI / 2 - a, st = Math.sin(t1), s = n1 * st / n2, t2 = Math.asin(s); return {
   prompt: `A laser on the alignment bench in the Lens Workshop is aimed from ${A} (index of refraction ${idx(n1)}) at a flat slab of ${B} (index ${idx(n2)}). The beam makes an angle of ${rads(a)} with the surface of the slab itself, not with the normal. Enter the angle of incidence, measured from the normal, in radians to 3 decimal places. Then enter the angle of the refracted beam from the normal, in radians to 3 decimal places, using the unrounded angle of incidence.`,
   answer: [rd(t1, 3), rd(t2, 3)],
@@ -378,7 +380,7 @@ mk({
  draw: R => guard(() => ({ v: R.int(130, 230) / 100, a: R.int(20, 140) / 100, lam: R.int(400, 700) }),
   ({ v, a, lam }) => { const nn = 3 / v, s = Math.sin(a) / nn; return ok(nn, 3) && ok(s, 3) && ok(Math.asin(s), 3) && ok(lam * v / 3, 1); }, { v: 1.75, a: 0.9, lam: 500 }),
  build: ({ v, a, lam }) => { const nn = 3 / v, sa = Math.sin(a), s = sa / nn, t2 = Math.asin(s), li = lam / nn; return {
-  prompt: `A fuel-quality sensor in the Lens Workshop shines a beam of vacuum wavelength ${n(lam)} nm from air (index of refraction 1.00) into a clear fuel, meeting its flat surface at ${rads(a)} from the normal. A timing test shows that light crosses the fuel at ${fx(v, 2)} in units of 10⁸ m/s. Take c = 3.00 × 10⁸ m/s. Enter the fuel’s index of refraction to 3 decimal places, then the angle of the refracted beam from the normal in radians to 3 decimal places, then the wavelength of the light inside the fuel in nanometres to 1 decimal place. Use the unrounded index of refraction in the later steps.`,
+  prompt: `A fuel-quality sensor in the Lens Workshop shines a beam of vacuum wavelength ${n(lam)} nm from air (index of refraction 1.00) into a clear fuel, meeting its flat surface at ${rads(a)} from the normal. A timing test shows that light crosses the fuel at ${fx(v, 2)} × 10⁸ m/s. Take c = 3.00 × 10⁸ m/s; the index of refraction is n = c ÷ v, and inside the fuel the wavelength is the vacuum wavelength divided by n. Enter the fuel’s index of refraction to 3 decimal places, then the angle of the refracted beam from the normal in radians to 3 decimal places, then the wavelength of the light inside the fuel in nanometres to 1 decimal place. Use the unrounded index of refraction in the later steps.`,
   answer: [rd(nn, 3), rd(t2, 3), rd(li, 1)],
   hints: ['The index of refraction is n = c ÷ v, which in units of 10⁸ m/s is 3.00 ÷ v.', 'Snell’s law with air as the first material gives sin θ₂ = sin θ₁ ÷ n; use arcsin in radians. The wavelength inside is the vacuum wavelength divided by n.'],
   solution: `n = 3.00 ÷ ${fx(v, 2)} ${say(nn, 3)}. By Snell’s law, sin θ₂ = 1.00 × sin ${n(a)} ÷ ${n(nn)} = ${n(sa)} ÷ ${n(nn)} ${eq4(s)}, so θ₂ = arcsin(${n(s)}) ${say(t2, 3, ' rad')}. Inside the fuel the wavelength is ${n(lam)} ÷ ${n(nn)} ${say(li, 1, ' nm')}.`,

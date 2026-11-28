@@ -617,7 +617,7 @@ window.QUESTS.push(
   "sector": "Crystal Observatory",
   "brief": "The Crystal Observatory wants to know how close together two lights on a distant moon can be before its telescope sees them as one.",
   "lesson": "A round opening of diameter D can tell apart two points only if they are at least θ = 1.22λ ÷ D apart in angle, the Rayleigh criterion.",
-  "prompt": "The Crystal Observatory’s telescope has a round opening 25 cm across and looks at two lamps on a moon 380000 km away, in light of wavelength 550 nm. By the Rayleigh criterion, enter the smallest angle between two points that the telescope can still tell apart, in microradians (1 μrad = 10⁻⁶ rad) to 2 decimal places; then the smallest distance between the two lamps that it can still separate, in kilometres to 2 decimal places.",
+  "prompt": "The Crystal Observatory’s telescope has a round opening 25 cm across and looks at two lamps on a moon 380000 km away, in light of wavelength 550 nm. By the Rayleigh criterion, enter the smallest angle between two points that the telescope can still tell apart, in microradians (1 μrad = 10⁻⁶ rad) to 2 decimal places; then the smallest distance between the two lamps that it can still separate, in kilometres to 2 decimal places, worked out from the unrounded angle.",
   "answer": [
    2.68,
    1.02

@@ -56,7 +56,7 @@ mk({
  draw: R => tries(() => { const L = R.pick([20, 25, 30, 40, 50, 60]), mu = R.pick([0.2, 0.4, 0.6, 0.8, 1, 1.2]), k = R.int(2, 6); return { L, m: G.tidy(mu * L), W: G.tidy(5 * mu * k * k) }; },
   p => { const q = m11b(p); return Number.isInteger(p.W) && q.T < 1000 && Number.isInteger(q.v) && exact(q.mu, 3) && exact(p.m, 2) && !edge(q.t, 3) && !same(p, c11b); }, c11b),
  build: p => { const { L, m, W } = p, { T, mu, v, t } = m11b(p); return {
-  prompt: `A signal line hangs straight down the comms mast, and a weight of ${n(W)} kg is hung on its lower end. The line is ${n(L)} m long and has a mass of ${n(m)} kg. Treat the tension as the same all the way along the line and equal to the weight of the load, F_T = mg, with g = 9.8 m/s². Mira taps the line at the top. Enter the tension in newtons, the linear mass density in kg/m, the speed of the pulse in m/s, and the time in seconds the pulse takes to run down to the weight, to 3 decimal places.`,
+  prompt: `A signal line hangs straight down the comms mast, and a load of mass ${n(W)} kg is hung on its lower end. The line is ${n(L)} m long and has a mass of ${n(m)} kg. Treat the tension as the same all the way along the line and equal to the weight of the load, F_T = mg, with g = 9.8 m/s². Mira taps the line at the top. Enter the tension in newtons, the linear mass density in kg/m, the speed of the pulse in m/s, and the time in seconds the pulse takes to run down to the load, to 3 decimal places.`,
   answer: [T, mu, v, rd(t, 3)],
   hints: ['A weight hanging still pulls the line with its own weight, F_T = mg, using g = 9.8 m/s². The linear mass density is the line’s mass divided by its length.', 'The speed of a pulse is v = √(F_T ÷ μ). The pulse keeps that speed all the way, so the time is the length divided by the speed.'],
   solution: `F_T = mg = ${n(W)} × 9.8 = ${n(T)} N. μ = ${n(m)} ÷ ${n(L)} = ${n(mu)} kg/m. v = √(${n(T)} ÷ ${n(mu)}) = √${n(v * v)} = ${n(v)} m/s. The pulse covers ${n(L)} m at ${n(v)} m/s, so it takes ${n(L)} ÷ ${n(v)} ${eq(t, 3)} s.`,
@@ -134,7 +134,7 @@ mk({
  draw: R => tries(() => ({ A: R.int(10, 60) / 10, phi: R.int(3, 28) / 10, th: R.int(1, 30) / 10 }),
   p => { const q = m12b(p); return !edge(q.AR, 2) && !edge(q.y, 2) && Math.abs(q.y) >= 0.1 && !same(p, c12b); }, c12b),
  build: p => { const { A, phi, th } = p, { AR, ang, y } = m12b(p); return {
-  prompt: `Two ripple makers at one end of the water tank in the assembly hall send waves of the same height down the same channel. Written with θ for kx − ωt, the water is lifted by y₁ = ${n(A)} sin θ mm from the first and by y₂ = ${n(A)} sin(θ + ${n(phi)}) mm from the second, so the second wave is ahead by ${n(phi)} rad. Together they make one wave, y = 2A cos(φ ÷ 2) sin(θ + φ ÷ 2), with A = ${n(A)} mm and φ = ${n(phi)} rad. Angles are in radians. Enter the amplitude of the combined wave in mm, then its height in mm at the place and moment where θ = ${n(th)} rad. Give both to 2 decimal places; the height may be negative.`,
+  prompt: `Two ripple makers at one end of the water tank in the assembly hall send waves of the same height down the same channel. Written with θ for kx − ωt, the water is lifted by y₁ = ${n(A)} sin θ mm from the first and by y₂ = ${n(A)} sin(θ + ${n(phi)}) mm from the second, so the second wave is ahead by ${n(phi)} rad. Together they make one wave, y = 2A cos(φ ÷ 2) sin(θ + φ ÷ 2), with A = ${n(A)} mm and φ = ${n(phi)} rad. Angles are in radians. The amplitude of the combined wave is the size of the factor in front of the sine, 2A cos(φ ÷ 2), which is positive here because φ is less than π. Enter that amplitude in mm, then its height in mm at the place and moment where θ = ${n(th)} rad. Give both to 2 decimal places; the height may be negative.`,
   answer: [rd(AR, 2), rd(y, 2)],
   hints: ['The amplitude of the combined wave is 2A cos(φ ÷ 2): the factor in front of the sine in the combined wave.', 'The height is the combined wave itself: put θ + φ ÷ 2 inside the sine, take it in radians, and multiply by the amplitude.'],
   solution: `The amplitude is 2A cos(φ ÷ 2) = 2 × ${n(A)} × cos(${n(phi / 2)}) ${eq(AR, 2)} mm. The angle in the sine is θ + φ ÷ 2 = ${n(th)} + ${n(phi / 2)} = ${n(ang)} rad, so y = ${fx(AR, 4)} × sin(${n(ang)}) ${eq(y, 2)} mm.`,
@@ -159,7 +159,7 @@ mk({
  draw: R => tries(() => ({ f: R.pick([196, 245, 343, 392, 490, 686]), d: R.int(5, 90) / 100, p: R.pick([0.5, 1, 1.5, 2, 2.5, 3, 4, 5]) }),
   p => { const q = m12c(p); return q.phi >= 0.3 && q.phi <= 2.8 && !edge(q.phi, 3) && !edge(q.AR, 2) && rd(2 * p.p * Math.cos(rd(q.phi, 3) / 2), 2) === rd(q.AR, 2) && !same(p, c12c); }, c12c),
  build: p => { const { f, d, p: A } = p, { lam, phi, AR } = m12c(p); return {
-  prompt: `Two loudspeakers on the stage of the assembly hall play the same note of ${n(f)} Hz, exactly in step with each other. At Mira’s seat the sound from one speaker has travelled ${n(d)} m further than the sound from the other, and each speaker on its own makes a sound wave of amplitude ${n(A)} Pa there. The speed of sound in the hall is 343 m/s. A wave that has travelled a path ${n(d)} m longer is behind by a phase difference φ = 2π × ${n(d)} ÷ λ radians, where λ is the wavelength. Enter the wavelength in metres, the phase difference in radians, both to 3 decimal places, then the amplitude of the combined sound in Pa to 2 decimal places, found from 2A cos(φ ÷ 2) with the unrounded φ.`,
+  prompt: `Two loudspeakers on the stage of the assembly hall play the same note of ${n(f)} Hz, exactly in step with each other. At Mira’s seat the sound from one speaker has travelled ${n(d)} m further than the sound from the other, and each speaker on its own makes a sound wave of amplitude ${n(A)} Pa there. The speed of sound in the hall is 343 m/s. A wave that has travelled a path ${n(d)} m longer is behind by a phase difference φ = 2π × ${n(d)} ÷ λ radians, where λ is the wavelength. Enter the wavelength in metres, the phase difference in radians, both to 3 decimal places, then the amplitude of the combined sound in Pa to 2 decimal places, found from 2A cos(φ ÷ 2) with the unrounded φ. The amplitude is a size, never negative, and here φ is less than π so the formula gives a positive value.`,
   answer: [lam, rd(phi, 3), rd(AR, 2)],
   hints: ['The wavelength comes from v = fλ, so λ = v ÷ f, with v = 343 m/s.', 'Put the path difference and the wavelength into φ = 2π × (path difference) ÷ λ. Then the combined amplitude is 2A cos(φ ÷ 2), where A is the amplitude of one speaker alone.'],
   solution: `λ = v ÷ f = 343 ÷ ${n(f)} = ${n(lam)} m. φ = 2π × ${n(d)} ÷ ${n(lam)} ${eq(phi, 3)} rad. The combined amplitude is 2A cos(φ ÷ 2) = 2 × ${n(A)} × cos(${fx(phi / 2, 4)}) ${eq(AR, 2)} Pa.`,
@@ -197,20 +197,21 @@ mk({
 
 /* ---- q13 Standing waves on a string: nodes and harmonics [V1 16.6] ---- */
 
-/* A rope of length L, wave speed v, driven at f = nv ÷ 2L: λ = v ÷ f, n = 2L ÷ λ, nodes n + 1. */
-const m13b = ({ L, v, n: h }) => { const f = G.tidy(h * v / (2 * L)), lam = v / f; return { f, lam, h: Math.round(2 * L / lam), nodes: Math.round(2 * L / lam) + 1 }; };
-const c13b = { L: 2.5, v: 60, n: 4 };
+/* A rope of length L, wave speed v, driven at frequency f (all three are parameters): λ = v ÷ f, n = 2L ÷ λ, nodes n + 1. */
+const m13b = ({ L, v, f }) => { const lam = G.tidy(v / f), h = Math.round(2 * L / lam); return { f, lam, h, nodes: h + 1 }; };
+const c13b = { L: 2.5, v: 60, f: 48 };
 mk({
  id: 'q13b', parent: 'q13', kind: 'setting', title: 'A rope between two posts',
  brief: 'A rope tied between two posts in the hall is shaken until it stands in neat loops, and Mira wants to know which pattern it found.',
  labels: ['wavelength (m)', 'harmonic number', 'number of nodes'], tolerance: 0.0005,
  gl: [['wavelength (m)'], ['harmonic number'], ['number of nodes']]
 }, {
- /* L from a short list, speed in steps of 5 m/s, harmonic n from 2 to 9. The driving frequency has at most 2 decimals and stays below 1000 Hz; the wavelength has at most 3. */
+ /* L from a short list and a harmonic from 2 to 9 fix a wavelength 2L ÷ n with at most 3 decimals; the driving frequency is a whole number of Hz
+    from 12 to 400 and the wave speed f λ (at most 1 decimal, 15 to 250 m/s) follows. The printed v, f and L are the parameters. */
  canonical: c13b,
- draw: R => tries(() => ({ L: R.pick([1.5, 2, 2.5, 3, 3.6, 4, 4.5, 5]), v: 5 * R.int(4, 24), n: R.int(2, 9) }),
-  p => { const q = m13b({ L: p.L, v: p.v, n: p.n }); return exact(q.f, 2) && q.f < 1000 && exact(2 * p.L / p.n, 3) && !same(p, c13b); }, c13b),
- build: p => { const { L, v, n: h } = p, { f, lam, nodes } = m13b({ L, v, n: h }); return {
+ draw: R => { const p = tries(() => { const L = R.pick([1.5, 2, 2.5, 3, 3.6, 4, 4.5, 5]), h = R.int(2, 9), lam = 2 * L / h, f = R.int(12, 400); return { L, v: G.tidy(f * lam), f, h, lam }; },
+  p => exact(p.lam, 3) && exact(p.v, 1) && p.v >= 15 && p.v <= 250 && Math.abs(2 * p.L / (p.v / p.f) - p.h) < 1e-9 && !same({ L: p.L, v: p.v, f: p.f }, c13b), { ...c13b, h: 4, lam: 1.25 }); return { L: p.L, v: p.v, f: p.f }; },
+ build: p => { const { L, v, f } = p, { lam, h, nodes } = m13b({ L, v, f }); return {
   prompt: `Mira ties a rope between two posts ${n(L)} m apart in the assembly hall. Waves run along the rope at ${n(v)} m/s. She shakes it at ${n(f)} Hz, and it settles into a standing wave with a node at each post and loops of equal size between them: one of its harmonics. Enter the wavelength of the wave in metres, the harmonic number (how many loops there are between the posts), and the total number of nodes, counting the two at the posts.`,
   answer: [lam, h, nodes],
   hints: ['The wavelength comes from v = fλ, so λ = v ÷ f.', 'Each loop is half a wavelength and the loops fill the distance between the posts, so the number of loops is the distance divided by half a wavelength, 2L ÷ λ. The loops are separated by nodes, with one more node than loops.'],
@@ -288,7 +289,7 @@ mk({
  draw: R => tries(() => ({ Tc: R.except(-20, 35, [0]), d: R.int(8, 60) }),
   p => { const q = m14b(p); return !edge(q.v, 2) && !edge(q.t, 3) && rd(2 * p.d / rd(q.v, 2), 3) === rd(q.t, 3) && !(p.Tc === 20 || p.Tc === 30) && !same(p, c14b); }, c14b),
  build: p => { const { Tc, d } = p, { r, v, t } = m14b(p); return {
-  prompt: `On the stage of the assembly hall Mira claps once and hears the echo from the back wall, ${n(d)} m away. The echo is the sound of the clap travelling to the wall and back again, and the air in the hall is at ${n(Tc)} °C. Enter the speed of sound in the hall in m/s, to 2 decimal places, then the time in seconds between the clap and its echo, to 3 decimal places, worked out from the unrounded speed.`,
+  prompt: `On the stage of the assembly hall Mira claps once and hears the echo from the back wall, ${n(d)} m away. The echo is the sound of the clap travelling to the wall and back again, and the air in the hall is at ${n(Tc)} °C. In air at T_C degrees Celsius, sound travels at v = 331 √(1 + T_C ÷ 273) m/s. Enter the speed of sound in the hall in m/s, to 2 decimal places, then the time in seconds between the clap and its echo, to 3 decimal places, worked out from the unrounded speed.`,
   answer: [rd(v, 2), rd(t, 3)],
   hints: ['In air at a temperature of T_C degrees Celsius, sound travels at v = 331 √(1 + T_C ÷ 273) m/s. A temperature below 0 °C makes the fraction negative.', 'The sound goes to the wall and comes back, so it covers twice the distance to the wall. Time = distance ÷ speed.'],
   solution: `1 + ${par(Tc)} ÷ 273 ≈ ${fx(r, 4)}, so v = 331 × √(1 + ${par(Tc)} ÷ 273) ≈ ${fx(v, 2)} m/s. The sound covers 2 × ${n(d)} = ${n(2 * d)} m there and back, so the delay is ${n(2 * d)} ÷ ${fx(v, 4)} ≈ ${fx(t, 3)} s.`,
@@ -336,7 +337,7 @@ mk({
  draw: R => tries(() => ({ L: R.pick([0.5, 0.6, 0.75, 0.8, 1, 1.2, 1.5, 2]), vs: 5 * R.int(12, 40), h: R.int(2, 6), Tc: R.except(-25, 35, [0]) }),
   p => { const q = m14d(p); return exact(q.f, 2) && q.f < 1000 && !edge(q.v, 2) && !edge(q.lam, 3) && rd(rd(q.v, 2) / q.f, 3) === rd(q.lam, 3) && !same(p, c14d); }, c14d),
  build: p => { const { L, vs, h, Tc } = p, { f, r, v, lam } = m14d(p); return {
-  prompt: `A tuning cable ${n(L)} m long is fixed at both ends in the assembly hall. Waves travel along the cable at ${n(vs)} m/s, and it vibrates in its ${ord(h)} harmonic. The vibrating cable makes sound with the same frequency as the cable. The air in the hall is at ${n(Tc)} °C. Enter the frequency of the cable’s vibration in Hz, the speed of sound in the hall in m/s to 2 decimal places, and the wavelength of the sound in the air in metres to 3 decimal places, worked out from the unrounded speed.`,
+  prompt: `A tuning cable ${n(L)} m long is fixed at both ends in the assembly hall. Waves travel along the cable at ${n(vs)} m/s, and it vibrates in its ${ord(h)} harmonic. The vibrating cable makes sound with the same frequency as the cable. The air in the hall is at ${n(Tc)} °C, and in air at T_C degrees Celsius sound travels at v = 331 √(1 + T_C ÷ 273) m/s. Enter the frequency of the cable’s vibration in Hz, the speed of sound in the hall in m/s to 2 decimal places, and the wavelength of the sound in the air in metres to 3 decimal places, worked out from the unrounded speed.`,
   answer: [f, rd(v, 2), rd(lam, 3)],
   hints: ['On the cable the harmonic has n loops, each half a wavelength, so λ = 2L ÷ n and f = v ÷ λ with the cable’s own wave speed.', 'The air carries the same frequency but its own speed, v = 331 √(1 + T_C ÷ 273). The wavelength of the sound is that speed divided by the frequency.'],
   solution: `On the cable λ = 2L ÷ n = 2 × ${n(L)} ÷ ${n(h)} ${eq(2 * L / h, 4)} m, so f = ${n(vs)} ÷ ${fx(2 * L / h, 4)} = ${n(f)} Hz. In the air, 1 + ${par(Tc)} ÷ 273 ≈ ${fx(r, 4)}, so v = 331 × √${fx(r, 4)} ≈ ${fx(v, 2)} m/s. The sound has the same frequency, so its wavelength is ${fx(v, 4)} ÷ ${n(f)} ≈ ${fx(lam, 3)} m.`,
