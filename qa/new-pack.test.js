@@ -107,40 +107,44 @@ check('the scaffolder in a scratch repository: writes, is idempotent, keeps work
     const base = JSON.parse(read('tools/packs/calc1.example.json'));
     const specFor = (id, extra) => Object.assign(JSON.parse(JSON.stringify(base)), { id, registry: {}, name: 'Test ' + id, short: 'Test ' + id, achievements: { done: id + ' done', master: id + ' mastered' } }, extra || {});
     const quiet = r => r;
-    /* 1. a part the registry has as 'coming' (calc2) is flipped to ready */
-    const calc2 = specFor('calc2', { name: 'Calculus 2: accumulation' });
-    let r = quiet(NP.scaffold(calc2, tmp));
+    /* The live registry changes as packs are scaffolded, so the part flipped here is the first 'coming' one without a pack. */
+    const live = {}; vm.runInNewContext(original.packs, { window: live }); vm.runInNewContext(original.registry, { window: live });
+    const coming = live.VG_REALMS.flatMap(n => n.parts).find(p => p.status === 'coming' && !live.VG_PACKS[p.id]);
+    assert.ok(coming, 'the registry still has a coming part to flip'); const F = coming.id, FNAME = coming.name;
+    /* 1. a part the registry has as 'coming' is flipped to ready */
+    const flip = specFor(F, { name: FNAME });
+    let r = quiet(NP.scaffold(flip, tmp));
     assert.deepEqual(r.conflicts, []); assert.equal(r.written.length, 39 + 2, 'pack.js, 37 stubs, the glossary and the two shared files'); assert.deepEqual(r.kept, []);
-    for (const f of ['game/realms/calc2/pack.js', 'game/realms/calc2/missions-d.js', 'game/realms/calc2/practice-8.js', 'game/realms/calc2/glossary.js', 'qa/realms/calc2/oracle-p8.js', 'qa/realms/calc2/oracle-pack-checks.js']) assert.ok(fs.existsSync(at(f)), f);
+    for (const f of [`game/realms/${F}/pack.js`, `game/realms/${F}/missions-d.js`, `game/realms/${F}/practice-8.js`, `game/realms/${F}/glossary.js`, `qa/realms/${F}/oracle-p8.js`, `qa/realms/${F}/oracle-pack-checks.js`]) assert.ok(fs.existsSync(at(f)), f);
     const w = {}; vm.runInNewContext(fs.readFileSync(at('game/realms/packs.js'), 'utf8'), { window: w }); vm.runInNewContext(fs.readFileSync(at('game/realms/registry.js'), 'utf8'), { window: w });
-    assert.deepEqual(Array.from(w.VG_PACKS.calc2.scripts), NP.packEntry(NP.normalize(calc2)), 'the VG_PACKS entry');
+    assert.deepEqual(Array.from(w.VG_PACKS[F].scripts), NP.packEntry(NP.normalize(flip)), 'the VG_PACKS entry');
     for (const id of ['la', 'found', 'calc1']) assert.deepEqual(JSON.parse(JSON.stringify(w.VG_PACKS[id])), JSON.parse(JSON.stringify((() => { const v = {}; vm.runInNewContext(original.packs, { window: v }); return v.VG_PACKS[id]; })())), id + ' is untouched');
-    const part = w.VG_REALMS.flatMap(n => n.parts).find(p => p.id === 'calc2');
-    assert.deepEqual(JSON.parse(JSON.stringify(part)), { id: 'calc2', name: 'Calculus 2: accumulation', status: 'ready', missions: 160, learn: 40, ach: { short: 'Test calc2', done: 'calc2 done', master: 'calc2 mastered' } });
+    const part = w.VG_REALMS.flatMap(n => n.parts).find(p => p.id === `${F}`);
+    assert.deepEqual(JSON.parse(JSON.stringify(part)), { id: `${F}`, name: FNAME, status: 'ready', missions: 160, learn: 40, ach: { short: `Test ${F}`, done: `${F} done`, master: `${F} mastered` } });
     /* every stub is a classic script that loads, and the pack loads in its order with the engine files */
-    for (const f of NP.packEntry(NP.normalize(calc2))) if (f.startsWith('realms/calc2/')) assert.doesNotThrow(() => new vm.Script(fs.readFileSync(at('game/' + f), 'utf8')), f);
-    for (const f of fs.readdirSync(at('qa/realms/calc2'))) assert.doesNotThrow(() => new vm.Script(fs.readFileSync(at('qa/realms/calc2/' + f), 'utf8')), f);
+    for (const f of NP.packEntry(NP.normalize(flip))) if (f.startsWith(`realms/${F}/`)) assert.doesNotThrow(() => new vm.Script(fs.readFileSync(at('game/' + f), 'utf8')), f);
+    for (const f of fs.readdirSync(at(`qa/realms/${F}`))) assert.doesNotThrow(() => new vm.Script(fs.readFileSync(at(`qa/realms/${F}/` + f), 'utf8')), f);
     const page = { VG_SEED: 0 };
-    for (const f of NP.packEntry(NP.normalize(calc2))) vm.runInNewContext(fs.existsSync(at('game/' + f)) ? fs.readFileSync(at('game/' + f), 'utf8') : read('game/' + f), { window: page, Math });
-    assert.equal(page.REALM.id, 'calc2'); assert.equal(page.QUESTS.length, 0); assert.deepEqual(Object.keys(page.VG_GLOSSARY.calc2), []); assert.equal(page.VGGlossary.find('a limit', 'calc2').length, 0, 'an empty glossary matches nothing');
-    const oracles = { ORACLE: {} }; Object.assign(oracles, page); for (const f of fs.readdirSync(at('qa/realms/calc2'))) vm.runInNewContext(fs.readFileSync(at('qa/realms/calc2/' + f), 'utf8'), { window: oracles, Math });
+    for (const f of NP.packEntry(NP.normalize(flip))) vm.runInNewContext(fs.existsSync(at('game/' + f)) ? fs.readFileSync(at('game/' + f), 'utf8') : read('game/' + f), { window: page, Math });
+    assert.equal(page.REALM.id, `${F}`); assert.equal(page.QUESTS.length, 0); assert.deepEqual(Object.keys(page.VG_GLOSSARY[F]), []); assert.equal(page.VGGlossary.find('a limit', `${F}`).length, 0, 'an empty glossary matches nothing');
+    const oracles = { ORACLE: {} }; Object.assign(oracles, page); for (const f of fs.readdirSync(at(`qa/realms/${F}`))) vm.runInNewContext(fs.readFileSync(at(`qa/realms/${F}/` + f), 'utf8'), { window: oracles, Math });
     /* 2. idempotent */
-    r = NP.scaffold(calc2, tmp); assert.deepEqual(r.written, []); assert.equal(r.unchanged.length, 41); assert.deepEqual(r.conflicts, []);
+    r = NP.scaffold(flip, tmp); assert.deepEqual(r.written, []); assert.equal(r.unchanged.length, 41); assert.deepEqual(r.conflicts, []);
     /* 3. a file with work in it is kept, never overwritten; an emptied one is written again */
-    const work = '/* my missions */\n'; fs.writeFileSync(at('game/realms/calc2/missions-a.js'), work); fs.writeFileSync(at('game/realms/calc2/gen-b.js'), '  \n');
-    r = NP.scaffold(calc2, tmp); assert.deepEqual(r.kept, ['game/realms/calc2/missions-a.js']); assert.deepEqual(r.written, ['game/realms/calc2/gen-b.js']); assert.deepEqual(r.conflicts, []);
-    assert.equal(fs.readFileSync(at('game/realms/calc2/missions-a.js'), 'utf8'), work);
+    const work = '/* my missions */\n'; fs.writeFileSync(at(`game/realms/${F}/missions-a.js`), work); fs.writeFileSync(at(`game/realms/${F}/gen-b.js`), '  \n');
+    r = NP.scaffold(flip, tmp); assert.deepEqual(r.kept, [`game/realms/${F}/missions-a.js`]); assert.deepEqual(r.written, [`game/realms/${F}/gen-b.js`]); assert.deepEqual(r.conflicts, []);
+    assert.equal(fs.readFileSync(at(`game/realms/${F}/missions-a.js`), 'utf8'), work);
     /* 4. a clash in a shared file is refused: the same id with other data */
-    r = NP.scaffold(Object.assign(specFor('calc2'), { name: 'Another name' }), tmp);
-    assert.ok(r.conflicts.some(c => /packs\.js: VG_PACKS\.calc2 exists/.test(c)) && r.conflicts.some(c => /registry\.js: the registry part calc2 is already ready/.test(c)), r.conflicts.join('; '));
-    assert.throws(() => NP.normalize(specFor('zz', { registry: { part: 'calc2' } })), NP.SpecError);
+    r = NP.scaffold(Object.assign(specFor(`${F}`), { name: 'Another name' }), tmp);
+    assert.ok(r.conflicts.some(c => c.includes(`packs.js: VG_PACKS.${F} exists`)) && r.conflicts.some(c => c.includes(`registry.js: the registry part ${F} is already ready`)), r.conflicts.join('; '));
+    assert.throws(() => NP.normalize(specFor('zz', { registry: { part: `${F}` } })), NP.SpecError);
     assert.ok(NP.scaffold(specFor('calc1'), tmp).conflicts.length, 'calc1 itself is never scaffolded');
     assert.ok(NP.scaffold(specFor('qq', { saveId: 'calc1' }), tmp).conflicts.some(c => /saveId calc1/.test(c)), 'a saveId in use is refused');
     assert.ok(NP.scaffold(specFor('nopart'), tmp).conflicts.some(c => /no part nopart/.test(c)), 'a part the registry lacks needs registry.node');
     assert.ok(!fs.existsSync(at('game/realms/nopart')) && !fs.readFileSync(at('game/realms/packs.js'), 'utf8').includes('nopart'), 'and a refused scaffold writes nothing');
     /* 5. --remove refuses while a file holds work, then removes everything */
-    r = NP.remove(calc2, tmp); assert.ok(r.conflicts.length && fs.existsSync(at('game/realms/calc2/pack.js')), 'nothing removed while missions-a.js holds work');
-    fs.writeFileSync(at('game/realms/calc2/missions-a.js'), NP.stubs(NP.normalize(calc2))['game/realms/calc2/missions-a.js']);
+    r = NP.remove(flip, tmp); assert.ok(r.conflicts.length && fs.existsSync(at(`game/realms/${F}/pack.js`)), 'nothing removed while missions-a.js holds work');
+    fs.writeFileSync(at(`game/realms/${F}/missions-a.js`), NP.stubs(NP.normalize(flip))[`game/realms/${F}/missions-a.js`]);
     /* 6. a second pack that adds a registry part of its own, and a pack the registry does not list */
     const qq = specFor('qq', { registry: { node: 'calc' } }), solo = specFor('solo', { registry: false });
     assert.deepEqual(NP.scaffold(qq, tmp).conflicts, []); assert.deepEqual(NP.scaffold(solo, tmp).conflicts, []);
@@ -148,7 +152,7 @@ check('the scaffolder in a scratch repository: writes, is idempotent, keeps work
     const before = (() => { const v = {}; vm.runInNewContext(original.registry, { window: v }); return v.VG_REALMS.find(n => n.node === 'calc').parts.map(p => p.id); })();
     assert.deepEqual(Array.from(w2.VG_REALMS.find(n => n.node === 'calc').parts, p => p.id), [...before, 'qq'], 'the new part is added at the end of its node');
     assert.ok(!w2.VG_REALMS.flatMap(n => n.parts).some(p => p.id === 'solo') && w2.VG_PACKS.solo, 'registry: false gives a pack with no star-map part');
-    for (const s of [solo, qq, calc2]) { r = NP.remove(s, tmp); assert.deepEqual(r.conflicts, [], s.id + ': ' + r.conflicts.join('; ')); }
+    for (const s of [solo, qq, flip]) { r = NP.remove(s, tmp); assert.deepEqual(r.conflicts, [], s.id + ': ' + r.conflicts.join('; ')); }
     assert.equal(fs.readFileSync(at('game/realms/packs.js'), 'utf8'), original.packs, 'packs.js is back, byte for byte');
     const back = fs.readFileSync(at('game/realms/registry.js'), 'utf8');
     assert.equal(back, original.registry, 'registry.js is back, byte for byte');

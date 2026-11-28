@@ -9,6 +9,7 @@
    oracle-p1.js ... oracle-p14.js).
    Every pack after Foundations (calc1 and every pack tools/new-pack.js adds) also runs the shared content checks in
    qa/pack-checks.js. A pack with no mission written yet passes with "No missions were checked."
+   With mission ids given, a pack-check failure of another mission is a NOTE, not a failure (see loadChecks below).
    Exit code 0 only if every checked mission passes. */
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -34,11 +35,25 @@ window.ORACLE = {};
    qa/realms/la/oracle-p1.js ... oracle-p14.js. Any other pack: every qa/realms/<id>/oracle-*.js. */
 const oracleDir = path.join(__dirname, 'realms', realm);
 const oracleDirs = realm === 'la' ? [[__dirname, /^oracle-[a-z]\.js$/], [oracleDir, /^oracle-.+\.js$/]] : [[oracleDir, /^oracle-.+\.js$/]];
-for (const [dir, name] of oracleDirs) if (fs.existsSync(dir)) for (const file of fs.readdirSync(dir).filter(f => name.test(f)).sort()) load(path.join(dir, file));
+/* Pack checks (qa/pack-checks.js and a pack's own oracle-pack-checks.js) throw one error listing every problem, each
+   line starting with the mission id. Without ids on the command line that error ends the run, as it always has. With
+   ids, only the problems of those ids are reported and counted (as FAIL lines); the problems of other missions, which
+   other authors may be editing, are one NOTE line listing their ids, so an author can check their own missions. */
+const checkFiles = /(^|[\\/])(oracle-)?pack-checks\.js$/;
+const packProblems = [];
+const loadChecks = file => {
+  if (!only.length || !checkFiles.test(file)) return load(file);
+  try { load(file); } catch (error) {
+    const lines = String(error.message).split('\n').filter(l => l.startsWith('  - ')).map(l => l.slice(4));
+    if (!lines.length) throw error;
+    for (const text of lines) packProblems.push({ id: (text.match(/^(q\d{2}[a-z]?)\b/) || [])[1] || null, text, file: path.relative(path.resolve(__dirname, '..'), file) });
+  }
+};
+for (const [dir, name] of oracleDirs) if (fs.existsSync(dir)) for (const file of fs.readdirSync(dir).filter(f => name.test(f)).sort()) loadChecks(path.join(dir, file));
 /* Shared content checks (qa/pack-checks.js) for every pack added after Foundations. Linear algebra keeps its 1.4.1
    checks; Foundations has the same rules in its own qa/realms/found/oracle-pack-checks.js. A failure throws. */
 const LEGACY = ['la', 'found']; // the only packs without the shared checks
-if (!LEGACY.includes(realm)) load(path.join(__dirname, 'pack-checks.js'));
+if (!LEGACY.includes(realm)) loadChecks(path.join(__dirname, 'pack-checks.js'));
 
 const { Gen, MISSION_GEN, ORACLE, QUESTS } = window;
 const bad = /NaN|undefined|Infinity|[=(,:·]\s*null\b|\[object|[+−]\s*-|(?<![A-Za-z])-\d|\d\.\d{5,}|[+−]\s*[+−]\d|\(\s*\)/;
@@ -47,6 +62,7 @@ const sameList = (a, b) => a.length === b.length && a.every((x, i) => close(x, b
 const texts = m => [m.prompt, ...m.hints, m.solution, ...m.guidance.flatMap(g => [g.prompt, g.explanation])];
 
 let failed = 0, checked = 0, withOracle = 0;
+const failedIds = new Set();
 const missing = [], noOracle = [];
 for (const q of QUESTS) {
   if (only.length && !only.includes(q.id)) continue;
@@ -96,9 +112,15 @@ for (const q of QUESTS) {
     else problems.push(`no oracle: add ORACLE.${q.id} to ${path.relative(path.resolve(__dirname, '..'), oracleDir) || '.'}/oracle-*.js`);
   } catch (error) { problems.push(error.message); }
   const uniqueNotes = [...new Set(notes)].slice(0, 6);
-  if (problems.length) { failed++; console.log(`FAIL ${q.id} ${q.topic}\n  - ${problems.join('\n  - ')}`); }
+  if (problems.length) { failed++; failedIds.add(q.id); console.log(`FAIL ${q.id} ${q.topic}\n  - ${problems.join('\n  - ')}`); }
   else console.log(`ok   ${q.id} ${q.topic}${ORACLE[q.id] ? ' [oracle agrees]' : ''}${uniqueNotes.length ? ` (${uniqueNotes.length} note${uniqueNotes.length > 1 ? 's' : ''})` : ''}`);
   if (uniqueNotes.length) console.log('  note: ' + uniqueNotes.join('\n  note: '));
+}
+/* Pack-check problems with ids given: those of the given ids fail; the rest (other missions, or the whole pack) are a note. */
+if (packProblems.length) {
+  const mine = packProblems.filter(p => only.includes(p.id)), others = packProblems.filter(p => !only.includes(p.id));
+  for (const id of [...new Set(mine.map(p => p.id))]) { if (!failedIds.has(id)) { failed++; failedIds.add(id); } console.log(`FAIL ${id} pack checks\n  - ${mine.filter(p => p.id === id).map(p => p.text + ' (' + p.file + ')').join('\n  - ')}`); }
+  if (others.length) { const ids = [...new Set(others.map(p => p.id || 'pack-wide'))]; console.log(`NOTE: pack checks also fail for missions not asked for here: ${ids.join(' ')} (run without ids to see them).`); }
 }
 const practiceCount = QUESTS.filter(q => q.parent && (!only.length || only.includes(q.id))).length;
 if (only.length && only.some(id => !QUESTS.some(q => q.id === id))) { console.log(`FAIL unknown mission id: ${only.filter(id => !QUESTS.some(q => q.id === id)).join(' ')}`); failed++; }

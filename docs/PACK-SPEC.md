@@ -22,6 +22,7 @@ Then run every check (§7) and commit the specs, the scaffolds, `packs.js`, `reg
 ```sh
 node qa/harness.js --realm <id>                              # after every change; unwritten missions are NOTEs
 node qa/generators.js --realm <id> --strict --draws 1000     # every written mission: generator, text, oracle, shared rules
+node qa/generators.js --realm <id> --strict --draws 1000 q07 q07b   # only your ids: other missions' pack-check failures are one NOTE
 node qa/glossary.test.js                                     # the pack's words are used where they are taught
 ```
 
@@ -137,7 +138,7 @@ window.VG_GLOSSARY_PACKS[<id>] = {
 };
 ```
 
-The row format and the rules are those of `game/glossary.js` (a one-sentence meaning of 20–190 characters ending with a full stop, an example of 8–150 characters, minus signs U+2212, `taught` a learn mission of the pack). `qa/glossary.test.js` checks every pack the same way it checks Calculus 1: a word whose `taught` mission is written must be used in that mission's text (lesson, prompt, hints, solution); every `required` word must be defined. A pack needs at least 40 words once all 40 learn missions are written; until then fewer is a NOTE. Add a word in the same change as the mission that teaches it, in that mission's file section.
+The row format and the rules are those of `game/glossary.js` (a one-sentence meaning of 20–190 characters ending with a full stop, an example of 8–150 characters, minus signs U+2212, `taught` a learn mission of the pack). `qa/glossary.test.js` checks every pack the same way it checks Calculus 1: a word whose `taught` mission is written must be used in that mission's text (lesson, prompt, hints, solution); every `required` word must be defined and the pack needs at least 40 words once all 40 learn missions are written; until then a missing required word, or fewer than 40, is a NOTE. Add a word in the same change as the mission that teaches it, in that mission's file section.
 
 ## 7. Checks while a pack fills up, and at the end
 
@@ -147,7 +148,7 @@ Every check finds the pack by itself through `qa/pack-list.js` (the packs of `ga
 |---|---|---|
 | `node qa/harness.js --realm <id>` | passes; unwritten learn and practice missions are NOTEs; with no mission at all it checks the configuration, chapters and ranks and says the play-throughs wait | everything; `--complete --complete-practice` at the very end |
 | `node qa/generators.js --realm <id> --strict --draws 1000` | every written mission, its oracle and the shared rules of `qa/pack-checks.js` | the same |
-| `qa/glossary.test.js` | the pack's words; under 40 words is a NOTE | at least 40 words |
+| `qa/glossary.test.js` | the pack's words; a missing required word or under 40 words is a NOTE | every required word, at least 40 words |
 | `qa/skip.test.js`, `qa/realm-collection.test.js`, `qa/daily.test.js` | NOTE: left out | the pack's chapters, skip-ahead check, collection payments and daily drills |
 | `qa/collection.test.js` | the pack's two achievements are in the list and can be earned | the same |
 | `qa/new-pack.test.js` | the pack's `VG_PACKS` entry is the standard one, its registry part has counts and achievement names | the same |
