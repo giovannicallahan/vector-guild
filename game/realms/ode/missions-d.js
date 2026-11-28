@@ -341,7 +341,7 @@ window.QUESTS.push(
   answer: [10,5,8.89], labels: ["x (hundreds)","y (tens)","period (months)"], tolerance: 0.005,
   hints: [
    "Factor each right-hand side: x(a − by) and y(−c + dx). The coexistence point has x and y both non-zero, so each bracket is 0.",
-   "At the coexistence point the Jacobian matrix has zeros on its diagonal, so its eigenvalues are ±iω with ω² equal to minus its determinant. Small swings then repeat every 2π ÷ ω."
+   "At the coexistence point the Jacobian matrix has zeros on its diagonal, so its eigenvalues are ±iω with ω² equal to its determinant. Small swings then repeat every 2π ÷ ω."
   ],
   solution: "x′ = x(1 − 0.2y) is 0 for y = 1 ÷ 0.2 = 5, and y′ = y(−0.5 + 0.05x) is 0 for x = 0.5 ÷ 0.05 = 10. So the coexistence point is (10, 5): 1000 insects and 50 birds. There the Jacobian matrix is [[0, −2], [0.25, 0]], with determinant 2 × 0.25 = 0.5. The eigenvalues are ±i√0.5, so the linearisation is a centre with ω = √0.5 ≈ 0.7071 per month, and the period is 2π ÷ ω ≈ 8.8858, which is 8.89 months to 2 decimal places.",
   xp: 200, prereqs: ["q37"],
@@ -424,7 +424,7 @@ window.QUESTS.push(
   id: "q40", title: "The dome’s last readings", topic: "Realm review and bridge to Waves", tier: 'Advanced', sector: "Ecology Dome",
   brief: "Before the outpost turns to its strings and air, the crew wants one last pair of readings from the dome: a harp string’s note and the bird count it hums over.",
   lesson: "The eigenvalues of a pinned string give its allowed frequencies, and the coexistence point gives the levels a predator–prey dome swings around.",
-  prompt: "Two last readings before the outpost moves on to Waves. A wind-harp string in the dome is 1.25 metres long and fixed at both ends; its shape X obeys X″ + λX = 0 with X(0) = 0 and X(1.25) = 0. In the Waves realm you will see why such a string swings with angular frequency ω = 90√λ rad/s, where 90 m/s is its wave speed. Enter its lowest allowed angular frequency, the fundamental frequency, in rad/s to 2 decimal places. Then the dome’s insects x (hundreds) and birds y (tens) follow x′ = 0.8x − 0.2xy and y′ = −0.6y + 0.05xy: enter y at the coexistence point.",
+  prompt: "Two last readings. A wind-harp string in the dome is 1.25 metres long and fixed at both ends; its shape X obeys X″ + λX = 0 with X(0) = 0 and X(1.25) = 0. Such a string swings with angular frequency ω = 90√λ rad/s, where 90 m/s is its wave speed (a rule from the physics of waves, not derived here; take it as given). Enter its lowest allowed angular frequency, the fundamental frequency, in rad/s to 2 decimal places. Then the dome’s insects x (hundreds) and birds y (tens) follow x′ = 0.8x − 0.2xy and y′ = −0.6y + 0.05xy: enter y at the coexistence point.",
   answer: [226.19,4], labels: ["ω (rad/s)","y (tens)"], tolerance: 0.005,
   hints: [
    "The allowed λ of the string are (kπ ÷ L)² for k = 1, 2, 3, …; the lowest frequency comes from k = 1.",
@@ -435,7 +435,7 @@ window.QUESTS.push(
   artifact: { name: "Wind-harp string", description: "A string pinned at both ends that only sings at certain notes." },
   sources: [source.s4_1, source.s8_3],
   teaching: {
-   intuition: "This mission joins two threads of the realm. A string fixed at both ends has a shape X with X″ + λX = 0 and X = 0 at both ends: the eigenvalue problem of the last mission, with allowed λ = (kπ ÷ L)². In the Waves realm you will meet the equation for a moving string and see that each allowed shape swings with angular frequency ω = c√λ, where c is the speed of waves along the string; take that rule as given here. The lowest allowed λ gives the lowest frequency, the fundamental frequency, ω = cπ ÷ L: a longer string sings lower. The second thread is the predator–prey dome: its coexistence point, where both populations hold steady, is found by setting each bracket of the factored equations to 0.",
+   intuition: "This mission joins two threads of the realm. A string fixed at both ends has a shape X with X″ + λX = 0 and X = 0 at both ends: the eigenvalue problem of the last mission, with allowed λ = (kπ ÷ L)². The physics of a moving string, which this realm does not derive, shows that each allowed shape swings with angular frequency ω = c√λ, where c is the speed of waves along the string; take that rule as given here. The lowest allowed λ gives the lowest frequency, the fundamental frequency, ω = cπ ÷ L: a longer string sings lower. The second thread is the predator–prey dome: its coexistence point, where both populations hold steady, is found by setting each bracket of the factored equations to 0.",
    steps: [
     "For the string, the lowest allowed λ is (π ÷ L)², so √λ = π ÷ L.",
     "Multiply by the wave speed: the fundamental frequency is ω = c × π ÷ L, in rad/s.",

@@ -390,13 +390,13 @@ window.QUESTS.push(
   id: "q29", title: "Flushing the linked tanks", topic: "Chapter review: two linked tanks", tier: "Intermediate", sector: "Control Room",
   brief: "Two linked brine tanks are being flushed with fresh water, and the crew wants to know how much salt is left in the first one a little later.",
   lesson: "Two linked tanks form a 2 × 2 system whose eigenvalues give the flushing rates, the shape of the phase portrait and, with the start, the salt at any time.",
-  prompt: "Two brine tanks in the Control Room are linked. Tank 1 holds 20 litres and tank 2 holds 20 litres, both well stirred. Fresh water flows into tank 1 at 30 L/min; 40 L/min flows from tank 1 into tank 2; 10 L/min flows back from tank 2 into tank 1, and tank 2 drains 30 L/min, so both volumes stay fixed. At t = 0 tank 1 holds 5 kg of salt and tank 2 holds 3 kg. Enter the two eigenvalues of the system’s matrix in increasing order, then the phase portrait code (1 node, 2 saddle, 3 spiral, 4 centre), then the salt in tank 1 in kg at t = ln 2 minutes, to 3 decimal places.",
-  answer: [-3,-1,1,1.844], labels: ["smaller eigenvalue","larger eigenvalue","portrait code","salt in tank 1 (kg)"], tolerance: 0.0005,
+  prompt: "Two brine tanks in the Control Room are linked. Tank 1 holds 20 litres and tank 2 holds 20 litres, both well stirred. Fresh water flows into tank 1 at 30 L/min; 40 L/min flows from tank 1 into tank 2; 10 L/min flows back from tank 2 into tank 1, and tank 2 drains 30 L/min, so both volumes stay fixed. At t = 0 tank 1 holds 5 kg of salt and tank 2 holds 3 kg. Enter the two eigenvalues of the system’s matrix in increasing order, then the salt in tank 1 in kg at t = ln 2 minutes, to 3 decimal places.",
+  answer: [-3,-1,1.844], labels: ["smaller eigenvalue","larger eigenvalue","salt in tank 1 (kg)"], tolerance: 0.0005,
   hints: [
    "Salt leaves a tank at (outflow rate) × (salt ÷ volume). So x₁′ = −(flow out of tank 1 ÷ V₁)x₁ + (flow back ÷ V₂)x₂, and x₂′ is built the same way.",
    "Write x₁(t) = pe^(λ₁t) + qe^(λ₂t). Then p + q = x₁(0) and λ₁p + λ₂q = x₁′(0), which the first equation gives at t = 0. At t = ln 2, e^(λt) = 2^λ."
   ],
-  solution: "x₁′ = −(40 ÷ 20)x₁ + (10 ÷ 20)x₂ = −2x₁ + 0.5x₂ and x₂′ = 2x₁ − 2x₂. The matrix has trace −4 and determinant 3, so λ² + 4λ + 3 = 0, with roots −3 and −1: real, both negative, so the portrait is a stable node (code 1). At t = 0, x₁′ = −2 × 5 + 0.5 × 3 = −8.5. With x₁(t) = pe^(−3t) + qe^(−t): p + q = 5 and −3p − q = −8.5, so p = 1.75 and q = 3.25. At t = ln 2, x₁ = 1.75 ÷ 8 + 3.25 ÷ 2 ≈ 1.844 kg.",
+  solution: "x₁′ = −(40 ÷ 20)x₁ + (10 ÷ 20)x₂ = −2x₁ + 0.5x₂ and x₂′ = 2x₁ − 2x₂. The matrix has trace −4 and determinant 3, so λ² + 4λ + 3 = 0, with roots −3 and −1: real, both negative, so the portrait is a stable node. At t = 0, x₁′ = −2 × 5 + 0.5 × 3 = −8.5. With x₁(t) = pe^(−3t) + qe^(−t): p + q = 5 and −3p − q = −8.5, so p = 1.75 and q = 3.25. At t = ln 2, x₁ = 1.75 ÷ 8 + 3.25 ÷ 2 ≈ 1.844 kg.",
   xp: 150, prereqs: ["q26","q28"],
   artifact: { name: "Tank flush schedule", description: "Two flushing rates and the salt left in the first tank at a chosen time." },
   sources: [source.s3_4, source.s3_5],
@@ -425,8 +425,7 @@ window.QUESTS.push(
   },
   guidance: [
    { prompt: "The matrix has trace −4 and determinant 3. What is the smaller eigenvalue?", answer: [-3], labels: ["smaller eigenvalue"], explanation: "λ² + 4λ + 3 = (λ + 3)(λ + 1), so the smaller root is −3." },
-   { prompt: "What is the larger eigenvalue?", answer: [-1], labels: ["larger eigenvalue"], explanation: "The other root is −1." },
-   { prompt: "Both eigenvalues are real and negative. Enter the code of the phase portrait.", answer: [1], labels: ["portrait code"], explanation: "Real eigenvalues of the same sign give a node; both negative, so every trajectory closes in on the origin: all the salt is flushed out." },
+   { prompt: "What is the larger eigenvalue?", answer: [-1], labels: ["larger eigenvalue"], explanation: "The other root is −1. Both are real and negative, so the portrait is a stable node: every trajectory closes in on the origin and all the salt is flushed out." },
    { prompt: "What is x₁′(0) = −2x₁ + 0.5x₂ at the start?", answer: [-8.5], labels: ["x₁′(0) (kg/min)"], explanation: "−2 × 5 + 0.5 × 3 = −8.5 kg/min." },
    { prompt: "With x₁(t) = pe^(−3t) + qe^(−t), p + q = 5 and −3p − q = −8.5. What is p?", answer: [1.75], labels: ["p"], explanation: "Subtracting −1 times the first equation from the second gives (−3 − (−1))p = −8.5 − (−1) × 5, so p = 1.75 and q = 3.25." },
    { prompt: "What is x₁ at t = ln 2, in kg to 3 decimal places?", answer: [1.844], labels: ["salt in tank 1 (kg)"], explanation: "x₁ = 1.75 ÷ 8 + 3.25 ÷ 2 ≈ 1.844 kg." }

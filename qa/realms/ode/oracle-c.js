@@ -110,8 +110,8 @@ Object.assign(window.ORACLE, {
       [10, 10, 30, 40, 10, 30], [10, 10, 40, 45, 5, 40], [10, 20, 25, 40, 15, 25], [10, 25, 30, 50, 20, 30],
       [20, 10, 25, 40, 15, 25], [20, 20, 30, 40, 10, 30], [20, 20, 32, 50, 18, 32], [25, 10, 30, 50, 20, 30]][p.i];
     const A = [[-r12 / V1, r21 / V2], [r12 / V1, -(r21 + out) / V2]];
-    const e = eigs(A), code = e.det < 0 ? 2 : e.disc >= 0 ? 1 : e.tr === 0 ? 4 : 3;
-    return [r9(e.re[0]), r9(e.re[1]), code, r3(expmApply(A, Math.LN2, [p.s1, p.s2])[0])];
+    const e = eigs(A);
+    return [r9(e.re[0]), r9(e.re[1]), r3(expmApply(A, Math.LN2, [p.s1, p.s2])[0])];
   },
   /* f(t) = al t^k + be e^(a t) + ga trig(b t). Transform: integrate e^(−st) f(t) from 0 to a large T by Simpson's
      rule. The largest growth rate is max(0, a) (the powers and trig terms grow no faster than 0, e^(at) like a),

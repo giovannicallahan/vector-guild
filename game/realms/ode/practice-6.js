@@ -347,9 +347,9 @@ mk({
  /* A set of TANKS29 with the roles turned round: the clean water enters trough 2 (volume V1 of the set) and trough 1 (volume V2 of the set)
     drains, so the answer is the salt in the drained tank. x₁ = p·e^(λ₁t) + q·e^(λ₂t), with p at most three decimals and the answer not near
     a rounding tie. The trace and determinant are those of the learn mission's tanks. */
- canonical: { i: 7, s1: 6, s2: 5 },
+ canonical: { i: 7, s1: 6, s2: 3 },
  draw: R => tryDraw(() => ({ i: R.int(0, TANKS29.length - 1), s1: R.int(2, 20), s2: R.int(0, 20) }),
-  p => { const t = tank29b(p); return exact3(t.p) && !edge(t.x1, 3); }, { i: 7, s1: 6, s2: 5 }),
+  p => { const t = tank29b(p); return exact3(t.p) && !edge(t.x1, 3); }, { i: 7, s1: 6, s2: 3 }),
  build: ({ i, s1, s2 }) => { const t = tank29b({ i, s1, s2 }), x1 = r3(t.x1), e1 = Math.pow(2, t.l1), e2 = Math.pow(2, t.l2); return {
   prompt: `Two hydroponic troughs in the Control Room are linked, and both are well stirred. Trough 1 holds ${n(t.VO)} litres and trough 2 holds ${n(t.VI)} litres. Clean water flows into trough 2 at ${n(t.f)} L/min; ${n(t.f + t.g)} L/min is pumped from trough 2 into trough 1; ${n(t.g)} L/min is pumped back from trough 1 into trough 2; and trough 1 drains ${n(t.f)} L/min, so both volumes stay fixed. At t = 0 trough 1 holds ${n(s1)} kg of dissolved nutrient and trough 2 holds ${n(s2)} kg. Enter the two eigenvalues of the system’s matrix in increasing order, then the nutrient in trough 1, in kg, at t = ln 2 minutes, to 3 decimal places.`,
   answer: [t.l1, t.l2, x1],
