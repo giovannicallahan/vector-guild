@@ -110,17 +110,18 @@ Object.assign(window.MISSION_GEN, {
    ] }; }
  },
  /* bt/2m has at most two decimals, the amplitude stays above 0.5 cm, A and f₀ round cleanly at 2 places, and the
-    damping is light enough that the damped frequency and f₀ agree at 2 places. Not the worked example. */
+    damping is light enough that the damped frequency, the driven peak √(k/m − b²/2m²) ÷ 2π and f₀ all agree at 2 places. Not the worked example. */
  q06: {
   canonical: { m: 2, b: 0.6, k: 50, A0: 8, t: 5 },
   draw: R => retry(() => ({ m: R.int(1, 10) / 2, b: R.int(1, 20) / 10, k: 10 * R.int(2, 40), A0: R.int(4, 20), t: R.int(2, 30) }), ({ m, b, k, A0, t }) => {
-   const e = b * t / (2 * m), A = A0 * Math.exp(-e), w0 = Math.sqrt(k / m), wd = Math.sqrt(w0 * w0 - (b / (2 * m)) * (b / (2 * m)));
-   return exactAt(e, 2) && A >= 0.5 && clear(A, 2) && clear(w0 / TAU, 2) && rd(wd / TAU, 2) === rd(w0 / TAU, 2) && !(m === 1 && b === 0.2 && k === 100); }, { m: 2, b: 0.6, k: 50, A0: 8, t: 5 }),
+   const e = b * t / (2 * m), A = A0 * Math.exp(-e), w0 = Math.sqrt(k / m), wd = Math.sqrt(w0 * w0 - (b / (2 * m)) * (b / (2 * m))),
+    wp = Math.sqrt(w0 * w0 - b * b / (2 * m * m));
+   return exactAt(e, 2) && A >= 0.5 && clear(A, 2) && clear(w0 / TAU, 2) && rd(wd / TAU, 2) === rd(w0 / TAU, 2) && rd(wp / TAU, 2) === rd(w0 / TAU, 2) && !(m === 1 && b === 0.2 && k === 100); }, { m: 2, b: 0.6, k: 50, A0: 8, t: 5 }),
   build: ({ m, b, k, A0, t }) => { const e = tid(b * t / (2 * m)), A = A0 * Math.exp(-e), w0 = Math.sqrt(k / m), f0 = w0 / TAU; return {
    prompt: `A ${n(m)} kg seismometer mass on a spring with k = ${n(k)} N/m is slowed by an oil damper with damping constant b = ${n(b)} kg/s. It is pulled ${n(A0)} cm from equilibrium and let go, and its amplitude shrinks as A(t) = A₀e^(−bt/2m), where A₀ is the starting amplitude. Enter the amplitude after ${n(t)} s, in cm to 2 decimal places. Then the ground shakes it at different frequencies. Enter, in hertz to 2 decimal places, the driving frequency that makes it swing hardest; the damping is light, so take that to be the natural frequency f₀ = √(k/m) ÷ 2π.`,
    answer: [rd(A, 2), rd(f0, 2)],
-   hints: ['Work out the number bt/2m first, with b in kg/s, t in seconds and m in kilograms; then multiply A₀ by e to the power of minus that number.', 'Resonance happens when the drive matches the natural frequency. Find ω₀ = √(k/m) in radians per second and divide by 2π to turn it into hertz.'],
-   solution: `bt/2m = ${n(b)} × ${n(t)} ÷ (2 × ${n(m)}) = ${n(e)}, so A = ${n(A0)}e^(−${n(e)}) ≈ ${fx(A, 2)} cm. The natural angular frequency is ω₀ = √(${n(k)} ÷ ${n(m)}) ${eq(w0, 4)} ${n(w0)} rad/s, so f₀ = ω₀ ÷ 2π ≈ ${fx(f0, 2)} Hz. Driving it at this frequency gives resonance, the largest swing.`,
+   hints: ['Work out the number bt/2m first, with b in kg/s, t in seconds and m in kilograms; then multiply A₀ by e to the power of minus that number.', 'With light damping, resonance happens when the drive is very close to the natural frequency. Find ω₀ = √(k/m) in radians per second and divide by 2π to turn it into hertz.'],
+   solution: `bt/2m = ${n(b)} × ${n(t)} ÷ (2 × ${n(m)}) = ${n(e)}, so A = ${n(A0)}e^(−${n(e)}) ≈ ${fx(A, 2)} cm. The natural angular frequency is ω₀ = √(${n(k)} ÷ ${n(m)}) ${eq(w0, 4)} ${n(w0)} rad/s, so f₀ = ω₀ ÷ 2π ≈ ${fx(f0, 2)} Hz. Driving it at about this frequency gives resonance, the largest swing: with damping the peak sits a shade below f₀, but here the two agree to 2 decimal places.`,
    guidance: [
     { prompt: `What is the number bt/2m after ${n(t)} s?`, answer: [e], explanation: `${n(b)} × ${n(t)} ÷ (2 × ${n(m)}) = ${n(e)}. It has no unit: kg/s times s divided by kg.` },
     { prompt: `What is the amplitude A₀e^(−bt/2m) after ${n(t)} s, in cm to 2 decimal places?`, answer: [rd(A, 2)], explanation: `e^(−${n(e)}) ≈ ${fx(Math.exp(-e), 4)}, and ${n(A0)} × ${fx(Math.exp(-e), 4)} ≈ ${fx(A, 2)} cm.` },

@@ -202,7 +202,7 @@ Object.assign(window.MISSION_GEN, {
    p => { const m = m19(p); return m.fa < 1000 && !edge(m.fa, 1) && !edge(m.fl, 1) && !(p.fs === 500 && p.vs === 30) && !same(p, { fs: 600, vs: 20 }); },
    { fs: 600, vs: 20 }),
   build: p => { const { fs, vs } = p, { fa, fl } = m19(p); return {
-   prompt: `A rover drives along the track at ${n(vs)} m/s with its siren sounding at ${n(fs)} Hz. Mira stands still beside the track, and sound travels at 343 m/s. Enter the frequency she hears while the rover comes towards her, then the frequency she hears after it has passed and is moving away, both in Hz to 1 decimal place.`,
+   prompt: `A rover drives along the track at ${n(vs)} m/s with its siren sounding at ${n(fs)} Hz. Mira stands still right at the edge of the track, so close to it that the rover’s motion counts as straight towards her and then straight away from her, and sound travels at 343 m/s. Enter the frequency she hears while the rover comes towards her, then the frequency she hears after it has passed and is moving away, both in Hz to 1 decimal place.`,
    answer: [rd(fa, 1), rd(fl, 1)],
    hints: ['For a moving source and a listener standing still, the heard frequency is f_o = f_s × v ÷ (v ∓ v_s): use v − v_s while the source comes towards the listener, and v + v_s while it moves away.', 'Coming towards her, the waves are squeezed together, so the note is higher than the siren’s own; moving away, it is lower. Check your two answers against that.'],
    solution: `Coming towards her: f_o = ${n(fs)} × 343 ÷ (343 − ${n(vs)}) = ${n(fs)} × 343 ÷ ${n(V - vs)} ≈ ${fx(fa, 1)} Hz. Moving away: f_o = ${n(fs)} × 343 ÷ (343 + ${n(vs)}) = ${n(fs)} × 343 ÷ ${n(V + vs)} ≈ ${fx(fl, 1)} Hz.`,

@@ -37,6 +37,10 @@ const places = dp => `${dp} decimal place${dp === 1 ? '' : 's'}`;
 const say = (x, dp, u = '') => exact(x, dp) ? `= ${n(rd(x, dp))}${u}` : dp >= 4 ? `≈ ${n(x)}${u}` : `≈ ${n(x)}${u}, which is ${fx(x, dp)}${u} to ${places(dp)}`;
 /* "≈ 0.6660" for a value used unrounded, "= 0.24" when it is exact at four places. */
 const eq4 = x => exact(x, 4) ? `= ${n(x)}` : `≈ ${n(x)}`;
+/* arcsin of a sine shown to 4 places: name the rounded sine only when its arcsin gives the same angle at 4 places, so a
+   player who keys in the shown value gets the shown angle; otherwise point to the unrounded sine. */
+const arc = s => exact(s, 4) || rd(Math.asin(rd(s, 4)), 4) === rd(Math.asin(s), 4) ? `arcsin(${n(s)})` : 'arcsin of the unrounded sine';
+const ofIt = s => exact(s, 4) || rd(Math.asin(rd(s, 4)), 4) === rd(Math.asin(s), 4) ? 'arcsin of it' : 'arcsin of the unrounded sine';
 const tid = x => Math.round(x * 1e9) / 1e9;
 /* "1 wavelength", "2.5 wavelengths". */
 const wl = w => `${n(w)} wavelength${w === 1 ? '' : 's'}`;
@@ -67,10 +71,10 @@ mk({
   prompt: `Before sunrise the air at the Rover Track is cold, so sound travels at only ${n(c)} m/s. A rocket sled on the long rail beside the track slides at a steady ${n(vs)} m/s, faster than sound. Enter the sled’s Mach number (a pure number, no unit) to 2 decimal places, then the half-angle of its shock cone in radians to 3 decimal places. Use the unrounded Mach number for the angle.`,
   answer: [rd(M, 2), rd(th, 3)],
   hints: ['The Mach number compares the sled’s speed with the speed of sound in the air it is moving through today: divide the first by the second.', 'For the cone, sin θ is the speed of sound divided by the speed of the source. Take arcsin with the calculator set to radians.'],
-  solution: `Today sound travels at ${n(c)} m/s, so M = ${n(vs)} ÷ ${n(c)} ${say(M, 2)}. The cone’s half-angle θ has sin θ = ${n(c)} ÷ ${n(vs)} ${eq4(s)}, so θ = arcsin(${n(s)}) ${say(th, 3, ' radians')}.`,
+  solution: `Today sound travels at ${n(c)} m/s, so M = ${n(vs)} ÷ ${n(c)} ${say(M, 2)}. The cone’s half-angle θ has sin θ = ${n(c)} ÷ ${n(vs)} ${eq4(s)}, so θ = ${arc(s)} ${say(th, 3, ' radians')}.`,
   guidance: [
    { prompt: `The sled moves at ${n(vs)} m/s and sound at ${n(c)} m/s. What is the Mach number, to 2 decimal places?`, answer: [rd(M, 2)], explanation: `M = ${n(vs)} ÷ ${n(c)} ${say(M, 2)}. It is more than 1, so the sled is supersonic.` },
-   { prompt: `Now sin θ = ${n(c)} ÷ ${n(vs)}. With the calculator set to radians, what is the half-angle θ, to 3 decimal places?`, answer: [rd(th, 3)], explanation: `sin θ ${eq4(s)}, so θ = arcsin(${n(s)}) ${say(th, 3, ' radians')}.` }
+   { prompt: `Now sin θ = ${n(c)} ÷ ${n(vs)}. With the calculator set to radians, what is the half-angle θ, to 3 decimal places?`, answer: [rd(th, 3)], explanation: `sin θ ${eq4(s)}, so θ = ${arc(s)} ${say(th, 3, ' radians')}.` }
   ] }; }
 });
 
@@ -110,11 +114,11 @@ mk({
   prompt: `A scout drone flies straight towards a listener standing at rest beside the Rover Track, sounding a steady siren whose own frequency is ${n(fs)} Hz. She hears ${n(fh)} Hz. Sound travels at v = 343 m/s, there is no wind, and the drone is slower than sound. A source moving at speed v_s straight towards a still listener is heard at f = f_s × v ÷ (v − v_s), where f_s is its own frequency. Then its booster fires and, on the same straight line, it flies ${n(k)} times as fast as before. Enter its speed before the boost in m/s to 1 decimal place, then its Mach number after the boost to 2 decimal places, then the half-angle of its shock cone after the boost in radians to 3 decimal places. Use unrounded values from one step to the next.`,
   answer: [rd(v1, 1), rd(M, 2), rd(th, 3)],
   hints: ['For a source coming towards a listener at rest, f_heard = f_s × v ÷ (v − v_s). Rearrange it to find v_s.', 'After the boost the speed is the multiple times the old speed. Divide by 343 for the Mach number, and use sin θ = 1 ÷ M with arcsin in radians for the cone.'],
-  solution: `Before the boost, ${n(fh)} = ${n(fs)} × 343 ÷ (343 − v_s), so v_s = 343 × (1 − ${n(fs)} ÷ ${n(fh)}) ${say(v1, 1, ' m/s')}. After the boost the speed is ${n(k)} × ${n(v1)} ${eq4(v2)} m/s, so M = ${n(v2)} ÷ 343 ${say(M, 2)}. The cone has sin θ = 1 ÷ M ${eq4(s)}, so θ = arcsin(${n(s)}) ${say(th, 3, ' radians')}.`,
+  solution: `Before the boost, ${n(fh)} = ${n(fs)} × 343 ÷ (343 − v_s), so v_s = 343 × (1 − ${n(fs)} ÷ ${n(fh)}) ${say(v1, 1, ' m/s')}. After the boost the speed is ${n(k)} × ${n(v1)} ${eq4(v2)} m/s, so M = ${n(v2)} ÷ 343 ${say(M, 2)}. The cone has sin θ = 1 ÷ M ${eq4(s)}, so θ = ${arc(s)} ${say(th, 3, ' radians')}.`,
   guidance: [
    { prompt: `She hears ${n(fh)} Hz from a ${n(fs)} Hz siren coming towards her. Use v_s = 343 × (1 − f_s ÷ f_heard). What is the drone’s speed before the boost in m/s, to 1 decimal place?`, answer: [rd(v1, 1)], explanation: `v_s = 343 × (1 − ${n(fs)} ÷ ${n(fh)}) ${say(v1, 1, ' m/s')}.` },
    { prompt: `After the boost the speed is ${n(k)} times the unrounded old speed. What is the Mach number, to 2 decimal places?`, answer: [rd(M, 2)], explanation: `The new speed is ${n(k)} × ${n(v1)} ${eq4(v2)} m/s, and M = ${n(v2)} ÷ 343 ${say(M, 2)}.` },
-   { prompt: 'For the cone sin θ = 1 ÷ M. Take arcsin of the unrounded value with the calculator in radians. What is the half-angle θ in radians, to 3 decimal places?', answer: [rd(th, 3)], explanation: `sin θ ${eq4(s)}, so θ = arcsin(${n(s)}) ${say(th, 3, ' radians')}.` }
+   { prompt: 'For the cone sin θ = 1 ÷ M. Take arcsin of the unrounded value with the calculator in radians. What is the half-angle θ in radians, to 3 decimal places?', answer: [rd(th, 3)], explanation: `sin θ ${eq4(s)}, so θ = ${arc(s)} ${say(th, 3, ' radians')}.` }
   ] }; }
 });
 
@@ -135,7 +139,7 @@ mk({
   prompt: `Two loudspeakers, P and Q, stand either side of the finish gate of the Rover Track. One signal generator drives both, so they play the same ${n(f)} Hz tone in phase. Sound travels at 343 m/s. A photographer stands ${n(P)} m from P and ${n(Q)} m from Q. Enter the wavelength of the tone in metres, then the path difference in metres (the longer distance minus the shorter), then 1 if her spot is loud (the two waves reinforce) or 0 if it is quiet (they cancel).`,
   answer: [lam, dr, loud],
   hints: ['The wavelength comes from v = fλ. The path difference is the longer distance minus the shorter one, whichever speaker that is.', 'Divide the path difference by the wavelength. A whole number of wavelengths means loud; a whole number and a half means quiet.'],
-  solution: `λ = 343 ÷ ${n(f)} = ${n(lam)} m. The path difference is ${n(far)} − ${n(near)} = ${n(dr)} m, which is ${n(dr)} ÷ ${n(lam)} = ${wl(w)}. ${loud ? 'That is a whole number of wavelengths, so crest meets crest: a loud spot (1).' : 'That is a whole number and a half of wavelengths, so crest meets trough and the waves cancel: a quiet spot (0).'}`,
+  solution: `λ = 343 ÷ ${n(f)} = ${n(lam)} m. The path difference is ${n(far)} − ${n(near)} = ${n(dr)} m, which is ${n(dr)} ÷ ${n(lam)} = ${wl(w)}. ${loud ? 'That is a whole number of wavelengths, so crest meets crest: a loud spot (1).' : 'That is a whole number and a half of wavelengths, so crest meets trough and the waves largely cancel (completely only if they arrive equally strong): a quiet spot (0).'}`,
   guidance: [
    { prompt: `What is the wavelength of a ${n(f)} Hz tone when sound travels at 343 m/s, in metres?`, answer: [lam], explanation: `λ = v ÷ f = 343 ÷ ${n(f)} = ${n(lam)} m.` },
    { prompt: `The photographer is ${n(P)} m from P and ${n(Q)} m from Q. What is the path difference, in metres?`, answer: [dr], explanation: `${n(far)} − ${n(near)} = ${n(dr)} m.` },
@@ -153,10 +157,10 @@ mk({
  canonical: { f: 490, r1: 3.2, m: 2 },
  draw: R => ({ f: R.pick(TONES), r1: R.int(200, 700) / 100, m: R.int(0, 5) }),
  build: ({ f, r1, m }) => { const w = m + 0.5, lam = tid(V / f), dr = tid(w * lam), r2 = tid(r1 + dr); return {
-  prompt: `Two speakers, A and B, at the start line of the Rover Track play the same ${n(f)} Hz tone in phase from one signal generator. Sound travels at 343 m/s. A technician wants to put a microphone at a spot ${n(r1)} m from A where the two sounds cancel, with B the farther speaker and the path difference exactly ${wl(w)}. Enter the wavelength of the tone in metres, then the path difference in metres, then how far the spot is from B in metres. All three come out exact, with at most 3 decimal places.`,
+  prompt: `Two speakers, A and B, at the start line of the Rover Track play the same ${n(f)} Hz tone in phase from one signal generator. Sound travels at 343 m/s. A technician wants to put a microphone at a spot ${n(r1)} m from A where the two sounds largely cancel, with B the farther speaker and the path difference exactly ${wl(w)}. Enter the wavelength of the tone in metres, then the path difference in metres, then how far the spot is from B in metres. All three come out exact, with at most 3 decimal places.`,
   answer: [lam, dr, r2],
   hints: ['The wavelength comes from v = fλ, and the path difference is the number of wavelengths times one wavelength.', 'The path difference is the farther distance minus the nearer one, so B’s distance is A’s distance plus the path difference.'],
-  solution: `λ = 343 ÷ ${n(f)} = ${n(lam)} m. The path difference is ${n(w)} × ${n(lam)} = ${n(dr)} m: a whole number and a half of wavelengths, so crest meets trough and the sound cancels. B is the farther speaker, so its distance is ${n(r1)} + ${n(dr)} = ${n(r2)} m.`,
+  solution: `λ = 343 ÷ ${n(f)} = ${n(lam)} m. The path difference is ${n(w)} × ${n(lam)} = ${n(dr)} m: a whole number and a half of wavelengths, so crest meets trough and the sound largely cancels (completely only if the two arrive equally strong). B is the farther speaker, so its distance is ${n(r1)} + ${n(dr)} = ${n(r2)} m.`,
   guidance: [
    { prompt: `What is the wavelength of a ${n(f)} Hz tone when sound travels at 343 m/s, in metres?`, answer: [lam], explanation: `λ = v ÷ f = 343 ÷ ${n(f)} = ${n(lam)} m.` },
    { prompt: `What is a path difference of ${wl(w)}, in metres?`, answer: [dr], explanation: `${n(w)} × ${n(lam)} = ${n(dr)} m.` },
@@ -200,7 +204,7 @@ mk({
  draw: R => guard(() => { const fr = R.int(300, 900); return { fr, fa: fr + R.int(10, 250) }; },
   ({ fa, fr }) => { const vs = vsOf(fa, fr), fs = fsOf(fa, fr); return vs >= 8 && vs <= 60 && !(fa === 560 && fr === 480) && !(fa === 440 && fr === 360) && ok(vs, 1) && ok(fs, 1) && ok(fs - fr, 1); }, { fa: 720, fr: 640 }),
  build: ({ fa, fr }) => { const S = fa + fr, D = fa - fr, vs = V * D / S, fs = fa * (V - vs) / V, beat = fs - fr; return {
-  prompt: `A patrol drone flies straight and level past the microphone mast at a steady speed, sounding a tone of fixed pitch. The mast is at rest and hears ${n(fa)} Hz while the drone comes towards it and ${n(fr)} Hz after the drone has passed. Sound travels at 343 m/s and there is no wind. Enter the drone’s speed in m/s, then the frequency of its own tone in Hz, then the beat frequency in Hz between the receding drone’s tone and a reference tone at the mast set to the drone’s own frequency. Give all three to 1 decimal place, using unrounded values from one step to the next.`,
+  prompt: `A patrol drone flies straight and level past the microphone mast at a steady speed, sounding a tone of fixed pitch. It passes so close to the mast that its motion counts as straight towards the mast and then straight away from it. The mast is at rest and hears ${n(fa)} Hz while the drone comes towards it and ${n(fr)} Hz after the drone has passed. Sound travels at 343 m/s and there is no wind. Enter the drone’s speed in m/s, then the frequency of its own tone in Hz, then the beat frequency in Hz between the receding drone’s tone and a reference tone at the mast set to the drone’s own frequency. Give all three to 1 decimal place, using unrounded values from one step to the next.`,
   answer: [rd(vs, 1), rd(fs, 1), rd(beat, 1)],
   hints: ['Use f_heard = f_s × v ÷ (v − v_s) while the drone approaches and f_s × v ÷ (v + v_s) while it recedes. Divide one equation by the other so that f_s cancels, then solve for v_s.', 'Put v_s back into one of the equations to get f_s. The beat frequency is the difference between the two tones that sound together: the reference tone and the receding tone.'],
   solution: `Dividing the two equations cancels f_s: ${n(fa)} ÷ ${n(fr)} = (343 + v_s) ÷ (343 − v_s), so v_s = 343 × (${n(fa)} − ${n(fr)}) ÷ (${n(fa)} + ${n(fr)}) = 343 × ${n(D)} ÷ ${n(S)} ${say(vs, 1, ' m/s')}. Then f_s = ${n(fa)} × (343 − ${n(vs)}) ÷ 343 ${say(fs, 1, ' Hz')}. The reference tone and the receding tone beat at ${n(fs)} − ${n(fr)} ${say(beat, 1, ' Hz')}.`,
@@ -244,7 +248,7 @@ mk({
  draw: R => guard(() => { const fr = R.int(300, 900); return { T: R.int(-20, 30), fr, fa: fr + R.int(10, 250) }; },
   ({ T, fa, fr }) => { const vs = speedT(T) * (fa - fr) / (fa + fr); return vs >= 5 && vs <= 60 && ok(speedT(T), 2) && ok(vs, 1) && ok(fsOf(fa, fr), 1); }, { T: -10, fa: 610, fr: 530 }),
  build: ({ T, fa, fr }) => { const q = 1 + T / 273, v = speedT(T), S = fa + fr, D = fa - fr, vs = v * D / S, fs = fa * (v - vs) / v; return {
-  prompt: `The air at the Rover Track is at ${n(T)} °C, and in air at T_C degrees Celsius sound travels at v = 331 √(1 + T_C ÷ 273) m/s. A rover drives straight past the siren tower at a steady speed. A listener standing still at the tower hears ${n(fa)} Hz while it approaches and ${n(fr)} Hz after it has passed, and there is no wind. Enter the speed of sound in m/s to 2 decimal places, then the rover’s speed in m/s to 1 decimal place, then the siren’s own frequency in Hz to 1 decimal place. Use unrounded values from one step to the next.`,
+  prompt: `The air at the Rover Track is at ${n(T)} °C, and in air at T_C degrees Celsius sound travels at v = 331 √(1 + T_C ÷ 273) m/s. A rover drives past the siren tower at a steady speed. The tower stands right at the edge of the track, so close to it that the rover’s motion counts as straight towards the tower and then straight away from it. A listener standing still at the tower hears ${n(fa)} Hz while it approaches and ${n(fr)} Hz after it has passed, and there is no wind. Enter the speed of sound in m/s to 2 decimal places, then the rover’s speed in m/s to 1 decimal place, then the siren’s own frequency in Hz to 1 decimal place. Use unrounded values from one step to the next.`,
   answer: [rd(v, 2), rd(vs, 1), rd(fs, 1)],
   hints: ['Put the temperature into v = 331 √(1 + T_C ÷ 273); a temperature below 0 °C makes the fraction negative.', 'Dividing the approaching Doppler equation by the receding one cancels f_s and gives v_s = v × (f_towards − f_away) ÷ (f_towards + f_away), with the speed of sound you found, not 343. Then f_s = f_towards × (v − v_s) ÷ v.'],
   solution: `${tq(T)} ${eq4(q)}, so v = 331 × √${n(q)} ${say(v, 2, ' m/s')}. The rover’s speed is v_s = ${n(v)} × (${n(fa)} − ${n(fr)}) ÷ (${n(fa)} + ${n(fr)}) = ${n(v)} × ${n(D)} ÷ ${n(S)} ${say(vs, 1, ' m/s')}. Then f_s = ${n(fa)} × (${n(v)} − ${n(vs)}) ÷ ${n(v)} ${say(fs, 1, ' Hz')}.`,
@@ -271,10 +275,10 @@ mk({
   prompt: `A technician in the Lens Workshop times light crossing a sample of an unlabelled clear material and finds that it travels at ${fx(v, 2)} × 10⁸ m/s. Take c = 3.00 × 10⁸ m/s. Enter the material’s index of refraction (no unit) to 3 decimal places. Then enter the wavelength, in nanometres to 1 decimal place, that a beam of ${n(lam)} nm in a vacuum has inside the sample. Use the unrounded index of refraction for the wavelength.`,
   answer: [rd(nn, 3), rd(li, 1)],
   hints: ['The index of refraction compares the speed of light in a vacuum with its speed in the material: n = c ÷ v. In units of 10⁸ m/s, c is 3.00.', 'The frequency stays the same when light enters the sample, so the wavelength shrinks by the same factor as the speed: λ inside = λ in a vacuum ÷ n.'],
-  solution: `n = c ÷ v = 3.00 ÷ ${fx(v, 2)} ${say(nn, 3)}. Inside the sample the wavelength is ${n(lam)} ÷ ${n(nn)} ${say(li, 1, ' nm')}.`,
+  solution: `n = c ÷ v = 3.00 ÷ ${fx(v, 2)} ${say(nn, 3)}. Inside the sample the wavelength is ${n(lam)} ÷ n = ${n(lam)} × ${fx(v, 2)} ÷ 3.00 ${say(li, 1, ' nm')}.`,
   guidance: [
    { prompt: `Divide the speed of light in a vacuum, 3.00 in units of 10⁸ m/s, by the speed in the sample, ${fx(v, 2)}. What is the index of refraction, to 3 decimal places?`, answer: [rd(nn, 3)], explanation: `n = 3.00 ÷ ${fx(v, 2)} ${say(nn, 3)}. It is more than 1, as it must be for a material.` },
-   { prompt: `Divide the vacuum wavelength, ${n(lam)} nm, by the unrounded index of refraction. What is the wavelength inside the sample, in nanometres to 1 decimal place?`, answer: [rd(li, 1)], explanation: `λ inside = ${n(lam)} ÷ ${n(nn)} ${say(li, 1, ' nm')}, shorter than in a vacuum.` }
+   { prompt: `Divide the vacuum wavelength, ${n(lam)} nm, by the unrounded index of refraction. What is the wavelength inside the sample, in nanometres to 1 decimal place?`, answer: [rd(li, 1)], explanation: `λ inside = ${n(lam)} ÷ n = ${n(lam)} × ${fx(v, 2)} ÷ 3.00 ${say(li, 1, ' nm')}, shorter than in a vacuum.` }
   ] }; }
 });
 
@@ -339,10 +343,10 @@ mk({
   prompt: `A laser on the alignment bench in the Lens Workshop is aimed from ${A} (index of refraction ${idx(n1)}) at a flat slab of ${B} (index ${idx(n2)}). The beam makes an angle of ${rads(a)} with the surface of the slab itself, not with the normal. Enter the angle of incidence, measured from the normal, in radians to 3 decimal places. Then enter the angle of the refracted beam from the normal, in radians to 3 decimal places, using the unrounded angle of incidence.`,
   answer: [rd(t1, 3), rd(t2, 3)],
   hints: ['The normal is at right angles to the surface, π/2 radians away from it, so an angle measured from the surface is π/2 minus an angle measured from the normal.', 'Snell’s law: n₁ sin θ₁ = n₂ sin θ₂, with both angles measured from the normal. Find sin θ₂, then take arcsin with the calculator set to radians.'],
-  solution: `The angle from the normal is π/2 − ${n(a)} ${say(t1, 3, ' rad')}. By Snell’s law, sin θ₂ = ${idx(n1)} × sin ${n(t1)} ÷ ${idx(n2)} = ${idx(n1)} × ${n(st)} ÷ ${idx(n2)} ${eq4(s)}, so θ₂ = arcsin(${n(s)}) ${say(t2, 3, ' rad')}. ${n2 > n1 ? 'The ray bends towards the normal, as it enters a larger index of refraction.' : 'The ray bends away from the normal, as it enters a smaller index of refraction.'}`,
+  solution: `The angle from the normal is π/2 − ${n(a)} ${say(t1, 3, ' rad')}. By Snell’s law, sin θ₂ = ${idx(n1)} × sin ${n(t1)} ÷ ${idx(n2)} = ${idx(n1)} × ${n(st)} ÷ ${idx(n2)} ${eq4(s)}, so θ₂ = ${arc(s)} ${say(t2, 3, ' rad')}. ${n2 > n1 ? 'The ray bends towards the normal, as it enters a larger index of refraction.' : 'The ray bends away from the normal, as it enters a smaller index of refraction.'}`,
   guidance: [
    { prompt: `The beam is ${n(a)} rad from the surface, and the normal is π/2 ≈ 1.5708 rad from the surface. What is the angle of incidence from the normal, in radians to 3 decimal places?`, answer: [rd(t1, 3)], explanation: `θ₁ = π/2 − ${n(a)} ${say(t1, 3, ' rad')}.` },
-   { prompt: `By Snell’s law sin θ₂ = ${idx(n1)} × sin θ₁ ÷ ${idx(n2)}, with the unrounded θ₁. What is the refracted angle θ₂ in radians, to 3 decimal places?`, answer: [rd(t2, 3)], explanation: `sin θ₁ ≈ ${n(st)} (radians), so sin θ₂ = ${idx(n1)} × ${n(st)} ÷ ${idx(n2)} ${eq4(s)} and θ₂ = arcsin(${n(s)}) ${say(t2, 3, ' rad')}.` }
+   { prompt: `By Snell’s law sin θ₂ = ${idx(n1)} × sin θ₁ ÷ ${idx(n2)}, with the unrounded θ₁. What is the refracted angle θ₂ in radians, to 3 decimal places?`, answer: [rd(t2, 3)], explanation: `sin θ₁ ≈ ${n(st)} (radians), so sin θ₂ = ${idx(n1)} × ${n(st)} ÷ ${idx(n2)} ${eq4(s)} and θ₂ = ${arc(s)} ${say(t2, 3, ' rad')}.` }
   ] }; }
 });
 
@@ -361,10 +365,10 @@ mk({
   prompt: `A test beam in the Lens Workshop travels through air (index of refraction 1.00) and meets a thin flat sheet of ${A} (index ${n(n2)}) that lies on a flat block of ${B} (index ${n(n3)}). The surfaces are parallel, so the angle the ray makes with the normal inside the sheet is the same when it reaches the lower surface. The beam meets the top of the sheet at ${rads(a)} from the normal. Enter the angle from the normal inside the sheet, then the angle from the normal inside the block, both in radians to 3 decimal places. Then enter, in radians to 3 decimal places, how far the ray’s angle from the normal in the block differs from its angle in the air (a positive number). Use unrounded values from one step to the next.`,
   answer: [rd(t2, 3), rd(t3, 3), rd(turn, 3)],
   hints: ['Apply Snell’s law twice: first from the air into the sheet, then from the sheet into the block, using the angle you found for the sheet as the angle of incidence at the block.', 'Each time, n₁ sin θ₁ = n₂ sin θ₂ with angles from the normal, and arcsin with the calculator set to radians gives the angle back. The last answer is the difference of two angles, taken as positive.'],
-  solution: `Air into the ${A}: sin θ₂ = 1.00 × sin ${n(a)} ÷ ${n(n2)} = ${n(sa)} ÷ ${n(n2)} ${eq4(s2)}, so θ₂ = arcsin(${n(s2)}) ${say(t2, 3, ' rad')}. The ${A} into the ${B}: sin θ₃ = ${n(n2)} × ${n(s2)} ÷ ${n(n3)} ${eq4(s3)}, so θ₃ = arcsin(${n(s3)}) ${say(t3, 3, ' rad')}. The ray’s angle from the normal changed from ${n(a)} rad to ${n(t3)} rad, a difference of ${say(turn, 3, ' rad')}.`,
+  solution: `Air into the ${A}: sin θ₂ = 1.00 × sin ${n(a)} ÷ ${n(n2)} = ${n(sa)} ÷ ${n(n2)} ${eq4(s2)}, so θ₂ = ${arc(s2)} ${say(t2, 3, ' rad')}. The ${A} into the ${B}: sin θ₃ = ${n(n2)} × ${n(s2)} ÷ ${n(n3)} ${eq4(s3)}, so θ₃ = ${arc(s3)} ${say(t3, 3, ' rad')}. The ray’s angle from the normal changed from ${n(a)} rad to ${n(t3)} rad, a difference of ${say(turn, 3, ' rad')}.`,
   guidance: [
-   { prompt: `By Snell’s law sin θ₂ = 1.00 × sin ${n(a)} ÷ ${n(n2)}. What is the angle inside the sheet, θ₂, in radians to 3 decimal places?`, answer: [rd(t2, 3)], explanation: `sin ${n(a)} ≈ ${n(sa)}, so sin θ₂ ${eq4(s2)} and θ₂ = arcsin(${n(s2)}) ${say(t2, 3, ' rad')}.` },
-   { prompt: `At the lower surface sin θ₃ = ${n(n2)} × sin θ₂ ÷ ${n(n3)}, using the unrounded θ₂. What is the angle inside the block, θ₃, in radians to 3 decimal places?`, answer: [rd(t3, 3)], explanation: `sin θ₃ = ${n(n2)} × ${n(s2)} ÷ ${n(n3)} ${eq4(s3)}, so θ₃ = arcsin(${n(s3)}) ${say(t3, 3, ' rad')}.` },
+   { prompt: `By Snell’s law sin θ₂ = 1.00 × sin ${n(a)} ÷ ${n(n2)}. What is the angle inside the sheet, θ₂, in radians to 3 decimal places?`, answer: [rd(t2, 3)], explanation: `sin ${n(a)} ≈ ${n(sa)}, so sin θ₂ ${eq4(s2)} and θ₂ = ${arc(s2)} ${say(t2, 3, ' rad')}.` },
+   { prompt: `At the lower surface sin θ₃ = ${n(n2)} × sin θ₂ ÷ ${n(n3)}, using the unrounded θ₂. What is the angle inside the block, θ₃, in radians to 3 decimal places?`, answer: [rd(t3, 3)], explanation: `sin θ₃ = ${n(n2)} × ${n(s2)} ÷ ${n(n3)} ${eq4(s3)}, so θ₃ = ${arc(s3)} ${say(t3, 3, ' rad')}.` },
    { prompt: `The ray was ${n(a)} rad from the normal in the air. How far is that from its unrounded angle θ₃ in the block, as a positive number of radians to 3 decimal places?`, answer: [rd(turn, 3)], explanation: `|${n(t3)} − ${n(a)}| ${say(turn, 3, ' rad')}.` }
   ] }; }
 });
@@ -383,11 +387,11 @@ mk({
   prompt: `A fuel-quality sensor in the Lens Workshop shines a beam of vacuum wavelength ${n(lam)} nm from air (index of refraction 1.00) into a clear fuel, meeting its flat surface at ${rads(a)} from the normal. A timing test shows that light crosses the fuel at ${fx(v, 2)} × 10⁸ m/s. Take c = 3.00 × 10⁸ m/s; the index of refraction is n = c ÷ v, and inside the fuel the wavelength is the vacuum wavelength divided by n. Enter the fuel’s index of refraction to 3 decimal places, then the angle of the refracted beam from the normal in radians to 3 decimal places, then the wavelength of the light inside the fuel in nanometres to 1 decimal place. Use the unrounded index of refraction in the later steps.`,
   answer: [rd(nn, 3), rd(t2, 3), rd(li, 1)],
   hints: ['The index of refraction is n = c ÷ v, which in units of 10⁸ m/s is 3.00 ÷ v.', 'Snell’s law with air as the first material gives sin θ₂ = sin θ₁ ÷ n; use arcsin in radians. The wavelength inside is the vacuum wavelength divided by n.'],
-  solution: `n = 3.00 ÷ ${fx(v, 2)} ${say(nn, 3)}. By Snell’s law, sin θ₂ = 1.00 × sin ${n(a)} ÷ ${n(nn)} = ${n(sa)} ÷ ${n(nn)} ${eq4(s)}, so θ₂ = arcsin(${n(s)}) ${say(t2, 3, ' rad')}. Inside the fuel the wavelength is ${n(lam)} ÷ ${n(nn)} ${say(li, 1, ' nm')}.`,
+  solution: `n = 3.00 ÷ ${fx(v, 2)} ${say(nn, 3)}. By Snell’s law, sin θ₂ = 1.00 × sin ${n(a)} ÷ ${n(nn)} = ${n(sa)} ÷ ${n(nn)} ${eq4(s)}, so θ₂ = ${arc(s)} ${say(t2, 3, ' rad')}. Inside the fuel the wavelength is ${n(lam)} ÷ n = ${n(lam)} × ${fx(v, 2)} ÷ 3.00 ${say(li, 1, ' nm')}.`,
   guidance: [
    { prompt: `Divide 3.00 by the speed in the fuel, ${fx(v, 2)} in units of 10⁸ m/s. What is the index of refraction, to 3 decimal places?`, answer: [rd(nn, 3)], explanation: `n = 3.00 ÷ ${fx(v, 2)} ${say(nn, 3)}.` },
-   { prompt: `Now sin θ₂ = 1.00 × sin ${n(a)} ÷ n, with the unrounded n. What is the refracted angle θ₂ in radians, to 3 decimal places?`, answer: [rd(t2, 3)], explanation: `sin ${n(a)} ≈ ${n(sa)} (radians), so sin θ₂ ${eq4(s)} and θ₂ = arcsin(${n(s)}) ${say(t2, 3, ' rad')}.` },
-   { prompt: `Divide the vacuum wavelength, ${n(lam)} nm, by the unrounded index of refraction. What is the wavelength inside the fuel, in nm to 1 decimal place?`, answer: [rd(li, 1)], explanation: `λ inside = ${n(lam)} ÷ ${n(nn)} ${say(li, 1, ' nm')}.` }
+   { prompt: `Now sin θ₂ = 1.00 × sin ${n(a)} ÷ n, with the unrounded n. What is the refracted angle θ₂ in radians, to 3 decimal places?`, answer: [rd(t2, 3)], explanation: `sin ${n(a)} ≈ ${n(sa)} (radians), so sin θ₂ ${eq4(s)} and θ₂ = ${arc(s)} ${say(t2, 3, ' rad')}.` },
+   { prompt: `Divide the vacuum wavelength, ${n(lam)} nm, by the unrounded index of refraction. What is the wavelength inside the fuel, in nm to 1 decimal place?`, answer: [rd(li, 1)], explanation: `λ inside = ${n(lam)} ÷ n = ${n(lam)} × ${fx(v, 2)} ÷ 3.00 ${say(li, 1, ' nm')}.` }
   ] }; }
 });
 

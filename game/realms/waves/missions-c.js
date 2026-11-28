@@ -46,7 +46,7 @@ window.QUESTS.push(
    'The Mach number is the speed of the source divided by the speed of sound: M = v_s ÷ v.',
    'The half-angle θ of the cone obeys sin θ = v ÷ v_s, which is 1 ÷ M. Take arcsin with the calculator set to radians.'
   ],
-  solution: 'The Mach number is M = 540 ÷ 343 ≈ 1.5743, which is 1.57 to 2 decimal places. The cone’s half-angle θ has sin θ = 343 ÷ 540 ≈ 0.6352, so θ = arcsin(0.6352) ≈ 0.6882 radians, which is 0.688 radians to 3 decimal places. The drone outruns its own sound, so the crests pile up along a cone that trails behind it: that cone is the shock wave, heard on the ground as a sonic boom.',
+  solution: 'The Mach number is M = 540 ÷ 343 ≈ 1.5743, which is 1.57 to 2 decimal places. The cone’s half-angle θ has sin θ = 343 ÷ 540 ≈ 0.6352, so θ = arcsin of the unrounded sine ≈ 0.6882 radians, which is 0.688 radians to 3 decimal places. The drone outruns its own sound, so the crests pile up along a cone that trails behind it: that cone is the shock wave, heard on the ground as a sonic boom.',
   xp: 150, prereqs: ['q19'],
   sources: [source.v1_17_8],
   teaching: {
@@ -71,24 +71,24 @@ window.QUESTS.push(
   guidance: [
    { prompt: 'The drone flies at 540 m/s and sound travels at 343 m/s. What is the Mach number, to 2 decimal places?', answer: [1.57], labels: ['Mach number'], explanation: 'M = 540 ÷ 343 ≈ 1.5743, which is 1.57 to 2 decimal places. It is more than 1, so the drone is supersonic and makes a shock wave.' },
    { prompt: 'For the cone, sin θ = 343 ÷ 540. What is sin θ, to 3 decimal places?', answer: [0.635], labels: ['sin θ'], explanation: '343 ÷ 540 ≈ 0.6352, which is 0.635 to 3 decimal places. It is the same as 1 ÷ M.' },
-   { prompt: 'Take arcsin of the unrounded sin θ, with the calculator set to radians. What is the half-angle θ in radians, to 3 decimal places?', answer: [0.688], labels: ['half-angle θ (rad)'], explanation: 'θ = arcsin(0.6352) ≈ 0.6882 radians, which is 0.688 radians to 3 decimal places. A faster drone gives a smaller sine and so a narrower cone.' }
+   { prompt: 'Take arcsin of the unrounded sin θ, with the calculator set to radians. What is the half-angle θ in radians, to 3 decimal places?', answer: [0.688], labels: ['half-angle θ (rad)'], explanation: 'θ = arcsin of the unrounded sine ≈ 0.6882 radians, which is 0.688 radians to 3 decimal places. A faster drone gives a smaller sine and so a narrower cone.' }
   ]
  },
  {
   id: 'q22', title: 'Loud and quiet spots by the track', topic: 'Two speakers: path difference, loud and quiet spots', tier: 'Intermediate', sector: 'Rover Track',
   brief: 'The track marshals stand between two warning speakers, and some of them say the warning tone almost vanishes where they stand.',
-  lesson: 'Two speakers in phase reinforce where the path difference is a whole number of wavelengths and cancel where it is a whole number and a half.',
+  lesson: 'Two speakers in phase reinforce where the path difference is a whole number of wavelengths and largely cancel where it is a whole number and a half.',
   prompt: 'Two speakers at the edge of the Rover Track are wired to the same signal generator, so they send out the same 686 Hz tone in phase. Sound travels at 343 m/s. A marshal stands 2.4 m from speaker A and 3.9 m from speaker B. Enter the path difference in metres, then the path difference in wavelengths, then 1 if the marshal’s spot is loud (constructive interference) or 0 if it is quiet (destructive interference).',
   answer: [1.5,3,1], labels: ['path difference (m)', 'path difference (wavelengths)', 'loud (1) or quiet (0)'], tolerance: 0.0005,
   hints: [
    'The path difference is the longer distance minus the shorter one. One wavelength is the speed of sound divided by the frequency.',
-   'A path difference of a whole number of wavelengths means crest meets crest and the sound is loud; a whole number and a half means crest meets trough and the sound cancels.'
+   'A path difference of a whole number of wavelengths means crest meets crest and the sound is loud; a whole number and a half means crest meets trough and the sound largely cancels.'
   ],
   solution: 'The path difference is 3.9 − 2.4 = 1.5 m. One wavelength is 343 ÷ 686 = 0.5 m, so the path difference is 1.5 ÷ 0.5 = 3 wavelengths. That is a whole number of wavelengths, so crests from the two speakers arrive together: constructive interference, a loud spot (1).',
   xp: 150, prereqs: ['q12', 'q14'],
   sources: [source.v1_17_4, source.v1_16_5],
   teaching: {
-   intuition: 'Two speakers fed by the same signal send out identical sound waves in step, crest for crest: we say they are in phase. At any spot, the two waves add up, which is superposition. What decides the result is how much farther one wave has travelled than the other. That extra distance is the path difference, Δr = r₂ − r₁, the distance from the farther speaker minus the distance from the nearer one. If Δr is a whole number of wavelengths (0, λ, 2λ …), a crest from one speaker arrives together with a crest from the other, and they add: constructive interference, a loud spot. If Δr is a whole number and a half (λ/2, 3λ/2, 5λ/2 …), a crest arrives with a trough and they cancel: destructive interference, a quiet spot. So the question is only how many wavelengths fit into the path difference, and for sound the wavelength comes from v = fλ, so λ = v ÷ f. Walk along the track and the sound swells and fades as Δr passes through whole and half wavelengths. Real spots between these two cases are partly loud; here we look only at the two clear cases, and we ignore echoes.',
+   intuition: 'Two speakers fed by the same signal send out identical sound waves in step, crest for crest: we say they are in phase. At any spot, the two waves add up, which is superposition. What decides the result is how much farther one wave has travelled than the other. That extra distance is the path difference, Δr = r₂ − r₁, the distance from the farther speaker minus the distance from the nearer one. If Δr is a whole number of wavelengths (0, λ, 2λ …), a crest from one speaker arrives together with a crest from the other, and they add: constructive interference, a loud spot. If Δr is a whole number and a half (λ/2, 3λ/2, 5λ/2 …), a crest arrives with a trough and they cancel: destructive interference, a quiet spot. The cancelling is complete only if the two waves arrive equally strong; the farther speaker usually sounds a little weaker, so such a spot is quiet but not silent. So the question is only how many wavelengths fit into the path difference, and for sound the wavelength comes from v = fλ, so λ = v ÷ f. Walk along the track and the sound swells and fades as Δr passes through whole and half wavelengths. Real spots between these two cases are partly loud; here we look only at the two clear cases, and we ignore echoes.',
    steps: [
     'Subtract the two distances to get the path difference Δr, in metres.',
     'Work out the wavelength λ = v ÷ f from the speed of sound and the frequency.',
@@ -117,7 +117,7 @@ window.QUESTS.push(
   id: 'q23', title: 'Clocking the rover by its siren', topic: 'Chapter review: a siren on the track', tier: 'Intermediate', sector: 'Rover Track',
   brief: 'The speed sensor on a rover has failed, and the only record of its run is what the siren sounded like to a listener at the tower.',
   lesson: 'Two Doppler readings, one approaching and one leaving, give the source’s speed and its true frequency; a fixed tone at the true frequency then beats against the heard one.',
-  prompt: 'A rover drives straight past the siren tower at a steady speed, sounding its siren. A listener standing still at the tower hears 560 Hz while the rover comes towards her and 480 Hz after it has passed. Sound travels at 343 m/s and there is no wind. Enter the rover’s speed in m/s, then the siren’s own frequency in Hz, then the beat frequency in Hz that she would hear between the approaching siren and a horn at the tower that plays the siren’s own frequency. Give all three to 1 decimal place, using unrounded values from one step to the next.',
+  prompt: 'A rover drives past the siren tower at a steady speed, sounding its siren. The tower stands right at the edge of the track, so close to it that the rover’s motion counts as straight towards the tower and then straight away from it. A listener standing still at the tower hears 560 Hz while the rover comes towards her and 480 Hz after it has passed. Sound travels at 343 m/s and there is no wind. Enter the rover’s speed in m/s, then the siren’s own frequency in Hz, then the beat frequency in Hz that she would hear between the approaching siren and a horn at the tower that plays the siren’s own frequency. Give all three to 1 decimal place, using unrounded values from one step to the next.',
   answer: [26.4,516.9,43.1], labels: ['rover speed (m/s)', 'siren’s own frequency (Hz)', 'beat frequency (Hz)'], tolerance: 0.05,
   hints: [
    'For a source moving towards a listener at rest, f_heard = f_s × v ÷ (v − v_s); moving away, f_heard = f_s × v ÷ (v + v_s). Divide one equation by the other so that f_s cancels, then solve for v_s.',
@@ -199,7 +199,7 @@ window.QUESTS.push(
    'By the law of reflection, the reflected ray makes the same angle with the normal as the incoming ray. The normal and the surface are at right angles: π/2 radians apart.',
    'Snell’s law: n₁ sin θ₁ = n₂ sin θ₂, with both angles measured from the normal. Find sin θ₂, then take arcsin with the calculator set to radians.'
   ],
-  solution: 'By the law of reflection the reflected ray is also 0.8 rad from the normal, so the angle it makes with the surface is π/2 − 0.8 ≈ 0.7708 rad, which is 0.771 rad to 3 decimal places. By Snell’s law, sin θ₂ = 1.00 × sin 0.8 ÷ 1.333 = 1.00 × 0.7174 ÷ 1.333 ≈ 0.5382, so θ₂ = arcsin(0.5382) ≈ 0.5682 rad, which is 0.568 rad to 3 decimal places. The ray bends towards the normal, because it enters a material with a larger index of refraction.',
+  solution: 'By the law of reflection the reflected ray is also 0.8 rad from the normal, so the angle it makes with the surface is π/2 − 0.8 ≈ 0.7708 rad, which is 0.771 rad to 3 decimal places. By Snell’s law, sin θ₂ = 1.00 × sin 0.8 ÷ 1.333 = 1.00 × 0.7174 ÷ 1.333 ≈ 0.5382, so θ₂ = arcsin of the unrounded sine ≈ 0.5682 rad, which is 0.568 rad to 3 decimal places. The ray bends towards the normal, because it enters a material with a larger index of refraction.',
   xp: 150, prereqs: ['q24'],
   sources: [source.v3_1_2, source.v3_1_3],
   teaching: {
@@ -224,7 +224,7 @@ window.QUESTS.push(
   guidance: [
    { prompt: 'The reflected ray is 0.8 rad from the normal. What angle does it make with the surface, in radians to 3 decimal places?', answer: [0.771], labels: ['reflected ray to surface (rad)'], explanation: 'The normal is at π/2 ≈ 1.5708 rad to the surface, so the angle is π/2 − 0.8 ≈ 0.7708 rad, which is 0.771 rad to 3 decimal places.' },
    { prompt: 'By Snell’s law sin θ₂ = 1.00 × sin 0.8 ÷ 1.333. What is sin θ₂, to 3 decimal places?', answer: [0.538], labels: ['sin θ₂'], explanation: 'sin 0.8 ≈ 0.7174 (radians), and 1.00 × 0.7174 ÷ 1.333 ≈ 0.5382, which is 0.538 to 3 decimal places.' },
-   { prompt: 'Take arcsin of the unrounded sin θ₂, with the calculator set to radians. What is the refracted angle θ₂ in radians, to 3 decimal places?', answer: [0.568], labels: ['refracted angle θ₂ (rad)'], explanation: 'θ₂ = arcsin(0.5382) ≈ 0.5682 rad, which is 0.568 rad to 3 decimal places, smaller than the 0.8 rad it came in at.' }
+   { prompt: 'Take arcsin of the unrounded sin θ₂, with the calculator set to radians. What is the refracted angle θ₂ in radians, to 3 decimal places?', answer: [0.568], labels: ['refracted angle θ₂ (rad)'], explanation: 'θ₂ = arcsin of the unrounded sine ≈ 0.5682 rad, which is 0.568 rad to 3 decimal places, smaller than the 0.8 rad it came in at.' }
   ]
  },
  {
@@ -250,7 +250,7 @@ window.QUESTS.push(
    ],
    example: {
     prompt: 'A ray in fresh water (n = 1.333) meets the surface with air (n = 1.00) at 0.8 radians from the normal. Is it trapped?',
-    steps: ['sin θc = 1.00 ÷ 1.333 ≈ 0.7502.', 'θc = arcsin(0.7502) ≈ 0.8483 rad.', '0.8 rad is less than 0.848 rad, so the ray is not trapped.'],
+    steps: ['sin θc = 1.00 ÷ 1.333 ≈ 0.7502.', 'θc = arcsin(1.00 ÷ 1.333) ≈ 0.8483 rad.', '0.8 rad is less than 0.848 rad, so the ray is not trapped.'],
     answer: 'A critical angle of about 0.848 radians; the ray escapes (enter 0).'
    },
    pitfalls: [
@@ -288,7 +288,7 @@ window.QUESTS.push(
    ],
    example: {
     prompt: 'Unpolarised light of 80 W/m² meets three filters; the second is turned 0.4 rad from the first and the third a further 0.9 rad. Find the intensity at each stage.',
-    steps: ['After the first: 80 ÷ 2 = 40 W/m².', 'cos(0.4) ≈ 0.9211, squared ≈ 0.8484, so 40 × 0.8484 ≈ 33.93 W/m².', 'cos(0.9) ≈ 0.6216, squared ≈ 0.3864, so 33.93 × 0.3864 ≈ 13.11 W/m².'],
+    steps: ['After the first: 80 ÷ 2 = 40 W/m².', 'cos(0.4) ≈ 0.92106, squared ≈ 0.84835, so 40 × 0.84835 ≈ 33.93 W/m².', 'cos(0.9) ≈ 0.6216, squared ≈ 0.3864, so 33.93 × 0.3864 ≈ 13.11 W/m².'],
     answer: '40, about 33.93 and about 13.11 W/m².'
    },
    pitfalls: [
@@ -299,8 +299,8 @@ window.QUESTS.push(
   },
   guidance: [
    { prompt: 'Unpolarised light of 240 W/m² meets the first filter. What intensity leaves it, in W/m²?', answer: [120], labels: ['after filter 1 (W/m²)'], explanation: 'A polarising filter passes half of unpolarised light: 240 ÷ 2 = 120 W/m².' },
-   { prompt: 'That light is polarised along the first axis and meets a filter at 0.5 rad to it. What is 120 × cos²(0.5), in W/m² to 2 decimal places?', answer: [92.42], labels: ['after filter 2 (W/m²)'], explanation: 'cos(0.5) ≈ 0.8776, squared ≈ 0.7702, and 120 × 0.7702 ≈ 92.4181 W/m², which is 92.42 W/m² to 2 decimal places.' },
-   { prompt: 'Now the third filter, 0.7 rad from the second. Multiply the unrounded I₂ by cos²(0.7). What is I₃ in W/m², to 2 decimal places?', answer: [54.06], labels: ['after filter 3 (W/m²)'], explanation: 'cos²(0.7) ≈ 0.585, so I₃ = 92.4181 × 0.585 ≈ 54.0631 W/m², which is 54.06 W/m² to 2 decimal places.' }
+   { prompt: 'That light is polarised along the first axis and meets a filter at 0.5 rad to it. What is 120 × cos²(0.5), in W/m² to 2 decimal places?', answer: [92.42], labels: ['after filter 2 (W/m²)'], explanation: 'cos(0.5) ≈ 0.8776, squared ≈ 0.7702, and 120 × cos²(0.5) ≈ 92.4181 W/m², which is 92.42 W/m² to 2 decimal places.' },
+   { prompt: 'Now the third filter, 0.7 rad from the second. Multiply the unrounded I₂ by cos²(0.7). What is I₃ in W/m², to 2 decimal places?', answer: [54.06], labels: ['after filter 3 (W/m²)'], explanation: 'cos²(0.7) ≈ 0.585, so I₃ = I₂ × cos²(0.7) ≈ 54.0631 W/m², which is 54.06 W/m² to 2 decimal places.' }
   ]
  },
  {

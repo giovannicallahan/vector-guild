@@ -15,6 +15,10 @@ const places = dp => `${dp} decimal place${dp === 1 ? '' : 's'}`;
 const say = (x, dp, u = '') => exact(x, dp) ? `= ${n(rd(x, dp))}${u}` : dp >= 4 ? `≈ ${n(x)}${u}` : `≈ ${n(x)}${u}, which is ${n(rd(x, dp))}${u} to ${places(dp)}`;
 /* "≈ 0.6660" for a value used on unrounded, "= 0.24" when it is exact at four places. */
 const eq4 = x => exact(x, 4) ? `= ${n(x)}` : `≈ ${n(x)}`;
+/* arcsin of a sine shown to 4 places: name the rounded sine only when its arcsin gives the same angle at 4 places, so a
+   player who keys in the shown value gets the shown angle; otherwise point to the unrounded sine. */
+const arc = s => exact(s, 4) || rd(Math.asin(rd(s, 4)), 4) === rd(Math.asin(s), 4) ? `arcsin(${n(s)})` : 'arcsin of the unrounded sine';
+const ofIt = s => exact(s, 4) || rd(Math.asin(rd(s, 4)), 4) === rd(Math.asin(s), 4) ? 'arcsin of it' : 'arcsin of the unrounded sine';
 const V = 343;
 /* "1 wavelength", "2.5 wavelengths". */
 const wl = w => `${n(w)} wavelength${w === 1 ? '' : 's'}`;
@@ -42,11 +46,11 @@ Object.assign(window.MISSION_GEN, {
    prompt: `A test drone flies level over the Rover Track at ${n(vs)} m/s, faster than sound, which travels at 343 m/s here. Enter its Mach number (a pure number, no unit) to 2 decimal places, then the half-angle of its shock cone in radians to 3 decimal places. Use the unrounded Mach number for the angle.`,
    answer: [rd(M, 2), rd(th, 3)],
    hints: ['The Mach number is the speed of the source divided by the speed of sound: M = v_s ÷ v.', 'The half-angle θ of the cone obeys sin θ = v ÷ v_s, which is 1 ÷ M. Take arcsin with the calculator set to radians.'],
-   solution: `The Mach number is M = ${n(vs)} ÷ 343 ${say(M, 2)}. The cone’s half-angle θ has sin θ = 343 ÷ ${n(vs)} ${eq4(s)}, so θ = arcsin(${n(s)}) ${say(th, 3, ' radians')}. The drone outruns its own sound, so the crests pile up along a cone that trails behind it: that cone is the shock wave, heard on the ground as a sonic boom.`,
+   solution: `The Mach number is M = ${n(vs)} ÷ 343 ${say(M, 2)}. The cone’s half-angle θ has sin θ = 343 ÷ ${n(vs)} ${eq4(s)}, so θ = ${arc(s)} ${say(th, 3, ' radians')}. The drone outruns its own sound, so the crests pile up along a cone that trails behind it: that cone is the shock wave, heard on the ground as a sonic boom.`,
    guidance: [
     { prompt: `The drone flies at ${n(vs)} m/s and sound travels at 343 m/s. What is the Mach number, to 2 decimal places?`, answer: [rd(M, 2)], explanation: `M = ${n(vs)} ÷ 343 ${say(M, 2)}. It is more than 1, so the drone is supersonic and makes a shock wave.` },
     { prompt: `For the cone, sin θ = 343 ÷ ${n(vs)}. What is sin θ, to 3 decimal places?`, answer: [rd(s, 3)], explanation: `343 ÷ ${n(vs)} ${say(s, 3)}. It is the same as 1 ÷ M.` },
-    { prompt: 'Take arcsin of the unrounded sin θ, with the calculator set to radians. What is the half-angle θ in radians, to 3 decimal places?', answer: [rd(th, 3)], explanation: `θ = arcsin(${n(s)}) ${say(th, 3, ' radians')}. A faster drone gives a smaller sine and so a narrower cone.` }
+    { prompt: 'Take arcsin of the unrounded sin θ, with the calculator set to radians. What is the half-angle θ in radians, to 3 decimal places?', answer: [rd(th, 3)], explanation: `θ = ${arc(s)} ${say(th, 3, ' radians')}. A faster drone gives a smaller sine and so a narrower cone.` }
    ] }; }
  },
  /* Two speakers in phase at f Hz; the wavelength 343 ÷ f is short (f from the list), and the path difference is k half
@@ -59,13 +63,13 @@ Object.assign(window.MISSION_GEN, {
   build: ({ f, r1, r2 }) => { const lam = G.tidy(V / f), dr = G.tidy(r2 - r1), w = G.tidy(dr / lam), loud = Number.isInteger(w) ? 1 : 0; return {
    prompt: `Two speakers at the edge of the Rover Track are wired to the same signal generator, so they send out the same ${n(f)} Hz tone in phase. Sound travels at 343 m/s. A marshal stands ${n(r1)} m from speaker A and ${n(r2)} m from speaker B. Enter the path difference in metres, then the path difference in wavelengths, then 1 if the marshal’s spot is loud (constructive interference) or 0 if it is quiet (destructive interference).`,
    answer: [dr, w, loud],
-   hints: ['The path difference is the longer distance minus the shorter one. One wavelength is the speed of sound divided by the frequency.', 'A path difference of a whole number of wavelengths means crest meets crest and the sound is loud; a whole number and a half means crest meets trough and the sound cancels.'],
-   solution: `The path difference is ${n(r2)} − ${n(r1)} = ${n(dr)} m. One wavelength is 343 ÷ ${n(f)} = ${n(lam)} m, so the path difference is ${n(dr)} ÷ ${n(lam)} = ${wl(w)}. ${loud ? 'That is a whole number of wavelengths, so crests from the two speakers arrive together: constructive interference, a loud spot (1).' : 'That is a whole number and a half, so a crest from one speaker arrives with a trough from the other: destructive interference, a quiet spot (0).'}`,
+   hints: ['The path difference is the longer distance minus the shorter one. One wavelength is the speed of sound divided by the frequency.', 'A path difference of a whole number of wavelengths means crest meets crest and the sound is loud; a whole number and a half means crest meets trough and the sound largely cancels.'],
+   solution: `The path difference is ${n(r2)} − ${n(r1)} = ${n(dr)} m. One wavelength is 343 ÷ ${n(f)} = ${n(lam)} m, so the path difference is ${n(dr)} ÷ ${n(lam)} = ${wl(w)}. ${loud ? 'That is a whole number of wavelengths, so crests from the two speakers arrive together: constructive interference, a loud spot (1).' : 'That is a whole number and a half, so a crest from one speaker arrives with a trough from the other: destructive interference, a quiet spot (0). The sound from the farther speaker is a little weaker there, so the cancelling is not complete, but the spot is quiet.'}`,
    guidance: [
     { prompt: `The marshal is ${n(r1)} m from A and ${n(r2)} m from B. What is the path difference, in metres?`, answer: [dr], explanation: `${n(r2)} − ${n(r1)} = ${n(dr)} m: the sound from B travels that much farther.` },
     { prompt: `What is the wavelength of a ${n(f)} Hz tone when sound travels at 343 m/s, in metres?`, answer: [lam], explanation: `λ = v ÷ f = 343 ÷ ${n(f)} = ${n(lam)} m.` },
     { prompt: `How many wavelengths is a path difference of ${n(dr)} m?`, answer: [w], explanation: `${n(dr)} ÷ ${n(lam)} = ${wl(w)}.` },
-    { prompt: `The path difference is ${wl(w)}. Enter 1 if the spot is loud, or 0 if it is quiet.`, answer: [loud], explanation: loud ? `${n(w)} is a whole number, so the two waves arrive in step and add: loud, 1.` : `${n(w)} is a whole number and a half, so the two waves arrive opposite and cancel: quiet, 0.` }
+    { prompt: `The path difference is ${wl(w)}. Enter 1 if the spot is loud, or 0 if it is quiet.`, answer: [loud], explanation: loud ? `${n(w)} is a whole number, so the two waves arrive in step and add: loud, 1.` : `${n(w)} is a whole number and a half, so the two waves arrive opposite and largely cancel: quiet, 0.` }
    ] }; }
  },
  /* Heard frequencies fa (approaching) and fr (receding) from a rover passing a listener at rest. vs = 343(fa − fr) ÷ (fa + fr),
@@ -76,7 +80,7 @@ Object.assign(window.MISSION_GEN, {
    const vs = V * (fa - fr) / (fa + fr), fs = 2 * fa * fr / (fa + fr);
    return vs >= 5 && vs <= 45 && !(fa === 440 && fr === 360) && ok(vs, 1) && ok(fs, 1) && ok(fa - fs, 1); }, { fa: 560, fr: 480 }),
   build: ({ fa, fr }) => { const S = fa + fr, D = fa - fr, vs = V * D / S, fs = fa * (V - vs) / V, beat = fa - fs; return {
-   prompt: `A rover drives straight past the siren tower at a steady speed, sounding its siren. A listener standing still at the tower hears ${n(fa)} Hz while the rover comes towards her and ${n(fr)} Hz after it has passed. Sound travels at 343 m/s and there is no wind. Enter the rover’s speed in m/s, then the siren’s own frequency in Hz, then the beat frequency in Hz that she would hear between the approaching siren and a horn at the tower that plays the siren’s own frequency. Give all three to 1 decimal place, using unrounded values from one step to the next.`,
+   prompt: `A rover drives past the siren tower at a steady speed, sounding its siren. The tower stands right at the edge of the track, so close to it that the rover’s motion counts as straight towards the tower and then straight away from it. A listener standing still at the tower hears ${n(fa)} Hz while the rover comes towards her and ${n(fr)} Hz after it has passed. Sound travels at 343 m/s and there is no wind. Enter the rover’s speed in m/s, then the siren’s own frequency in Hz, then the beat frequency in Hz that she would hear between the approaching siren and a horn at the tower that plays the siren’s own frequency. Give all three to 1 decimal place, using unrounded values from one step to the next.`,
    answer: [rd(vs, 1), rd(fs, 1), rd(beat, 1)],
    hints: ['For a source moving towards a listener at rest, f_heard = f_s × v ÷ (v − v_s); moving away, f_heard = f_s × v ÷ (v + v_s). Divide one equation by the other so that f_s cancels, then solve for v_s.', 'The beat frequency is the difference between two frequencies sounding together: f_beat = |f₂ − f₁|.'],
    solution: `Dividing the approaching equation by the leaving one cancels f_s: ${n(fa)} ÷ ${n(fr)} = (343 + v_s) ÷ (343 − v_s). Cross-multiplying, ${n(fa)} × (343 − v_s) = ${n(fr)} × (343 + v_s), so v_s = 343 × (${n(fa)} − ${n(fr)}) ÷ (${n(fa)} + ${n(fr)}) = 343 × ${n(D)} ÷ ${n(S)} ${say(vs, 1, ' m/s')}. Then f_s = ${n(fa)} × (343 − v_s) ÷ 343 ${say(fs, 1, ' Hz')}. The horn and the approaching siren beat at ${n(fa)} − ${n(fs)} ${say(beat, 1, ' Hz')}.`,
@@ -114,11 +118,11 @@ Object.assign(window.MISSION_GEN, {
    prompt: `In the Lens Workshop a narrow ray of light passes from ${A} (index of refraction ${idx(n1)}) into ${B} (index ${idx(n2)}) across a flat boundary. It meets the boundary at ${n(a)} radians from the normal, the line at right angles to the boundary. Part of the light reflects back into the ${A} and part refracts into the ${B}. Enter the angle between the reflected ray and the boundary surface, then the angle of the refracted ray from the normal, both in radians to 3 decimal places.`,
    answer: [rd(refl, 3), rd(b, 3)],
    hints: ['By the law of reflection, the reflected ray makes the same angle with the normal as the incoming ray. The normal and the surface are at right angles: π/2 radians apart.', 'Snell’s law: n₁ sin θ₁ = n₂ sin θ₂, with both angles measured from the normal. Find sin θ₂, then take arcsin with the calculator set to radians.'],
-   solution: `By the law of reflection the reflected ray is also ${n(a)} rad from the normal, so the angle it makes with the surface is π/2 − ${n(a)} ${say(refl, 3, ' rad')}. By Snell’s law, sin θ₂ = ${idx(n1)} × sin ${n(a)} ÷ ${idx(n2)} = ${idx(n1)} × ${n(sa)} ÷ ${idx(n2)} ${eq4(s)}, so θ₂ = arcsin(${n(s)}) ${say(b, 3, ' rad')}. ${toward ? 'The ray bends towards the normal, because it enters a material with a larger index of refraction.' : 'The ray bends away from the normal, because it enters a material with a smaller index of refraction.'}`,
+   solution: `By the law of reflection the reflected ray is also ${n(a)} rad from the normal, so the angle it makes with the surface is π/2 − ${n(a)} ${say(refl, 3, ' rad')}. By Snell’s law, sin θ₂ = ${idx(n1)} × sin ${n(a)} ÷ ${idx(n2)} = ${idx(n1)} × ${n(sa)} ÷ ${idx(n2)} ${eq4(s)}, so θ₂ = ${arc(s)} ${say(b, 3, ' rad')}. ${toward ? 'The ray bends towards the normal, because it enters a material with a larger index of refraction.' : 'The ray bends away from the normal, because it enters a material with a smaller index of refraction.'}`,
    guidance: [
     { prompt: `The reflected ray is ${n(a)} rad from the normal. What angle does it make with the surface, in radians to 3 decimal places?`, answer: [rd(refl, 3)], explanation: `The normal is at π/2 ≈ 1.5708 rad to the surface, so the angle is π/2 − ${n(a)} ${say(refl, 3, ' rad')}.` },
     { prompt: `By Snell’s law sin θ₂ = ${idx(n1)} × sin ${n(a)} ÷ ${idx(n2)}. What is sin θ₂, to 3 decimal places?`, answer: [rd(s, 3)], explanation: `sin ${n(a)} ≈ ${n(sa)} (radians), and ${idx(n1)} × ${n(sa)} ÷ ${idx(n2)} ${say(s, 3)}.` },
-    { prompt: 'Take arcsin of the unrounded sin θ₂, with the calculator set to radians. What is the refracted angle θ₂ in radians, to 3 decimal places?', answer: [rd(b, 3)], explanation: `θ₂ = arcsin(${n(s)}) ${say(b, 3, ' rad')}, ${toward ? 'smaller' : 'larger'} than the ${n(a)} rad it came in at.` }
+    { prompt: 'Take arcsin of the unrounded sin θ₂, with the calculator set to radians. What is the refracted angle θ₂ in radians, to 3 decimal places?', answer: [rd(b, 3)], explanation: `θ₂ = ${arc(s)} ${say(b, 3, ' rad')}, ${toward ? 'smaller' : 'larger'} than the ${n(a)} rad it came in at.` }
    ] }; }
  },
  /* Inside n1, at a face with n2 < n1, at a (radians) from the normal. θc = arcsin(n2 ÷ n1); trapped when a > θc, with
@@ -131,10 +135,10 @@ Object.assign(window.MISSION_GEN, {
    prompt: `A ray travelling inside a block of ${A} (index of refraction ${n(n1)}) reaches a flat face where the block meets ${B} (index ${idx(n2)}). It strikes the face at ${n(a)} radians from the normal. Enter the critical angle for this face, in radians to 3 decimal places, then 1 if the ray is totally internally reflected (trapped inside the ${A}) or 0 if some of it escapes into the ${B}.`,
    answer: [rd(c, 3), trap],
    hints: ['At the critical angle the refracted ray would run along the face, at π/2 from the normal, and sin(π/2) = 1, so Snell’s law gives sin θc = n₂ ÷ n₁.', 'A ray that strikes the face at more than the critical angle cannot refract out: all of it reflects back inside. At less than the critical angle, part of it escapes.'],
-   solution: `sin θc = ${idx(n2)} ÷ ${n(n1)} ${eq4(sc)}, so θc = arcsin(${n(sc)}) ${say(c, 3, ' rad')}. The ray strikes at ${n(a)} rad, which is ${trap ? 'more' : 'less'} than the critical angle, so ${trap ? 'it is totally internally reflected and stays in the ' + A + ': 1.' : 'part of it refracts out into the ' + B + ': 0.'}`,
+   solution: `sin θc = ${idx(n2)} ÷ ${n(n1)} ${eq4(sc)}, so θc = ${arc(sc)} ${say(c, 3, ' rad')}. The ray strikes at ${n(a)} rad, which is ${trap ? 'more' : 'less'} than the critical angle, so ${trap ? 'it is totally internally reflected and stays in the ' + A + ': 1.' : 'part of it refracts out into the ' + B + ': 0.'}`,
    guidance: [
     { prompt: `What is sin θc = ${idx(n2)} ÷ ${n(n1)}, to 3 decimal places?`, answer: [rd(sc, 3)], explanation: `${idx(n2)} ÷ ${n(n1)} ${say(sc, 3)}. It is less than 1 because the ray is in the material with the larger index.` },
-    { prompt: 'Take arcsin of the unrounded sin θc, with the calculator set to radians. What is the critical angle in radians, to 3 decimal places?', answer: [rd(c, 3)], explanation: `θc = arcsin(${n(sc)}) ${say(c, 3, ' rad')}.` },
+    { prompt: 'Take arcsin of the unrounded sin θc, with the calculator set to radians. What is the critical angle in radians, to 3 decimal places?', answer: [rd(c, 3)], explanation: `θc = ${arc(sc)} ${say(c, 3, ' rad')}.` },
     { prompt: `The ray strikes at ${n(a)} rad and the critical angle is about ${n(rd(c, 3))} rad. Enter 1 if it is trapped, 0 if it escapes.`, answer: [trap], explanation: trap ? `${n(a)} rad is more than the critical angle, so there is no refracted ray: total internal reflection, 1.` : `${n(a)} rad is less than the critical angle, so part of the light refracts out: 0.` }
    ] }; }
  },
@@ -151,8 +155,8 @@ Object.assign(window.MISSION_GEN, {
    solution: `After the first filter the light is polarised and has half the intensity: ${n(I0)} ÷ 2 = ${n(I1)} W/m². The second filter is at ${n(a)} rad to that polarisation, and cos²(${n(a)}) ≈ ${n(ca)}, so I₂ = ${n(I1)} × cos²(${n(a)}) ${say(I2, 2, ' W/m²')}. The third filter is at ${n(b)} rad to the second, and cos²(${n(b)}) ≈ ${n(cb)}, so I₃ = I₂ × cos²(${n(b)}) ${say(I3, 2, ' W/m²')}.`,
    guidance: [
     { prompt: `Unpolarised light of ${n(I0)} W/m² meets the first filter. What intensity leaves it, in W/m²?`, answer: [rd(I1, 2)], explanation: `A polarising filter passes half of unpolarised light: ${n(I0)} ÷ 2 = ${n(I1)} W/m².` },
-    { prompt: `That light is polarised along the first axis and meets a filter at ${n(a)} rad to it. What is ${n(I1)} × cos²(${n(a)}), in W/m² to 2 decimal places?`, answer: [rd(I2, 2)], explanation: `cos(${n(a)}) ≈ ${n(Math.cos(a))}, squared ≈ ${n(ca)}, and ${n(I1)} × ${n(ca)} ${say(I2, 2, ' W/m²')}.` },
-    { prompt: `Now the third filter, ${n(b)} rad from the second. Multiply the unrounded I₂ by cos²(${n(b)}). What is I₃ in W/m², to 2 decimal places?`, answer: [rd(I3, 2)], explanation: `cos²(${n(b)}) ≈ ${n(cb)}, so I₃ = ${n(I2)} × ${n(cb)} ${say(I3, 2, ' W/m²')}.` }
+    { prompt: `That light is polarised along the first axis and meets a filter at ${n(a)} rad to it. What is ${n(I1)} × cos²(${n(a)}), in W/m² to 2 decimal places?`, answer: [rd(I2, 2)], explanation: `cos(${n(a)}) ≈ ${n(Math.cos(a))}, squared ≈ ${n(ca)}, and ${n(I1)} × cos²(${n(a)}) ${say(I2, 2, ' W/m²')}.` },
+    { prompt: `Now the third filter, ${n(b)} rad from the second. Multiply the unrounded I₂ by cos²(${n(b)}). What is I₃ in W/m², to 2 decimal places?`, answer: [rd(I3, 2)], explanation: `cos²(${n(b)}) ≈ ${n(cb)}, so I₃ = I₂ × cos²(${n(b)}) ${say(I3, 2, ' W/m²')}.` }
    ] }; }
  },
  /* 1/d0 + 1/di = 1/f with signed f; kind is only an index into OPTIC (words), f's sign matches it. |d0 − f| >= 3 keeps
@@ -203,11 +207,11 @@ Object.assign(window.MISSION_GEN, {
    prompt: `In the Fringe Lab, light of wavelength ${n(lam)} nm falls on two narrow slits ${n(d)} μm apart (a micrometre, μm, is 1000 nm). Enter the angle from the centre line of the bright fringe of order m = ${n(m)}, then the angle of the dark fringe given by d sin θ = (m + ½)λ with m = ${n(m)}, both in radians to 4 decimal places. Then enter the highest order m of a bright fringe that can appear on one side, as a whole number.`,
    answer: [rd(tb, 4), rd(td, 4), top],
    hints: ['The path difference from the two slits to a point at angle θ is d sin θ. Bright fringes need d sin θ = mλ; dark fringes need d sin θ = (m + ½)λ. Put d and λ in the same unit first.', 'No angle can pass π/2, where sin θ = 1, so a bright fringe’s order can be at most d ÷ λ: take the whole-number part.'],
-   solution: `In nanometres the slits are d = ${n(D)} nm apart. Bright fringe: sin θ = ${n(m)} × ${n(lam)} ÷ ${n(D)} ${eq4(sb)}, so θ = arcsin(${n(sb)}) ${say(tb, 4, ' rad')}. Dark fringe: sin θ = ${n(m + 0.5)} × ${n(lam)} ÷ ${n(D)} ${eq4(sd)}, so θ ${say(td, 4, ' rad')}. Highest order: m ≤ d ÷ λ = ${n(D)} ÷ ${n(lam)} ${exact(D / lam, 2) ? '=' : '≈'} ${n(rd(D / lam, 2))}, so the highest bright fringe is order ${n(top)}.`,
+   solution: `In nanometres the slits are d = ${n(D)} nm apart. Bright fringe: sin θ = ${n(m)} × ${n(lam)} ÷ ${n(D)} ${eq4(sb)}, so θ = ${arc(sb)} ${say(tb, 4, ' rad')}. Dark fringe: sin θ = ${n(m + 0.5)} × ${n(lam)} ÷ ${n(D)} ${eq4(sd)}, so θ ${say(td, 4, ' rad')}. Highest order: m ≤ d ÷ λ = ${n(D)} ÷ ${n(lam)} ${exact(D / lam, 2) ? '=' : '≈'} ${n(rd(D / lam, 2))}, so the highest bright fringe is order ${n(top)}.`,
    guidance: [
     { prompt: `Put both lengths in nanometres. What is d = ${n(d)} μm in nm?`, answer: [D], explanation: `1 μm is 1000 nm, so ${n(d)} μm = ${n(D)} nm.` },
-    { prompt: `For the bright fringe, sin θ = ${n(m)} × ${n(lam)} ÷ ${n(D)}. What is θ in radians, to 4 decimal places?`, answer: [rd(tb, 4)], explanation: `sin θ ${eq4(sb)}, and arcsin of it ${say(tb, 4, ' rad')}.` },
-    { prompt: `For the dark fringe, sin θ = ${n(m + 0.5)} × ${n(lam)} ÷ ${n(D)}. What is θ in radians, to 4 decimal places?`, answer: [rd(td, 4)], explanation: `sin θ ${eq4(sd)}, and arcsin of it ${say(td, 4, ' rad')}. It lies between the bright fringes of orders ${n(m)} and ${n(m + 1)}.` },
+    { prompt: `For the bright fringe, sin θ = ${n(m)} × ${n(lam)} ÷ ${n(D)}. What is θ in radians, to 4 decimal places?`, answer: [rd(tb, 4)], explanation: `sin θ ${eq4(sb)}, and ${ofIt(sb)} ${say(tb, 4, ' rad')}.` },
+    { prompt: `For the dark fringe, sin θ = ${n(m + 0.5)} × ${n(lam)} ÷ ${n(D)}. What is θ in radians, to 4 decimal places?`, answer: [rd(td, 4)], explanation: `sin θ ${eq4(sd)}, and ${ofIt(sd)} ${say(td, 4, ' rad')}. It lies between the bright fringes of orders ${n(m)} and ${n(m + 1)}.` },
     { prompt: `sin θ cannot be more than 1, so m ≤ ${n(D)} ÷ ${n(lam)}. What is the highest order of bright fringe?`, answer: [top], explanation: `${n(D)} ÷ ${n(lam)} ${exact(D / lam, 2) ? '=' : '≈'} ${n(rd(D / lam, 2))}, and the order must be a whole number, so it is ${n(top)}.` }
    ] }; }
  }

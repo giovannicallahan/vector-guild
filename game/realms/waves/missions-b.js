@@ -365,7 +365,7 @@ window.QUESTS.push(
   id: 'q19', title: "The siren coming and going", topic: "Doppler effect for a moving source", tier: 'Intermediate', sector: 'Rover Track',
   brief: "A rover’s siren changes pitch as it passes Mira on the track, and she wants to predict both notes.",
   lesson: "Doppler effect: a source moving towards a listener sounds higher, f_o = f_s × v ÷ (v − v_s); moving away it sounds lower, f_o = f_s × v ÷ (v + v_s).",
-  prompt: "A rover drives along the track at 20 m/s with its siren sounding at 600 Hz. Mira stands still beside the track, and sound travels at 343 m/s. Enter the frequency she hears while the rover comes towards her, then the frequency she hears after it has passed and is moving away, both in Hz to 1 decimal place.",
+  prompt: "A rover drives along the track at 20 m/s with its siren sounding at 600 Hz. Mira stands still right at the edge of the track, so close to it that the rover’s motion counts as straight towards her and then straight away from her, and sound travels at 343 m/s. Enter the frequency she hears while the rover comes towards her, then the frequency she hears after it has passed and is moving away, both in Hz to 1 decimal place.",
   answer: [637.2,566.9], labels: ["heard while approaching (Hz)","heard while moving away (Hz)"], tolerance: 0.01,
   hints: [
    "For a moving source and a listener standing still, the heard frequency is f_o = f_s × v ÷ (v ∓ v_s): use v − v_s while the source comes towards the listener, and v + v_s while it moves away.",
