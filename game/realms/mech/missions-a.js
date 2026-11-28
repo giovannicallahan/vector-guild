@@ -72,7 +72,8 @@ window.QUESTS.push(
   guidance: [
    { prompt: "How many metres are there in 54 kilometres?", answer: [54000], labels: ["metres in the distance (m)"], explanation: "Each kilometre is 1000 metres, so 54 km × (1000 m ÷ 1 km) = 54000 m. The rover covers 54000 m every hour." },
    { prompt: "An hour is 3600 seconds. What is 54000 metres per hour in metres per second?", answer: [15], labels: ["speed (m/s)"], explanation: "54000 m ÷ 3600 s = 15 m/s: the hours cancel and seconds are left underneath." },
-   { prompt: "How many seconds are there in 4 minutes, and how far does the rover go at 15 m/s in that time?", answer: [240,3600], labels: ["time (s)","distance (m)"], explanation: "4 × 60 = 240 s, and 15 m/s × 240 s = 3600 m. The seconds cancel and metres are left." }
+   { prompt: "How many seconds are there in 4 minutes?", answer: [240], labels: ["time (s)"], explanation: "Each minute is 60 seconds, so 4 × 60 = 240 s." },
+   { prompt: "How far does the rover go at 15 m/s in 240 s, in metres?", answer: [3600], labels: ["distance (m)"], explanation: "15 m/s × 240 s = 3600 m. The seconds cancel and metres are left." }
   ]
  },
  {
@@ -197,7 +198,8 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: "Add the x components and then the y components of A and B. What are Rx and Ry?", answer: [4,6], labels: ["Rx (m)","Ry (m)"], explanation: "Rx = 7 + (−3) = 4 and Ry = −2 + 8 = 6, both in metres." },
+   { prompt: "Add the x components of A and B. What is Rx, in metres?", answer: [4], labels: ["Rx (m)"], explanation: "Rx = 7 + (−3) = 4 m." },
+   { prompt: "Add the y components of A and B. What is Ry, in metres?", answer: [6], labels: ["Ry (m)"], explanation: "Ry = −2 + 8 = 6 m." },
    { prompt: "What is the magnitude √(4² + 6²), in metres to 2 decimal places?", answer: [7.21], labels: ["magnitude (m)"], explanation: "4² + 6² = 16 + 36 = 52, and √52 ≈ 7.2111, so the magnitude is 7.21 m." },
    { prompt: "What is the angle tan⁻¹(6 ÷ 4), in radians to 2 decimal places?", answer: [0.98], labels: ["angle (rad)"], explanation: "6 ÷ 4 ≈ 1.5, and tan⁻¹ of that is about 0.9828 radians, which rounds to 0.98." }
   ]
@@ -241,7 +243,8 @@ window.QUESTS.push(
   },
   guidance: [
    { prompt: "What is A · B = 4 × 2 + 3 × (−5), in square metres?", answer: [-7], labels: ["A · B (m²)"], explanation: "8 + (−15) = −7 m²." },
-   { prompt: "What are the magnitudes |A| = √(4² + 3²) and |B| = √(2² + (−5)²), in metres to 3 decimal places?", answer: [5,5.385], labels: ["|A| (m)","|B| (m)"], explanation: "|A| = √25 ≈ 5 and |B| = √29 ≈ 5.3852. Keep the unrounded values for the next step." },
+   { prompt: "What is the magnitude |A| = √(4² + 3²), in metres to 3 decimal places?", answer: [5], labels: ["|A| (m)"], explanation: "|A| = √25 ≈ 5. Keep the unrounded value for the last step." },
+   { prompt: "What is the magnitude |B| = √(2² + (−5)²), in metres to 3 decimal places?", answer: [5.385], labels: ["|B| (m)"], explanation: "|B| = √29 ≈ 5.3852. Keep the unrounded value for the last step." },
    { prompt: "cos φ = A · B ÷ (|A| |B|). What is the angle φ, in radians to 3 decimal places?", answer: [1.834], labels: ["angle (rad)"], explanation: "cos φ = −7 ÷ (5 × 5.3852) ≈ −0.26, and cos⁻¹(−0.26) ≈ 1.8338, so φ ≈ 1.834 radians." }
   ]
  },
@@ -284,8 +287,10 @@ window.QUESTS.push(
   },
   guidance: [
    { prompt: "What is the displacement, the final position −8 m minus the starting position 12 m?", answer: [-20], labels: ["displacement (m)"], explanation: "Δx = −8 − 12 = −20 m. Only the two ends count." },
-   { prompt: "How long is each leg of the trip: from 12 m to 40 m, then from 40 m to −8 m?", answer: [28,48], labels: ["first leg (m)","second leg (m)"], explanation: "The legs are 28 m and 48 m long. A length is never negative, whichever way the sled went." },
-   { prompt: "What is the total distance, and what is the average velocity, the displacement divided by the 10 s of the trip?", answer: [76,-2], labels: ["distance (m)","average velocity (m/s)"], explanation: "The distance is 28 + 48 = 76 m. The average velocity is −20 ÷ 10 = −2 m/s." }
+   { prompt: "How long is the first leg of the trip, from 12 m to 40 m, in metres?", answer: [28], labels: ["first leg (m)"], explanation: "The first leg is 28 m long. A length is never negative, whichever way the sled went." },
+   { prompt: "How long is the second leg, from 40 m to −8 m, in metres?", answer: [48], labels: ["second leg (m)"], explanation: "The second leg is 48 m long, again counted as positive." },
+   { prompt: "What is the total distance, the two leg lengths added, in metres?", answer: [76], labels: ["distance (m)"], explanation: "The distance is 28 + 48 = 76 m." },
+   { prompt: "What is the average velocity, the displacement divided by the 10 s of the trip, in metres per second?", answer: [-2], labels: ["average velocity (m/s)"], explanation: "The average velocity is −20 ÷ 10 = −2 m/s." }
   ]
  },
  {
@@ -326,9 +331,12 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: "Differentiate x(t) = 10 + 4t + 3t² − t³. In v(t), what are the constant term, the number in front of t and the number in front of t²?", answer: [4,6,-3], labels: ["constant term","number in front of t","number in front of t²"], explanation: "The constant 10 has derivative 0, 4t gives 4, 3t² gives 6t and −t³ gives −3t², so v(t) = 4 + 6t − 3t²." },
+   { prompt: "Differentiate x(t) = 10 + 4t + 3t² − t³. What is the constant term of v(t)?", answer: [4], labels: ["constant term"], explanation: "The constant 10 has derivative 0 and 4t gives 4, so the constant term of v(t) is 4." },
+   { prompt: "What is the number in front of t in v(t)?", answer: [6], labels: ["number in front of t"], explanation: "3t² gives 6t, so the number is 6." },
+   { prompt: "What is the number in front of t² in v(t)?", answer: [-3], labels: ["number in front of t²"], explanation: "−t³ gives −3t², so the number is −3 and v(t) = 4 + 6t − 3t²." },
    { prompt: "What is v(1), the velocity at t = 1 s, in metres per second?", answer: [7], labels: ["velocity (m/s)"], explanation: "4 + 6 × 1 − 3 × 1 = 7 m/s. It is positive, so the sled is going uphill." },
-   { prompt: "What are the velocity and the speed at t = 3 s, in metres per second?", answer: [-5,5], labels: ["velocity (m/s)","speed (m/s)"], explanation: "4 + 6 × 3 − 3 × 9 = −5 m/s. The minus sign says downhill; the speed drops the sign: 5 m/s." }
+   { prompt: "What is the velocity at t = 3 s, in metres per second?", answer: [-5], labels: ["velocity (m/s)"], explanation: "4 + 6 × 3 − 3 × 9 = −5 m/s. The minus sign says downhill." },
+   { prompt: "What is the speed at t = 3 s, in metres per second?", answer: [5], labels: ["speed (m/s)"], explanation: "The speed drops the sign of the velocity: 5 m/s." }
   ]
  },
  {
@@ -368,7 +376,8 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: "What are the velocities v(1) and v(4), in metres per second?", answer: [4,25], labels: ["v at the start (m/s)","v at the end (m/s)"], explanation: "Put each time into v(t) = 2t² − 3t + 5: v(1) = 4 and v(4) = 25, both in m/s." },
+   { prompt: "What is the velocity v(1), in metres per second?", answer: [4], labels: ["v at the start (m/s)"], explanation: "Put t = 1 into v(t) = 2t² − 3t + 5: v(1) = 4 m/s." },
+   { prompt: "What is the velocity v(4), in metres per second?", answer: [25], labels: ["v at the end (m/s)"], explanation: "Put t = 4 into v(t) = 2t² − 3t + 5: v(4) = 25 m/s." },
    { prompt: "What is the average acceleration, (v(4) − v(1)) ÷ (4 − 1), in m/s²?", answer: [7], labels: ["average acceleration (m/s²)"], explanation: "21 m/s of change in 3 s gives 7 m/s²." },
    { prompt: "Differentiate: a(t) = 4t − 3. What is a(4), in m/s²?", answer: [13], labels: ["instantaneous acceleration (m/s²)"], explanation: "4 × 4 − 3 = 13 m/s². It is not the average, because the acceleration changes during the interval." }
   ]
@@ -378,7 +387,7 @@ window.QUESTS.push(
   brief: "Cargo sleds brake on the flat at the foot of the run, and the crew must know how long and how far each one takes to stop.",
   lesson: "With constant acceleration a: v = v₀ + at, x = x₀ + v₀t + ½at² and v² = v₀² + 2a(x − x₀).",
   prompt: "A cargo sled is moving along the flat run at 20 m/s when its brakes come on. They slow it with a constant deceleration of 2.5 m/s², so, taking its direction of motion as positive, its acceleration is −2.5 m/s². Enter the time it takes to stop in seconds, then the distance it slides while braking in metres.",
-  answer: [8,80], labels: ["stopping time (s)","stopping distance (m)"], tolerance: 0.005,
+  answer: [8, 80], labels: ["stopping time (s)","stopping distance (m)"], tolerance: 0.005,
   hints: [
    "Use v = v₀ + at with the final velocity v = 0, and solve for t.",
    "Use v² = v₀² + 2a(x − x₀) with v = 0: the stopping distance x − x₀ is v₀² ÷ (2 × the deceleration)."

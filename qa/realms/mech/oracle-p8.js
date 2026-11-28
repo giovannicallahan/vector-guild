@@ -10,11 +10,11 @@ const inertia = pts => pts.reduce((s, [m, r]) => s + m * r * r, 0);
 /* Perfectly inelastic collision of A (moving east at v1) and B (moving north at v2): velocity components by momentum sums. */
 const couple = (m1, v1, m2, v2) => ({ vx: m1 * v1 / (m1 + m2), vy: m2 * v2 / (m1 + m2) });
 Object.assign(window.ORACLE, {
-  /* q36b: k is an index: the prompt prints the speed as 30·k rpm (60 for k = 2, 120 for k = 4). I from the four printed pots;
+  /* q36b: N is the printed speed in rpm. I from the four printed pots;
      omega = rpm turns × 2π rad ÷ 60 s; K = I omega² / 2. */
   q36b: p => {
     const I = inertia([[p.m1, p.r1], [p.m2, p.r2], [p.m3, p.r3], [p.m4, p.r4]]);
-    const w = 30 * p.k * TAU / 60;
+    const w = p.N * TAU / 60;
     return [rd(I, 2), rd(I * w * w / 2, 2)];
   },
   /* q36c: two drums, start omega w0, work E added. K0 = I w0²/2; K1 = K0 + E; w1 = sqrt(2 K1 / I). */
@@ -23,10 +23,10 @@ Object.assign(window.ORACLE, {
     const K1 = I * p.w0 * p.w0 / 2 + p.E;
     return [rd(I, 2), rd(Math.sqrt(2 * K1 / I), 2)];
   },
-  /* q36d: k is an index: the prompt prints the speed as 30·k rpm (180 for k = 6, 60 for k = 2). Outer weight is the largest r. */
+  /* q36d: N is the printed speed in rpm. Outer weight is the largest r. */
   q36d: p => {
     const I = inertia([[p.m1, p.r1], [p.m2, p.r2], [p.m3, p.r3]]);
-    const w = 30 * p.k * TAU / 60;
+    const w = p.N * TAU / 60;
     return [rd(I, 2), rd(I * w * w / 2, 2), rd(w * Math.max(p.r1, p.r2, p.r3), 2)];
   },
   /* q37b: angle is a·π/b rad (printed, e.g. π/3). tau = r F sin(angle); alpha = tau / I. */

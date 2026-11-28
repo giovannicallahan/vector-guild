@@ -27,6 +27,8 @@ const mk = (meta, gen) => {
 const g = 9.8, PI = Math.PI, SUP = { 2: '²', 3: '³' };
 const r2 = x => Math.round(x * 100) / 100;
 const f2 = x => r2(x).toFixed(2).replace('-', '−');
+/* "=" when x is already exact at 2 decimal places, otherwise "≈", so a solution never writes ≈ before an exact value. */
+const ap = x => Math.abs(Math.round(x * 100) / 100 - x) < 1e-9 ? '=' : '≈';
 /* True when x sits within 0.05 of a hundredth of a rounding tie at 2 places (a player's own rounding could go either way). */
 const nearTie = x => { const f = Math.abs(x) * 100 - Math.floor(Math.abs(x) * 100); return Math.abs(f - 0.5) < 0.05; };
 /* '=' when n(x) shows x exactly, '≈' when it is rounded. */
@@ -67,7 +69,7 @@ mk({
   guidance: [
    { prompt: `Add the x components: the drone’s x relative to the air, ${n(ax)}, plus the air’s x relative to the ground, ${n(wx)}. What is the drone’s x component relative to the ground, in m/s?`, answer: [gx], explanation: `${n(ax)} ${pm(wx)} = ${n(gx)} m/s.` },
    { prompt: `Now the y components: ${n(ay)} plus ${n(wy)}. What is the drone’s y component relative to the ground, in m/s?`, answer: [gy], explanation: `${n(ay)} ${pm(wy)} = ${n(gy)} m/s.` },
-   { prompt: `What is the drone’s speed over the ground, √(x² + y²) for (${n(gx)}, ${n(gy)}), in m/s to 2 decimal places?`, answer: [r2(s)], explanation: `√(${par(gx)}² + ${par(gy)}²) = √${n(gx * gx + gy * gy)} ≈ ${f2(s)} m/s.` }
+   { prompt: `What is the drone’s speed over the ground, √(x² + y²) for (${n(gx)}, ${n(gy)}), in m/s to 2 decimal places?`, answer: [r2(s)], explanation: `√(${par(gx)}² + ${par(gy)}²) = √${n(gx * gx + gy * gy)} ${ap(s)} ${f2(s)} m/s.` }
   ] }; }
 });
 
@@ -114,11 +116,11 @@ mk({
   hints: ['First turn the wind over the ground into components, as for any vector given by its size and angle: x is the size times cos of the angle and y is the size times sin of the angle, with the angle in radians.', 'The rule v_PG = v_PR + v_RG gives v_RG = v_PG − v_PR: subtract the measured wind from the wind over the ground, component by component. The rover’s speed is then √(x² + y²).'],
   solution: `Wind relative to the ground: (${n(W)} cos ${n(th)}, ${n(W)} sin ${n(th)}) ≈ (${n(wx)}, ${n(wy)}) m/s. Rover relative to the ground = (wind relative to ground) − (wind relative to rover) = (${n(wx)} − ${par(sx)}, ${n(wy)} − ${par(sy)}) ≈ (${n(rx)}, ${n(ry)}) m/s, which is (${f2(rx)}, ${f2(ry)}) m/s. Its speed is √(${par(rx)}² + ${par(ry)}²) ≈ ${n(s)}, which is ${f2(s)} m/s.`,
   guidance: [
-   { prompt: `What is the x component of the wind relative to the ground, ${n(W)} × cos ${n(th)}, in m/s to 2 decimal places?`, answer: [r2(wx)], explanation: `${n(W)} × cos ${n(th)} ≈ ${f2(wx)} m/s.` },
-   { prompt: `What is the y component of the wind relative to the ground, ${n(W)} × sin ${n(th)}, in m/s to 2 decimal places?`, answer: [r2(wy)], explanation: `${n(W)} × sin ${n(th)} ≈ ${f2(wy)} m/s.` },
-   { prompt: `The rover’s x relative to the ground is the wind’s x relative to the ground minus the wind’s x relative to the rover, ${n(sx)}. What is it, in m/s to 2 decimal places?`, answer: [r2(rx)], explanation: `${n(wx)} − ${par(sx)} ≈ ${f2(rx)} m/s.` },
-   { prompt: `Now the y components: the wind’s y relative to the ground minus ${n(sy)}. What is the rover’s y relative to the ground, in m/s to 2 decimal places?`, answer: [r2(ry)], explanation: `${n(wy)} − ${par(sy)} ≈ ${f2(ry)} m/s.` },
-   { prompt: `What is the rover’s speed over the ground, √(x² + y²) for (${f2(rx)}, ${f2(ry)}), in m/s to 2 decimal places?`, answer: [r2(s)], explanation: `√(${par(r2(rx))}² + ${par(r2(ry))}²) ≈ ${f2(s)} m/s.` }
+   { prompt: `What is the x component of the wind relative to the ground, ${n(W)} × cos ${n(th)}, in m/s to 2 decimal places?`, answer: [r2(wx)], explanation: `${n(W)} × cos ${n(th)} ${ap(wx)} ${f2(wx)} m/s.` },
+   { prompt: `What is the y component of the wind relative to the ground, ${n(W)} × sin ${n(th)}, in m/s to 2 decimal places?`, answer: [r2(wy)], explanation: `${n(W)} × sin ${n(th)} ${ap(wy)} ${f2(wy)} m/s.` },
+   { prompt: `The rover’s x relative to the ground is the wind’s x relative to the ground minus the wind’s x relative to the rover, ${n(sx)}. What is it, in m/s to 2 decimal places?`, answer: [r2(rx)], explanation: `${n(wx)} − ${par(sx)} ${ap(rx)} ${f2(rx)} m/s.` },
+   { prompt: `Now the y components: the wind’s y relative to the ground minus ${n(sy)}. What is the rover’s y relative to the ground, in m/s to 2 decimal places?`, answer: [r2(ry)], explanation: `${n(wy)} − ${par(sy)} ${ap(ry)} ${f2(ry)} m/s.` },
+   { prompt: `What is the rover’s speed over the ground, √(x² + y²) for (${f2(rx)}, ${f2(ry)}), in m/s to 2 decimal places?`, answer: [r2(s)], explanation: `√(${par(r2(rx))}² + ${par(r2(ry))}²) ${ap(s)} ${f2(s)} m/s.` }
   ] }; }
 });
 
@@ -140,10 +142,10 @@ mk({
   hints: ['On the arm the pod goes once round a circle of length 2πr in one period, so its speed is 2πr ÷ T, and its centripetal acceleration is v² ÷ r.', 'After release the pod starts with no downward speed, so it falls the height h in a time t with h = ½gt². Meanwhile it keeps its horizontal speed, so the horizontal distance is v × t.'],
   solution: `On the arm: v = 2π × ${n(r)} ÷ ${n(T)} ${eq(v)} ${n(v)} m/s. The centripetal acceleration is v² ÷ r, with v² ≈ ${n(v * v)}, so v² ÷ r ${eq(ac)} ${n(ac)}, which is ${f2(ac)} m/s². After release: ${n(h)} = ½ × 9.8 × t², so t = √(2 × ${n(h)} ÷ 9.8) ${eq(t)} ${n(t)}, which is ${f2(t)} s. The horizontal distance is v × t ≈ ${n(v)} × ${n(t)} ${eq(d)} ${n(d)}, which is ${f2(d)} m.`,
   guidance: [
-   { prompt: `What is the pod’s speed on the arm, 2πr ÷ T, in m/s to 2 decimal places?`, answer: [r2(v)], explanation: `2π × ${n(r)} ÷ ${n(T)} ≈ ${f2(v)} m/s.` },
-   { prompt: `What is the centripetal acceleration v² ÷ r, in m/s² to 2 decimal places? Use the unrounded speed.`, answer: [r2(ac)], explanation: `v² ÷ r ≈ ${n(v * v)} ÷ ${n(r)} ≈ ${f2(ac)} m/s².` },
-   { prompt: `After release the pod falls ${n(h)} m from rest vertically: ${n(h)} = ½ × 9.8 × t². What is t, in seconds to 2 decimal places?`, answer: [r2(t)], explanation: `t = √(2 × ${n(h)} ÷ 9.8) ≈ ${f2(t)} s.` },
-   { prompt: `The pod keeps its horizontal speed v while it falls. What horizontal distance does it travel in that time, in metres to 2 decimal places? Use the unrounded speed and time.`, answer: [r2(d)], explanation: `v × t ≈ ${n(v)} × ${n(t)} ≈ ${f2(d)} m.` }
+   { prompt: `What is the pod’s speed on the arm, 2πr ÷ T, in m/s to 2 decimal places?`, answer: [r2(v)], explanation: `2π × ${n(r)} ÷ ${n(T)} ${ap(v)} ${f2(v)} m/s.` },
+   { prompt: `What is the centripetal acceleration v² ÷ r, in m/s² to 2 decimal places? Use the unrounded speed.`, answer: [r2(ac)], explanation: `v² ÷ r ≈ ${n(v * v)} ÷ ${n(r)} ${ap(ac)} ${f2(ac)} m/s².` },
+   { prompt: `After release the pod falls ${n(h)} m from rest vertically: ${n(h)} = ½ × 9.8 × t². What is t, in seconds to 2 decimal places?`, answer: [r2(t)], explanation: `t = √(2 × ${n(h)} ÷ 9.8) ${ap(t)} ${f2(t)} s.` },
+   { prompt: `The pod keeps its horizontal speed v while it falls. What horizontal distance does it travel in that time, in metres to 2 decimal places? Use the unrounded speed and time.`, answer: [r2(d)], explanation: `v × t ≈ ${n(v)} × ${n(t)} ${ap(d)} ${f2(d)} m.` }
   ] }; }
 });
 
@@ -164,8 +166,8 @@ mk({
   hints: ['The pod leaves the arm with the speed it had on the circle: once round a circle of length 2πr in one period, so v = 2πr ÷ T.', 'On level ground the range is v² sin(2θ) ÷ g, with θ in radians. The distance to the crate is the difference between the range and the crate’s distance, taken as a positive number.'],
   solution: `Release speed: v = 2π × ${n(r)} ÷ ${n(T)} ${eq(v)} ${n(v)} m/s. Range: v² sin(2θ) ÷ g, with v² ≈ ${n(v * v)}, so it is ${n(v * v)} × sin ${n(2 * th)} ÷ 9.8 ${eq(Rg)} ${n(Rg)}, which is ${f2(Rg)} m. The crate is ${n(D)} m away, so the distance between them is ${n(gap)} m (the pod lands ${Rg < D ? 'short of' : 'beyond'} the crate), which is ${f2(gap)} m.`,
   guidance: [
-   { prompt: `What is the release speed 2πr ÷ T, in m/s to 2 decimal places?`, answer: [r2(v)], explanation: `2π × ${n(r)} ÷ ${n(T)} ≈ ${f2(v)} m/s.` },
-   { prompt: `What is the range v² sin(2θ) ÷ g, in metres to 2 decimal places? Use the unrounded speed.`, answer: [r2(Rg)], explanation: `${n(v * v)} × sin ${n(2 * th)} ÷ 9.8 ≈ ${f2(Rg)} m.` },
+   { prompt: `What is the release speed 2πr ÷ T, in m/s to 2 decimal places?`, answer: [r2(v)], explanation: `2π × ${n(r)} ÷ ${n(T)} ${ap(v)} ${f2(v)} m/s.` },
+   { prompt: `What is the range v² sin(2θ) ÷ g, in metres to 2 decimal places? Use the unrounded speed.`, answer: [r2(Rg)], explanation: `${n(v * v)} × sin ${n(2 * th)} ÷ 9.8 ${ap(Rg)} ${f2(Rg)} m.` },
    { prompt: `The crate is ${n(D)} m from the launch point. How far is the landing point from the crate, in metres to 2 decimal places?`, answer: [r2(gap)], explanation: `The difference between ${n(D)} and ${n(Rg)} is ${n(gap)}, so about ${f2(gap)} m.` }
   ] }; }
 });
@@ -189,8 +191,8 @@ mk({
   guidance: [
    { prompt: `What speed has the pod reached after ${n(t)} s of gaining ${n(at)} m/s every second, in m/s?`, answer: [r2(v)], explanation: `${n(at)} × ${n(t)} = ${n(v)} m/s.` },
    { prompt: `What is the centripetal acceleration v² ÷ r at release, in m/s² to 2 decimal places?`, answer: [r2(ac)], explanation: `${n(v * v)} ÷ ${n(r)} ${eq(ac)} ${f2(ac)} m/s².` },
-   { prompt: `Combine it with the tangential ${n(at)} m/s², which is at a right angle to it. What is the size of the total acceleration, in m/s² to 2 decimal places?`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ≈ ${f2(tot)} m/s².` },
-   { prompt: `What is the range v² sin(2θ) ÷ g after release, in metres to 2 decimal places?`, answer: [r2(Rg)], explanation: `${n(v * v)} × ${n(Math.sin(2 * th))} ÷ 9.8 ≈ ${f2(Rg)} m.` }
+   { prompt: `Combine it with the tangential ${n(at)} m/s², which is at a right angle to it. What is the size of the total acceleration, in m/s² to 2 decimal places?`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ${ap(tot)} ${f2(tot)} m/s².` },
+   { prompt: `What is the range v² sin(2θ) ÷ g after release, in metres to 2 decimal places?`, answer: [r2(Rg)], explanation: `${n(v * v)} × ${n(Math.sin(2 * th))} ÷ 9.8 ${ap(Rg)} ${f2(Rg)} m.` }
   ] }; }
 });
 
@@ -268,7 +270,7 @@ mk({
    { prompt: `What is the y component of the net force, m × a_y, in newtons?`, answer: [Sy], explanation: `${n(m)} × ${par(ay)} = ${n(Sy)} N.` },
    { prompt: `The net force is rope 1 plus rope 2. What is the x component of rope 2’s force, in newtons?`, answer: [Fx], explanation: `${n(Sx)} − ${par(f1x)} = ${n(Fx)} N.` },
    { prompt: `What is the y component of rope 2’s force, in newtons?`, answer: [Fy], explanation: `${n(Sy)} − ${par(f1y)} = ${n(Fy)} N.` },
-   { prompt: `What is the size of rope 2’s force (${n(Fx)}, ${n(Fy)}) N, √(x² + y²), in newtons to 2 decimal places?`, answer: [r2(F)], explanation: `√(${par(Fx)}² + ${par(Fy)}²) ≈ ${f2(F)} N.` }
+   { prompt: `What is the size of rope 2’s force (${n(Fx)}, ${n(Fy)}) N, √(x² + y²), in newtons to 2 decimal places?`, answer: [r2(F)], explanation: `√(${par(Fx)}² + ${par(Fy)}²) ${ap(F)} ${f2(F)} N.` }
   ] }; }
 });
 
@@ -303,10 +305,11 @@ mk({
  gl: [['largest net force (N)'], ['largest acceleration (m/s²)'], ['time (s)']]
 }, {
  /* a = Fmax ÷ m − g is a whole number of tenths (Fmax = m(9.8 + A), A in tenths from 0.5 to 3), and t = V ÷ a is off a rounding tie. */
- canonical: { m: 55, A: 1.2, V: 5 },
- draw: R => retry(() => ({ m: R.int(30, 70), A: R.int(5, 30) / 10, V: R.int(2, 6) }), p => !nearTie(p.V / p.A) && !(p.m === 50 && p.A === 1.2), { m: 55, A: 1.2, V: 5 }),
- build: ({ m, A, V }) => { const Fm = Math.round(m * (g + A) * 10) / 10, W = m * g, net = Fm - W, a = Fm / m - g, t = V / a; return {
-  prompt: `The floor plate of a Crane Yard lift cage can push up on whatever stands on it with a force of at most ${n(Fm)} N before it gives way. A crate of mass ${n(m)} kg stands on the plate. The cage starts from rest and rises, speeding up steadily. Take g = 9.8 m/s². Enter the largest upward acceleration the cage can have without the plate pushing harder than ${n(Fm)} N, in m/s², then how long the cage takes to reach ${n(V)} m/s from rest at that acceleration, in seconds (a body that starts from rest and speeds up steadily at a reaches speed v after v ÷ a seconds). Give both to 2 decimal places.`,
+ canonical: { m: 55, Fm: 605, V: 5 },
+ draw: R => retry(() => { const m = R.int(30, 70); return { m, Fm: R.int(Math.ceil(m * (g + 0.5)), Math.floor(m * (g + 3))), V: R.int(2, 6) }; },
+  p => { const a = p.Fm / p.m - g; return !nearTie(a) && !nearTie(p.V / a) && !(p.m === 50 && p.Fm === 550); }, { m: 55, Fm: 605, V: 5 }),
+ build: ({ m, Fm, V }) => { const W = m * g, net = Fm - W, a = Fm / m - g, t = V / a; return {
+  prompt: `The floor plate of a Crane Yard lift cage can push up on whatever stands on it with a force of at most ${n(Fm)} N before it gives way. A crate of mass ${n(m)} kg stands on the plate. The cage starts from rest and rises, speeding up steadily. Take g = 9.8 m/s². Enter the largest upward acceleration the cage can have without the plate pushing harder than ${n(Fm)} N, in m/s², then how long the cage takes to reach ${n(V)} m/s from rest at that acceleration, in seconds (a body that starts from rest and speeds up steadily at a reaches speed v after v ÷ a seconds). Give both to 2 decimal places, and use the unrounded acceleration for the time.`,
   answer: [r2(a), r2(t)],
   hints: ['Weight is mg, pointing down. With up positive, Newton’s second law for the crate is F_N − mg = ma, and the largest acceleration is the one that makes F_N as big as the plate allows.', 'Solve for a: a = (F_N − mg) ÷ m. Then the time to reach a speed v from rest is v ÷ a.'],
   solution: `Weight: ${n(m)} × 9.8 = ${n(W)} N. With F_N at its largest, the net force is ${n(Fm)} − ${n(W)} = ${n(net)} N, so a = ${n(net)} ÷ ${n(m)} ${eq(a)} ${n(a)}, which is ${f2(a)} m/s². The time to reach ${n(V)} m/s is ${n(V)} ÷ ${n(a)} ${eq(t)} ${n(t)}, which is ${f2(t)} s.`,
@@ -369,20 +372,21 @@ mk({
 mk({
  id: 'q20c', parent: 'q20', kind: 'applied', title: 'The lower cable’s rating',
  brief: 'The lower cable on a twin lift has a rating plate, and the crane operator needs to know the hardest the crane may pull without overloading it.',
- labels: ['greatest acceleration (m/s²)', 'greatest crane pull (N)'], tolerance: 0.01,
+ labels: ['greatest acceleration (m/s²)', 'greatest crane pull (N)'], tolerance: 0.005,
  gl: [['greatest acceleration (m/s²)'], ['net force on both crates (N)'], ['greatest crane pull (N)']]
 }, {
  /* The lower cable's rating is Tmax = m2(9.8 + A) with A in tenths from 0.3 to 2.5, so a = Tmax ÷ m2 − g = A and the crane pull F = (m1 + m2)(g + A) are short decimals below 1000 N. The masses differ. */
- canonical: { m1: 35, m2: 20, A: 1.4 },
- draw: R => retry(() => ({ m1: R.int(10, 45), m2: R.int(10, 30), A: R.int(3, 25) / 10 }), p => p.m1 !== p.m2 && !(p.m1 === 40 && p.m2 === 25), { m1: 35, m2: 20, A: 1.4 }),
- build: ({ m1, m2, A }) => { const Tm = Math.round(m2 * (g + A) * 10) / 10, M = m1 + m2, a = Tm / m2 - g, S = M * a, F = M * g + S; return {
-  prompt: `The gantry crane lifts two crates. Its cable pulls straight up on the top crate, of mass ${n(m1)} kg. A lower cable hangs from the top crate and holds the bottom crate, of mass ${n(m2)} kg. The lower cable’s rating plate says it must never carry a tension above ${n(Tm)} N. Ignore the mass of the cables and take g = 9.8 m/s². Enter the greatest upward acceleration the crates can have without the lower cable’s tension passing ${n(Tm)} N, in m/s², then the greatest pull the crane’s cable can then exert on the top crate, in newtons, both to 2 decimal places.`,
+ canonical: { m1: 35, m2: 20, Tm: 224 },
+ draw: R => retry(() => { const m2 = R.int(10, 30); return { m1: R.int(10, 45), m2, Tm: R.int(Math.ceil(m2 * (g + 0.3)), Math.floor(m2 * (g + 2.5))) }; },
+  p => { const a = p.Tm / p.m2 - g; return p.m1 !== p.m2 && !(p.m1 === 40 && p.m2 === 25) && !nearTie(a) && !nearTie((p.m1 + p.m2) * a) && !nearTie((p.m1 + p.m2) * (g + a)); }, { m1: 35, m2: 20, Tm: 224 }),
+ build: ({ m1, m2, Tm }) => { const M = m1 + m2, a = Tm / m2 - g, S = M * a, F = M * g + S; return {
+  prompt: `The gantry crane lifts two crates. Its cable pulls straight up on the top crate, of mass ${n(m1)} kg. A lower cable hangs from the top crate and holds the bottom crate, of mass ${n(m2)} kg. The lower cable’s rating plate says it must never carry a tension above ${n(Tm)} N. Ignore the mass of the cables and take g = 9.8 m/s². Enter the greatest upward acceleration the crates can have without the lower cable’s tension passing ${n(Tm)} N, in m/s², then the greatest pull the crane’s cable can then exert on the top crate, in newtons, both to 2 decimal places. Use the unrounded acceleration for the pull.`,
   answer: [r2(a), r2(F)],
   hints: ['Look at the bottom crate alone: the lower cable pulls it up with the tension T and gravity pulls it down, so T − m₂g = m₂a. The largest allowed T gives the largest a.', 'Then treat both crates as one system, whose total mass is m₁ + m₂: the lower cable’s pulls cancel inside it (Newton’s third law), so the crane’s pull F minus the total weight must equal the total mass times a.'],
   solution: `Bottom crate alone, with T at its largest: ${n(Tm)} − ${n(m2 * g)} = ${n(m2)}a, so a = ${n(Tm - m2 * g)} ÷ ${n(m2)} ${eq(a)} ${n(a)}, which is ${f2(a)} m/s². Whole system: mass ${n(M)} kg, so the net force is ${n(M)} × ${n(a)} ${eq(S)} ${n(S)} N and the total weight is ${n(M)} × 9.8 = ${n(M * g)} N. The crane’s pull is F = ${n(M * g)} + ${n(S)} ${eq(F)} ${n(F)}, which is ${f2(F)} N.`,
   guidance: [
    { prompt: `Bottom crate alone: T − ${n(m2 * g)} = ${n(m2)} × a, with T = ${n(Tm)} N. What is the greatest acceleration a, in m/s² to 2 decimal places?`, answer: [r2(a)], explanation: `a = (${n(Tm)} − ${n(m2 * g)}) ÷ ${n(m2)} ${eq(a)} ${f2(a)} m/s².` },
-   { prompt: `Take both crates as one system of mass ${n(M)} kg. What net force does it need to have the acceleration ${n(a)} m/s², in newtons?`, answer: [S], explanation: `${n(M)} × ${n(a)} ${eq(S)} ${n(S)} N.` },
+   { prompt: `Take both crates as one system of mass ${n(M)} kg. What net force does it need to have the acceleration ${n(a)} m/s², in newtons to 2 decimal places?`, answer: [r2(S)], explanation: `${n(M)} × ${n(a)} ${eq(S)} ${n(S)}, which is ${f2(S)} N.` },
    { prompt: `The crane’s pull must supply that net force and also hold up the total weight ${n(M)} × 9.8 N. What is the greatest crane pull, in newtons to 2 decimal places?`, answer: [r2(F)], explanation: `F = ${n(M * g)} + ${n(S)} ${eq(F)} ${n(F)}, which is ${f2(F)} N.` }
   ] }; }
 });

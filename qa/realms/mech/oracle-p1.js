@@ -10,16 +10,13 @@ const conv = (v, oldF, newF) => r6(v * oldF / newF);
 Object.assign(window.ORACLE, {
   /* q01b: V m/min (printed), L km (printed). m/s = V/60; km/h = V×60/1000; minutes = L×1000/V. */
   q01b: p => [r6(p.V / 60), r6(p.V * 60 / 1000), r6(p.L * 1000 / p.V)],
-  /* q01c: k1, k2 are indices: the prompt prints the speeds as 9·k1 and 9·k2 km/h (9 k = 36, 45, 54, 27 in the draws shown).
+  /* q01c: V1, V2 km/h and M1, M2 minutes (printed); D m to the pylon (printed).
      Distance driven = speed × 1000/60 m per minute × minutes; the answer is D minus that. */
-  q01c: p => {
-    const v1 = 9 * p.k1, v2 = 9 * p.k2;
-    return [r6(p.D - (v1 * 1000 / 60 * p.M1 + v2 * 1000 / 60 * p.M2))];
-  },
-  /* q01d: j is an index: the prompt prints the speed as 5·j m/s (55 for j = 11). Time = 3600 H + 60 M s. */
+  q01c: p => [r6(p.D - (p.V1 * 1000 / 60 * p.M1 + p.V2 * 1000 / 60 * p.M2))],
+  /* q01d: V m/s, H hours and M minutes (printed). Time = 3600 H + 60 M s. */
   q01d: p => {
-    const v = 5 * p.j, t = 3600 * p.H + 60 * p.M;
-    return [r6(v * 3600 / 1000), t, r6(v * t / 1000)];
+    const t = 3600 * p.H + 60 * p.M;
+    return [r6(p.V * 3600 / 1000), t, r6(p.V * t / 1000)];
   },
   /* q02b: a1, a2, a3 are the printed coefficients ×10 (58 means 5.8); e1, e2, e3 the printed powers of ten. */
   q02b: p => [

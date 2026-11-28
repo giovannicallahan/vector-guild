@@ -76,12 +76,12 @@ mk({
  labels: ['distance left (m)'], tolerance: 0.01,
  gl: [['first leg (m)'], ['second leg (m)'], ['distance left (m)']]
 }, {
- /* Speeds are 9k km/h, so a speed is 2.5k m/s and a leg is 150 k × minutes metres. Never the q01 canonical (54 km/h for 4 min). The pylon is
+ /* Speeds V are multiples of 9 km/h, so a speed is 5V/18 m/s (a multiple of 2.5) and a leg is 50 V × minutes ÷ 3 metres, a whole number. Never the q01 canonical (54 km/h for 4 min). The pylon is
     200 to 2000 m beyond where the rover stops, in steps of 50. */
- canonical: { k1: 4, M1: 5, k2: 5, M2: 6, D: 8400 },
- draw: R => retry(() => { const k1 = R.int(2, 6), M1 = R.int(2, 8), k2 = R.int(2, 6), M2 = R.int(2, 8); return { k1, M1, k2, M2, D: 150 * (k1 * M1 + k2 * M2) + 50 * R.int(4, 40) }; },
-  p => !(p.k1 === 6 && p.M1 === 4) && !(p.k2 === 6 && p.M2 === 4), { k1: 4, M1: 5, k2: 5, M2: 6, D: 8400 }),
- build: ({ k1, M1, k2, M2, D }) => { const V1 = 9 * k1, V2 = 9 * k2, m1 = 2.5 * k1, m2 = 2.5 * k2, l1 = 150 * k1 * M1, l2 = 150 * k2 * M2, left = D - l1 - l2; return {
+ canonical: { V1: 36, M1: 5, V2: 45, M2: 6, D: 8400 },
+ draw: R => retry(() => { const V1 = 9 * R.int(2, 6), M1 = R.int(2, 8), V2 = 9 * R.int(2, 6), M2 = R.int(2, 8); return { V1, M1, V2, M2, D: 50 * (V1 * M1 + V2 * M2) / 3 + 50 * R.int(4, 40) }; },
+  p => !(p.V1 === 54 && p.M1 === 4) && !(p.V2 === 54 && p.M2 === 4), { V1: 36, M1: 5, V2: 45, M2: 6, D: 8400 }),
+ build: ({ V1, M1, V2, M2, D }) => { const m1 = 5 * V1 / 18, m2 = 5 * V2 / 18, l1 = 50 * V1 * M1 / 3, l2 = 50 * V2 * M2 / 3, left = D - l1 - l2; return {
   prompt: `The survey rover leaves the depot and drives in a straight line towards a signal pylon that stands ${n(D)} m from the depot. It drives at ${n(V1)} km/h for ${n(M1)} minutes, then at ${n(V2)} km/h for ${n(M2)} minutes, in the same direction. Enter how far the rover still is from the pylon when it stops, in metres, typed without commas.`,
   answer: [left],
   hints: ['Change each speed to metres per second with the factors (1000 m ÷ 1 km) and (1 h ÷ 3600 s), and each time to seconds. A leg is its speed times its time.',
@@ -101,10 +101,10 @@ mk({
  labels: ['speed (km/h)', 'flight time (s)', 'distance (km)'], tolerance: 0.01,
  gl: [['speed (km/h)'], ['flight time (s)'], ['distance (km)']]
 }, {
- /* V = 5 j m/s, so the speed in km/h is 18 j and the distance 0.3 j (60 H + M) km, a number with at most one decimal place. */
- canonical: { j: 5, H: 2, M: 30 },
- draw: R => ({ j: R.int(2, 12), H: R.int(1, 3), M: R.int(2, 59) }),
- build: ({ j, H, M }) => { const V = 5 * j, kmh = 18 * j, s = 3600 * H + 60 * M, km = 3 * j * (60 * H + M) / 10; return {
+ /* V is a multiple of 5 m/s, so the speed in km/h (3.6 V) is a whole number and the distance V (3600 H + 60 M) ÷ 1000 km has at most one decimal place. */
+ canonical: { V: 25, H: 2, M: 30 },
+ draw: R => ({ V: 5 * R.int(2, 12), H: R.int(1, 3), M: R.int(2, 59) }),
+ build: ({ V, H, M }) => { const kmh = 18 * V / 5, s = 3600 * H + 60 * M, km = 3 * V * (60 * H + M) / 50; return {
   prompt: `A relay drone cruises at ${n(V)} metres per second (m/s) on a survey flight that lasts ${pl(H, 'hour', 'hours')} and ${n(M)} minutes. Enter its speed in kilometres per hour (km/h), the flight time in seconds (s, typed without commas), then the distance it flies in kilometres (km).`,
   answer: [kmh, s, km],
   hints: ['Turn metres per second into kilometres per hour with (1 km ÷ 1000 m) and (3600 s ÷ 1 h): the seconds are underneath in m/s, so 3600 s goes on top.',

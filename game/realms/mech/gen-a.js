@@ -25,7 +25,7 @@ const quadrant = th => th < Math.PI / 2 ? `The angle ${n(th)} is between 0 and �
  : `The angle ${n(th)} is between 3π/2 ≈ 4.71 and 2π ≈ 6.28, so the marker is south-east of the mast: the x component is positive and the y component negative.`;
 const Q01 = { V: 54, M: 4 }, Q02 = { a1: 35, e1: -4, a2: 48, e2: -2, a3: 27, e3: 8 }, Q03 = { M: 40, th10: 21 }, Q04 = { ax: 7, ay: -2, bx: -3, by: 8 },
  Q05 = { ax: 4, ay: 3, bx: 2, by: -5 }, Q06 = { x0: 12, x1: 40, x2: -8, t1: 6, t2: 10 }, Q07 = { a: 1, b: 3, c: 4, d: 10, t1: 1, t2: 3 },
- Q08 = { p: 2, q: -3, r: 5, t1: 1, t2: 4 }, Q09 = { a2: 5, t: 8 }, Q10 = { v0: 14, h: 20 };
+ Q08 = { p: 2, q: -3, r: 5, t1: 1, t2: 4 }, Q09 = { v0: 20, a: 2.5 }, Q10 = { v0: 14, h: 20 };
 window.MISSION_GEN = window.MISSION_GEN || {};
 Object.assign(window.MISSION_GEN, {
  /* V km/h is a multiple of 9, so V ÷ 3.6 is a multiple of 2.5 m/s; M minutes from 2 to 15. Never 72 km/h, the worked example. */
@@ -40,7 +40,8 @@ Object.assign(window.MISSION_GEN, {
    guidance: [
     { prompt: `How many metres are there in ${n(V)} kilometres?`, answer: [mh], explanation: `Each kilometre is 1000 metres, so ${n(V)} km × (1000 m ÷ 1 km) = ${n(mh)} m. The rover covers ${n(mh)} m every hour.` },
     { prompt: `An hour is 3600 seconds. What is ${n(mh)} metres per hour in metres per second?`, answer: [ms], explanation: `${n(mh)} m ÷ 3600 s = ${n(ms)} m/s: the hours cancel and seconds are left underneath.` },
-    { prompt: `How many seconds are there in ${n(M)} minutes, and how far does the rover go at ${n(ms)} m/s in that time?`, answer: [s, d], explanation: `${n(M)} × 60 = ${n(s)} s, and ${n(ms)} m/s × ${n(s)} s = ${n(d)} m. The seconds cancel and metres are left.` }
+    { prompt: `How many seconds are there in ${n(M)} minutes?`, answer: [s], explanation: `Each minute is 60 seconds, so ${n(M)} × 60 = ${n(s)} s.` },
+    { prompt: `How far does the rover go at ${n(ms)} m/s in ${n(s)} s, in metres?`, answer: [d], explanation: `${n(ms)} m/s × ${n(s)} s = ${n(d)} m. The seconds cancel and metres are left.` }
    ] }; }
  },
  /* Mantissas a ÷ 10 from 1.2 to 9.9 (never a whole number); each exponent is drawn from two values, so each answer is
@@ -87,7 +88,8 @@ Object.assign(window.MISSION_GEN, {
    hints: ['Add matching components: Rx = Ax + Bx and Ry = Ay + By.', 'The magnitude is √(Rx² + Ry²). When both components are positive, the angle is tan⁻¹(Ry ÷ Rx), in radians.'],
    solution: `Rx = ${n(ax)} + ${par(bx)} = ${n(x)} m and Ry = ${n(ay)} + ${par(by)} = ${n(y)} m, so R = ${vIJ(x, y)} metres. Its magnitude is √(${n(x)}² + ${n(y)}²) = √${n(x * x + y * y)} ≈ ${n(m)}, which is ${fx(M, 2)} m to 2 decimal places. Its angle is tan⁻¹(${n(y)} ÷ ${n(x)}) ≈ ${n(th)}, which is ${fx(TH, 2)} radians to 2 decimal places.`,
    guidance: [
-    { prompt: `Add the x components and then the y components of A and B. What are Rx and Ry?`, answer: [x, y], explanation: `Rx = ${n(ax)} + ${par(bx)} = ${n(x)} and Ry = ${n(ay)} + ${par(by)} = ${n(y)}, both in metres.` },
+    { prompt: `Add the x components of A and B. What is Rx, in metres?`, answer: [x], explanation: `Rx = ${n(ax)} + ${par(bx)} = ${n(x)} m.` },
+    { prompt: `Add the y components of A and B. What is Ry, in metres?`, answer: [y], explanation: `Ry = ${n(ay)} + ${par(by)} = ${n(y)} m.` },
     { prompt: `What is the magnitude √(${n(x)}² + ${n(y)}²), in metres to 2 decimal places?`, answer: [M], explanation: `${n(x)}² + ${n(y)}² = ${n(x * x)} + ${n(y * y)} = ${n(x * x + y * y)}, and √${n(x * x + y * y)} ≈ ${n(m)}, so the magnitude is ${fx(M, 2)} m.` },
     { prompt: `What is the angle tan⁻¹(${n(y)} ÷ ${n(x)}), in radians to 2 decimal places?`, answer: [TH], explanation: `${n(y)} ÷ ${n(x)} ≈ ${n(y / x)}, and tan⁻¹ of that is about ${n(th)} radians, which rounds to ${fx(TH, 2)}.` }
    ] }; }
@@ -105,7 +107,8 @@ Object.assign(window.MISSION_GEN, {
    solution: `A · B = ${par(ax)} × ${par(bx)} + ${par(ay)} × ${par(by)} = ${n(ax * bx)} + ${par(ay * by)} = ${n(d)} m². The magnitudes are |A| = √${n(ax * ax + ay * ay)} ≈ ${n(A)} m and |B| = √${n(bx * bx + by * by)} ≈ ${n(B)} m. So cos φ = ${n(d)} ÷ (${n(A)} × ${n(B)}) ≈ ${n(c)}, and φ = cos⁻¹(${n(c)}) ≈ ${n(ph)}, which is ${fx(PH, 3)} radians to 3 decimal places.`,
    guidance: [
     { prompt: `What is A · B = ${par(ax)} × ${par(bx)} + ${par(ay)} × ${par(by)}, in square metres?`, answer: [d], explanation: `${n(ax * bx)} + ${par(ay * by)} = ${n(d)} m².` },
-    { prompt: `What are the magnitudes |A| = √(${par(ax)}² + ${par(ay)}²) and |B| = √(${par(bx)}² + ${par(by)}²), in metres to 3 decimal places?`, answer: [A3, B3], explanation: `|A| = √${n(ax * ax + ay * ay)} ≈ ${n(A)} and |B| = √${n(bx * bx + by * by)} ≈ ${n(B)}. Keep the unrounded values for the next step.` },
+    { prompt: `What is the magnitude |A| = √(${par(ax)}² + ${par(ay)}²), in metres to 3 decimal places?`, answer: [A3], explanation: `|A| = √${n(ax * ax + ay * ay)} ≈ ${n(A)}. Keep the unrounded value for the last step.` },
+    { prompt: `What is the magnitude |B| = √(${par(bx)}² + ${par(by)}²), in metres to 3 decimal places?`, answer: [B3], explanation: `|B| = √${n(bx * bx + by * by)} ≈ ${n(B)}. Keep the unrounded value for the last step.` },
     { prompt: `cos φ = A · B ÷ (|A| |B|). What is the angle φ, in radians to 3 decimal places?`, answer: [PH], explanation: `cos φ = ${n(d)} ÷ (${n(A)} × ${n(B)}) ≈ ${n(c)}, and cos⁻¹(${n(c)}) ≈ ${n(ph)}, so φ ≈ ${fx(PH, 3)} radians.` }
    ] }; }
  },
@@ -122,8 +125,10 @@ Object.assign(window.MISSION_GEN, {
    solution: `Displacement: Δx = ${n(x2)} − ${par(x0)} = ${n(D)} m. The first leg is from ${n(x0)} m to ${n(x1)} m, a length of ${n(l1)} m; the second is from ${n(x1)} m to ${n(x2)} m, a length of ${n(l2)} m. The distance is ${n(l1)} + ${n(l2)} = ${n(d)} m. The average velocity is ${n(D)} m ÷ ${n(t2)} s = ${n(v)} m/s.`,
    guidance: [
     { prompt: `What is the displacement, the final position ${n(x2)} m minus the starting position ${n(x0)} m?`, answer: [D], explanation: `Δx = ${n(x2)} − ${par(x0)} = ${n(D)} m. Only the two ends count.` },
-    { prompt: `How long is each leg of the trip: from ${n(x0)} m to ${n(x1)} m, then from ${n(x1)} m to ${n(x2)} m?`, answer: [l1, l2], explanation: `The legs are ${n(l1)} m and ${n(l2)} m long. A length is never negative, whichever way the sled went.` },
-    { prompt: `What is the total distance, and what is the average velocity, the displacement divided by the ${n(t2)} s of the trip?`, answer: [d, v], explanation: `The distance is ${n(l1)} + ${n(l2)} = ${n(d)} m. The average velocity is ${n(D)} ÷ ${n(t2)} = ${n(v)} m/s.` }
+    { prompt: `How long is the first leg of the trip, from ${n(x0)} m to ${n(x1)} m, in metres?`, answer: [l1], explanation: `The first leg is ${n(l1)} m long. A length is never negative, whichever way the sled went.` },
+    { prompt: `How long is the second leg, from ${n(x1)} m to ${n(x2)} m, in metres?`, answer: [l2], explanation: `The second leg is ${n(l2)} m long, again counted as positive.` },
+    { prompt: `What is the total distance, the two leg lengths added, in metres?`, answer: [d], explanation: `The distance is ${n(l1)} + ${n(l2)} = ${n(d)} m.` },
+    { prompt: `What is the average velocity, the displacement divided by the ${n(t2)} s of the trip, in metres per second?`, answer: [v], explanation: `The average velocity is ${n(D)} ÷ ${n(t2)} = ${n(v)} m/s.` }
    ] }; }
  },
  /* x(t) = d + ct + bt² − at³: the velocity is positive at t1 and negative at t2, at most 60 m/s in size. */
@@ -137,9 +142,12 @@ Object.assign(window.MISSION_GEN, {
    hints: ['The velocity is the derivative of the position, v(t) = dx/dt. Differentiate term by term with the power rule.', 'Speed is the size of the velocity, with its sign dropped: it is never negative.'],
    solution: `v(t) = dx/dt = ${vx}. At t = ${n(t1)}: v = ${n(c)} + ${n(B)} × ${n(t1)} − ${n(A)} × ${n(t1 * t1)} = ${n(v1)} m/s, so the sled is moving uphill. At t = ${n(t2)}: v = ${n(c)} + ${n(B)} × ${n(t2)} − ${n(A)} × ${n(t2 * t2)} = ${n(v2)} m/s, so it is sliding downhill, and its speed is ${n(-v2)} m/s.`,
    guidance: [
-    { prompt: `Differentiate x(t) = ${x}. In v(t), what are the constant term, the number in front of t and the number in front of t²?`, answer: [c, B, -A], explanation: `The constant ${n(d)} has derivative 0, ${coef(c)}t gives ${n(c)}, ${coef(b)}t² gives ${n(B)}t and −${coef(a)}t³ gives −${n(A)}t², so v(t) = ${vx}.` },
+    { prompt: `Differentiate x(t) = ${x}. What is the constant term of v(t)?`, answer: [c], explanation: `The constant ${n(d)} has derivative 0 and ${coef(c)}t gives ${n(c)}, so the constant term of v(t) is ${n(c)}.` },
+    { prompt: `What is the number in front of t in v(t)?`, answer: [B], explanation: `${coef(b)}t² gives ${n(B)}t, so the number is ${n(B)}.` },
+    { prompt: `What is the number in front of t² in v(t)?`, answer: [-A], explanation: `−${coef(a)}t³ gives −${n(A)}t², so the number is −${n(A)} and v(t) = ${vx}.` },
     { prompt: `What is v(${n(t1)}), the velocity at t = ${n(t1)} s, in metres per second?`, answer: [v1], explanation: `${n(c)} + ${n(B)} × ${n(t1)} − ${n(A)} × ${n(t1 * t1)} = ${n(v1)} m/s. It is positive, so the sled is going uphill.` },
-    { prompt: `What are the velocity and the speed at t = ${n(t2)} s, in metres per second?`, answer: [v2, -v2], explanation: `${n(c)} + ${n(B)} × ${n(t2)} − ${n(A)} × ${n(t2 * t2)} = ${n(v2)} m/s. The minus sign says downhill; the speed drops the sign: ${n(-v2)} m/s.` }
+    { prompt: `What is the velocity at t = ${n(t2)} s, in metres per second?`, answer: [v2], explanation: `${n(c)} + ${n(B)} × ${n(t2)} − ${n(A)} × ${n(t2 * t2)} = ${n(v2)} m/s. The minus sign says downhill.` },
+    { prompt: `What is the speed at t = ${n(t2)} s, in metres per second?`, answer: [-v2], explanation: `The speed drops the sign of the velocity: ${n(-v2)} m/s.` }
    ] }; }
  },
  /* v(t) = pt² + qt + r; the average acceleration from t1 to t2 is p(t1 + t2) + q and the instantaneous one at t2 is
@@ -154,7 +162,8 @@ Object.assign(window.MISSION_GEN, {
    hints: ['The average acceleration is the change in velocity divided by the change in time, Δv ÷ Δt.', 'The instantaneous acceleration is the derivative of the velocity, a(t) = dv/dt.'],
    solution: `v(${n(t1)}) = ${n(v1)} m/s and v(${n(t2)}) = ${n(v2)} m/s, so the average acceleration is (${n(v2)} − ${par(v1)}) ÷ (${n(t2)} − ${n(t1)}) = ${n(v2 - v1)} ÷ ${n(t2 - t1)} = ${n(avg)} m/s². The derivative is a(t) = ${ax}, so at t = ${n(t2)} the acceleration is ${n(2 * p)} × ${n(t2)} ${sgn(q)} ${n(Math.abs(q))} = ${n(inst)} m/s².`,
    guidance: [
-    { prompt: `What are the velocities v(${n(t1)}) and v(${n(t2)}), in metres per second?`, answer: [v1, v2], explanation: `Put each time into v(t) = ${vx}: v(${n(t1)}) = ${n(v1)} and v(${n(t2)}) = ${n(v2)}, both in m/s.` },
+    { prompt: `What is the velocity v(${n(t1)}), in metres per second?`, answer: [v1], explanation: `Put t = ${n(t1)} into v(t) = ${vx}: v(${n(t1)}) = ${n(v1)} m/s.` },
+    { prompt: `What is the velocity v(${n(t2)}), in metres per second?`, answer: [v2], explanation: `Put t = ${n(t2)} into v(t) = ${vx}: v(${n(t2)}) = ${n(v2)} m/s.` },
     { prompt: `What is the average acceleration, (v(${n(t2)}) − v(${n(t1)})) ÷ (${n(t2)} − ${n(t1)}), in m/s²?`, answer: [avg], explanation: `${n(v2 - v1)} m/s of change in ${n(t2 - t1)} s gives ${n(avg)} m/s².` },
     { prompt: `Differentiate: a(t) = ${ax}. What is a(${n(t2)}), in m/s²?`, answer: [inst], explanation: `${n(2 * p)} × ${n(t2)} ${sgn(q)} ${n(Math.abs(q))} = ${n(inst)} m/s². It is not the average, because the acceleration changes during the interval.` }
    ] }; }
@@ -163,8 +172,9 @@ Object.assign(window.MISSION_GEN, {
     (12 m/s at 3 m/s²). The distance v₀t ÷ 2 has at most 2 decimal places. */
  q09: {
   canonical: Q09,
-  draw: R => retry(() => ({ a2: R.int(3, 12), t: R.int(3, 12) }), ({ a2, t }) => a2 * t / 2 <= 40 && !(a2 === 6 && t === 4), Q09),
-  build: ({ a2, t }) => { const a = a2 / 2, v0 = a * t, v02 = v0 * v0, d = v0 * t / 2; return {
+  /* The deceleration a is a multiple of 0.5 m/s² and the printed speed v0 = a t for a whole stopping time t, so t = v0 ÷ a is whole. */
+  draw: R => retry(() => { const a = R.int(3, 12) / 2, t = R.int(3, 12); return { v0: a * t, a }; }, ({ v0, a }) => v0 <= 40 && !(a === 3 && v0 === 12), Q09),
+  build: ({ v0, a }) => { const t = Math.round(v0 / a), v02 = v0 * v0, d = v0 * t / 2; return {
    prompt: `A cargo sled is moving along the flat run at ${n(v0)} m/s when its brakes come on. They slow it with a constant deceleration of ${n(a)} m/s², so, taking its direction of motion as positive, its acceleration is −${n(a)} m/s². Enter the time it takes to stop in seconds, then the distance it slides while braking in metres.`,
    answer: [t, d],
    hints: ['Use v = v₀ + at with the final velocity v = 0, and solve for t.', 'Use v² = v₀² + 2a(x − x₀) with v = 0: the stopping distance x − x₀ is v₀² ÷ (2 × the deceleration).'],

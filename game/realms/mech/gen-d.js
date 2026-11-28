@@ -2,6 +2,8 @@
    build(canonical) must reproduce the authored text in missions-d.js exactly. */
 (function(){
 'use strict';
+/* "a" or "an" before a number as it is read aloud: an 8, an 80, an 11, an 18, an 18000; a 7, a 110. cap gives "A"/"An". */
+const aN = (x, cap) => { const d = String(Math.round(Math.abs(x))), v = d[0] === '8' || ((d.startsWith('11') || d.startsWith('18')) && d.length % 3 === 2); return (cap ? 'A' : 'a') + (v ? 'n' : ''); };
 const G = window.Gen, { n, plus, par } = G;
 const g = 9.8;
 /* Rounding to 2 decimal places (or dp places), and "=" or "≈" before a rounded value. */
@@ -48,7 +50,7 @@ Object.assign(window.MISSION_GEN, {
   draw: R => tryDraw(R, R => ({ m: 10 * R.int(5, 40), v1: R.int(2, 12) / 2, v2: R.int(1, 6) / 2, dt: R.pick([0.2, 0.25, 0.4, 0.5, 0.8]) }),
    p => p.v2 < p.v1 && !(p.m === 80 && p.v1 === 2 && p.v2 === 1 && p.dt === 0.5), { m: 120, v1: 3, v2: 1.5, dt: 0.4 }),
   build: ({ m, v1, v2, dt }) => { const p1 = m * v1, pf = -m * v2, J = pf - p1, F = J / dt; return {
-   prompt: `A ${n(m)} kg cargo module drifts towards the docking buffer at ${n(v1)} m/s, presses into it for ${n(dt)} s and bounces straight back at ${n(v2)} m/s. Take the direction towards the buffer as positive, so the velocity after the bounce is ${n(-v2)} m/s. Enter the module’s momentum before it touches the buffer in kilogram metres per second (kg·m/s), then the impulse the buffer gives it in newton seconds (N·s), then the average force of the buffer on it in newtons (N). Signs matter; type the numbers without commas.`,
+   prompt: `${aN(m, true)} ${n(m)} kg cargo module drifts towards the docking buffer at ${n(v1)} m/s, presses into it for ${n(dt)} s and bounces straight back at ${n(v2)} m/s. The module floats in the ring, so during the contact only the buffer pushes on it along its line of motion. Take the direction towards the buffer as positive, so the velocity after the bounce is ${n(-v2)} m/s. Enter the module’s momentum before it touches the buffer in kilogram metres per second (kg·m/s), then the impulse the buffer gives it in newton seconds (N·s), then the average force of the buffer on it in newtons (N). Signs matter; type the numbers without commas.`,
    answer: [p1, J, F],
    hints: ['Momentum is mass times velocity, p = mv. The velocity after the bounce is negative, so that momentum is negative too.', 'The impulse equals the change in momentum, final minus initial. The average force is the impulse divided by the contact time.'],
    solution: `Before: p = ${n(m)} × ${n(v1)} = ${n(p1)} kg·m/s. After: p = ${n(m)} × ${par(-v2)} = ${n(pf)} kg·m/s. The impulse is the change in momentum: ${n(pf)} − ${n(p1)} = ${n(J)} N·s. The average force is impulse ÷ contact time = ${n(J)} ÷ ${n(dt)} = ${n(F)} N. The minus sign says the buffer pushes in the negative direction, back the way the load came.`,

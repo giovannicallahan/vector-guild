@@ -43,7 +43,7 @@ window.QUESTS.push(
   brief: "Cargo sleds roll down the loading ramp into a buffer spring, and the riggers need to know how fast they arrive and how far the spring gives.",
   lesson: "With only gravity and springs doing work, kinetic plus potential energy stays the same; friction takes away energy equal to the size of its work.",
   prompt: "A cargo sled of mass 30 kg starts from rest at the top of the Docking Ring’s loading ramp, 4 m above the floor. The ramp is frictionless. At the bottom the sled crosses a rough strip of floor 3 m long, where the coefficient of kinetic friction is μ = 0.2: there the friction force is μmg, μ times the sled’s weight. Past the strip the floor is frictionless again, and the sled runs into a buffer spring with spring constant k = 3000 N/m. Take g = 9.8 m/s². Enter the sled’s speed at the bottom of the ramp in metres per second, then the greatest compression of the spring in metres, both to 2 decimal places.",
-  answer: [8.85,0.82], labels: ["speed at the bottom (m/s)","spring compression (m)"], tolerance: 0.005,
+  answer: [8.85, 0.82], labels: ["speed at the bottom (m/s)","spring compression (m)"], tolerance: 0.005,
   hints: [
    "On the frictionless ramp mechanical energy is kept: the potential energy mgh at the top becomes the kinetic energy ½mv² at the bottom.",
    "On the rough strip friction takes away energy equal to the size of its work, μmg × distance. What is left is stored in the spring as ½kx² at the moment the sled stops."
@@ -86,8 +86,8 @@ window.QUESTS.push(
   id: 'q32', title: "Bouncing off the docking buffer", topic: "Momentum and impulse", tier: 'Advanced', sector: 'Docking Ring',
   brief: "A cargo module has hit the docking buffer and bounced, and the engineers want to know how hard the buffer had to push.",
   lesson: "Momentum is mass times velocity; the impulse of a force is the change in momentum it causes, and average force is impulse divided by contact time.",
-  prompt: "A 120 kg cargo module drifts towards the docking buffer at 3 m/s, presses into it for 0.4 s and bounces straight back at 1.5 m/s. Take the direction towards the buffer as positive, so the velocity after the bounce is −1.5 m/s. Enter the module’s momentum before it touches the buffer in kilogram metres per second (kg·m/s), then the impulse the buffer gives it in newton seconds (N·s), then the average force of the buffer on it in newtons (N). Signs matter; type the numbers without commas.",
-  answer: [360,-540,-1350], labels: ["momentum before (kg·m/s)","impulse (N·s)","average force (N)"], tolerance: 0.005,
+  prompt: "A 120 kg cargo module drifts towards the docking buffer at 3 m/s, presses into it for 0.4 s and bounces straight back at 1.5 m/s. The module floats in the ring, so during the contact only the buffer pushes on it along its line of motion. Take the direction towards the buffer as positive, so the velocity after the bounce is −1.5 m/s. Enter the module’s momentum before it touches the buffer in kilogram metres per second (kg·m/s), then the impulse the buffer gives it in newton seconds (N·s), then the average force of the buffer on it in newtons (N). Signs matter; type the numbers without commas.",
+  answer: [360, -540, -1350], labels: ["momentum before (kg·m/s)","impulse (N·s)","average force (N)"], tolerance: 0.005,
   hints: [
    "Momentum is mass times velocity, p = mv. The velocity after the bounce is negative, so that momentum is negative too.",
    "The impulse equals the change in momentum, final minus initial. The average force is the impulse divided by the contact time."
@@ -131,7 +131,7 @@ window.QUESTS.push(
   brief: "Two cargo modules are about to latch together on the docking track, and control needs their speed afterwards and how much energy the latches must soak up.",
   lesson: "With no outside force, the total momentum before a collision equals the total after; when bodies stick together kinetic energy is lost.",
   prompt: "Module A (400 kg) glides along the docking track at 3 m/s towards module B (200 kg), which is coming the other way at 1.5 m/s (a velocity of −1.5 m/s). Take A’s direction of motion as positive. The two latch together and move off as one, and no outside force acts along the track. Enter their common velocity just after latching in metres per second, then the kinetic energy lost in the collision in joules (type the numbers without commas).",
-  answer: [1.5,1350], labels: ["common velocity (m/s)","kinetic energy lost (J)"], tolerance: 0.005,
+  answer: [1.5, 1350], labels: ["common velocity (m/s)","kinetic energy lost (J)"], tolerance: 0.005,
   hints: [
    "The total momentum before, m₁v₁ + m₂v₂, equals the total momentum after, (m₁ + m₂)v. Keep the sign of each velocity.",
    "The kinetic energy lost is the total ½mv² of the two modules before, minus ½(m₁ + m₂)v² after."
@@ -146,7 +146,8 @@ window.QUESTS.push(
     "Choose a positive direction and give each velocity its sign.",
     "Add the momenta before the collision: m₁v₁ + m₂v₂.",
     "If the bodies stick, divide the total momentum by the total mass to get their common velocity.",
-    "For the energy, work out the total ½mv² before and ½(m₁ + m₂)v² after; the difference is the kinetic energy lost."
+    "For the energy, work out the total ½mv² before and ½(m₁ + m₂)v² after; the difference is the kinetic energy lost.",
+    "If instead the bodies bounce apart elastically, the total kinetic energy after equals the total before. That gives a second equation beside momentum, enough to find both velocities after the collision."
    ],
    example: {
     prompt: "A 300 kg cart moving at 2 m/s runs into a 100 kg cart at rest, and they stick together. What is their speed afterwards, and how much kinetic energy is lost?",
@@ -175,7 +176,7 @@ window.QUESTS.push(
   brief: "The docking ring tilts if its load sits off centre, so the crew needs the one point that stands for the whole group of parked modules.",
   lesson: "The centre of mass of point masses is the mass-weighted average of their positions, worked out one coordinate at a time.",
   prompt: "Three cargo modules are parked on the Docking Ring floor, which is marked with an x axis and a y axis in metres. Module A has mass 300 kg and sits at (2, 5), module B has mass 500 kg at (−4, 1), and module C has mass 200 kg at (6, −3). Treat each module as a point at its position. Enter the x coordinate of the centre of mass, then its y coordinate, both in metres to 2 decimal places.",
-  answer: [-0.2,1.4], labels: ["centre of mass x (m)","centre of mass y (m)"], tolerance: 0.005,
+  answer: [-0.2, 1.4], labels: ["centre of mass x (m)","centre of mass y (m)"], tolerance: 0.005,
   hints: [
    "The centre of mass is a mass-weighted average: multiply each position by its mass, add the products, and divide by the total mass.",
    "Work out x and y separately, and keep the signs of negative coordinates."
@@ -219,7 +220,7 @@ window.QUESTS.push(
   brief: "The vault flywheel’s gauge reads in revolutions per minute, and the safety check needs its spin in radians per second and the speed of its rim.",
   lesson: "Angular velocity ω is the rate of change of the angle turned, in radians per second; a point at distance r from the axle moves at v = ωr.",
   prompt: "A flywheel in the vault spins at a steady 150 revolutions per minute (rpm). A point on its rim is 0.4 m from the axle. Enter the flywheel’s angular velocity ω in radians per second, then the speed of the rim point in metres per second, both to 2 decimal places (use the unrounded ω for the speed), then the number of turns the flywheel makes in 12 seconds.",
-  answer: [15.71,6.28,30], labels: ["angular velocity (rad/s)","rim speed (m/s)","turns"], tolerance: 0.005,
+  answer: [15.71, 6.28, 30], labels: ["angular velocity (rad/s)","rim speed (m/s)","turns"], tolerance: 0.005,
   hints: [
    "One turn is 2π radians and one minute is 60 seconds, so multiply the rpm by 2π and divide by 60 to get radians per second.",
    "A point at distance r from the axle moves at v = ωr. The number of turns is the turns per second times the time."
@@ -261,7 +262,7 @@ window.QUESTS.push(
   brief: "The vault stores energy in a spinning frame of steel weights, and the crew wants to know how much it holds at its working speed.",
   lesson: "The moment of inertia I = Σmr² measures how hard a body is to spin; a spinning body has rotational kinetic energy ½Iω².",
   prompt: "To store energy, three steel weights are bolted to a light spoke frame that turns on the flywheel axle: 4 kg at 0.5 m from the axle, 6 kg at 0.8 m and 3 kg at 1.2 m. Treat each weight as a point and ignore the frame’s own mass. The frame spins at 10 rad/s. Enter the moment of inertia about the axle in kilogram square metres (kg·m²), then the rotational kinetic energy in joules (type the numbers without commas).",
-  answer: [9.16,458], labels: ["moment of inertia (kg·m²)","rotational kinetic energy (J)"], tolerance: 0.005,
+  answer: [9.16, 458], labels: ["moment of inertia (kg·m²)","rotational kinetic energy (J)"], tolerance: 0.005,
   hints: [
    "The moment of inertia of point masses is I = Σmr²: square each distance from the axle before multiplying by its mass.",
    "The rotational kinetic energy is K = ½Iω², with ω in radians per second."
@@ -302,7 +303,7 @@ window.QUESTS.push(
   brief: "A technician is starting a stopped flywheel by hand, and the vault log needs the turning effect of her pull and how fast the wheel picks up spin.",
   lesson: "Torque τ = rF sin θ is the turning effect of a force; the net torque equals the moment of inertia times the angular acceleration, τ = Iα.",
   prompt: "A technician turns a flywheel by pulling on a spanner clamped to its hub. She pulls with a force of 80 N at a point on the spanner 0.5 m from the axle, and the angle between the spanner and her pull is π/3 radians. The flywheel’s moment of inertia about the axle is 8 kg·m², and no other torque acts on it. Enter the torque about the axle in newton metres (N·m), then the flywheel’s angular acceleration in radians per second squared (rad/s²), both to 2 decimal places (use the unrounded torque for the second).",
-  answer: [34.64,4.33], labels: ["torque (N·m)","angular acceleration (rad/s²)"], tolerance: 0.005,
+  answer: [34.64, 4.33], labels: ["torque (N·m)","angular acceleration (rad/s²)"], tolerance: 0.005,
   hints: [
    "Torque is τ = rF sin θ, where θ is the angle between the line from the axle and the force. Only the part of the pull at right angles to the spanner turns it.",
    "Newton’s second law for rotation is τ = Iα, so α = τ ÷ I."
@@ -343,7 +344,7 @@ window.QUESTS.push(
   brief: "A second wheel is being dropped onto a spinning flywheel to share its load, and the vault needs the speed they settle at and the energy the coupling costs.",
   lesson: "Angular momentum L = Iω stays the same when no outside torque acts, so a larger moment of inertia means a smaller angular velocity.",
   prompt: "Flywheel A, with moment of inertia 15 kg·m², spins freely at 40 rad/s. Wheel B, with moment of inertia 7 kg·m² and not turning, is dropped onto the same axle. Friction between the two makes them lock together and spin as one, and no outside torque acts about the axle. Enter the angular momentum of A before the drop in kg·m²/s, then the common angular velocity afterwards in rad/s, then the rotational kinetic energy lost in joules; give the last two to 2 decimal places (use the unrounded angular velocity for the energy) and type the numbers without commas.",
-  answer: [600,27.27,3818.18], labels: ["angular momentum (kg·m²/s)","common angular velocity (rad/s)","energy lost (J)"], tolerance: 0.005,
+  answer: [600, 27.27, 3818.18], labels: ["angular momentum (kg·m²/s)","common angular velocity (rad/s)","energy lost (J)"], tolerance: 0.005,
   hints: [
    "Angular momentum is L = Iω. With no outside torque, the total angular momentum before equals the total after.",
    "Locked together, the two wheels have a moment of inertia equal to the sum of theirs. Compare ½Iω² before and after for the energy."
@@ -387,7 +388,7 @@ window.QUESTS.push(
   brief: "A survey satellite is going up, and the tracking crew needs its speed and how often it will pass overhead.",
   lesson: "Two masses attract with force Gm₁m₂ ÷ r²; in a circular orbit gravity supplies the centripetal force, so v = √(GM ÷ r).",
   prompt: "A survey satellite circles the outpost’s planet in a circular orbit. The planet has mass 6 × 10²⁴ kg and radius 6400 km, and the satellite flies 400 km above the surface. Take G = 6.67 × 10⁻¹¹ N·m²/kg², and measure the orbit’s radius r from the planet’s centre. Enter the orbital speed in metres per second, to the nearest whole number, then the orbital period in minutes, to 2 decimal places (use the unrounded speed for the period; type the numbers without commas).",
-  answer: [7672,92.82], labels: ["orbital speed (m/s)","orbital period (minutes)"], tolerance: 0.005,
+  answer: [7672, 92.82], labels: ["orbital speed (m/s)","orbital period (minutes)"], tolerance: 0.005,
   hints: [
    "Gravity, GMm ÷ r², supplies the centripetal force mv² ÷ r, so v = √(GM ÷ r), with r in metres.",
    "The period is the time for one lap of the circle: T = 2πr ÷ v in seconds; divide by 60 for minutes."
@@ -430,7 +431,7 @@ window.QUESTS.push(
   brief: "Two modules crossing the floor at right angles are going to latch, and the crew must know whether the joined pair can coast up the ramp to the upper deck.",
   lesson: "In two dimensions momentum is conserved in x and in y separately; after the collision, energy conservation tells how high the pair can climb.",
   prompt: "On the docking floor, module A (400 kg) slides east at 3 m/s and module B (100 kg) slides north at 6 m/s. Take east as the x direction and north as the y direction. They meet, latch together and slide on as one, with no outside force along the floor. The pair then coasts up a frictionless ramp until it stops. Take g = 9.8 m/s². Enter the speed of the pair just after latching in metres per second, then the height it climbs in metres, both to 2 decimal places (use the unrounded speed for the height).",
-  answer: [2.68,0.37], labels: ["speed after latching (m/s)","height climbed (m)"], tolerance: 0.005,
+  answer: [2.68, 0.37], labels: ["speed after latching (m/s)","height climbed (m)"], tolerance: 0.005,
   hints: [
    "Momentum is kept in each direction separately: the x momentum of A alone becomes the x momentum of the pair, and the y momentum of B alone becomes its y momentum.",
    "The speed is √(vx² + vy²). On the frictionless ramp all the kinetic energy becomes potential energy, so ½Mv² = Mgh."

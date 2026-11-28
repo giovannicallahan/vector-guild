@@ -30,11 +30,12 @@ Object.assign(window.ORACLE, {
     const v = t => p.v0 + simpson(s => p.b - p.c * s, 0, t, 400);
     return [v(p.T), simpson(v, 0, p.T, 400)];
   },
-  /* q11c: a = −c t, v(0) is printed as c T²/2 (not a parameter; the prompt's 81 = 18·9/2). It stops at the first t where v = 0: bisect. */
+  /* q11c: a = −c t and the printed starting speed v0. It stops at the first t where v = 0: bisect, with the bracket grown until v < 0. */
   q11c: p => {
-    const v0 = p.c * p.T * p.T / 2;
+    const v0 = p.v0;
     const v = t => v0 + simpson(s => -p.c * s, 0, t, 400);
-    let lo = 0, hi = 2 * p.T;
+    let lo = 0, hi = 1;
+    while (v(hi) > 0) hi *= 2;
     for (let i = 0; i < 100; i++) { const m = (lo + hi) / 2; if (v(m) > 0) lo = m; else hi = m; }
     const tr = (lo + hi) / 2;
     return [tr, simpson(v, 0, tr, 400)];

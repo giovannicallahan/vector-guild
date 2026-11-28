@@ -35,7 +35,7 @@ window.QUESTS.push(
   brief: "A new rocket sled has a booster whose push changes as it burns, and Mira wants to know where it will be and how fast it will be going a few seconds after the start.",
   lesson: "Integrate the acceleration to get the velocity, using v(0) for the constant, then integrate the velocity to get the position, using x(0).",
   prompt: "A rocket sled on the Sled Run has a booster whose push changes as it burns, so the sled’s acceleration is not constant: it is a(t) = 2 + 3t m/s², t seconds after the start. Distances are measured down the run from the top marker, with positive meaning down the run. At t = 0 the sled is at x(0) = 10 m with velocity v(0) = 4 m/s. Enter its velocity at t = 4 s in metres per second, then its position at t = 4 s in metres.",
-  answer: [36,74], labels: ["velocity (m/s)", "position (m)"], tolerance: 0.01,
+  answer: [36, 74], labels: ["velocity (m/s)", "position (m)"], tolerance: 0.01,
   hints: [
    "Velocity is an antiderivative of acceleration: v(t) = ∫a(t) dt + C, and the constant C is the velocity at t = 0.",
    "Position is an antiderivative of velocity: x(t) = ∫v(t) dt + C, and this constant is the position at t = 0."
@@ -77,7 +77,7 @@ window.QUESTS.push(
   brief: "A pod launcher on the crater rim fires supply pods straight out sideways, and the ground crew needs to know where to stand to catch them.",
   lesson: "A projectile moves sideways at a steady speed and falls freely at the same time; the fall alone sets the time in the air.",
   prompt: "The catapult crew tests a pod launcher on the rim of the crater. It fires a supply pod straight out sideways (horizontally) at 12 m/s from a platform 20 m above the flat crater floor. Ignore the air and take g = 9.8 m/s². Enter the time the pod is in the air in seconds, then how far it lands from the foot of the platform, measured along the floor, in metres. Give both to 2 decimal places, and work out the distance from the unrounded time.",
-  answer: [2.02,24.24], labels: ["time in the air (s)", "distance from the platform (m)"], tolerance: 0.005,
+  answer: [2.02, 24.24], labels: ["time in the air (s)", "distance from the platform (m)"], tolerance: 0.005,
   hints: [
    "The fall is free fall that starts with no up or down speed: the drop is ½gt², so set ½ × 9.8 × t² equal to the height and solve for t.",
    "Sideways nothing pushes the pod, so its sideways speed stays the same the whole time: distance = sideways speed × time in the air."
@@ -117,7 +117,7 @@ window.QUESTS.push(
   brief: "The pod catapult throws its loads upwards at a slant, and the crew must know where each pod lands and whether it clears the cable mast on the way.",
   lesson: "On level ground a projectile launched at speed v and angle θ has range v² sin(2θ) ÷ g and greatest height (v sin θ)² ÷ (2g).",
   prompt: "The pod catapult throws a supply pod from the flat crater floor at 20 m/s, aimed 0.6 radians above the horizontal. It lands back on the same flat floor. Ignore the air and take g = 9.8 m/s². Enter the range (the distance along the floor from launch to landing) in metres, then the greatest height the pod reaches above the floor in metres, both to 2 decimal places.",
-  answer: [38.04,6.51], labels: ["range (m)", "greatest height (m)"], tolerance: 0.005,
+  answer: [38.04, 6.51], labels: ["range (m)", "greatest height (m)"], tolerance: 0.005,
   hints: [
    "Split the launch speed into parts: sideways v cos θ and upwards v sin θ, with θ in radians. Only the upward part decides how long the flight lasts and how high it goes.",
    "On level ground the range is v² sin(2θ) ÷ g, and the greatest height is (v sin θ)² ÷ (2g)."
@@ -161,7 +161,7 @@ window.QUESTS.push(
   brief: "Before each throw the catapult whirls its pod round on the sling arm, and the arm’s makers need to know how hard it must pull the pod in.",
   lesson: "At a steady speed on a circle the speed is 2πr ÷ T, and the centripetal acceleration points at the centre with size v² ÷ r.",
   prompt: "Before a throw, the catapult’s sling arm whirls a supply pod round a circle of radius 5 m at a steady speed, taking 4 s for each full turn (its period). Enter the pod’s speed in metres per second, then the size of its centripetal acceleration in metres per second squared, both to 2 decimal places. Work out the acceleration from the unrounded speed.",
-  answer: [7.85,12.34], labels: ["speed (m/s)", "centripetal acceleration (m/s²)"], tolerance: 0.005,
+  answer: [7.85, 12.34], labels: ["speed (m/s)", "centripetal acceleration (m/s²)"], tolerance: 0.005,
   hints: [
    "In one period the pod goes once round the circle, a distance of 2πr. Speed is that distance divided by the period.",
    "The centripetal acceleration points at the centre and has size v² ÷ r."
@@ -202,7 +202,7 @@ window.QUESTS.push(
   brief: "The sling arm speeds the pod up as it swings, and the arm’s joint must take the whole acceleration, not just the part towards the centre.",
   lesson: "Speeding up on a circle adds a tangential acceleration along the path; it is at a right angle to the centripetal one, so the total is √(a_c² + a_t²).",
   prompt: "As the catapult winds up, its sling arm swings a pod round a circle of radius 8 m and keeps speeding it up. At one moment the pod moves at 6 m/s and its speed is growing by 3.5 m/s every second (its tangential acceleration). Enter the size of the centripetal acceleration at that moment, then the size of the total acceleration, both in metres per second squared and to 2 decimal places.",
-  answer: [4.5,5.7], labels: ["centripetal acceleration (m/s²)", "total acceleration (m/s²)"], tolerance: 0.005,
+  answer: [4.5, 5.7], labels: ["centripetal acceleration (m/s²)", "total acceleration (m/s²)"], tolerance: 0.005,
   hints: [
    "The centripetal part points at the centre and has size v² ÷ r, whether or not the speed is changing.",
    "The tangential part points along the path, at a right angle to the centripetal part, so the total is √(centripetal² + tangential²)."
@@ -233,7 +233,7 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: "What is the centripetal acceleration v² ÷ r, in m/s², to 2 decimal places?", answer: [4.5], labels: ["centripetal acceleration (m/s²)"], explanation: "36 ÷ 8 ≈ 4.5 m/s², pointing at the centre." },
+   { prompt: "What is the centripetal acceleration v² ÷ r, in m/s², to 2 decimal places?", answer: [4.5], labels: ["centripetal acceleration (m/s²)"], explanation: "36 ÷ 8 = 4.5 m/s², pointing at the centre." },
    { prompt: "The tangential acceleration is 3.5 m/s² along the path, at a right angle to the centripetal one. What is the size of the total, √(a_c² + a_t²), in m/s² to 2 decimal places?", answer: [5.7], labels: ["total acceleration (m/s²)"], explanation: "√(4.5² + 3.5²) ≈ 5.7 m/s²." }
   ]
  },
@@ -242,7 +242,7 @@ window.QUESTS.push(
   brief: "The survey rover reports the wind from its mast while it drives, and the catapult crew needs the wind as it blows over the ground.",
   lesson: "A relative velocity measured from a moving frame of reference becomes the velocity relative to the ground when you add the frame’s own velocity: v_PG = v_PR + v_RG.",
   prompt: "A survey rover crosses the Catapult Field with velocity (6, 2) m/s relative to the ground, where x points east and y points north. The wind vane on its mast measures the wind relative to the rover as (−2, 5) m/s. The catapult crew needs the wind relative to the ground. Enter its x component and its y component in metres per second, then its speed over the ground in metres per second to 2 decimal places.",
-  answer: [4,7,8.06], labels: ["wind x relative to ground (m/s)", "wind y relative to ground (m/s)", "wind speed over the ground (m/s)"], tolerance: 0.005,
+  answer: [4, 7, 8.06], labels: ["wind x relative to ground (m/s)", "wind y relative to ground (m/s)", "wind speed over the ground (m/s)"], tolerance: 0.005,
   hints: [
    "Velocities between frames add: (wind relative to ground) = (wind relative to rover) + (rover relative to ground).",
    "Add the x components together and the y components together, then the speed is √(x² + y²)."
@@ -284,7 +284,7 @@ window.QUESTS.push(
   brief: "Mira runs the whole catapult once from wind-up to landing, and the crew must give her the strain on the sling arm and where the pod comes down.",
   lesson: "On the sling the pod has centripetal and tangential acceleration; once released it is a projectile with flight time 2v sin θ ÷ g and range v² sin(2θ) ÷ g.",
   prompt: "The full catapult test. The sling arm swings the pod round a circle of radius 3 m, speeding up. Just before release the pod moves at 15 m/s and its speed is growing by 8 m/s every second. It is then released at that speed from floor level, 0.7 radians above the horizontal, and lands on the same flat floor. Ignore the air and the release height, and take g = 9.8 m/s². Enter the size of the pod’s total acceleration just before release in m/s², then its flight time in seconds, then its range in metres, all to 2 decimal places.",
-  answer: [75.43,1.97,22.63], labels: ["total acceleration before release (m/s²)", "flight time (s)", "range (m)"], tolerance: 0.005,
+  answer: [75.43, 1.97, 22.63], labels: ["total acceleration before release (m/s²)", "flight time (s)", "range (m)"], tolerance: 0.005,
   hints: [
    "On the circle the acceleration has a centripetal part v² ÷ r and a tangential part at a right angle to it; combine them with Pythagoras.",
    "After release it is a projectile: the flight time is 2v sin θ ÷ g and the range is v² sin(2θ) ÷ g, with θ in radians."
@@ -328,7 +328,7 @@ window.QUESTS.push(
   brief: "Two winches drag a cargo sled across the frozen yard at once, and the crane crew wants to know how quickly the sled will pick up speed.",
   lesson: "The net force ΣF is the vector sum of all the forces on a body, and Newton’s second law says ΣF = ma: the acceleration is the net force divided by the mass.",
   prompt: "In the Crane Yard two winch ropes pull a 4 kg cargo sled across smooth ice, seen from above with x east and y north. Rope 1 pulls with force (10, −3) N and rope 2 with (−4, 11) N. The ice pushes up on the sled exactly as hard as gravity pulls it down, and nothing else pushes along the ice. Enter the x component of the net force in newtons, then its y component in newtons, then the size of the sled’s acceleration in metres per second squared.",
-  answer: [6,8,2.5], labels: ["net force x (N)", "net force y (N)", "acceleration (m/s²)"], tolerance: 0.005,
+  answer: [6, 8, 2.5], labels: ["net force x (N)", "net force y (N)", "acceleration (m/s²)"], tolerance: 0.005,
   hints: [
    "The net force ΣF is the vector sum of all the forces: add the x components together and the y components together.",
    "Newton’s second law says ΣF = ma, so the size of the acceleration is the size of the net force divided by the mass."
@@ -371,7 +371,7 @@ window.QUESTS.push(
   brief: "A crate rides the lift cage up and down the crane tower, and the cage floor is only rated for so much push.",
   lesson: "Weight is mg downwards; the normal force from a floor is whatever the floor must push so that the net force F_N − mg equals ma.",
   prompt: "A 60 kg crate stands on the floor of a lift cage in the Crane Yard. The cage is rising and speeding up: its acceleration has size 1.5 m/s². Take up as positive and g = 9.8 m/s². Enter the crate’s weight in newtons, then the normal force the floor pushes up on it with, in newtons.",
-  answer: [588,678], labels: ["weight (N)", "normal force (N)"], tolerance: 0.01,
+  answer: [588, 678], labels: ["weight (N)", "normal force (N)"], tolerance: 0.01,
   hints: [
    "Weight is the pull of gravity, w = mg, and it acts downwards whatever the cage does.",
    "Speeding up means the acceleration points the way the cage moves; slowing down means it points the other way. With up positive, the free-body diagram has the normal force F_N up and the weight mg down, and F_N − mg must equal ma."
@@ -414,7 +414,7 @@ window.QUESTS.push(
   brief: "The gantry crane is lifting two crates hung one below the other, and the lower cable must not be asked to hold more than it is rated for.",
   lesson: "Treat the crates as one system to find the acceleration, where the inner cable’s equal and opposite pulls cancel, then look at one crate alone to find the tension.",
   prompt: "The gantry crane lifts two crates at once. Its cable pulls straight up with 700 N on the top crate, of mass 40 kg. A second, lower cable hangs from the top crate and holds the bottom crate, of mass 25 kg. Ignore the mass of the cables and take g = 9.8 m/s². Enter the crates’ upward acceleration in metres per second squared, then the tension in the lower cable in newtons, both to 2 decimal places.",
-  answer: [0.97,269.23], labels: ["acceleration (m/s²)", "lower cable tension (N)"], tolerance: 0.005,
+  answer: [0.97, 269.23], labels: ["acceleration (m/s²)", "lower cable tension (N)"], tolerance: 0.005,
   hints: [
    "Treat both crates and the lower cable as one system. The lower cable’s pulls on the two crates are equal and opposite (Newton’s third law), so they cancel inside the system: only the crane’s pull and the total weight act on it.",
    "Then look at the bottom crate alone: the lower cable pulls it up with the tension T and gravity pulls it down, and T − m₂g = m₂a."

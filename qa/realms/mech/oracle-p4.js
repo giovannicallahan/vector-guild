@@ -55,18 +55,18 @@ Object.assign(window.ORACLE, {
     const a = (p.k === 0 || p.k === 3) ? p.A : -p.A;
     return [r6(p.m * g), r6(p.m * (g + a))];
   },
-  /* q19c: the printed limit is the plate's maximum push, 1 decimal place; it is m (g + A) as printed (not a parameter of its own). */
+  /* q19c: the printed limit Fm is the plate's maximum push on the crate of mass m; a = (Fm − m g) ÷ m. */
   q19c: p => {
-    const Nmax = rd(p.m * (g + p.A), 1), a = Nmax / p.m - g;
+    const a = (p.Fm - p.m * g) / p.m;
     return [rd(a, 2), rd(p.V / a, 2)];
   },
   /* q19d: v(t) = p t² + q t + c; a = 2 p t0 + q; N = m (g + a). */
   q19d: p => { const a = 2 * p.p * p.t0 + p.q; return [r6(a), r6(p.m * (g + a))]; },
   /* q20b: both sleds share a; the tow-bar alone accelerates the rear sled. */
   q20b: p => { const a = p.F / (p.m1 + p.m2); return [rd(a, 2), rd(p.m2 * a, 2)]; },
-  /* q20c: the printed rating is the lower cable's tension limit, 1 decimal place; it is m2 (g + A) as printed. */
+  /* q20c: the printed rating Tm is the lower cable's tension limit; the bottom crate alone gives a = (Tm − m2 g) ÷ m2. */
   q20c: p => {
-    const Tmax = rd(p.m2 * (g + p.A), 1), a = Tmax / p.m2 - g;
+    const a = (p.Tm - p.m2 * g) / p.m2;
     return [rd(a, 2), rd((p.m1 + p.m2) * (g + a), 2)];
   },
   /* q20d: whole stack F − M g = M a; each cable carries the weight-plus-acceleration of everything below it. */

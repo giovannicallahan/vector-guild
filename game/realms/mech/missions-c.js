@@ -163,7 +163,7 @@ window.QUESTS.push(
    "A body moving on a circle at a steady speed needs a net force towards the centre of size F = mv² ÷ r: its mass times its centripetal acceleration.",
    "On a flat track the most static friction can give is μs mg. The rover skids when mv² ÷ r would have to be more than that, so the greatest speed solves mv² ÷ r = μs mg. The mass cancels."
   ],
-  solution: "The centripetal acceleration is v² ÷ r = 81 ÷ 40 ≈ 2.03 m/s², so the centripetal force is F = mv² ÷ r ≈ 1215 N. The most static friction can give is μs mg = 0.5 × 600 × 9.8 = 2940 N. At the greatest speed mv² ÷ r = μs mg, so v² = μs g r = 0.5 × 9.8 × 40 = 196 and v = √196 ≈ 14 m/s. The mass cancelled: a heavier rover needs more grip but also presses down harder.",
+  solution: "The centripetal acceleration is v² ÷ r = 81 ÷ 40 ≈ 2.03 m/s², so the centripetal force is F = mv² ÷ r = 1215 N. The most static friction can give is μs mg = 0.5 × 600 × 9.8 = 2940 N. At the greatest speed mv² ÷ r = μs mg, so v² = μs g r = 0.5 × 9.8 × 40 = 196 and v = √196 = 14 m/s. The mass cancelled: a heavier rover needs more grip but also presses down harder.",
   xp: 150, prereqs: ["q14", "q22"],
   artifact: { name: "Track speed board", description: "The fastest safe lap speed for each radius of the test track." },
   sources: [source.s6_3],
@@ -188,9 +188,9 @@ window.QUESTS.push(
   },
   guidance: [
    { prompt: "What is the rover’s centripetal acceleration v² ÷ r, in m/s² to 2 decimal places?", answer: [2.03], labels: ["centripetal acceleration (m/s²)"], explanation: "v² ÷ r = 81 ÷ 40 ≈ 2.03 m/s², pointing towards the centre." },
-   { prompt: "What centripetal force F = m × (v² ÷ r) does that need, in newtons to 2 decimal places?", answer: [1215], labels: ["centripetal force (N)"], explanation: "F = 600 × 81 ÷ 40 ≈ 1215 N, all of it supplied by static friction." },
+   { prompt: "What centripetal force F = m × (v² ÷ r) does that need, in newtons to 2 decimal places?", answer: [1215], labels: ["centripetal force (N)"], explanation: "F = 600 × 81 ÷ 40 = 1215 N, all of it supplied by static friction." },
    { prompt: "What is the most force static friction can give, μs mg, in newtons?", answer: [2940], labels: ["greatest friction (N)"], explanation: "μs mg = 0.5 × 600 × 9.8 = 2940 N. The rover needs less than this at 9 m/s, so it holds the curve." },
-   { prompt: "At the greatest speed, mv² ÷ r = μs mg, so v = √(μs g r). What is it, in m/s to 2 decimal places?", answer: [14], labels: ["greatest speed (m/s)"], explanation: "v = √(0.5 × 9.8 × 40) = √196 ≈ 14 m/s." }
+   { prompt: "At the greatest speed, mv² ÷ r = μs mg, so v = √(μs g r). What is it, in m/s to 2 decimal places?", answer: [14], labels: ["greatest speed (m/s)"], explanation: "v = √(0.5 × 9.8 × 40) = √196 = 14 m/s." }
   ]
  },
  {
@@ -203,7 +203,7 @@ window.QUESTS.push(
    "Drag points up, against the motion, and grows with the square of the speed. The net downward force is the weight mg minus the drag, and Newton’s second law turns it into an acceleration.",
    "At terminal speed the drag has grown to equal the weight, so the net force and the acceleration are zero: bv² = mg, so v = √(mg ÷ b)."
   ],
-  solution: "At 30 m/s the drag is D = bv² = 0.25 × 900 = 225 N, upward. The weight is mg = 882 N, downward. The net downward force is 882 − 225 = 657 N, so a = 657 ÷ 90 ≈ 7.3 m/s². At terminal speed bv² = mg, so v² = 882 ÷ 0.25 ≈ 3528 and v ≈ 59.4 m/s.",
+  solution: "At 30 m/s the drag is D = bv² = 0.25 × 900 = 225 N, upward. The weight is mg = 882 N, downward. The net downward force is 882 − 225 = 657 N, so a = 657 ÷ 90 = 7.3 m/s². At terminal speed bv² = mg, so v² = 882 ÷ 0.25 = 3528 and v ≈ 59.4 m/s.",
   xp: 150, prereqs: ["q18"],
   artifact: { name: "Pod drop log", description: "Speed against time for a pod that levels off at its terminal speed." },
   sources: [source.s6_4],
@@ -229,7 +229,7 @@ window.QUESTS.push(
   guidance: [
    { prompt: "What is the pod’s weight mg, in newtons?", answer: [882], labels: ["weight (N)"], explanation: "mg = 90 × 9.8 = 882 N." },
    { prompt: "What is the drag D = bv² at 30 m/s, in newtons to 2 decimal places?", answer: [225], labels: ["drag (N)"], explanation: "D = 0.25 × 30² = 0.25 × 900 = 225 N." },
-   { prompt: "The net downward force is mg − D. What is the acceleration (mg − D) ÷ m, in m/s² to 2 decimal places?", answer: [7.3], labels: ["acceleration (m/s²)"], explanation: "a = (882 − 225) ÷ 90 ≈ 7.3 m/s², less than g because drag holds it back." },
+   { prompt: "The net downward force is mg − D. What is the acceleration (mg − D) ÷ m, in m/s² to 2 decimal places?", answer: [7.3], labels: ["acceleration (m/s²)"], explanation: "a = (882 − 225) ÷ 90 = 7.3 m/s², less than g because drag holds it back." },
    { prompt: "At terminal speed bv² = mg. What is that speed, √(mg ÷ b), in m/s to 2 decimal places?", answer: [59.4], labels: ["terminal speed (m/s)"], explanation: "v = √(882 ÷ 0.25) ≈ √3528 ≈ 59.4 m/s." }
   ]
  },
@@ -237,13 +237,13 @@ window.QUESTS.push(
   id: "q26", title: "Work in the Engine Hall", topic: "Work by a constant force and by a varying force (an integral)", tier: "Intermediate", sector: "Engine Hall",
   brief: "The Engine Hall logs the energy every machine hands over, and it starts with a winch and a hydraulic ram.",
   lesson: "Work is force along the motion times distance, W = Fd cos θ; for a force that changes with position it is the integral of F(x) dx.",
-  prompt: "Two machines in the Engine Hall. First, a winch drags a sled 12 m across the level floor with a constant pull of 250 N along its cable, and the cable makes an angle of 0.5 radians with the floor. Second, a hydraulic ram pushes a block along a straight track from x = 1 m to x = 4 m with a force along the track of F(x) = 6x² + 10x newtons. Enter the work done by the winch’s pull on the sled, in joules to 2 decimal places, then the work done by the ram on the block, in joules. Type the numbers without commas.",
-  answer: [2632.75, 201], labels: ["work by the winch (J)", "work by the ram (J)"], tolerance: 0.005,
+  prompt: "Two machines in the Engine Hall. First, a winch drags a sled 12 m across the level floor with a constant pull of 240 N along its cable, and the cable makes an angle of 0.5 radians with the floor. Second, a hydraulic ram pushes a block along a straight track from x = 1 m to x = 4 m with a force along the track of F(x) = 6x² + 10x newtons. Enter the work done by the winch’s pull on the sled, in joules to 2 decimal places, then the work done by the ram on the block, in joules. Type the numbers without commas.",
+  answer: [2527.44, 201], labels: ["work by the winch (J)", "work by the ram (J)"], tolerance: 0.005,
   hints: [
    "Only the part of a force along the motion does work. For a constant force at angle θ to the displacement, W = F · d = Fd cos θ.",
    "For a force that changes with position, add up F dx along the path: the work is the definite integral of F(x) from the start to the end. Find an antiderivative and subtract its value at the start from its value at the end."
   ],
-  solution: "Winch: the part of the pull along the floor is F cos θ = 250 × cos 0.5 ≈ 219.4 N, so W = Fd cos θ = 250 × 12 × cos 0.5 ≈ 2632.75 J. Ram: W = ∫ (6x² + 10x) dx from 1 to 4. An antiderivative is 2x³ + 5x². At x = 4 it is 208 and at x = 1 it is 7, so W = 208 − 7 = 201 J.",
+  solution: "Winch: the part of the pull along the floor is F cos θ = 240 × cos 0.5 ≈ 210.62 N, so W = Fd cos θ = 240 × 12 × cos 0.5 ≈ 2527.44 J. Ram: W = ∫ (6x² + 10x) dx from 1 to 4. An antiderivative is 2x³ + 5x². At x = 4 it is 208 and at x = 1 it is 7, so W = 208 − 7 = 201 J.",
   xp: 150, prereqs: ["q05", "q18"],
   artifact: { name: "Work ledger", description: "One page for steady pulls and one for pushes that change along the way." },
   sources: [source.s7_1],
@@ -267,8 +267,8 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: "What is the part of the winch’s pull along the floor, F cos θ, in newtons to 2 decimal places?", answer: [219.4], labels: ["pull along the floor (N)"], explanation: "F cos θ = 250 × cos 0.5 ≈ 219.4 N. The rest of the pull lifts slightly on the sled and does no work along the floor." },
-   { prompt: "What work does the pull do over the 12 m, Fd cos θ, in joules to 2 decimal places?", answer: [2632.75], labels: ["work by the winch (J)"], explanation: "W = 250 × 12 × cos 0.5 ≈ 2632.75 J." },
+   { prompt: "What is the part of the winch’s pull along the floor, F cos θ, in newtons to 2 decimal places?", answer: [210.62], labels: ["pull along the floor (N)"], explanation: "F cos θ = 240 × cos 0.5 ≈ 210.62 N. The rest of the pull lifts slightly on the sled and does no work along the floor." },
+   { prompt: "What work does the pull do over the 12 m, Fd cos θ, in joules to 2 decimal places?", answer: [2527.44], labels: ["work by the winch (J)"], explanation: "W = 240 × 12 × cos 0.5 ≈ 2527.44 J." },
    { prompt: "An antiderivative of 6x² + 10x is 2x³ + 5x². What is its value at the end, x = 4, in joules?", answer: [208], labels: ["antiderivative at the end (J)"], explanation: "2 × 64 + 5 × 16 = 208." },
    { prompt: "What is its value at the start, x = 1, in joules?", answer: [7], labels: ["antiderivative at the start (J)"], explanation: "2 × 1 + 5 × 1 = 7." },
    { prompt: "The ram’s work is the end value minus the start value. What is it, in joules?", answer: [201], labels: ["work by the ram (J)"], explanation: "W = 208 − 7 = 201 J." }
@@ -322,7 +322,7 @@ window.QUESTS.push(
    "At a steady speed the net force is zero, so the cable pulls up with a force equal to the weight mg, along the motion. The work is that force times the height.",
    "Average power is work divided by time, P = W ÷ t, in watts (joules per second). A kilowatt is 1000 watts, so a winch of P kilowatts does 1000P joules each second, and the time is the work divided by that."
   ],
-  solution: "The cable pulls up with mg = 150 × 9.8 = 1470 N, so it does W = mgh = 1470 × 12 = 17640 J. The average power is 17640 ÷ 20 ≈ 882 W. (The same comes from P = Fv: the speed is 12 ÷ 20 m/s, and 1470 × 12 ÷ 20 ≈ 882 W.) A 4 kW winch delivers 4000 J each second, so it needs 17640 ÷ 4000 ≈ 4.41 s.",
+  solution: "The cable pulls up with mg = 150 × 9.8 = 1470 N, so it does W = mgh = 1470 × 12 = 17640 J. The average power is 17640 ÷ 20 = 882 W. (The same comes from P = Fv: the speed is 12 ÷ 20 m/s, and 1470 × 12 ÷ 20 = 882 W.) A 4 kW winch delivers 4000 J each second, so it needs 17640 ÷ 4000 = 4.41 s.",
   xp: 150, prereqs: ["q27"],
   artifact: { name: "Winch rating plate", description: "A brass plate stamped with the winch’s power in kilowatts." },
   sources: [source.s7_4],
@@ -348,15 +348,15 @@ window.QUESTS.push(
   guidance: [
    { prompt: "At a steady speed the cable’s pull equals the weight. What is mg, in newtons?", answer: [1470], labels: ["lifting force (N)"], explanation: "mg = 150 × 9.8 = 1470 N." },
    { prompt: "The pull acts along the 12 m of motion. What work does it do, in joules?", answer: [17640], labels: ["work (J)"], explanation: "W = 1470 × 12 = 17640 J." },
-   { prompt: "What is the average power W ÷ t, in watts to 2 decimal places?", answer: [882], labels: ["average power (W)"], explanation: "P = 17640 ÷ 20 ≈ 882 W." },
-   { prompt: "A 4 kW winch does 4000 J per second. How long does it take to do the same work, in seconds to 2 decimal places?", answer: [4.41], labels: ["time for the winch (s)"], explanation: "t = 17640 ÷ 4000 ≈ 4.41 s." }
+   { prompt: "What is the average power W ÷ t, in watts to 2 decimal places?", answer: [882], labels: ["average power (W)"], explanation: "P = 17640 ÷ 20 = 882 W." },
+   { prompt: "A 4 kW winch does 4000 J per second. How long does it take to do the same work, in seconds to 2 decimal places?", answer: [4.41], labels: ["time for the winch (s)"], explanation: "t = 17640 ÷ 4000 = 4.41 s." }
   ]
  },
  {
   id: "q29", title: "One pull, start to finish", topic: "Chapter review: work, energy and power on one machine", tier: "Intermediate", sector: "Engine Hall",
   brief: "A winch hauls sleds across the Engine Hall floor, and the crew wants its whole energy account from one pull: work in, work lost, speed and power.",
   lesson: "Add the work of every force to get the net work; the work-energy theorem turns it into a speed, and P = Fv gives the power at that speed.",
-  prompt: "A winch in the Engine Hall pulls a sled of mass 80 kg from rest across the level floor with a constant horizontal pull of 286 N, along the direction it moves, for 16 m. The coefficient of kinetic friction between the sled and the floor is μk = 0.25. Take g = 9.8 m/s². Enter the work done by the winch on the sled in joules; then the work done by friction in joules, with its sign; then the sled’s speed at the end of the pull in m/s; then the winch’s power at that moment, P = Fv, in watts. Type the numbers without commas.",
+  prompt: "A winch in the Engine Hall pulls a sled of mass 80 kg from rest across the level floor with a constant horizontal pull of 286 N, along the direction it moves, for 16 m. The coefficient of kinetic friction between the sled and the floor is μk = 0.25. Take g = 9.8 m/s². Enter the work done by the winch on the sled in joules; then the work done by friction in joules, with its sign (a force against the motion does negative work); then the sled’s speed at the end of the pull in m/s; then the winch’s power at that moment, P = Fv, in watts. Type the numbers without commas.",
   answer: [4576, -3136, 6, 1716], labels: ["work by the winch (J)", "work by friction (J)", "end speed (m/s)", "power at the end (W)"], tolerance: 0.01,
   hints: [
    "The winch’s pull points along the motion, so its work is Fd. Kinetic friction μk mg points against the motion, so its work is −μk mg d. The weight and the normal force are at right angles to the motion and do no work.",

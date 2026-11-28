@@ -68,12 +68,11 @@ Object.assign(window.ORACLE, {
     const v = t => p.p * t * t + p.q * t + p.r, h = 1e-4;
     return [rd((v(p.t2) - v(p.t1)) / (p.t2 - p.t1), 6), rd((v(p.t2 + h) - v(p.t2 - h)) / (2 * h), 6)];
   },
-  /* a2 is twice the deceleration (a2 = 4 prints 2 m/s²; a2 = 5 prints 2.5). The start speed is the one the prompt
-     prints: deceleration × t, where t is the stopping time (a parameter). Distance = average of start and end speed
+  /* q09: printed start speed v0 and deceleration a. Stopping time v0 ÷ a; distance = average of start and end speed
      (end = 0) × time. */
   q09: p => {
-    const a = p.a2 / 2, v0 = a * p.t;
-    return [clean(v0 / a), clean((v0 + 0) / 2 * p.t)];
+    const t = p.v0 / p.a;
+    return [clean(t), clean((p.v0 + 0) / 2 * t)];
   },
   /* x(t) = h + v0 t − 4.9 t². Highest point by ternary search on x; landing time by bisection for x(t) = 0 after the top. */
   q10: p => {

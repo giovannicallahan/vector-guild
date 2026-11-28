@@ -2,6 +2,8 @@
    build(canonical) must reproduce the authored text in missions-b.js exactly. */
 (function(){
 'use strict';
+/* "a" or "an" before a number as it is read aloud: an 8, an 80, an 11, an 18, an 18000; a 7, a 110. cap gives "A"/"An". */
+const aN = (x, cap) => { const d = String(Math.round(Math.abs(x))), v = d[0] === '8' || ((d.startsWith('11') || d.startsWith('18')) && d.length % 3 === 2); return (cap ? 'A' : 'a') + (v ? 'n' : ''); };
 const G = window.Gen, { n, plus, par } = G;
 const g = 9.8, PI = Math.PI;
 /* Rounding to 2 decimal places, and a guard: true when x sits within 0.05 of a hundredth's rounding tie (so a
@@ -9,6 +11,8 @@ const g = 9.8, PI = Math.PI;
 const r2 = x => Math.round(x * 100) / 100;
 const nearTie = x => { const f = Math.abs(x) * 100 - Math.floor(Math.abs(x) * 100); return Math.abs(f - 0.5) < 0.05; };
 const f2 = x => n(r2(x));
+/* "=" when x is already exact at 2 decimal places, otherwise "≈", so a solution never writes ≈ before an exact value. */
+const ap = x => Math.abs(Math.round(x * 100) / 100 - x) < 1e-9 ? '=' : '≈';
 /* '=' when n(x) shows x exactly, '≈' when it is rounded. */
 const eq = x => Math.abs(Number(n(x).replace('−', '-')) - x) < 1e-12 ? '=' : '≈';
 /* "b + ct" with signs written out: lin(2, 3) is "2 + 3t", lin(−4, 6) is "−4 + 6t". */
@@ -58,8 +62,8 @@ Object.assign(window.MISSION_GEN, {
    hints: ['The fall is free fall that starts with no up or down speed: the drop is ½gt², so set ½ × 9.8 × t² equal to the height and solve for t.', 'Sideways nothing pushes the pod, so its sideways speed stays the same the whole time: distance = sideways speed × time in the air.'],
    solution: `Down: ${n(h)} = ½ × 9.8 × t², so t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)} and t = √${n(q)} ${eq(t)} ${n(t)}, which is ${f2(t)} s to 2 decimal places. Sideways: the speed stays ${n(u)} m/s, so the pod travels ${n(u)} × ${n(t)} ≈ ${n(x)} m, which is ${f2(x)} m to 2 decimal places.`,
    guidance: [
-    { prompt: `Look at the up-and-down motion only. It starts with no vertical speed and drops ${n(h)} m, so ${n(h)} = ½ × 9.8 × t². What is t, in seconds, to 2 decimal places?`, answer: [r2(t)], explanation: `t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)}, so t = √${n(q)} ≈ ${f2(t)} s. The sideways speed plays no part in how long the fall takes.` },
-    { prompt: `Sideways, the pod keeps its ${n(u)} m/s for the whole of that time. How far does it travel along the floor, in metres, to 2 decimal places?`, answer: [r2(x)], explanation: `Distance = ${n(u)} × ${n(t)} ≈ ${f2(x)} m, using the unrounded time.` }
+    { prompt: `Look at the up-and-down motion only. It starts with no vertical speed and drops ${n(h)} m, so ${n(h)} = ½ × 9.8 × t². What is t, in seconds, to 2 decimal places?`, answer: [r2(t)], explanation: `t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)}, so t = √${n(q)} ${ap(t)} ${f2(t)} s. The sideways speed plays no part in how long the fall takes.` },
+    { prompt: `Sideways, the pod keeps its ${n(u)} m/s for the whole of that time. How far does it travel along the floor, in metres, to 2 decimal places?`, answer: [r2(x)], explanation: `Distance = ${n(u)} × ${n(t)} ${ap(x)} ${f2(x)} m, using the unrounded time.` }
    ] }; }
  },
  /* Level ground: v0y = v sin θ, flight time 2v0y ÷ g, range v² sin 2θ ÷ g, highest point v0y² ÷ (2g). θ in radians
@@ -73,12 +77,12 @@ Object.assign(window.MISSION_GEN, {
    prompt: `The pod catapult throws a supply pod from the flat crater floor at ${n(v)} m/s, aimed ${n(th)} radians above the horizontal. It lands back on the same flat floor. Ignore the air and take g = 9.8 m/s². Enter the range (the distance along the floor from launch to landing) in metres, then the greatest height the pod reaches above the floor in metres, both to 2 decimal places.`,
    answer: [r2(R), r2(H)],
    hints: ['Split the launch speed into parts: sideways v cos θ and upwards v sin θ, with θ in radians. Only the upward part decides how long the flight lasts and how high it goes.', 'On level ground the range is v² sin(2θ) ÷ g, and the greatest height is (v sin θ)² ÷ (2g).'],
-   solution: `Upward part of the launch speed: ${n(v)} × sin ${n(th)} ≈ ${n(vy)} m/s. Range: ${n(v)}² × sin(2 × ${n(th)}) ÷ 9.8 ≈ ${n(v * v)} × ${n(s2)} ÷ 9.8 ${eq(R)} ${n(R)}, which is ${f2(R)} m. Greatest height: ${n(vy)}² ÷ (2 × 9.8) ${eq(H)} ${n(H)}, which is ${f2(H)} m. (The flight lasts 2 × ${n(vy)} ÷ 9.8 ≈ ${f2(T)} s.)`,
+   solution: `Upward part of the launch speed: ${n(v)} × sin ${n(th)} ≈ ${n(vy)} m/s. Range: ${n(v)}² × sin(2 × ${n(th)}) ÷ 9.8 ≈ ${n(v * v)} × ${n(s2)} ÷ 9.8 ${eq(R)} ${n(R)}, which is ${f2(R)} m. Greatest height: ${n(vy)}² ÷ (2 × 9.8) ${eq(H)} ${n(H)}, which is ${f2(H)} m. (The flight lasts 2 × ${n(vy)} ÷ 9.8 ${ap(T)} ${f2(T)} s.)`,
    guidance: [
-    { prompt: `What is the upward part of the launch speed, ${n(v)} × sin ${n(th)} (θ in radians), in m/s to 2 decimal places?`, answer: [r2(vy)], explanation: `${n(v)} × sin ${n(th)} ≈ ${n(v)} × ${n(s)} ≈ ${f2(vy)} m/s.` },
-    { prompt: `The pod rises until its upward speed is 0, then falls for just as long. The flight time is 2 × (upward speed) ÷ g. What is it, in seconds, to 2 decimal places?`, answer: [r2(T)], explanation: `2 × ${n(vy)} ÷ 9.8 ≈ ${f2(T)} s.` },
-    { prompt: `The range is the sideways speed ${n(v)} × cos ${n(th)} times the flight time. Since 2 sin θ cos θ = sin(2θ), that comes to v² sin(2θ) ÷ g. What is the range, in metres, to 2 decimal places?`, answer: [r2(R)], explanation: `${n(v * v)} × sin ${n(2 * th)} ÷ 9.8 ≈ ${n(v * v)} × ${n(s2)} ÷ 9.8 ≈ ${f2(R)} m.` },
-    { prompt: `At the top the upward speed is 0, so the height is (upward speed)² ÷ (2g). What is the greatest height, in metres, to 2 decimal places?`, answer: [r2(H)], explanation: `${n(vy)}² ÷ 19.6 ≈ ${f2(H)} m.` }
+    { prompt: `What is the upward part of the launch speed, ${n(v)} × sin ${n(th)} (θ in radians), in m/s to 2 decimal places?`, answer: [r2(vy)], explanation: `${n(v)} × sin ${n(th)} ≈ ${n(v)} × ${n(s)} ${ap(vy)} ${f2(vy)} m/s.` },
+    { prompt: `The pod rises until its upward speed is 0, then falls for just as long. The flight time is 2 × (upward speed) ÷ g. What is it, in seconds, to 2 decimal places?`, answer: [r2(T)], explanation: `2 × ${n(vy)} ÷ 9.8 ${ap(T)} ${f2(T)} s.` },
+    { prompt: `The range is the sideways speed ${n(v)} × cos ${n(th)} times the flight time. Since 2 sin θ cos θ = sin(2θ), that comes to v² sin(2θ) ÷ g. What is the range, in metres, to 2 decimal places?`, answer: [r2(R)], explanation: `${n(v * v)} × sin ${n(2 * th)} ÷ 9.8 ≈ ${n(v * v)} × ${n(s2)} ÷ 9.8 ${ap(R)} ${f2(R)} m.` },
+    { prompt: `At the top the upward speed is 0, so the height is (upward speed)² ÷ (2g). What is the greatest height, in metres, to 2 decimal places?`, answer: [r2(H)], explanation: `${n(vy)}² ÷ 19.6 ${ap(H)} ${f2(H)} m.` }
    ] }; }
  },
  /* Speed 2πr ÷ T and centripetal acceleration v² ÷ r = 4π²r ÷ T², both to 2 decimal places, both off rounding ties.
@@ -93,9 +97,9 @@ Object.assign(window.MISSION_GEN, {
    hints: ['In one period the pod goes once round the circle, a distance of 2πr. Speed is that distance divided by the period.', 'The centripetal acceleration points at the centre and has size v² ÷ r.'],
    solution: `One turn is 2π × ${n(r)} ≈ ${n(C)} m, covered in ${n(T)} s, so v = ${n(C)} ÷ ${n(T)} ${eq(v)} ${n(v)}, which is ${f2(v)} m/s. The centripetal acceleration is v² ÷ r = ${n(v)}² ÷ ${n(r)} ${eq(a)} ${n(a)}, which is ${f2(a)} m/s², directed at the centre of the circle.`,
    guidance: [
-    { prompt: `How far does the pod travel in one full turn of a circle of radius ${n(r)} m? Give the circumference 2πr in metres, to 2 decimal places.`, answer: [r2(C)], explanation: `2π × ${n(r)} ≈ ${f2(C)} m.` },
-    { prompt: `It covers that distance in one period, ${n(T)} s. What is its speed, in m/s, to 2 decimal places?`, answer: [r2(v)], explanation: `${n(C)} ÷ ${n(T)} ≈ ${f2(v)} m/s.` },
-    { prompt: `What is the centripetal acceleration v² ÷ r, in m/s², to 2 decimal places?`, answer: [r2(a)], explanation: `${n(v)}² ÷ ${n(r)} ≈ ${f2(a)} m/s², pointing at the centre.` }
+    { prompt: `How far does the pod travel in one full turn of a circle of radius ${n(r)} m? Give the circumference 2πr in metres, to 2 decimal places.`, answer: [r2(C)], explanation: `2π × ${n(r)} ${ap(C)} ${f2(C)} m.` },
+    { prompt: `It covers that distance in one period, ${n(T)} s. What is its speed, in m/s, to 2 decimal places?`, answer: [r2(v)], explanation: `${n(C)} ÷ ${n(T)} ${ap(v)} ${f2(v)} m/s.` },
+    { prompt: `What is the centripetal acceleration v² ÷ r, in m/s², to 2 decimal places?`, answer: [r2(a)], explanation: `${n(v)}² ÷ ${n(r)} ${ap(a)} ${f2(a)} m/s², pointing at the centre.` }
    ] }; }
  },
  /* Centripetal v² ÷ r and total √(a_c² + a_t²), to 2 decimal places, off rounding ties. a_t in tenths from 0.5 to 6.
@@ -110,8 +114,8 @@ Object.assign(window.MISSION_GEN, {
    hints: ['The centripetal part points at the centre and has size v² ÷ r, whether or not the speed is changing.', 'The tangential part points along the path, at a right angle to the centripetal part, so the total is √(centripetal² + tangential²).'],
    solution: `Centripetal: ${n(v)}² ÷ ${n(r)} = ${n(v * v)} ÷ ${n(r)} ${eq(ac)} ${n(ac)}, which is ${f2(ac)} m/s². The tangential part, ${n(at)} m/s², is at a right angle to it, so the total is √(${n(ac)}² + ${n(at)}²) ${eq(tot)} ${n(tot)}, which is ${f2(tot)} m/s².`,
    guidance: [
-    { prompt: `What is the centripetal acceleration v² ÷ r, in m/s², to 2 decimal places?`, answer: [r2(ac)], explanation: `${n(v * v)} ÷ ${n(r)} ≈ ${f2(ac)} m/s², pointing at the centre.` },
-    { prompt: `The tangential acceleration is ${n(at)} m/s² along the path, at a right angle to the centripetal one. What is the size of the total, √(a_c² + a_t²), in m/s² to 2 decimal places?`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ≈ ${f2(tot)} m/s².` }
+    { prompt: `What is the centripetal acceleration v² ÷ r, in m/s², to 2 decimal places?`, answer: [r2(ac)], explanation: `${n(v * v)} ÷ ${n(r)} ${ap(ac)} ${f2(ac)} m/s², pointing at the centre.` },
+    { prompt: `The tangential acceleration is ${n(at)} m/s² along the path, at a right angle to the centripetal one. What is the size of the total, √(a_c² + a_t²), in m/s² to 2 decimal places?`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ${ap(tot)} ${f2(tot)} m/s².` }
    ] }; }
  },
  /* Wind over the ground = wind seen from the rover + rover over the ground, by components; its size to 2 decimal
@@ -129,7 +133,7 @@ Object.assign(window.MISSION_GEN, {
    guidance: [
     { prompt: `Add the x components: the wind’s x relative to the rover, ${n(sx)}, plus the rover’s x relative to the ground, ${n(rx)}. What is the wind’s x component relative to the ground, in m/s?`, answer: [wx], explanation: `${n(sx)} ${pm(rx)} = ${n(wx)} m/s.` },
     { prompt: `Now the y components: ${n(sy)} plus ${n(ry)}. What is the wind’s y component relative to the ground, in m/s?`, answer: [wy], explanation: `${n(sy)} ${pm(ry)} = ${n(wy)} m/s.` },
-    { prompt: `What is the wind’s speed over the ground, √(x² + y²) for (${n(wx)}, ${n(wy)}), in m/s to 2 decimal places?`, answer: [r2(w)], explanation: `√(${par(wx)}² + ${par(wy)}²) = √${n(wx * wx + wy * wy)} ≈ ${f2(w)} m/s.` }
+    { prompt: `What is the wind’s speed over the ground, √(x² + y²) for (${n(wx)}, ${n(wy)}), in m/s to 2 decimal places?`, answer: [r2(w)], explanation: `√(${par(wx)}² + ${par(wy)}²) = √${n(wx * wx + wy * wy)} ${ap(w)} ${f2(w)} m/s.` }
    ] }; }
  },
  /* A sling speeding up on a circle (q15), then a launch on level ground (q13). Every asked and guided value is off a
@@ -145,9 +149,9 @@ Object.assign(window.MISSION_GEN, {
    solution: `On the circle: centripetal ${n(v * v)} ÷ ${n(r)} ${eq(ac)} ${n(ac)} m/s² and tangential ${n(at)} m/s², so the total is √(${n(ac)}² + ${n(at)}²) ${eq(tot)} ${n(tot)}, which is ${f2(tot)} m/s². In flight: the upward part of the speed is ${n(v)} × sin ${n(th)} ≈ ${n(vy)} m/s, so the flight time is 2 × ${n(vy)} ÷ 9.8 ${eq(T)} ${n(T)}, which is ${f2(T)} s, and the range is ${n(v * v)} × sin ${n(2 * th)} ÷ 9.8 ${eq(Rg)} ${n(Rg)}, which is ${f2(Rg)} m.`,
    guidance: [
     { prompt: `What is the centripetal acceleration v² ÷ r just before release, in m/s² to 2 decimal places?`, answer: [r2(ac)], explanation: `${n(v * v)} ÷ ${n(r)} ${eq(r2(ac)) === '=' && eq(ac) === '=' ? '=' : '≈'} ${f2(ac)} m/s².` },
-    { prompt: `Combine it with the tangential ${n(at)} m/s², which is at a right angle to it. What is the size of the total acceleration, in m/s² to 2 decimal places?`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ≈ ${f2(tot)} m/s².` },
-    { prompt: `After release, what is the flight time 2v sin θ ÷ g, in seconds to 2 decimal places?`, answer: [r2(T)], explanation: `2 × ${n(v)} × sin ${n(th)} ÷ 9.8 = 2 × ${n(vy)} ÷ 9.8 ≈ ${f2(T)} s.` },
-    { prompt: `What is the range v² sin(2θ) ÷ g, in metres to 2 decimal places?`, answer: [r2(Rg)], explanation: `${n(v * v)} × ${n(s2)} ÷ 9.8 ≈ ${f2(Rg)} m.` }
+    { prompt: `Combine it with the tangential ${n(at)} m/s², which is at a right angle to it. What is the size of the total acceleration, in m/s² to 2 decimal places?`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ${ap(tot)} ${f2(tot)} m/s².` },
+    { prompt: `After release, what is the flight time 2v sin θ ÷ g, in seconds to 2 decimal places?`, answer: [r2(T)], explanation: `2 × ${n(v)} × sin ${n(th)} ÷ 9.8 = 2 × ${n(vy)} ÷ 9.8 ${ap(T)} ${f2(T)} s.` },
+    { prompt: `What is the range v² sin(2θ) ÷ g, in metres to 2 decimal places?`, answer: [r2(Rg)], explanation: `${n(v * v)} × ${n(s2)} ÷ 9.8 ${ap(Rg)} ${f2(Rg)} m.` }
    ] }; }
  },
  /* Two rope forces on a sled on smooth ice, seen from above; their sum is a Pythagorean pair (so its size is whole), and
@@ -159,7 +163,7 @@ Object.assign(window.MISSION_GEN, {
    p => { const N = Math.hypot(p.f1x + p.f2x, p.f1y + p.f2y), a = N / p.m; return p.f2x !== 0 && p.f2y !== 0 && Math.abs(a * 100 - Math.round(a * 100)) < 1e-9 && a >= 0.2 && p.f1x !== p.f2x && !(p.m === 2 && p.f1x === 5); },
    { f1x: 10, f1y: -3, f2x: -4, f2y: 11, m: 4 }),
   build: ({ f1x, f1y, f2x, f2y, m }) => { const Nx = f1x + f2x, Ny = f1y + f2y, N = Math.hypot(Nx, Ny), a = N / m; return {
-   prompt: `In the Crane Yard two winch ropes pull a ${n(m)} kg cargo sled across smooth ice, seen from above with x east and y north. Rope 1 pulls with force (${n(f1x)}, ${n(f1y)}) N and rope 2 with (${n(f2x)}, ${n(f2y)}) N. The ice pushes up on the sled exactly as hard as gravity pulls it down, and nothing else pushes along the ice. Enter the x component of the net force in newtons, then its y component in newtons, then the size of the sled’s acceleration in metres per second squared.`,
+   prompt: `In the Crane Yard two winch ropes pull ${aN(m)} ${n(m)} kg cargo sled across smooth ice, seen from above with x east and y north. Rope 1 pulls with force (${n(f1x)}, ${n(f1y)}) N and rope 2 with (${n(f2x)}, ${n(f2y)}) N. The ice pushes up on the sled exactly as hard as gravity pulls it down, and nothing else pushes along the ice. Enter the x component of the net force in newtons, then its y component in newtons, then the size of the sled’s acceleration in metres per second squared.`,
    answer: [Nx, Ny, a],
    hints: ['The net force ΣF is the vector sum of all the forces: add the x components together and the y components together.', 'Newton’s second law says ΣF = ma, so the size of the acceleration is the size of the net force divided by the mass.'],
    solution: `ΣF = (${n(f1x)} ${pm(f2x)}, ${n(f1y)} ${pm(f2y)}) = (${n(Nx)}, ${n(Ny)}) N. Its size is √(${par(Nx)}² + ${par(Ny)}²) = √${n(Nx * Nx + Ny * Ny)} = ${n(N)} N. By Newton’s second law the acceleration has size ${n(N)} ÷ ${n(m)} = ${n(a)} m/s², in the direction of the net force.`,
@@ -177,7 +181,7 @@ Object.assign(window.MISSION_GEN, {
   canonical: { m: 60, A: 1.5, k: 0 },
   draw: R => retry(() => ({ m: R.int(40, 80), A: R.int(2, 25) / 10, k: R.int(0, 3) }), p => !(p.m === 50 && p.A === 1.2 && p.k === 0), { m: 60, A: 1.5, k: 0 }),
   build: ({ m, A, k }) => { const [moving, change, s] = CAGE[k], a = s * A, W = m * g, F = m * a, N = W + F; return {
-   prompt: `A ${n(m)} kg crate stands on the floor of a lift cage in the Crane Yard. The cage is ${moving} and ${change}: its acceleration has size ${n(A)} m/s². Take up as positive and g = 9.8 m/s². Enter the crate’s weight in newtons, then the normal force the floor pushes up on it with, in newtons.`,
+   prompt: `${aN(m, true)} ${n(m)} kg crate stands on the floor of a lift cage in the Crane Yard. The cage is ${moving} and ${change}: its acceleration has size ${n(A)} m/s². Take up as positive and g = 9.8 m/s². Enter the crate’s weight in newtons, then the normal force the floor pushes up on it with, in newtons.`,
    answer: [W, N],
    hints: ['Weight is the pull of gravity, w = mg, and it acts downwards whatever the cage does.', 'Speeding up means the acceleration points the way the cage moves; slowing down means it points the other way. With up positive, the free-body diagram has the normal force F_N up and the weight mg down, and F_N − mg must equal ma.'],
    solution: `Weight: w = ${n(m)} × 9.8 = ${n(W)} N, downwards. The cage is ${moving} and ${change}, so its acceleration points ${s > 0 ? 'up' : 'down'}: a = ${n(a)} m/s². Newton’s second law for the crate: F_N − ${n(W)} = ${n(m)} × ${par(a)} = ${n(F)}, so the normal force is F_N = ${n(W)} ${pm(F)} = ${n(N)} N.`,
@@ -203,7 +207,7 @@ Object.assign(window.MISSION_GEN, {
    solution: `Whole system: mass ${n(m1)} + ${n(m2)} = ${n(M)} kg and weight ${n(M)} × 9.8 = ${n(W)} N. Net force ${n(F)} − ${n(W)} = ${n(F - W)} N, so a = ${n(F - W)} ÷ ${n(M)} ${eq(a)} ${n(a)}, which is ${f2(a)} m/s². Bottom crate alone: T − ${n(w2)} = ${n(m2)}a, so T = ${n(m2)} × (9.8 + a) ${eq(T)} ${n(T)}, which is ${f2(T)} N. By Newton’s third law the lower cable pulls down on the top crate with the same ${f2(T)} N.`,
    guidance: [
     { prompt: `Take both crates as one system of mass ${n(M)} kg. What is its total weight, in newtons?`, answer: [W], explanation: `${n(M)} × 9.8 = ${n(W)} N.` },
-    { prompt: `The net force on the system is ${n(F)} − ${n(W)} N. What is the acceleration, net force ÷ total mass, in m/s² to 2 decimal places?`, answer: [r2(a)], explanation: `${n(F - W)} ÷ ${n(M)} ≈ ${f2(a)} m/s², upwards.` },
+    { prompt: `The net force on the system is ${n(F)} − ${n(W)} N. What is the acceleration, net force ÷ total mass, in m/s² to 2 decimal places?`, answer: [r2(a)], explanation: `${n(F - W)} ÷ ${n(M)} ${ap(a)} ${f2(a)} m/s², upwards.` },
     { prompt: `Now the ${n(m2)} kg bottom crate alone: T − ${n(w2)} = ${n(m2)} × a. What is the tension T, in newtons to 2 decimal places? Use the unrounded acceleration.`, answer: [r2(T)], explanation: `T = ${n(m2)} × (9.8 + a) ${eq(T)} ${f2(T)} N, with a ${eq(a)} ${n(a)} m/s². (The same as ${n(m2)} × ${n(F)} ÷ ${n(M)}: the bottom crate gets its share of the crane’s pull.)` }
    ] }; }
  }

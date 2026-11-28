@@ -39,10 +39,10 @@ Object.assign(window.ORACLE, {
     const v1 = slope(x, p.t1), v2 = slope(x, p.t2);
     return [v1, v2, Math.abs(v2)];
   },
-  /* q07c: x(t) = d + 2 b ts t − b t² (the prompt prints the expanded form: linear coefficient is 2 b ts). Rest time is the
+  /* q07c: x(t) = d + c t − b t², all three coefficients printed. Rest time is the
      first zero of the slope; position then; slope at T. */
   q07c: p => {
-    const x = t => p.d + 2 * p.b * p.ts * t - p.b * t * t;
+    const x = t => p.d + p.c * t - p.b * t * t;
     const v = t => slope(x, t);
     const t0 = firstZero(v);
     return [t0, x(t0), v(p.T)];
@@ -61,9 +61,9 @@ Object.assign(window.ORACLE, {
     const v = t => p.c + p.b * t - p.a * t * t * t;
     return [(v(p.t2) - v(p.t1)) / (p.t2 - p.t1), slope(v, p.t1), slope(v, p.t2)];
   },
-  /* q08c: v(t) = r + 2 b ts t − b t² (linear coefficient is 2 b ts); acceleration zero where the slope vanishes. */
+  /* q08c: v(t) = r + c t − b t², all printed; acceleration zero where the slope vanishes. */
   q08c: p => {
-    const v = t => p.r + 2 * p.b * p.ts * t - p.b * t * t;
+    const v = t => p.r + p.c * t - p.b * t * t;
     const t0 = firstZero(t => slope(v, t));
     return [(v(p.T) - v(0)) / p.T, t0, v(t0)];
   },

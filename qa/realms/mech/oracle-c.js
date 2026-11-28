@@ -48,11 +48,10 @@ Object.assign(window.ORACLE, {
   q27: p => { const k0 = 0.5 * p.m * p.v0 * p.v0, k1 = k0 + p.W; return [clean(k0), clean(k1), rd(root(2 * k1 / p.m), 2)]; },
   /* Work = m g h; power = work / t; time at P2 kW = work / (1000 P2). */
   q28: p => { const W = p.m * G * p.h; return [clean(W), rd(W / p.t, 2), rd(W / (p.P2 * 1000), 2)]; },
-  /* The pull F is printed (one decimal) but is not a parameter: it is the force that takes the sled from rest to vf
-     over d against kinetic friction, F = uk m g + m vf^2 / (2 d), rounded to the printed 1 decimal. Then winch work F d,
-     friction work -uk m g d, speed from the net work by the work-energy rule, power F v. */
+  /* q29: the printed pull F, mass m, distance d and μk are parameters. Winch work F d, friction work −uk m g d,
+     speed from the net work by the work-energy rule, power F v. */
   q29: p => {
-    const F = rd(p.uk * p.m * G + p.m * p.vf * p.vf / (2 * p.d), 1), fr = p.uk * p.m * G;
+    const F = p.F, fr = p.uk * p.m * G;
     const v = root(2 * (F - fr) * p.d / p.m);
     return [clean(F * p.d), -clean(fr * p.d), rd(v, 2), rd(F * v, 2)];
   },

@@ -142,9 +142,10 @@ mk({
  labels: ['time at rest (s)', 'position at rest (m)', 'velocity at the later time (m/s)'], tolerance: 0.01,
  gl: [['time at rest (s)'], ['position at rest (m)'], ['velocity at the later time (m/s)']]
 }, {
- canonical: { d: 8, b: 2, ts: 3, T: 5 },
- draw: R => { const ts = R.int(2, 6); return { d: R.int(5, 40), b: R.int(1, 4), ts, T: ts + R.int(1, 4) }; },
- build: ({ d, b, ts, T }) => { const c = 2 * b * ts, xs = d + b * ts * ts, vT = c - 2 * b * T, x = `${n(d)} + ${n(c)}t − ${coef(b)}t²`, vx = `${n(c)} − ${n(2 * b)}t`; return {
+ canonical: { d: 8, b: 2, c: 12, T: 5 },
+ /* The printed linear coefficient c is 2 b ts for a whole rest time ts, and T is 1 to 4 s after ts. */
+ draw: R => { const ts = R.int(2, 6), b = R.int(1, 4); return { d: R.int(5, 40), b, c: 2 * b * ts, T: ts + R.int(1, 4) }; },
+ build: ({ d, b, c, T }) => { const ts = c / (2 * b), xs = d + b * ts * ts, vT = c - 2 * b * T, x = `${n(d)} + ${n(c)}t − ${coef(b)}t²`, vx = `${n(c)} − ${n(2 * b)}t`; return {
   prompt: `A sled is pushed up the test ramp and then slides back down. Its position along the ramp is x(t) = ${x} metres, t seconds after the push, with up the ramp as positive. The sled is momentarily at rest when its velocity is 0. Enter the time at which it is momentarily at rest, in seconds, then its position at that moment in metres, then its velocity at t = ${n(T)} s in metres per second (a negative value means sliding down the ramp).`,
   answer: [ts, xs, vT],
   hints: ['Differentiate x(t) to get v(t), set v(t) = 0 and solve for t. That time is when the sled is momentarily at rest.', 'Put that time into x(t) to get the position. Put the later time into v(t), not x(t), to get the velocity.'],
@@ -209,9 +210,10 @@ mk({
  labels: ['average acceleration (m/s²)', 'time acceleration is zero (s)', 'velocity then (m/s)'], tolerance: 0.01,
  gl: [['average acceleration (m/s²)'], ['time acceleration is zero (s)'], ['velocity then (m/s)']]
 }, {
- canonical: { b: 1, ts: 4, r: 4, T: 6 },
- draw: R => retry(() => ({ b: R.int(1, 3), ts: R.int(2, 6), r: R.int(2, 15), T: R.int(2, 9) }), ({ ts, T }) => T !== 2 * ts, { b: 1, ts: 4, r: 4, T: 6 }),
- build: ({ b, ts, r, T }) => { const c = 2 * b * ts, vT = r + c * T - b * T * T, avg = (vT - r) / T, vmax = r + b * ts * ts, vx = `${n(r)} + ${n(c)}t − ${coef(b)}t²`, ax = `${n(c)} − ${n(2 * b)}t`; return {
+ canonical: { b: 1, c: 8, r: 4, T: 6 },
+ /* The printed linear coefficient c is 2 b ts for a whole time ts at which the acceleration is zero; T is never 2 ts. */
+ draw: R => retry(() => { const b = R.int(1, 3); return { b, c: 2 * b * R.int(2, 6), r: R.int(2, 15), T: R.int(2, 9) }; }, ({ b, c, T }) => T !== c / b, { b: 1, c: 8, r: 4, T: 6 }),
+ build: ({ b, c, r, T }) => { const ts = c / (2 * b), vT = r + c * T - b * T * T, avg = (vT - r) / T, vmax = r + b * ts * ts, vx = `${n(r)} + ${n(c)}t − ${coef(b)}t²`, ax = `${n(c)} − ${n(2 * b)}t`; return {
   prompt: `A booster pushes a test sled along the flat run. The sled's velocity is v(t) = ${vx} metres per second, t seconds after ignition, with its direction of travel as positive. The booster is cut out when the sled's acceleration falls to 0. Enter its average acceleration from t = 0 s to t = ${n(T)} s, then the time at which its acceleration is 0, in seconds, then its velocity at that time in metres per second.`,
   answer: [avg, ts, vmax],
   hints: ['The average acceleration is the change in velocity divided by the change in time: find v at both ends of the interval.', 'The acceleration is the derivative of the velocity. Differentiate, set a(t) = 0 and solve for t, then put that time into v(t), not into a(t).'],

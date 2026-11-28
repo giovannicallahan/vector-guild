@@ -29,6 +29,8 @@ const g = 9.8, PI = Math.PI;
 const r2 = x => Math.round(x * 100) / 100;
 const nearTie = x => { const f = Math.abs(x) * 100 - Math.floor(Math.abs(x) * 100); return Math.abs(f - 0.5) < 0.05; };
 const f2 = x => n(r2(x));
+/* "=" when x is already exact at 2 decimal places, otherwise "≈", so a solution never writes ≈ before an exact value. */
+const ap = x => Math.abs(Math.round(x * 100) / 100 - x) < 1e-9 ? '=' : '≈';
 /* True when x has at most 2 decimal places. */
 const exact2 = x => Math.abs(x * 100 - Math.round(x * 100)) < 1e-9;
 /* '=' when n(x) shows x exactly, '≈' when it is rounded. */
@@ -48,7 +50,7 @@ mk({
  gl: [['k (m/s³)'], ['velocity (m/s)'], ['distance (m)']]
 }, {
  canonical: { b: 9, c: 6, v0: 4, T: 3 },
- draw: R => retry(() => ({ b: R.int(6, 16), c: R.pick([3, 6]), v0: R.int(2, 9), T: R.int(2, 5) }),
+ draw: R => retry(() => ({ b: R.int(6, 16), c: R.pick([3, 6, 9, 12]), v0: R.int(2, 9), T: R.int(2, 5) }),
   p => { for (let k = 0; k <= 100 * p.T; k++) { const t = k / 100; if (p.v0 + p.b * t - p.c * t * t / 2 <= 0) return false; } return true; },
   { b: 9, c: 6, v0: 4, T: 3 }),
  build: ({ b, c, v0, T }) => { const k2 = c / 2, h = b / 2, k3 = c / 6, T2 = T * T, T3 = T2 * T, v = v0 + b * T - k2 * T2, s = v0 * T + h * T2 - k3 * T3; return {
@@ -70,10 +72,12 @@ mk({
  labels: ['stopping time (s)', 'stopping distance (m)'], tolerance: 0.01,
  gl: [['k (m/s³)'], ['stopping time (s)'], ['distance (m)']]
 }, {
- canonical: { c: 6, T: 3 },
- draw: R => retry(() => ({ c: R.pick([3, 6, 9, 12, 15, 18]), T: R.int(2, 8) }), p => (p.c * p.T * p.T) % 2 === 0 && p.c * p.T * p.T / 2 <= 300 && p.c * p.T * p.T * p.T / 3 < 1000, { c: 6, T: 3 }),
- build: ({ c, T }) => { const v0 = c * T * T / 2, k2 = c / 2, k3 = c / 6, T3 = T * T * T, d = c * T3 / 3; return {
-  prompt: `A sled coming to the end of the Sled Run is slowed by a magnetic brake that bites harder the longer it is on. Measured from the moment the brake first touches, the sled’s acceleration is a(t) = −${co(c, 't')} m/s², t seconds after that moment, where positive means down the run. At t = 0 the sled is moving down the run at ${n(v0)} m/s. Take the brake as the only thing changing its speed. Enter the time, in seconds, at which the sled first comes to rest, then the distance it travels along the run from t = 0 until it comes to rest, in metres.`,
+ /* The printed starting speed v0 is c T² ÷ 2 for a whole stopping time T, so T = √(2 v0 ÷ c) is whole; c is a multiple of 3, so c ÷ 6 and the distance c T³ ÷ 3 are tidy. */
+ canonical: { c: 6, v0: 27 },
+ draw: R => retry(() => { const c = R.pick([3, 6, 9, 12, 15, 18, 21, 24, 27, 30]), T = R.int(2, 12); return { c, v0: c * T * T / 2 }; },
+  p => { const T = Math.round(Math.sqrt(2 * p.v0 / p.c)); return Number.isInteger(p.v0) && p.v0 <= 500 && p.c * T * T * T / 3 < 5000; }, { c: 6, v0: 27 }),
+ build: ({ c, v0 }) => { const T = Math.round(Math.sqrt(2 * v0 / c)), k2 = c / 2, k3 = c / 6, T3 = T * T * T, d = c * T3 / 3; return {
+  prompt: `A sled coming to the end of the Sled Run is slowed by a magnetic brake that bites harder the longer it is on. Measured from the moment the brake first touches, the sled’s acceleration is a(t) = −${co(c, 't')} m/s², t seconds after that moment, where positive means down the run. At t = 0 the sled is moving down the run at ${n(v0)} m/s. Take the brake as the only thing changing its speed. Enter the time, in seconds, at which the sled first comes to rest, then the distance it travels along the run from t = 0 until it comes to rest, in metres (typed without commas).`,
   answer: [T, d],
   hints: ['Integrate the acceleration and use the starting speed as the constant: v(t) = v(0) + ∫a dt. The sled is at rest when v(t) = 0, so solve that equation for t and take the positive root.', 'The sled only moves forwards until it stops, so the distance is the change in position. An antiderivative of v(t) that is 0 at t = 0, put in the stopping time, gives it directly.'],
   solution: `An antiderivative of a(t) = −${co(c, 't')} is −${co(k2, 't²')}, which is 0 at t = 0, so v(t) = ${n(v0)} − ${co(k2, 't²')}. The sled is at rest when ${co(k2, 't²')} = ${n(v0)}, so t² = ${n(T * T)} and t = ${n(T)} s. An antiderivative of v(t) is ${n(v0)}t − ${co(k3, 't³')}, which is 0 at t = 0. At t = ${n(T)} it is ${n(v0 * T)} − ${n(k3 * T3)} = ${n(d)}, so the sled travels ${n(d)} m.`,
@@ -127,8 +131,8 @@ mk({
   hints: ['Look at up and down on its own. The crate starts with no vertical speed, so the drop after t seconds is ½gt². Set that equal to the height and solve for t.', 'Along the ground nothing pushes the crate, so it keeps the drone’s speed for the whole fall: distance ahead = that speed × the fall time.'],
   solution: `Down: ${n(h)} = ½ × 9.8 × t², so t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)} and t = √${n(q)} ${eq(t)} ${n(t)}, which is ${f2(t)} s to 2 decimal places. Ahead: the speed stays ${n(u)} m/s, so the crate lands ${n(u)} × ${n(t)} ≈ ${n(x)} m ahead, which is ${f2(x)} m to 2 decimal places.`,
   guidance: [
-   { prompt: `Up and down only: the crate drops ${n(h)} m from no vertical speed, so ${n(h)} = ½ × 9.8 × t². What is t, in seconds, to 2 decimal places?`, answer: [r2(t)], explanation: `t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)}, so t = √${n(q)} ≈ ${f2(t)} s. The drone’s forward speed does not change how long the fall takes.` },
-   { prompt: `Along the ground the crate keeps the drone’s ${n(u)} m/s for that whole time. How far ahead of the release point does it land, in metres, to 2 decimal places?`, answer: [r2(x)], explanation: `${n(u)} × ${n(t)} ≈ ${f2(x)} m, using the unrounded time.` }
+   { prompt: `Up and down only: the crate drops ${n(h)} m from no vertical speed, so ${n(h)} = ½ × 9.8 × t². What is t, in seconds, to 2 decimal places?`, answer: [r2(t)], explanation: `t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)}, so t = √${n(q)} ${ap(t)} ${f2(t)} s. The drone’s forward speed does not change how long the fall takes.` },
+   { prompt: `Along the ground the crate keeps the drone’s ${n(u)} m/s for that whole time. How far ahead of the release point does it land, in metres, to 2 decimal places?`, answer: [r2(x)], explanation: `${n(u)} × ${n(t)} ${ap(x)} ${f2(x)} m, using the unrounded time.` }
   ] }; }
 });
 
@@ -148,9 +152,9 @@ mk({
   hints: ['The fall sets the time: the drop is ½gt² from no vertical speed, so set it equal to the height and solve for t. The sideways speed stays the same, so the landing distance is that speed × t.', 'Compare the landing distance with the distance to the pad’s near edge, with the landing distance first: landing distance − distance to the edge. A positive result means past the edge.'],
   solution: `Down: ${n(h)} = ½ × 9.8 × t², so t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)} and t = √${n(q)} ${eq(t)} ${n(t)} s. Sideways: ${n(u)} × ${n(t)} ≈ ${n(x)} m, which is ${f2(x)} m from the foot of the platform. The near edge is ${n(D)} m out, so the pod lands ${n(x)} − ${n(D)} ≈ ${n(m)} m past it, which is ${f2(m)} m to 2 decimal places${m < 0 ? ' (negative: it falls short of the edge)' : ''}.`,
   guidance: [
-   { prompt: `The pod drops ${n(h)} m from no vertical speed, so ${n(h)} = ½ × 9.8 × t². What is the time in the air, in seconds, to 2 decimal places?`, answer: [r2(t)], explanation: `t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)}, so t = √${n(q)} ≈ ${f2(t)} s.` },
-   { prompt: `Sideways the pod keeps ${n(u)} m/s for that whole time. How far from the foot of the platform does it land, in metres, to 2 decimal places?`, answer: [r2(x)], explanation: `${n(u)} × ${n(t)} ≈ ${f2(x)} m, using the unrounded time.` },
-   { prompt: `The near edge of the pad is ${n(D)} m out. What is the landing distance minus ${n(D)}, in metres, to 2 decimal places? (Positive means past the edge, negative means short.)`, answer: [r2(m)], explanation: `${n(x)} − ${n(D)} ≈ ${f2(m)} m${m < 0 ? ', which is negative: the pod falls short of the pad’s edge' : ', which is positive: the pod lands past the near edge'}.` }
+   { prompt: `The pod drops ${n(h)} m from no vertical speed, so ${n(h)} = ½ × 9.8 × t². What is the time in the air, in seconds, to 2 decimal places?`, answer: [r2(t)], explanation: `t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)}, so t = √${n(q)} ${ap(t)} ${f2(t)} s.` },
+   { prompt: `Sideways the pod keeps ${n(u)} m/s for that whole time. How far from the foot of the platform does it land, in metres, to 2 decimal places?`, answer: [r2(x)], explanation: `${n(u)} × ${n(t)} ${ap(x)} ${f2(x)} m, using the unrounded time.` },
+   { prompt: `The near edge of the pad is ${n(D)} m out. What is the landing distance minus ${n(D)}, in metres, to 2 decimal places? (Positive means past the edge, negative means short.)`, answer: [r2(m)], explanation: `${n(x)} − ${n(D)} ${ap(m)} ${f2(m)} m${m < 0 ? ', which is negative: the pod falls short of the pad’s edge' : ', which is positive: the pod lands past the near edge'}.` }
   ] }; }
 });
 
@@ -170,10 +174,10 @@ mk({
   hints: ['The turn changes nothing about the fall: it is still a drop from no vertical speed, so ½gt² equals the height. The pod travels at its launch speed for that time along the line it was aimed.', 'Split the distance travelled along the line into components, with the angle in radians: east = distance × cos θ and north = distance × sin θ.'],
   solution: `Down: ${n(h)} = ½ × 9.8 × t², so t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)} and t = √${n(q)} ${eq(t)} ${n(t)}, which is ${f2(t)} s. Along the line the pod travels ${n(u)} × ${n(t)} ≈ ${n(D)} m. East: ${n(D)} × cos ${n(th)} ≈ ${n(D)} × ${n(c)} ≈ ${n(e)}, which is ${f2(e)} m. North: ${n(D)} × sin ${n(th)} ≈ ${n(D)} × ${n(s)} ≈ ${n(nn)}, which is ${f2(nn)} m.`,
   guidance: [
-   { prompt: `The pod drops ${n(h)} m from no vertical speed, so ${n(h)} = ½ × 9.8 × t². What is the time in the air, in seconds, to 2 decimal places?`, answer: [r2(t)], explanation: `t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)}, so t = √${n(q)} ≈ ${f2(t)} s.` },
-   { prompt: `Along its line the pod keeps ${n(u)} m/s for that whole time. How far along the line does it travel, in metres, to 2 decimal places?`, answer: [r2(D)], explanation: `${n(u)} × ${n(t)} ≈ ${f2(D)} m, using the unrounded time.` },
-   { prompt: `The line is ${n(th)} radians north of east. What is the east part of the distance, distance × cos ${n(th)}, in metres to 2 decimal places? (Use the unrounded distance.)`, answer: [r2(e)], explanation: `${n(D)} × cos ${n(th)} ≈ ${n(D)} × ${n(c)} ≈ ${f2(e)} m.` },
-   { prompt: `What is the north part of the distance, distance × sin ${n(th)}, in metres to 2 decimal places? (Use the unrounded distance.)`, answer: [r2(nn)], explanation: `${n(D)} × sin ${n(th)} ≈ ${n(D)} × ${n(s)} ≈ ${f2(nn)} m.` }
+   { prompt: `The pod drops ${n(h)} m from no vertical speed, so ${n(h)} = ½ × 9.8 × t². What is the time in the air, in seconds, to 2 decimal places?`, answer: [r2(t)], explanation: `t² = 2 × ${n(h)} ÷ 9.8 ${eq(q)} ${n(q)}, so t = √${n(q)} ${ap(t)} ${f2(t)} s.` },
+   { prompt: `Along its line the pod keeps ${n(u)} m/s for that whole time. How far along the line does it travel, in metres, to 2 decimal places?`, answer: [r2(D)], explanation: `${n(u)} × ${n(t)} ${ap(D)} ${f2(D)} m, using the unrounded time.` },
+   { prompt: `The line is ${n(th)} radians north of east. What is the east part of the distance, distance × cos ${n(th)}, in metres to 2 decimal places? (Use the unrounded distance.)`, answer: [r2(e)], explanation: `${n(D)} × cos ${n(th)} ≈ ${n(D)} × ${n(c)} ${ap(e)} ${f2(e)} m.` },
+   { prompt: `What is the north part of the distance, distance × sin ${n(th)}, in metres to 2 decimal places? (Use the unrounded distance.)`, answer: [r2(nn)], explanation: `${n(D)} × sin ${n(th)} ≈ ${n(D)} × ${n(s)} ${ap(nn)} ${f2(nn)} m.` }
   ] }; }
 });
 
@@ -195,9 +199,9 @@ mk({
   hints: ['Split the launch speed: the upward part is v sin θ and the sideways part is v cos θ. The upward part falls by 9.8 m/s every second, reaches 0 at the top, and the beacon then falls for just as long.', 'On level ground the distance along the ground is v² sin(2θ) ÷ g, which is the sideways speed times the time in the air.'],
   solution: `Upward part of the launch speed: ${n(v)} × sin ${n(th)} ≈ ${n(vy)} m/s. Time in the air: 2 × ${n(vy)} ÷ 9.8 ${eq(T)} ${n(T)}, which is ${f2(T)} s. Distance along the ground: ${n(v)}² × sin(2 × ${n(th)}) ÷ 9.8 ≈ ${n(v * v)} × ${n(s2)} ÷ 9.8 ${eq(Rg)} ${n(Rg)}, which is ${f2(Rg)} m.`,
   guidance: [
-   { prompt: `What is the upward part of the launch speed, ${n(v)} × sin ${n(th)} (θ in radians), in m/s to 2 decimal places?`, answer: [r2(vy)], explanation: `${n(v)} × sin ${n(th)} ≈ ${n(v)} × ${n(s)} ≈ ${f2(vy)} m/s.` },
-   { prompt: `The beacon rises until its upward speed is 0, then falls for just as long. What is the time in the air, 2 × (upward speed) ÷ g, in seconds to 2 decimal places?`, answer: [r2(T)], explanation: `2 × ${n(vy)} ÷ 9.8 ≈ ${f2(T)} s.` },
-   { prompt: `The distance along the ground is v² sin(2θ) ÷ g. What is it, in metres to 2 decimal places?`, answer: [r2(Rg)], explanation: `${n(v * v)} × sin ${n(2 * th)} ÷ 9.8 ≈ ${n(v * v)} × ${n(s2)} ÷ 9.8 ≈ ${f2(Rg)} m.` }
+   { prompt: `What is the upward part of the launch speed, ${n(v)} × sin ${n(th)} (θ in radians), in m/s to 2 decimal places?`, answer: [r2(vy)], explanation: `${n(v)} × sin ${n(th)} ≈ ${n(v)} × ${n(s)} ${ap(vy)} ${f2(vy)} m/s.` },
+   { prompt: `The beacon rises until its upward speed is 0, then falls for just as long. What is the time in the air, 2 × (upward speed) ÷ g, in seconds to 2 decimal places?`, answer: [r2(T)], explanation: `2 × ${n(vy)} ÷ 9.8 ${ap(T)} ${f2(T)} s.` },
+   { prompt: `The distance along the ground is v² sin(2θ) ÷ g. What is it, in metres to 2 decimal places?`, answer: [r2(Rg)], explanation: `${n(v * v)} × sin ${n(2 * th)} ÷ 9.8 ≈ ${n(v * v)} × ${n(s2)} ÷ 9.8 ${ap(Rg)} ${f2(Rg)} m.` }
   ] }; }
 });
 
@@ -217,9 +221,9 @@ mk({
   hints: ['The pod’s time in the air is 2 × (upward speed) ÷ g, where the upward speed is v sin θ. The rover drives for exactly that long.', 'The range on level ground is v² sin(2θ) ÷ g. A steady speed is distance ÷ time, so divide the range by the time in the air.'],
   solution: `Upward part of the launch speed: ${n(v)} × sin ${n(th)} ≈ ${n(vy)} m/s, so the pod is in the air for 2 × ${n(vy)} ÷ 9.8 ${eq(T)} ${n(T)} s. Range: ${n(v)}² × sin(2 × ${n(th)}) ÷ 9.8 ≈ ${n(v * v)} × ${n(s2)} ÷ 9.8 ${eq(Rg)} ${n(Rg)}, which is ${f2(Rg)} m. The rover covers that in ${n(T)} s, so its speed is ${n(Rg)} ÷ ${n(T)} ${eq(w)} ${n(w)}, which is ${f2(w)} m/s.`,
   guidance: [
-   { prompt: `The pod’s upward speed is ${n(v)} × sin ${n(th)} (θ in radians). What is the time in the air, 2 × (upward speed) ÷ g, in seconds to 2 decimal places?`, answer: [r2(T)], explanation: `${n(v)} × sin ${n(th)} ≈ ${n(vy)} m/s, and 2 × ${n(vy)} ÷ 9.8 ≈ ${f2(T)} s.` },
-   { prompt: `What is the range v² sin(2θ) ÷ g, in metres to 2 decimal places?`, answer: [r2(Rg)], explanation: `${n(v * v)} × sin ${n(2 * th)} ÷ 9.8 ≈ ${n(v * v)} × ${n(s2)} ÷ 9.8 ≈ ${f2(Rg)} m.` },
-   { prompt: `The rover covers the range in the same time the pod is in the air. What is its steady speed, range ÷ time, in m/s to 2 decimal places? (Use the unrounded range and time.)`, answer: [r2(w)], explanation: `${n(Rg)} ÷ ${n(T)} ≈ ${f2(w)} m/s.` }
+   { prompt: `The pod’s upward speed is ${n(v)} × sin ${n(th)} (θ in radians). What is the time in the air, 2 × (upward speed) ÷ g, in seconds to 2 decimal places?`, answer: [r2(T)], explanation: `${n(v)} × sin ${n(th)} ≈ ${n(vy)} m/s, and 2 × ${n(vy)} ÷ 9.8 ${ap(T)} ${f2(T)} s.` },
+   { prompt: `What is the range v² sin(2θ) ÷ g, in metres to 2 decimal places?`, answer: [r2(Rg)], explanation: `${n(v * v)} × sin ${n(2 * th)} ÷ 9.8 ≈ ${n(v * v)} × ${n(s2)} ÷ 9.8 ${ap(Rg)} ${f2(Rg)} m.` },
+   { prompt: `The rover covers the range in the same time the pod is in the air. What is its steady speed, range ÷ time, in m/s to 2 decimal places? (Use the unrounded range and time.)`, answer: [r2(w)], explanation: `${n(Rg)} ÷ ${n(T)} ${ap(w)} ${f2(w)} m/s.` }
   ] }; }
 });
 
@@ -235,15 +239,15 @@ mk({
  draw: R => retry(() => ({ v: R.int(10, 40), th: R.int(3, 12) / 10 }), p => { const vy = p.v * Math.sin(p.th), H = vy * vy / (2 * g), tf = Math.sqrt(2 * H / g), xh = p.v * Math.cos(p.th) * tf;
   return p.th !== 1 && !(p.th === 0.6 && p.v === 20) && ![H, tf, xh, 2 * xh].some(nearTie); }, { v: 31, th: 1.1 }),
  build: ({ v, th }) => { const s = Math.sin(th), c = Math.cos(th), vy = v * s, vx = v * c, H = vy * vy / (2 * g), q = 2 * H / g, tf = Math.sqrt(q), xh = vx * tf, Rg = 2 * xh; return {
-  prompt: `A pod is thrown from flat crater floor at ${n(v)} m/s, aimed ${n(th)} radians above the horizontal, and lands on the same floor. At the very top of its path the pod has no upward speed and is moving only sideways, at v cos θ, so from the top onwards it moves exactly like a pod fired horizontally from a platform whose height is the greatest height reached. Ignore the air and take g = 9.8 m/s². Angles are in radians. Enter the greatest height in metres, then the range of the whole throw in metres, both to 2 decimal places. Find the range by treating the climb as a mirror image of the drop from the top, so the whole range is twice the sideways distance from the top to the landing point. Work from unrounded values.`,
+  prompt: `A pod is thrown from the flat crater floor at ${n(v)} m/s, aimed ${n(th)} radians above the horizontal, and lands on the same floor. At the very top of its path the pod has no upward speed and is moving only sideways, at v cos θ, so from the top onwards it moves exactly like a pod fired horizontally from a platform whose height is the greatest height reached. Ignore the air and take g = 9.8 m/s². Angles are in radians. Enter the greatest height in metres, then the range of the whole throw in metres, both to 2 decimal places. Find the range by treating the climb as a mirror image of the drop from the top, so the whole range is twice the sideways distance from the top to the landing point. Work from unrounded values.`,
   answer: [r2(H), r2(Rg)],
   hints: ['The greatest height is (upward speed)² ÷ (2g), with the upward speed v sin θ. From the top, the drop is a fall from no vertical speed: ½gt² equals that height.', 'From the top the sideways speed v cos θ never changes, so the sideways distance to the landing point is v cos θ × the fall time. The climb mirrors the drop, so double it for the whole range.'],
   solution: `Upward part of the launch speed: ${n(v)} × sin ${n(th)} ≈ ${n(vy)} m/s. Greatest height: ${n(vy)}² ÷ (2 × 9.8) ${eq(H)} ${n(H)}, which is ${f2(H)} m. Drop from the top: ${n(H)} = ½ × 9.8 × t², so t² = 2 × ${n(H)} ÷ 9.8 ${eq(q)} ${n(q)} and t = √${n(q)} ${eq(tf)} ${n(tf)} s. Sideways speed: ${n(v)} × cos ${n(th)} ≈ ${n(vx)} m/s, so the distance from the top to the landing point is ${n(vx)} × ${n(tf)} ≈ ${n(xh)} m. The whole range is twice that: ${n(Rg)} m, which is ${f2(Rg)} m to 2 decimal places.`,
   guidance: [
-   { prompt: `The upward part of the launch speed is ${n(v)} × sin ${n(th)} (θ in radians). What is the greatest height, (upward speed)² ÷ (2g), in metres to 2 decimal places?`, answer: [r2(H)], explanation: `${n(v)} × sin ${n(th)} ≈ ${n(vy)} m/s, and ${n(vy)}² ÷ 19.6 ≈ ${f2(H)} m.` },
-   { prompt: `From the top, the pod drops that height from no vertical speed. What is the fall time, from H = ½ × 9.8 × t², in seconds to 2 decimal places? (Use the unrounded height.)`, answer: [r2(tf)], explanation: `t² = 2 × ${n(H)} ÷ 9.8 ${eq(q)} ${n(q)}, so t = √${n(q)} ≈ ${f2(tf)} s.` },
-   { prompt: `Sideways the pod keeps ${n(v)} × cos ${n(th)} for that time. What is the sideways distance from the top to the landing point, in metres to 2 decimal places? (Use unrounded values.)`, answer: [r2(xh)], explanation: `${n(vx)} × ${n(tf)} ≈ ${f2(xh)} m.` },
-   { prompt: `The climb mirrors the drop, so the range is twice the distance from the top to the landing point. What is the range, in metres to 2 decimal places? (Double the unrounded distance.)`, answer: [r2(Rg)], explanation: `2 × ${n(xh)} ≈ ${f2(Rg)} m.` }
+   { prompt: `The upward part of the launch speed is ${n(v)} × sin ${n(th)} (θ in radians). What is the greatest height, (upward speed)² ÷ (2g), in metres to 2 decimal places?`, answer: [r2(H)], explanation: `${n(v)} × sin ${n(th)} ≈ ${n(vy)} m/s, and ${n(vy)}² ÷ 19.6 ${ap(H)} ${f2(H)} m.` },
+   { prompt: `From the top, the pod drops that height from no vertical speed. What is the fall time, from H = ½ × 9.8 × t², in seconds to 2 decimal places? (Use the unrounded height.)`, answer: [r2(tf)], explanation: `t² = 2 × ${n(H)} ÷ 9.8 ${eq(q)} ${n(q)}, so t = √${n(q)} ${ap(tf)} ${f2(tf)} s.` },
+   { prompt: `Sideways the pod keeps ${n(v)} × cos ${n(th)} for that time. What is the sideways distance from the top to the landing point, in metres to 2 decimal places? (Use unrounded values.)`, answer: [r2(xh)], explanation: `${n(vx)} × ${n(tf)} ${ap(xh)} ${f2(xh)} m.` },
+   { prompt: `The climb mirrors the drop, so the range is twice the distance from the top to the landing point. What is the range, in metres to 2 decimal places? (Double the unrounded distance.)`, answer: [r2(Rg)], explanation: `2 × ${n(xh)} ${ap(Rg)} ${f2(Rg)} m.` }
   ] }; }
 });
 
@@ -265,9 +269,9 @@ mk({
   hints: ['One full turn is a distance of 2πr and takes the period, so the speed is 2πr divided by the period. The period is the time for one turn, 60 seconds divided by the number of turns in a minute.', 'The centripetal acceleration points at the centre of the circle and has size v² ÷ r.'],
   solution: `One turn takes 60 ÷ ${n(N)} ${eq(T)} ${n(T)} s, and covers 2π × ${n(r)} ≈ ${n(C)} m, so v = ${n(C)} ÷ ${n(T)} ${eq(v)} ${n(v)}, which is ${f2(v)} m/s. The centripetal acceleration is v² ÷ r = ${n(v)}² ÷ ${n(r)} ${eq(a)} ${n(a)}, which is ${f2(a)} m/s², pointing at the centre.`,
   guidance: [
-   { prompt: `One full turn takes 60 ÷ ${n(N)} seconds. What is the period, in seconds, to 2 decimal places?`, answer: [r2(T)], explanation: `60 ÷ ${n(N)} ≈ ${f2(T)} s.` },
-   { prompt: `In one period the pod goes once round the circle, a distance of 2π × ${n(r)} m. What is its speed, in m/s to 2 decimal places? (Use the unrounded period.)`, answer: [r2(v)], explanation: `${n(C)} ÷ ${n(T)} ≈ ${f2(v)} m/s.` },
-   { prompt: `What is the centripetal acceleration v² ÷ r, in m/s² to 2 decimal places?`, answer: [r2(a)], explanation: `${n(v)}² ÷ ${n(r)} ≈ ${f2(a)} m/s², pointing at the centre.` }
+   { prompt: `One full turn takes 60 ÷ ${n(N)} seconds. What is the period, in seconds, to 2 decimal places?`, answer: [r2(T)], explanation: `60 ÷ ${n(N)} ${ap(T)} ${f2(T)} s.` },
+   { prompt: `In one period the pod goes once round the circle, a distance of 2π × ${n(r)} m. What is its speed, in m/s to 2 decimal places? (Use the unrounded period.)`, answer: [r2(v)], explanation: `${n(C)} ÷ ${n(T)} ${ap(v)} ${f2(v)} m/s.` },
+   { prompt: `What is the centripetal acceleration v² ÷ r, in m/s² to 2 decimal places?`, answer: [r2(a)], explanation: `${n(v)}² ÷ ${n(r)} ${ap(a)} ${f2(a)} m/s², pointing at the centre.` }
   ] }; }
 });
 
@@ -287,9 +291,9 @@ mk({
   hints: ['Rearrange a = v² ÷ r into v² = a × r, then take the square root for the speed at the limit.', 'The speed is 2πr ÷ T, so the period is 2πr divided by the speed. The turns in a minute are 60 seconds divided by the period.'],
   solution: `v² = a × r = ${n(a)} × ${n(r)} = ${n(ar)}, so v = √${n(ar)} ${eq(v)} ${n(v)}, which is ${f2(v)} m/s. One turn is 2π × ${n(r)} ≈ ${n(C)} m, so the period is ${n(C)} ÷ ${n(v)} ${eq(T)} ${n(T)}, which is ${f2(T)} s. Turns per minute: 60 ÷ ${n(T)} ${eq(N)} ${n(N)}, which is ${f2(N)}.`,
   guidance: [
-   { prompt: `At the limit v² ÷ ${n(r)} = ${n(a)}, so v² = ${n(a)} × ${n(r)}. What is v, in m/s to 2 decimal places?`, answer: [r2(v)], explanation: `v² = ${n(ar)}, so v = √${n(ar)} ≈ ${f2(v)} m/s.` },
-   { prompt: `One turn is a distance of 2π × ${n(r)} m. At the speed you just found, how long does one turn take, in seconds to 2 decimal places? (Use the unrounded speed.)`, answer: [r2(T)], explanation: `${n(C)} ÷ ${n(v)} ≈ ${f2(T)} s.` },
-   { prompt: `How many full turns is that per minute, 60 ÷ period, to 2 decimal places? (Use the unrounded period.)`, answer: [r2(N)], explanation: `60 ÷ ${n(T)} ≈ ${f2(N)} turns per minute.` }
+   { prompt: `At the limit v² ÷ ${n(r)} = ${n(a)}, so v² = ${n(a)} × ${n(r)}. What is v, in m/s to 2 decimal places?`, answer: [r2(v)], explanation: `v² = ${n(ar)}, so v = √${n(ar)} ${ap(v)} ${f2(v)} m/s.` },
+   { prompt: `One turn is a distance of 2π × ${n(r)} m. At the speed you just found, how long does one turn take, in seconds to 2 decimal places? (Use the unrounded speed.)`, answer: [r2(T)], explanation: `${n(C)} ÷ ${n(v)} ${ap(T)} ${f2(T)} s.` },
+   { prompt: `How many full turns is that per minute, 60 ÷ period, to 2 decimal places? (Use the unrounded period.)`, answer: [r2(N)], explanation: `60 ÷ ${n(T)} ${ap(N)} ${f2(N)} turns per minute.` }
   ] }; }
 });
 
@@ -310,8 +314,8 @@ mk({
   solution: `${n(kmh)} km/h = ${n(kmh)} ÷ 3.6 = ${n(v)} m/s. One turn is 2π × ${n(r)} ≈ ${n(C)} m, so the period is ${n(C)} ÷ ${n(v)} ${eq(T)} ${n(T)}, which is ${f2(T)} s. The centripetal acceleration is v² ÷ r = ${n(v)}² ÷ ${n(r)} ${eq(a)} ${n(a)}, which is ${f2(a)} m/s².`,
   guidance: [
    { prompt: `Convert ${n(kmh)} km/h to metres per second by dividing by 3.6. What is the speed, in m/s?`, answer: [v], explanation: `${n(kmh)} ÷ 3.6 = ${n(v)} m/s.` },
-   { prompt: `One turn is a distance of 2π × ${n(r)} m. At ${n(v)} m/s, how long does one turn take, in seconds to 2 decimal places?`, answer: [r2(T)], explanation: `${n(C)} ÷ ${n(v)} ≈ ${f2(T)} s.` },
-   { prompt: `What is the centripetal acceleration v² ÷ r, in m/s² to 2 decimal places?`, answer: [r2(a)], explanation: `${n(v)}² ÷ ${n(r)} ≈ ${f2(a)} m/s², pointing at the centre.` }
+   { prompt: `One turn is a distance of 2π × ${n(r)} m. At ${n(v)} m/s, how long does one turn take, in seconds to 2 decimal places?`, answer: [r2(T)], explanation: `${n(C)} ÷ ${n(v)} ${ap(T)} ${f2(T)} s.` },
+   { prompt: `What is the centripetal acceleration v² ÷ r, in m/s² to 2 decimal places?`, answer: [r2(a)], explanation: `${n(v)}² ÷ ${n(r)} ${ap(a)} ${f2(a)} m/s², pointing at the centre.` }
   ] }; }
 });
 
@@ -333,8 +337,8 @@ mk({
   hints: ['The centripetal part points at the centre of the circle and has size v² ÷ r, whether or not the speed is changing.', 'The tangential part points along the track, at a right angle to the centripetal part, so the total is the square root of (centripetal² + tangential²).'],
   solution: `Centripetal: ${n(v)}² ÷ ${n(r)} = ${n(v * v)} ÷ ${n(r)} ${eq(ac)} ${n(ac)}, which is ${f2(ac)} m/s². The tangential part, ${n(at)} m/s², is at a right angle to it, so the total is √(${n(ac)}² + ${n(at)}²) ${eq(tot)} ${n(tot)}, which is ${f2(tot)} m/s².`,
   guidance: [
-   { prompt: `What is the centripetal acceleration v² ÷ r, in m/s² to 2 decimal places?`, answer: [r2(ac)], explanation: `${n(v * v)} ÷ ${n(r)} ≈ ${f2(ac)} m/s², pointing at the centre.` },
-   { prompt: `The tangential acceleration is ${n(at)} m/s² along the track, at a right angle to the centripetal one. What is the size of the total, √(a_c² + a_t²), in m/s² to 2 decimal places? (Use the unrounded centripetal value.)`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ≈ ${f2(tot)} m/s².` }
+   { prompt: `What is the centripetal acceleration v² ÷ r, in m/s² to 2 decimal places?`, answer: [r2(ac)], explanation: `${n(v * v)} ÷ ${n(r)} ${ap(ac)} ${f2(ac)} m/s², pointing at the centre.` },
+   { prompt: `The tangential acceleration is ${n(at)} m/s² along the track, at a right angle to the centripetal one. What is the size of the total, √(a_c² + a_t²), in m/s² to 2 decimal places? (Use the unrounded centripetal value.)`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ${ap(tot)} ${f2(tot)} m/s².` }
   ] }; }
 });
 
@@ -355,8 +359,8 @@ mk({
   solution: `The speed after ${n(t)} s is ${n(at)} × ${n(t)} = ${n(v)} m/s. Centripetal: ${n(v)}² ÷ ${n(r)} = ${n(v * v)} ÷ ${n(r)} ${eq(ac)} ${n(ac)}, which is ${f2(ac)} m/s². The tangential part is ${n(at)} m/s², at a right angle to it, so the total is √(${n(ac)}² + ${n(at)}²) ${eq(tot)} ${n(tot)}, which is ${f2(tot)} m/s².`,
   guidance: [
    { prompt: `The speed after ${n(t)} s is the tangential acceleration × the time, ${n(at)} × ${n(t)}. What is it, in m/s?`, answer: [v], explanation: `${n(at)} × ${n(t)} = ${n(v)} m/s.` },
-   { prompt: `What is the centripetal acceleration v² ÷ r at that moment, in m/s² to 2 decimal places?`, answer: [r2(ac)], explanation: `${n(v)}² ÷ ${n(r)} = ${n(v * v)} ÷ ${n(r)} ≈ ${f2(ac)} m/s².` },
-   { prompt: `The tangential acceleration is ${n(at)} m/s², at a right angle to the centripetal one. What is the size of the total, in m/s² to 2 decimal places? (Use the unrounded centripetal value.)`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ≈ ${f2(tot)} m/s².` }
+   { prompt: `What is the centripetal acceleration v² ÷ r at that moment, in m/s² to 2 decimal places?`, answer: [r2(ac)], explanation: `${n(v)}² ÷ ${n(r)} = ${n(v * v)} ÷ ${n(r)} ${ap(ac)} ${f2(ac)} m/s².` },
+   { prompt: `The tangential acceleration is ${n(at)} m/s², at a right angle to the centripetal one. What is the size of the total, in m/s² to 2 decimal places? (Use the unrounded centripetal value.)`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ${ap(tot)} ${f2(tot)} m/s².` }
   ] }; }
 });
 
@@ -377,8 +381,8 @@ mk({
   solution: `The speed rises from ${n(v1)} to ${n(v2)} m/s in ${n(dt)} s, so the tangential acceleration is (${n(v2)} − ${n(v1)}) ÷ ${n(dt)} = ${n(at)} m/s². At the second reading the centripetal acceleration is ${n(v2)}² ÷ ${n(r)} = ${n(v2 * v2)} ÷ ${n(r)} ${eq(ac)} ${n(ac)}, which is ${f2(ac)} m/s². The total is √(${n(ac)}² + ${n(at)}²) ${eq(tot)} ${n(tot)}, which is ${f2(tot)} m/s².`,
   guidance: [
    { prompt: `The speed rises steadily from ${n(v1)} m/s to ${n(v2)} m/s in ${n(dt)} s. What is the tangential acceleration, (change in speed) ÷ time, in m/s²?`, answer: [at], explanation: `(${n(v2)} − ${n(v1)}) ÷ ${n(dt)} = ${n(at)} m/s².` },
-   { prompt: `At the second reading the speed is ${n(v2)} m/s. What is the centripetal acceleration v² ÷ r, in m/s² to 2 decimal places?`, answer: [r2(ac)], explanation: `${n(v2 * v2)} ÷ ${n(r)} ≈ ${f2(ac)} m/s².` },
-   { prompt: `What is the size of the total acceleration, √(a_c² + a_t²), in m/s² to 2 decimal places? (Use the unrounded centripetal value.)`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ≈ ${f2(tot)} m/s².` }
+   { prompt: `At the second reading the speed is ${n(v2)} m/s. What is the centripetal acceleration v² ÷ r, in m/s² to 2 decimal places?`, answer: [r2(ac)], explanation: `${n(v2 * v2)} ÷ ${n(r)} ${ap(ac)} ${f2(ac)} m/s².` },
+   { prompt: `What is the size of the total acceleration, √(a_c² + a_t²), in m/s² to 2 decimal places? (Use the unrounded centripetal value.)`, answer: [r2(tot)], explanation: `√(${n(ac)}² + ${n(at)}²) ${ap(tot)} ${f2(tot)} m/s².` }
   ] }; }
 });
 
