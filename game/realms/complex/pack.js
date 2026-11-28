@@ -62,7 +62,7 @@ window.REALM = {
  sourceRule: { publisherPattern: /^Orloff/, label: 'Orloff' },
  features: { workshop: false, contracts: false, board: false, docking: false, handson: false, labs: ['concept'] },
  mentor: {
-  name: 'Mira', role: 'field engineer', cardEyebrow: 'MIRA / YOUR SIGNAL ENGINEER',
+  name: 'Mira', role: 'field engineer', cardEyebrow: 'MIRA / YOUR FIELD ENGINEER',
   opening: (q, purpose) => `I’m Mira. Nothing out here is a single line any more, and we have to ${purpose}. Your task is “${q.title}.” ${q.brief} The idea we need: ${q.topic}.`,
   closing: 'You already have the derivatives and integrals from Calculus 1 and 2. I’ll go through the worked example with you, and the guided steps are there whenever you want them.'
  },
