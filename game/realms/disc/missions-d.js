@@ -34,7 +34,7 @@ window.QUESTS.push(
   id: 'q31', title: 'Jumping ahead in the pattern log', topic: 'The characteristic root technique', tier: 'Advanced', sector: 'Tiling Works',
   brief: 'The pattern counter only knows how to step forward one term at a time, and Mira needs a term far down the list without stepping all the way there.',
   lesson: 'For aₙ = c × aₙ₋₁ + d × aₙ₋₂, solve x² = cx + d. With roots r and s, aₙ = A × rⁿ + B × sⁿ, where A and B are fixed by the initial conditions.',
-  prompt: 'The pattern counter in the Tiling Works follows the rule aₙ = 3aₙ₋₁ − 2aₙ₋₂, with initial conditions a₀ = 5 and a₁ = 8. Its characteristic equation has two whole-number roots. Enter the larger root, then the smaller root, then a₁₂ (type it without commas).',
+  prompt: 'The pattern counter in the Tiling Works follows the rule aₙ = 3aₙ₋₁ − 2aₙ₋₂, with initial conditions a₀ = 5 and a₁ = 8. Its characteristic equation has two roots, and each is a whole number or a negative whole number. Enter the larger root, then the smaller root, then a₁₂ (type it without commas).',
   answer: [2, 1, 12290], labels: ['larger root', 'smaller root', 'a₁₂'], tolerance: 0.01,
   hints: [
    'Replace aₙ by x², aₙ₋₁ by x and aₙ₋₂ by 1 to get the characteristic equation. Move every term to one side and factor it.',

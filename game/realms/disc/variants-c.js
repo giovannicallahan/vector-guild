@@ -11,7 +11,7 @@ Object.assign(window.VARIANT_SETUP, {
  q24: t => `A crate stack has a₁ = ${1 + (t + 10) % 9} and aₙ = 2aₙ₋₁ + 1 for n ≥ 2.`,
  q25: t => `An arithmetic sequence starts at 5 with common difference ${1 + (t + 10) % 9}.`,
  q26: t => `A geometric sequence starts at 3 and doubles each time. Take its first ${3 + (t + 10) % 6} terms.`,
- q27: t => { const k = (t + 10) % 11 - 2, list = [1, 2, 3, 4, 5].map(m => 2 * m * m + k * m + 1); return `A list comes from a polynomial in n: ${list.join(', ')}, ….`; },
+ q27: t => { const k = (t + 10) % 11 - 2, list = [1, 2, 3, 4, 5].map(m => 2 * m * m + k * m + 1); return `A list comes from the simplest polynomial in n that fits it: ${list.join(', ')}, ….`; },
  q28: t => `A sequence has a₀ = 2, a₁ = ${1 + (t + 10) % 10} and aₙ = aₙ₋₁ + aₙ₋₂ for n ≥ 2.`,
  q29: t => `A stock line starts with ${1 + (t + 10) % 7} in week 1 and doubles every week.`,
  q30: t => { const N = 5 + (t + 10) % 16; return `A store has a₀ = 3 and aₙ = aₙ₋₁ + 2n for n ≥ 1. Look ahead to week ${N}.`; },

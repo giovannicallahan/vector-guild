@@ -208,7 +208,7 @@ mk({
  canonical: { f: 4, g: 7, k: 3 },
  draw: R => { let p; do { const k = R.int(3, 4); p = { f: R.int(2, 5), g: R.int(k + 1, 9), k }; } while (choose(p.f + p.g, p.k) >= 1000); return p; },
  build: ({ f, g, k }) => { const T = f + g, all = choose(T, k), none = choose(g, k), some = all - none; return {
-  prompt: `A relay rack holds ${n(f)} faulty cells and ${n(g)} good ones, all looking alike. A technician pulls ${n(k)} cells at once for a test, and the test is only worth running if the batch has at least one faulty cell in it. Enter the number of batches of ${n(k)} with no rule at all, then the number of batches with no faulty cell, then the number with at least one faulty cell.`,
+  prompt: `A relay rack holds ${n(f)} faulty cells and ${n(g)} good ones, and each cell has its own serial number. A technician pulls ${n(k)} cells at once for a test, and the test is only worth running if the batch has at least one faulty cell in it. Enter the number of batches of ${n(k)} with no rule at all, then the number of batches with no faulty cell, then the number with at least one faulty cell.`,
   answer: [all, none, some],
   hints: [`With no rule, a batch is any ${n(k)} of the ${n(T)} cells, in no order.`, 'A batch with no faulty cell is made of good cells only. Every batch has either no faulty cell or at least one, never both, so take one count away from the other.'],
   solution: `With no rule there are C(${n(T)}, ${n(k)}) = ${n(all)} batches. A batch with no faulty cell is ${n(k)} of the ${n(g)} good cells: C(${n(g)}, ${n(k)}) = ${n(none)}. Every other batch has at least one faulty cell, so the count is ${n(all)} − ${n(none)} = ${n(some)}.`,

@@ -43,7 +43,7 @@ Object.assign(window.MISSION_GEN, {
    const closed = `aₙ = ${n(A)} × ${par(p)}ⁿ ${bT('ⁿ')}`;
    const last = `a₁₂ = ${n(A)} × ${par(p)}¹² ${bT('¹²')} = ${n(A)} × 4096 ${B < 0 ? '−' : '+'} ${n(Math.abs(B))} × 1 = ${n(a12)}`;
    return {
-   prompt: `The pattern counter in the Tiling Works follows the rule ${rec}, with initial conditions a₀ = ${n(a0)} and a₁ = ${n(a1)}. Its characteristic equation has two whole-number roots. Enter the larger root, then the smaller root, then a₁₂ (type it without commas).`,
+   prompt: `The pattern counter in the Tiling Works follows the rule ${rec}, with initial conditions a₀ = ${n(a0)} and a₁ = ${n(a1)}. Its characteristic equation has two roots, and each is a whole number or a negative whole number. Enter the larger root, then the smaller root, then a₁₂ (type it without commas).`,
    answer: [big, small, a12],
    hints: ['Replace aₙ by x², aₙ₋₁ by x and aₙ₋₂ by 1 to get the characteristic equation. Move every term to one side and factor it.', 'With roots r and s, the closed formula is aₙ = A × rⁿ + B × sⁿ. Put n = 0 and n = 1 into it and match the initial conditions to find A and B.'],
    solution: `The characteristic equation is x² = ${rhs}, that is ${eq}, which factors as ${fac} = 0. The roots are ${n(big)} and ${n(small)}, so aₙ = A × ${par(p)}ⁿ + B × ${par(q)}ⁿ. Putting in n = 0 gives A + B = ${n(a0)}, and n = 1 gives ${eq1}. ${solveAB} So ${closed}, and ${last}.`,
