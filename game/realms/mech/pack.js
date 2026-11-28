@@ -32,7 +32,7 @@ window.REALM = {
   { name: 'Catapult Field', purpose: 'land a supply pod exactly where it is needed' },
   { name: 'Crane Yard', purpose: 'lift and haul loads without snapping a cable' },
   { name: 'Engine Hall', purpose: 'know how much energy each machine needs' },
-  { name: 'Docking Ring', purpose: 'bring cargo modules together safely' },
+  { name: 'Docking Ring', purpose: 'bring cargo pods together safely' },
   { name: 'Flywheel Vault', purpose: 'keep the flywheels and satellites turning' }
  ],
  landmarks: [
