@@ -187,7 +187,7 @@ mk({
  id: 'q12b', parent: 'q12', kind: 'setting', title: 'Which trays are cleared',
  brief: 'The greenhouse clears trays for watering by a rule written with one long “not”, and the gardeners need it in a form they can check tray by tray.',
  labels: ['number of the rewrite', 'trays cleared'], tolerance: 0.01,
- gl: [['number of the rewrite'], ['trays failing the inner statement'], ['trays cleared']]
+ gl: [['number of the rewrite'], ['trays making the inner statement true'], ['trays cleared']]
 }, {
  canonical: { form: 'or', p: { k: 'high', c: 14 }, q: { k: 'odd', c: 0 }, N: 36, ord: 4 },
  draw: R => { let s; do {

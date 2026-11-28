@@ -247,7 +247,7 @@ window.QUESTS.push(
  {
   id: 'q16', title: 'The rule that held until it didn’t', topic: 'Negating a quantifier; the smallest counterexample', tier: 'Intermediate', sector: 'Regulations Office',
   brief: 'A regulation was checked for the first few numbers and passed every time, so it was written down for all of them; we have to check whether it really holds.',
-  lesson: 'The negation of ∀n P(n) is ∃n ¬P(n). One counterexample, an n that makes the claim false, is enough to show a “for every” claim is false.',
+  lesson: 'P(n) stands for a claim about a number n, such as “n² < 3n + 10”. The negation of ∀n P(n) is ∃n ¬P(n). One counterexample, an n that makes the claim false, is enough to show a “for every” claim is false.',
   prompt: 'A regulation claims: for every whole number n from 1 to 10, n² < 3n + 10. Write its negation, then test it. Enter the smallest n in the domain that is a counterexample to the claim, then how many numbers from 1 to 10 are counterexamples.',
   answer: [5, 6], labels: ['smallest counterexample', 'counterexamples in the domain'], tolerance: 0.01,
   hints: [

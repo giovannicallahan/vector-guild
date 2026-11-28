@@ -92,7 +92,7 @@ Object.assign(window.MISSION_GEN, {
    means = more ? `${n(k)} litres or fewer` : `${n(k)} litres or more`; return {
    prompt: `The water tank rule p says: “The tank holds ${rel} ${n(k)} litres.” Its negation ¬p says: “The tank holds not ${rel} ${n(k)} litres.” Today’s log shows these readings, in litres: ${log.map(n).join(', ')}. Enter the truth value of ¬p for the first reading (1 for true, 0 for false). Then enter the ${want} reading in the log that makes ¬p true.`,
    answer: [TV(np(r0)), ans],
-   hints: ['¬p is true exactly when p is false. Decide p for a reading first, then flip it.', `A reading of exactly ${n(k)} litres is not ${rel} ${n(k)}, so it makes ¬p true.`],
+   hints: ['¬p is true exactly when p is false. Decide p for a reading first, then flip it.', `Mind the boundary: a reading equal to the limit in the rule is not ${rel} that limit, so it makes ¬p true.`],
    solution: `For the first reading, ${n(r0)} litres, p is ${word(p(r0))}, so ¬p is ${word(np(r0))}: ${TV(np(r0))}. ¬p means the tank holds ${means}. The readings that make ¬p true are ${ok.map(n).join(', ')}, and the ${want} of them is ${n(ans)} litres.`,
    guidance: [
     { prompt: `The first reading is ${n(r0)} litres. Is p, “the tank holds ${rel} ${n(k)} litres”, true (1) or false (0) for it? Then what is ¬p?`, answer: [TV(p(r0)), TV(np(r0))], explanation: `${n(r0)} is ${p(r0) ? '' : 'not '}${rel} ${n(k)}, so p is ${word(p(r0))} and ¬p, its opposite, is ${word(np(r0))}.` },
@@ -184,7 +184,7 @@ Object.assign(window.MISSION_GEN, {
    sum = fw.length === 1 ? pl(skip, 'row') : `${fw.map(n).join(' + ')} = ${n(skip)} rows`; return {
    prompt: `A control panel has ${n(k)} switches, ${names}. Each switch is a statement that is true or false. Enter how many rows a truth table for these ${n(k)} letters needs. Then enter the row number of the case ${caseW}, in the standard order: the first letter is true on the top half of the rows, each next letter switches twice as often, and the last letter switches on every row.`,
    answer: [rows, row],
-   hints: ['Each new letter doubles the number of rows: 2 for one letter, 4 for two, and so on.', `p is true on the top ${n(half)} rows. Each letter that is false in the case moves it down by the number of rows that letter’s block fills.`],
+   hints: ['One letter alone needs 2 rows, and each new letter doubles the number of rows.', 'p is true on the top half of the rows. Each letter that is false in the case moves it down by the number of rows that letter’s block fills.'],
    solution: `With ${n(k)} letters the table has ${Array(k).fill('2').join(' × ')} = ${n(rows)} rows. In the standard order the blocks are ${blocks}. The case is false for ${and(falseL)}, so it sits ${sum} below row 1: row ${n(row)}.`,
    guidance: [
     { prompt: `How many rows does a truth table for ${n(k)} letters have?`, answer: [rows], explanation: `Each letter doubles the count: ${Array(k).fill('2').join(' × ')} = ${n(rows)}.` },

@@ -39,7 +39,7 @@ const prodText = ps => ps.map(String).join(' × ');
 /* The unlisted primes tried in turn, each with the remainder it leaves; p is the smallest prime factor of N. */
 const tryText = (N, p, ps) => PRIMES.filter(q => !ps.includes(q) && (p === N ? q * q <= N : q < p)).map(q => `${n(q)} (remainder ${n(N % q)})`).join(', ');
 const findText = (N, p, ps) => { const t = tryText(N, p, ps);
- return p === N ? `${t ? `trying the unlisted primes in order, with the remainder each leaves: ${t}; none divides it, and the next prime squared is more than ${n(N)}` : `every prime whose square is at most ${n(N)} is on the list, so none of the others needs trying`}. So ${n(N)} is itself prime: its smallest prime factor is ${n(N)}, and ${n(N)} ÷ ${n(N)} = 1`
+ return p === N ? `${t ? `trying the unlisted primes in order, with the remainder each leaves: ${t}; none divides it. That rules out every prime whose square is at most ${n(N)}: the next prime, ${n(PRIMES.find(q => q * q > N))}, has ${n(PRIMES.find(q => q * q > N))} × ${n(PRIMES.find(q => q * q > N))} = ${n(PRIMES.find(q => q * q > N) ** 2)}, which is more than ${n(N)}` : `every prime whose square is at most ${n(N)} is on the list, so none of the others needs trying`}. So ${n(N)} is itself prime: its smallest prime factor is ${n(N)}, and ${n(N)} ÷ ${n(N)} = 1`
   : `${t ? `trying the unlisted primes in order, with the remainder each leaves: ${t}; but ` : ''}${n(N)} = ${n(p)} × ${n(N / p)}. So its smallest prime factor is ${n(p)}, and ${n(N)} ÷ ${n(p)} = ${n(N / p)}`; };
 
 /* ---- q26 Direct proofs with “divides” [Levin 3.2] ---- */

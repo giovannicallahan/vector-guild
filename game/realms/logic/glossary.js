@@ -27,7 +27,7 @@ P['logic'] = {
   ['conditional', 'q05', 'An if-then statement p → q; it is false only when its hypothesis is true and its conclusion is false.', '“If n is greater than 5, then n is greater than 2” is true for every n.'],
   ['hypothesis', 'q05', 'The part of an if-then statement that comes after “if”.', 'In “if it rains, the hatch is closed”, the hypothesis is “it rains”.'],
   ['conclusion', 'q05', 'The part of an if-then statement that comes after “then”, or more generally the claim said to follow.', 'In “if it rains, the hatch is closed”, the conclusion is “the hatch is closed”.'],
-  ['biconditional', 'q06', 'An if-and-only-if statement p ↔ q; it is true when p and q have the same truth value.', '“n is greater than 3 if and only if n is greater than 2” is false only for n = 3.', ['if and only if']],
+  ['biconditional', 'q06', 'An if-and-only-if statement p ↔ q; it is true when p and q have the same truth value.', 'For a whole number n, “n is greater than 3 if and only if n is greater than 2” is false only for n = 3.', ['if and only if']],
   ['truth table', 'q07', 'A table with one row for each case of the letters, showing the truth value of a statement in every case.', 'A truth table for p and q has 4 rows: TT, TF, FT and FF.'],
   ['tautology', 'q09', 'A compound statement that is true on every row of its truth table.', 'p ∨ ¬p is a tautology: it is true whether p is true or false.', ['tautologies']],
   ['contradiction', 'q09', 'A compound statement that is false on every row of its truth table.', 'p ∧ ¬p is a contradiction: it is false whether p is true or false.'],

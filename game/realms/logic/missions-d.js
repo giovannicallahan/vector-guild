@@ -340,11 +340,11 @@ window.QUESTS.push(
   id: 'q39', title: 'Stamps for every amount', topic: 'Strong induction: postage stamps', tier: 'Advanced', sector: 'Long Stair',
   brief: 'The relay post at the foot of the Long Stair has only two stamp values, and Mira wants to know which parcels it can always send.',
   lesson: 'Strong induction may lean on any earlier case; with two stamp values, a run of payable amounts as long as the smaller value covers every larger amount.',
-  prompt: 'The relay post at the foot of the Long Stair sells only 3-credit and 5-credit stamps, and any number of each may go on a parcel. Mira wants to prove by strong induction that every amount above some point can be paid exactly. Enter the largest amount that cannot be paid, then how many base cases the strong induction needs.',
+  prompt: 'The relay post at the foot of the Long Stair sells only 3-credit and 5-credit stamps, and any number of each may go on a parcel. Mira wants to prove by strong induction that every amount above some point can be paid exactly. Enter the largest amount that cannot be paid. Then enter how many base cases the strong induction needs, when its step pays each larger amount by adding one 3-credit stamp to an amount already paid.',
   answer: [7, 3], labels: ['largest amount that cannot be paid', 'base cases needed'], tolerance: 0.01,
   hints: [
-   'List the amounts 1, 2, 3 and so on, and mark each one that can be made from 3s and 5s. Look for a run of 3 amounts in a row that can all be paid.',
-   'Once 3 amounts in a row can be paid, every larger amount can be too: take the amount 3 below it and add one 3-credit stamp.'
+   'List the amounts 1, 2, 3 and so on, and mark each one that can be made from 3s and 5s. Look for a run of amounts in a row that can all be paid, as long as the smaller stamp value.',
+   'Once that many amounts in a row can be paid, every larger amount can be too: take the amount one small stamp below it and add one small stamp. Each amount in that first run is a base case.'
   ],
   solution: 'The amounts that cannot be paid are 1, 2, 4 and 7. The next 3 amounts can all be paid: 8 = 3 + 5, 9 = 3 × 3 and 10 = 2 × 5. These are the base cases. Strong induction: any larger amount m is 3 more than m − 3, an amount from 8 up that can be paid by the hypothesis, so m can be paid with one more 3-credit stamp. So 7 is the largest amount that cannot be paid, and 3 base cases are needed. For two stamp values with no common factor this always comes to 3 × 5 − 3 − 5 = 7.',
   xp: 200, prereqs: ['q38'],
@@ -386,7 +386,7 @@ window.QUESTS.push(
    'Put your N in place of n on the right side of the formula.'
   ],
   solution: '1 ÷ n < 0.03 exactly when n > 1 ÷ 0.03, which is about 33.33. The first whole number strictly above it is N = 34: 1 ÷ 34 is less than 0.03, and every larger n makes 1 ÷ n smaller still. N = 33 is not enough, since 1 ÷ 33 is more than 0.03. The formula at n = 34 gives 34² = 1156.',
-  xp: 200, prereqs: ['q37', 'q39'],
+  xp: 200, prereqs: ['q37', 'q39', 'q21'],
   artifact: { name: 'The tolerance gauge', description: 'Pick any tolerance; it finds the point after which every value is below it.' },
   sources: [source.l0_2, source.oc5_1],
   teaching: {

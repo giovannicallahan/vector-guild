@@ -142,7 +142,7 @@ mk({
  build: ({ k, row }) => { const L = ['p', 'q', 'r', 's', 't'].slice(0, k), rows = 2 ** k, half = rows / 2, first = row <= half, last = row % 2 === 1; return {
   prompt: `The council has ${n(k)} members, ${names(L)}. Each votes yes (true) or no (false) on a motion, and a truth table lists every pattern of votes in the standard order: the first letter is true on the top half of the rows, each next letter switches twice as often, and the last letter switches on every row. Enter how many rows the table has. Then look at row ${n(row)} and enter 1 if member ${L[0]} votes yes on it, 0 if no. Then do the same for member ${L[k - 1]}.`,
   answer: [rows, TV(first), TV(last)],
-  hints: ['Each member doubles the number of rows: 2 for one member, 4 for two, and so on.', `The first letter is true on the top ${n(half)} rows. The last letter goes T, F, T, F down the table, starting with T on row 1.`],
+  hints: ['One member alone needs 2 rows, and each further member doubles the number of rows.', 'The first letter is true on the top half of the rows. The last letter goes T, F, T, F down the table, starting with T on row 1.'],
   solution: `With ${n(k)} letters the table has ${Array(k).fill('2').join(' × ')} = ${n(rows)} rows. The top half is rows 1 to ${n(half)}, so on row ${n(row)} ${L[0]} is ${word(first)}: ${TV(first)}. The last letter is true on odd rows and false on even rows, and ${n(row)} is ${last ? 'odd' : 'even'}, so ${L[k - 1]} is ${word(last)}: ${TV(last)}.`,
   guidance: [
    { prompt: `How many rows does a truth table for ${n(k)} letters have?`, answer: [rows], explanation: `Each letter doubles the count: ${Array(k).fill('2').join(' × ')} = ${n(rows)}.` },
@@ -276,7 +276,7 @@ const kindWord = code => code === 1 ? 'a tautology' : code === 2 ? 'a contradict
 const draw2 = (R, avoid) => { let f; do { const u = R.next(), m = R.bool() ? { A: 'p', B: 'q' } : { A: 'q', B: 'p' };
   if (u < 0.35) f = sub(R.pick(TAUT2), m); else if (u < 0.65) f = sub(R.pick(CONTRA2), m);
   else { do { f = randomTree2(R); } while (tcount(f, ['p', 'q']) === 0 || tcount(f, ['p', 'q']) === 4); }
- } while (avoid.includes(show(f))); return f; };
+ } while (lettersOf(f).length < 2 || avoid.includes(show(f))); return f; };
 
 mk({
  id: 'q09b', parent: 'q09', kind: 'setting', title: 'The council motion’s wording',
@@ -334,7 +334,7 @@ mk({
  canonical: { f: IMP(AND(IMP('p', 'q'), IMP('q', 'r')), IMP('r', 'p')) },
  draw: R => { let f; do { const u = R.next(), [x, y, z] = perm3(R), m = { A: x, B: y, C: z };
    f = sub(R.pick(u < 0.35 ? TAUT3 : u < 0.6 ? CONTRA3 : NEITHER3), m);
-  } while (show(f) === '((p → q) ∧ (q → r)) → (r → p)'); return { f }; },
+  } while (lettersOf(f).length < 3 || show(f) === '((p → q) ∧ (q → r)) → (r → p)'); return { f }; },
  build: ({ f }) => { const L = ['p', 'q', 'r'], rows = rowsOf(L), vals = rows.map(v => ev(f, v)), k = vals.filter(x => x).length, first = vals.indexOf(false) + 1, taut = k === 8, S = show(f); return {
   prompt: `The cooling circuit’s rule is the statement ${S}, on the three inputs p, q and r. Build its truth table in the standard order, with row 1 at the top. Enter how many rows make the statement true. Then enter the number of the first row, counting from the top, on which it is false (enter 0 if there is no such row). Then enter 1 if the statement is a tautology, 0 if not.`,
   answer: [k, first, TV(taut)],

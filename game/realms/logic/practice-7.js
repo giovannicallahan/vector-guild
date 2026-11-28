@@ -235,7 +235,7 @@ mk({
   const counts = `For n from 1 to ${n(N)}, “${C.L}” is true for ${n(c)} numbers, ${C.which}. Those are exactly the numbers that make “${C.R}” true, so both sides are true together for the same ${n(c)} numbers, as an if-and-only-if claim requires.`; return {
   prompt: `The hangar crew is checking a door rule: “For every whole number n, ${C.L} if and only if ${C.R}.” Its two directions are: 1. ${I.items[0]}. 2. ${I.items[1]}. A technician hands in this argument: “${I.arg}” Enter the number of the direction this argument proves. Then, for n from 1 to ${n(N)}, enter how many n make “${C.L}” true, and how many n make both “${C.L}” and “${C.R}” true.`,
   answer: [I.idx, c, c],
-  hints: ['Read what the argument supposes at the start and what it reaches at the end. If it supposes the opposite of one side and reaches the opposite of the other, it is proving a contrapositive.', 'An if-and-only-if claim says the two sides are true for exactly the same numbers. So the numbers that make the left side true are also the numbers that make both sides true.'],
+  hints: ['Read what the argument supposes at the start and what it reaches at the end. If it supposes the opposite of one side and reaches the opposite of the other, it is proving a contrapositive.', 'An if-and-only-if claim says the two sides are always both true or both false. Think about what that means for a number that makes the left side true.'],
   solution: `${I.how} The other direction needs its own argument before the claim is proved. ${counts}`,
   guidance: [
    { prompt: 'Which direction does the argument prove? Enter its number from the list.', answer: [I.idx], explanation: I.how },
@@ -256,7 +256,7 @@ mk({
   const agree = `Since the claim holds in both directions, “${C.L}” and “${C.R}” are true together or false together for every n. A two-way claim “P if and only if Q” is true when both sides have the same truth value, so it is true for all ${n(N)} of the numbers.`; return {
   prompt: `Every door number n from 1 to ${n(N)} gets two checks in the log: check L is “${C.L}” and check R is “${C.R}”. The log is meant to show that L is true exactly when R is true. The two directions of that claim are: 1. ${I.items[0]}. 2. ${I.items[1]}. A clerk hands in this argument for one of them: “${I.arg}” Enter the number of the direction the argument proves. Then enter how many doors pass check L, and how many doors have the two checks agreeing, both true or both false.`,
   answer: [I.idx, c, N],
-  hints: ['Read what the argument supposes at the start and what it reaches at the end, and match that to one of the two directions.', 'Two checks agree when they are both true or both false. If the two-way claim holds, they agree on every door.'],
+  hints: ['Read what the argument supposes at the start and what it reaches at the end, and match that to one of the two directions.', 'Two checks agree when they are both true or both false. Think about what a two-way claim that holds says about any one door.'],
   solution: `${I.how} The other direction still needs its own argument. Check L is true for ${C.which}, and there are ${n(c)} of them from 1 to ${n(N)}. ${agree}`,
   guidance: [
    { prompt: 'Which direction does the argument prove? Enter its number from the list.', answer: [I.idx], explanation: I.how },

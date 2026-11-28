@@ -379,7 +379,7 @@ mk({
   do { kind = R.pick([0, 1, 1]);
    if (kind === 0) { d = R.pick([3, 5, 7]); list = Array.from({ length: 6 }, () => d * R.int(Math.ceil(12 / d), Math.floor(99 / d))); }
    else { d = R.int(3, 8); list = Array.from({ length: 6 }, () => R.int(12, 99)); const hit = R.int(1, 4); for (let i = 0; i < hit; i++) { const m = R.int(Math.ceil(12 / d), Math.floor(99 / d)); list[R.int(0, 5)] = d * m; } }
-  } while (!list.some(x => x % 2) || (kind === 1 && list.filter(x => x % d === 0).length === 6) || (kind === 1 && list.filter(x => x % d === 0).length === 0) || (d === 6 && list.join() === '24,51,18,60,33,42'));
+  } while (new Set(list).size < 6 || !list.some(x => x % 2) || (kind === 1 && list.filter(x => x % d === 0).length === 6) || (kind === 1 && list.filter(x => x % d === 0).length === 0) || (d === 6 && list.join() === '24,51,18,60,33,42'));
   return { d, list }; },
  build: ({ d, list }) => { const hits = list.filter(x => x % d === 0), cnt = hits.length, C = tv(cnt === 6), first = list.find(x => x % 2), k = (first - 1) / 2, miss = list.find(x => x % d !== 0); return {
   prompt: `A shipping list holds six crate numbers: ${and(list.map(n))}. Let C be the claim “for every number x on the list, ${n(d)} | x”. Here ${n(d)} | x means x = ${n(d)} × m for some whole number m. Enter how many numbers on the list ${n(d)} divides, then 1 if C is true and 0 if C is false. Finally take the first odd number on the list, written as 2k + 1 for a whole number k, and enter its k.`,
