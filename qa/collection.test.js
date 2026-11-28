@@ -504,7 +504,7 @@ test('summary and describe turn a list of events into totals and one short line'
   assert.equal(C.describe(ev), '+' + total(ev) + ' stardust · 9 missions solved, 2 first-try stars, chapter finished, 4 achievements');
   assert.equal(C.describe([{ type: 'solve', realm: 'la', qid: 'q01', dust: 10 }]), '+10 stardust · mission solved');
   assert.equal(C.describe([{ type: 'achievement', id: 'x', name: 'First light', text: '', dust: 15 }]), '+15 stardust · achievement: First light');
-  assert.equal(C.describe([]), ''); assert.equal(C.describe(null), ''); eq(plain(C.summary(undefined)), { dust: 0, solves: 0, stars: 0, chapters: 0, drills: 0, achievements: [] });
+  assert.equal(C.describe([]), ''); assert.equal(C.describe(null), ''); eq(plain(C.summary(undefined)), { dust: 0, solves: 0, stars: 0, chapters: 0, drills: 0, achievements: [], finds: [] });
 });
 
 test('the real figure list (when it exists) works with these rules', () => {

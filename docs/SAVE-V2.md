@@ -15,6 +15,13 @@ localStorage key `vector-guild-save-v2`. The 1.x key `vector-guild-save-v1` is n
 Since 2.3 a slice may also hold `skips` (the skip-ahead check, `game/skip.js`): `{ "<chapter index>": { last, miss: [learn ids], seen, n } }`, one record per chapter whose check was failed and that is not complete yet. A save without `skips` loads as before; a damaged record is dropped; a mission passed by a check is stored exactly like a solved one.
 Since 2.3 `meta` may also hold `daily` (the daily review, `game/daily.js`, rules in `docs/COLLECTION.md`): the last finished day, the day streak, the best streak, the streak rewards already paid and the missions recently asked. It is kept only when the save has one, is made safe on every read, and travels with the backup.
 
+Since 2.8 `meta` may also hold, each optional and absent in older saves (a save without one behaves as before):
+- `played`: local day numbers (whole days since 1970) of the last 14 days with a solve, a drill, a daily review or a five-minute run (the "days played this week" dots, `game/daily.js`).
+- `daily.rests`: the missed days the day streak rested over (one rest day in any seven days, `game/collection/core.js` `streakOn`).
+- `run`: `{ paid, runs }`, the day of the last paid five-minute run and how many runs were finished (`game/run.js`).
+- `finds`: `{ got: [findId], last }`, the cosmetic finds and the solve number of the last one (`game/finds.js`).
+Mastery (bronze, silver, gold, `game/mastery.js`) is worked out from `solved` and stores nothing.
+
 Rules
 - First run with no v2 key: if a v1 save parses, `realms.la` = that object (seed moved to the top level, `seed` missing -> 0), `intro:false`. Otherwise a fresh save with a random non-zero seed and no realms.
 - A slice whose pack is not loaded on the current page is NEVER normalised, recomputed or dropped. Only the realm page that loaded that pack validates its own slice.

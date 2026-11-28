@@ -166,7 +166,12 @@ window.VGCollection = (() => {
     }
     events.push(...award(m, realms, rc));
     /* A solve made just now counts as a day played. */
-    if (isObject(opts) && opts.perks === true && events.some(e => e.type === 'solve')) markPlayed(m);
+    if (isObject(opts) && opts.perks === true && events.some(e => e.type === 'solve')) {
+      markPlayed(m);
+      /* Small surprises (finds.js): now and then a solve turns up a cosmetic find. It pays nothing. */
+      const F = window.VGFinds, total = Object.entries(realms).reduce((n, [id, sl]) => n + (isObject(sl) && safeId(id) ? texts(sl.solved).length : 0), 0);
+      if (F && typeof F.onSolve === 'function') try { events.push(...F.onSolve(m, total)); } catch (e) { /* finds are optional */ }
+    }
     if (!events.length || !commit(m, before)) return [];
     return events;
   }
@@ -251,9 +256,10 @@ window.VGCollection = (() => {
   }
   /* Totals of a list of events, for a toast. */
   function summary(events) {
-    const s = { dust: 0, solves: 0, stars: 0, chapters: 0, drills: 0, achievements: [] };
+    const s = { dust: 0, solves: 0, stars: 0, chapters: 0, drills: 0, achievements: [], finds: [] };
     for (const e of Array.isArray(events) ? events : []) {
       if (!isObject(e)) continue; s.dust += Number.isFinite(e.dust) ? e.dust : 0;
+      if (e.type === 'find' && isText(e.name)) s.finds.push(e.name);
       if (e.type === 'solve') s.solves++; else if (e.type === 'star') s.stars++; else if (e.type === 'chapter') s.chapters++; else if (e.type === 'drill') s.drills++; else if (e.type === 'achievement') s.achievements.push(e);
     }
     return s;
@@ -261,9 +267,10 @@ window.VGCollection = (() => {
   /* One short plain sentence for a list of events, or '' when nothing was earned. */
   function describe(events) {
     const s = summary(events), n = (k, one, many) => k ? [k === 1 ? one : k + ' ' + many] : [];
-    if (!s.dust && !s.achievements.length) return '';
+    if (!s.dust && !s.achievements.length) return s.finds.length ? 'You found something: ' + s.finds.join(', ') + '. See Finds in your collection.' : '';
     const parts = [...n(s.solves, 'mission solved', 'missions solved'), ...n(s.stars, 'first-try star', 'first-try stars'), ...n(s.chapters, 'chapter finished', 'chapters finished'), ...n(s.drills, 'drill done', 'drills done'),
-      ...(s.achievements.length === 1 ? ['achievement: ' + s.achievements[0].name] : s.achievements.length ? [s.achievements.length + ' achievements'] : [])];
+      ...(s.achievements.length === 1 ? ['achievement: ' + s.achievements[0].name] : s.achievements.length ? [s.achievements.length + ' achievements'] : []),
+      ...s.finds.map(name => 'found: ' + name)];
     return '+' + s.dust + ' stardust' + (parts.length ? ' · ' + parts.join(', ') : '');
   }
 
