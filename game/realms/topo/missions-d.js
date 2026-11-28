@@ -442,9 +442,9 @@ window.QUESTS.push(
    "name": "Beacon ray marker",
    "description": "A painted ray due east from the beacon, where every crossing of a loop is counted."
   },
-  "sources": [source.w_fg],
+  "sources": [Object.assign({}, source.w_fg, { "description": "Loops at a base point, homotopy, and the fundamental group of the circle as the whole numbers (negative ones included), with a loop’s number of turns read from its lift to the real line. Reading the winding number from crossings of a ray is worked out in this mission." })],
   "teaching": {
-   "intuition": "A loop is a path that starts and ends at the same point. Picture a loop drawn round a beacon that it never touches. However it wanders, it goes round the beacon some whole number of times, anticlockwise counting as plus and clockwise as minus. That net count is the winding number of the loop round the point. To read it, draw a ray, a half-line, out from the point, such as due east. Each time the loop crosses the ray going anticlockwise, add 1; each time it crosses going clockwise, subtract 1. Back-and-forth wiggles across the ray cancel out. The winding number does not change when the loop is deformed little by little without ever passing through the point. Such a deformation is a homotopy, and loops that can be deformed into each other are homotopic. A loop that can be shrunk to a dot without crossing the point has winding number 0.",
+   "intuition": "A loop is a path that starts and ends at the same point. Picture a loop drawn round a beacon that it never touches. However it wanders, it goes round the beacon some whole number of times, anticlockwise counting as plus and clockwise as minus. That net count is the winding number of the loop round the point. To read it, draw a ray, a half-line, out from the point, such as due east. Each time the loop crosses the ray going anticlockwise, add 1; each time it crosses going clockwise, subtract 1. Back-and-forth wiggles across the ray cancel out. The winding number does not change when the loop is deformed little by little without ever passing through the point. Such a deformation is a homotopy, and loops that can be deformed into each other are homotopic. A loop that can be shrunk to a dot without crossing the point has winding number 0. The cited page counts turns by lifting a loop to the real line; reading them off as crossings of a ray is worked out here.",
    "steps": [
     "Choose a ray from the point that the loop never stops on, for example due east.",
     "Go along the loop and list each crossing of the ray, with its direction.",
@@ -505,7 +505,7 @@ window.QUESTS.push(
   "tier": "Advanced",
   "sector": "Orbit Ring",
   "brief": "Drone routes are built by flying stored loops one after another, sometimes in reverse, and the crew wants the turn count of the whole route.",
-  "lesson": "Joining loops adds their winding numbers and running a loop backwards changes its sign, so loops round a point behave like the whole numbers.",
+  "lesson": "Joining loops adds their winding numbers and running a loop backwards changes its sign, so loops round a point behave like the whole numbers, negative ones included.",
   "prompt": "Round beacon B the sectors NE, NW, SW and SE follow each other anticlockwise, and the ray due east from B is the border between SE and NE. Two drone loops start and end in NE. Loop a logs NE, NW, SW, SE, NE, NW, SW, SE, NE. Loop b logs NE, SE, SW, NW, NE. Enter the winding number round B of the loop “a, then b”, then of a run backwards, then of the loop “b, then a backwards, then b again”.",
   "answer": [
    1,
@@ -533,7 +533,7 @@ window.QUESTS.push(
   },
   "sources": [source.w_fg],
   "teaching": {
-   "intuition": "Two loops that start and end at the same base point can be joined: fly the first one, then the second. Every crossing of the ray from the first loop and every crossing from the second still happens, so the winding number of the joined loop is the sum of the two winding numbers. A loop can also be run backwards, from its end to its start. Then every anticlockwise crossing becomes a clockwise one and the other way round, so the winding number changes sign. A loop joined to its own reverse has winding number 0, and it can be shrunk to the base point by a homotopy. Grouping loops by homotopy and joining them gives the fundamental group of the space. For the ring round the beacon (a circle), loops are known up to homotopy by their winding numbers alone, so this fundamental group is the whole numbers, with joining as adding.",
+   "intuition": "Two loops that start and end at the same base point can be joined: fly the first one, then the second. Every crossing of the ray from the first loop and every crossing from the second still happens, so the winding number of the joined loop is the sum of the two winding numbers. A loop can also be run backwards, from its end to its start. Then every anticlockwise crossing becomes a clockwise one and the other way round, so the winding number changes sign. A loop joined to its own reverse has winding number 0, and it can be shrunk to the base point by a homotopy. Grouping loops by homotopy and joining them gives the fundamental group of the space. For the ring round the beacon (a circle), loops are known up to homotopy by their winding numbers alone, so this fundamental group is the whole numbers, negative ones included, with joining as adding.",
    "steps": [
     "Find the winding number of each loop on its own.",
     "For a loop run backwards, change the sign of its winding number.",
@@ -609,7 +609,7 @@ window.QUESTS.push(
   "tolerance": 0.01,
   "hints": [
    "θ ↦ nθ has degree n: as θ goes once round, nθ goes n times round. Doing one map after another multiplies the degrees.",
-   "A map of degree n (not 0) sends exactly |n| points to each point. A loop with winding number k goes to a loop with winding number n × k."
+   "The map θ ↦ nθ with n not 0 sends exactly |n| points to each point. A loop with winding number k goes to a loop with winding number n × k."
   ],
   "solution": "f(θ) = 3θ, so g(f(θ)) = −2 × 3θ = −6θ: the combined map has degree −6. Angle −6θ is a whole number of turns at exactly 6 angles θ round the circle (θ = 2πj ÷ 6 for j = 0 to 5), so 6 points land on angle 0. The loop with winding number 2 goes to a loop with winding number −6 × 2 = −12.",
   "xp": 200,
@@ -620,9 +620,9 @@ window.QUESTS.push(
    "name": "Wrapping gear",
    "description": "A gear train that winds one ring round another a fixed number of times."
   },
-  "sources": [source.w_fg],
+  "sources": [Object.assign({}, source.w_fg, { "description": "The circle’s fundamental group as the whole numbers (negative ones included), the loop e^(2πiNt) that goes N times round, and the map z ↦ z² sending a loop that goes once round to one that goes twice. The general map θ ↦ nθ and its point count are worked out in this mission." })],
   "teaching": {
-   "intuition": "Describe a point of a circle by its angle θ. The map θ ↦ nθ, for a whole number n, moves each point to n times its angle. As θ goes once round, nθ goes n times round: for n = 2 the circle is wrapped twice round itself, and for n = −1 it is flipped so it runs the other way. The number n is the degree of a circle map like this one. A loop that winds k times round goes to a loop that winds n × k times, so the map multiplies winding numbers by its degree. Doing θ ↦ aθ and then θ ↦ bθ gives θ ↦ baθ, so degrees multiply. Counting the points that land on one target point also shows the degree: for n not 0, nθ hits any given angle at exactly |n| evenly spaced values of θ, where |n| is the size of n without its sign.",
+   "intuition": "Describe a point of a circle by its angle θ. The map θ ↦ nθ, for a whole number n (negative ones included), moves each point to n times its angle. As θ goes once round, nθ goes n times round: for n = 2 the circle is wrapped twice round itself, and for n = −1 it is flipped so it runs the other way. The number n is the degree of a circle map like this one. A loop that winds k times round goes to a loop that winds n × k times, so the map multiplies winding numbers by its degree. Doing θ ↦ aθ and then θ ↦ bθ gives θ ↦ baθ, so degrees multiply. Counting the points that land on one target point also shows the degree: for n not 0, nθ hits any given angle at exactly |n| evenly spaced values of θ, where |n| is the size of n without its sign. That count is special to θ ↦ nθ: another map of degree n can linger, or turn back and forth, and send more points to the same place. The cited page works only the map z ↦ z², which doubles; the general rule for θ ↦ nθ is worked out here the same way.",
    "steps": [
     "Read the degree of θ ↦ nθ: it is n. For one map after another, multiply the degrees.",
     "The points sent to any one point number |n|, spaced 2π ÷ |n| apart.",
@@ -655,7 +655,7 @@ window.QUESTS.push(
     "explanation": "Degrees multiply: −2 × 3 = −6."
    },
    {
-    "prompt": "A map of degree −6 sends how many points to angle 0?",
+    "prompt": "The combined map is θ ↦ −6θ. How many points does it send to angle 0?",
     "answer": [
      6
     ],
@@ -710,9 +710,9 @@ window.QUESTS.push(
    "name": "Loop sensor kit",
    "description": "One sensor for each independent loop of a cable loom."
   },
-  "sources": [source.h7_5],
+  "sources": [Object.assign({}, source.h7_5, { "description": "Cell divisions, a 1-complex (a graph) as vertices and edges, and the Euler characteristic v − e + f. The number E − V + 1 of independent loops in a graph is worked out in this mission." })],
   "teaching": {
-   "intuition": "A cable loom is a graph: junctions are vertices and cables are edges, and it is connected, all in one piece. Some routes through it come back to where they started: loops. Many loops are built from others, since two loops that share a cable can be joined into a bigger one, so the useful count is the number of independent loops, the fewest from which every loop can be built. To count them, keep cutting cables that lie on a loop until no loop is left but the loom is still in one piece. What remains is a spanning tree: it reaches every vertex, has no loop, and has exactly V − 1 edges. Every cable put back closes exactly one new loop, so there are E − (V − 1) = E − V + 1 independent loops. The Euler characteristic of a graph is χ = V − E, so the count is also 1 − χ.",
+   "intuition": "A cable loom is a graph: junctions are vertices and cables are edges, and it is connected, all in one piece. Some routes through it come back to where they started: loops. Many loops are built from others, since two loops that share a cable can be joined into a bigger one, so the useful count is the number of independent loops, the fewest from which every loop can be built. To count them, keep cutting cables that lie on a loop until no loop is left but the loom is still in one piece. What remains is a spanning tree: it reaches every vertex, has no loop, and has exactly V − 1 edges. Every cable put back closes exactly one new loop, so there are E − (V − 1) = E − V + 1 independent loops. The Euler characteristic of a graph is χ = V − E, so the count is also 1 − χ. The cited section defines graphs and χ but does not count loops; the count E − V + 1 is worked out here.",
    "steps": [
     "Count the vertices V, part by part or row by row so none is counted twice.",
     "Count the edges E the same way.",
@@ -799,9 +799,9 @@ window.QUESTS.push(
    "name": "Steady set point",
    "description": "The one setting the thermostat hands back unchanged."
   },
-  "sources": [source.l8_5],
+  "sources": [Object.assign({}, source.l8_5, { "description": "Continuous functions between metric spaces, and (in an exercise) the intermediate value theorem for a continuous real function on a connected space. The fixed point result for a continuous map of [a, b] into itself is worked out in this mission from that theorem." })],
   "teaching": {
-   "intuition": "A fixed point of a function f is an input that f leaves alone: f(x) = x. If f is continuous and takes the interval [a, b] into itself, so every value f(x) also lies in [a, b], then f must have a fixed point. To see why, look at g(x) = f(x) − x, which is continuous too. At the left end, f(a) is at least a, so g(a) ≥ 0. At the right end, f(b) is at most b, so g(b) ≤ 0. By the intermediate value theorem, a continuous function that goes from a value ≥ 0 to a value ≤ 0 is 0 somewhere in between, and there f(x) = x. The same argument tells us how to find it: halve the interval, look at the sign of g at the midpoint, and keep the half whose ends still have opposite signs. Each halving makes the interval half as long, so the fixed point is pinned down as closely as we like. This is the simplest fixed point theorem; it holds for any continuous map of the interval, whatever its formula.",
+   "intuition": "A fixed point of a function f is an input that f leaves alone: f(x) = x. If f is continuous and takes the interval [a, b] into itself, so every value f(x) also lies in [a, b], then f must have a fixed point. To see why, look at g(x) = f(x) − x, which is continuous too. At the left end, f(a) is at least a, so g(a) ≥ 0. At the right end, f(b) is at most b, so g(b) ≤ 0. By the intermediate value theorem, a continuous function that goes from a value ≥ 0 to a value ≤ 0 is 0 somewhere in between, and there f(x) = x. The same argument tells us how to find it: halve the interval, look at the sign of g at the midpoint, and keep the half whose ends still have opposite signs. Each halving makes the interval half as long, so the fixed point is pinned down as closely as we like. This is the simplest fixed point theorem; it holds for any continuous map of the interval, whatever its formula. The cited section gives the intermediate value theorem; the fixed point result is worked out here from it.",
    "steps": [
     "Check that f is continuous and that its values stay inside [a, b].",
     "Set g(x) = f(x) − x and work out g(a) ≥ 0 and g(b) ≤ 0.",
@@ -901,9 +901,9 @@ window.QUESTS.push(
    "name": "Three-sensor survey map",
    "description": "One joined loop and the turn count it makes round each sensor."
   },
-  "sources": [source.w_fg],
+  "sources": [Object.assign({}, source.w_fg, { "description": "Loops, joining loops, and the fundamental group of the circle as the whole numbers (negative ones included). Winding numbers round several points of the plane, and adding them circuit by circuit, are worked out in this mission and the loop missions before it." })],
   "teaching": {
-   "intuition": "One loop goes round different points different numbers of times. A circle flown once anticlockwise has winding number 1 round every point inside it and 0 round every point outside, since a ray from an outside point can be chosen to miss the circle altogether. Clockwise, the inside points get −1. When a loop is made by joining circuits that all start and end at one base point, its winding number round each point is the sum of the circuits’ winding numbers round that point, exactly as for joining loops round one beacon. So a few circles, each flown some number of times, give a whole table of winding numbers, one per point. This is the bridge to complex analysis, which opens next at the Antenna Field: there, the winding number round a point becomes an integral taken along the loop, and totals over several points like the one here decide what such integrals are worth.",
+   "intuition": "One loop goes round different points different numbers of times. A circle flown once anticlockwise has winding number 1 round every point inside it and 0 round every point outside, since a ray from an outside point can be chosen to miss the circle altogether. Clockwise, the inside points get −1. When a loop is made by joining circuits that all start and end at one base point, its winding number round each point is the sum of the circuits’ winding numbers round that point, exactly as for joining loops round one beacon. So a few circles, each flown some number of times, give a whole table of winding numbers, one per point. This is the bridge to complex analysis, which opens next at the Antenna Field: there, the winding number round a point becomes an integral taken along the loop, and totals over several points like the one here decide what such integrals are worth. The cited page treats loops in a circle; winding round points of the plane is worked out in these loop missions.",
    "steps": [
     "For each circuit, note which points it encloses and its winding number: + for anticlockwise, − for clockwise, times the number of times round.",
     "For each point, add the winding numbers of the circuits that enclose it. A circuit that does not enclose the point adds 0.",

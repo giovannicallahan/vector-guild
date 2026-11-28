@@ -87,14 +87,14 @@ mk({
   { s: 7, a: 7, b: 4, c: 4 }),
  build: ({ s, a, b, c }) => { const s2 = s * s, e = a + b + c - 12, ex = e * Math.PI / 12, area = ex * s2, whole = 4 * s2, copies = 48 / e,
   ang = `${piFrac(a, 12)}, ${piFrac(b, 12)} and ${piFrac(c, 12)}`; return {
-  prompt: `A survey moon is a sphere of radius ${n(s)} kilometres, so its surface has curvature k = 1 ÷ ${n(s)}² = 1 ÷ ${n(s2)}. One triangular zone is pegged out with sides along great circles, and its corner angles are ${ang} radians. Enter the zone’s angle excess in radians, then its area in square kilometres. The whole moon has surface area 4π × ${n(s)}² square kilometres. Suppose identical copies of this zone cover the whole moon exactly, with no gaps and no overlaps: enter how many copies there are. Give the first two answers to 2 decimal places, rounding only at the end.`,
+  prompt: `A survey moon is a sphere of radius ${n(s)} kilometres, so its surface has curvature k = 1 ÷ ${n(s)}² = 1 ÷ ${n(s2)}. One triangular zone is pegged out with sides along great circles, and its corner angles are ${ang} radians. Enter the zone’s angle excess in radians, then its area in square kilometres. The whole moon has surface area 4π × ${n(s)}² square kilometres. Then enter how many copies of this zone have, all together, exactly the area of the whole moon. Give the first two answers to 2 decimal places, rounding only at the end.`,
   answer: [r2(ex), r2(area), copies],
   hints: ['The angle excess is the angle sum minus π. On a surface of curvature k, a triangle satisfies kA = α + β + γ − π, so on a sphere of radius s the area is the angle excess times s².', 'The number of copies is the whole surface area divided by the area of one zone. Keep the π in both and it cancels.'],
   solution: `The angles add up to ${piFrac(a + b + c, 12)}, so the angle excess is ${piFrac(a + b + c, 12)} − π = ${piFrac(e, 12)} ≈ ${n(r2(ex))} radians. By kA = α + β + γ − π, the area is A = (${piFrac(e, 12)}) × ${n(s2)} ≈ ${n(r2(area))} square kilometres. The whole moon has area 4π × ${n(s2)} = ${n(whole)}π, so the number of copies is ${n(whole)}π ÷ ((${piFrac(e, 12)}) × ${n(s2)}) = 4π ÷ (${piFrac(e, 12)}) = ${n(copies)}.`,
   guidance: [
    { prompt: `Add the angles ${ang} and take away π. What is the angle excess, to 2 decimal places?`, answer: [r2(ex)], explanation: `${piFrac(a, 12)} + ${piFrac(b, 12)} + ${piFrac(c, 12)} = ${piFrac(a + b + c, 12)}, and ${piFrac(a + b + c, 12)} − π = ${piFrac(e, 12)} ≈ ${n(r2(ex))} radians.` },
    { prompt: `With k = 1 ÷ ${n(s2)}, the area is the angle excess times ${n(s2)}. What is the zone’s area in square kilometres, to 2 decimal places?`, answer: [r2(area)], explanation: `A = (${piFrac(e, 12)}) × ${n(s2)} ≈ ${n(r2(area))} square kilometres. Use the exact excess, not the rounded one.` },
-   { prompt: `The whole moon is 4π × ${n(s2)} = ${n(whole)}π square kilometres and one zone is (${piFrac(e, 12)}) × ${n(s2)}. How many zones fit exactly?`, answer: [copies], explanation: `${n(whole)}π ÷ ((${piFrac(e, 12)}) × ${n(s2)}) = 4π ÷ (${piFrac(e, 12)}) = ${n(copies)}. The radius cancels, so the count depends only on the angle excess.` }
+   { prompt: `The whole moon is 4π × ${n(s2)} = ${n(whole)}π square kilometres and one zone is (${piFrac(e, 12)}) × ${n(s2)}. How many zones have that total area?`, answer: [copies], explanation: `${n(whole)}π ÷ ((${piFrac(e, 12)}) × ${n(s2)}) = 4π ÷ (${piFrac(e, 12)}) = ${n(copies)}. The radius cancels, so the count depends only on the angle excess.` }
   ] }; }
 });
 
@@ -234,14 +234,14 @@ mk({
  draw: R => ({ c: R.int(3, 10), t: R.int(0, TILES.length - 1) }),
  build: ({ c, t }) => { const [p, q, r] = TILES[t], D = tileD(TILES[t]), chi = 2 - c, P = -2 * chi, plates = P * D,
   ang = `π ÷ ${n(p)}, π ÷ ${n(q)} and π ÷ ${n(r)}`; return {
-  prompt: `A closed non-orientable hull with ${n(c)} cross-caps is given the constant curvature k = −1. It is to be covered exactly by identical triangular plates, with no gaps and no overlaps, each with corner angles ${ang} radians. Enter the hull’s Euler characteristic χ, then its area divided by π, then the number of plates. For a triangle on a surface of curvature k, kA = α + β + γ − π.`,
+  prompt: `A closed non-orientable hull with ${n(c)} cross-caps is given the constant curvature k = −1. The crew orders identical triangular plates, each with corner angles ${ang} radians, enough that their total area is exactly the hull’s area. Enter the hull’s Euler characteristic χ, then its area divided by π, then the number of plates. For a triangle on a surface of curvature k, kA = α + β + γ − π.`,
   answer: [chi, P, plates],
   hints: ['A non-orientable surface with c cross-caps has χ = 2 − c. With k = −1, Gauss–Bonnet kA = 2πχ gives A = −2πχ.', 'For one plate, kA = α + β + γ − π with k = −1 gives A = π − (α + β + γ). The number of plates is the hull’s area divided by one plate’s area, and the π cancels.'],
   solution: `${chiRule(0, c)}. With k = −1, A = −2πχ = ${n(P)}π, so the area divided by π is ${n(P)}. One plate has angle sum π ÷ ${n(p)} + π ÷ ${n(q)} + π ÷ ${n(r)}, so its area is π − (that sum) = π ÷ ${n(D)}. The number of plates is ${n(P)}π ÷ (π ÷ ${n(D)}) = ${n(plates)}.`,
   guidance: [
    { prompt: `What is the Euler characteristic χ = 2 − c of a surface with ${n(c)} cross-caps?`, answer: [chi], explanation: `χ = 2 − ${n(c)} = ${n(chi)}.` },
    { prompt: `With k = −1, Gauss–Bonnet kA = 2πχ gives A = −2πχ. What is the hull’s area divided by π?`, answer: [P], explanation: `A = −2π × ${par(chi)} = ${n(P)}π.` },
-   { prompt: `One plate has area π − (π ÷ ${n(p)} + π ÷ ${n(q)} + π ÷ ${n(r)}) = π ÷ ${n(D)}. How many plates cover the hull of area ${n(P)}π?`, answer: [plates], explanation: `${n(P)}π ÷ (π ÷ ${n(D)}) = ${n(P)} × ${n(D)} = ${n(plates)}.` }
+   { prompt: `One plate has area π − (π ÷ ${n(p)} + π ÷ ${n(q)} + π ÷ ${n(r)}) = π ÷ ${n(D)}. How many plates have a total area of ${n(P)}π?`, answer: [plates], explanation: `${n(P)}π ÷ (π ÷ ${n(D)}) = ${n(P)} × ${n(D)} = ${n(plates)}.` }
   ] }; }
 });
 
@@ -310,13 +310,13 @@ mk({
  draw: R => tries(() => { const g = R.int(2, 7), m = R.int(1, 6), per = (4 * g - 4) * m; return { g, m, Q: per * R.int(3, 12) }; },
   p => !(p.g === 2 && p.m === 1), { g: 3, m: 2, Q: 128 }),
  build: ({ g, m, Q }) => { const sides = 4 * g, per = (4 * g - 4) * m, copies = Q / per, marks = sides * copies; return {
-  prompt: `The Observatory’s display wall shows a hyperbolic floor with constant curvature k = ${kTxt(m)}, laid out in copies of one regular polygon. The polygon is the fundamental domain of the genus-${n(g)} surface: it has 4 sides for each unit of genus, and its gluing sends all its corners to one point. A region of the floor has an area of ${n(Q)}π square metres. Enter the area of one copy of the polygon divided by π. Then enter how many copies exactly cover the region. Then enter how many corner markers are needed if every corner of every copy gets its own marker.`,
+  prompt: `The Observatory’s display wall shows a hyperbolic floor with constant curvature k = ${kTxt(m)}, laid out in copies of one regular polygon. The polygon is the fundamental domain of the genus-${n(g)} surface: it has 4 sides for each unit of genus, and its gluing sends all its corners to one point. A region of the floor is made up of whole copies of the polygon, with no gaps and no overlaps, and has an area of ${n(Q)}π square metres. Enter the area of one copy of the polygon divided by π. Then enter how many copies make up the region. Then enter how many corner markers are needed if every corner of every copy gets its own marker.`,
   answer: [per, copies, marks],
   hints: ['The polygon has 4g sides and its equal corner angles add up to 2π. For a polygon with n sides, kA = (angle sum) − (n − 2)π.', 'Divide the area of the region by the area of one copy; the π cancels. Each copy has as many corners as sides.'],
   solution: `The polygon has 4 × ${n(g)} = ${n(sides)} sides. Its angles add up to 2π, so kA = 2π − (${n(sides)} − 2)π = ${n(4 - sides)}π. With k = ${kTxt(m)}, A = ${n(4 - sides)}π ÷ (${kTxt(m)}) = ${n(per)}π, so one copy has area ${n(per)}π. The region needs ${n(Q)}π ÷ ${n(per)}π = ${n(copies)} copies. Each copy has ${n(sides)} corners, so ${n(copies)} × ${n(sides)} = ${n(marks)} markers.`,
   guidance: [
    { prompt: `The polygon has ${n(sides)} sides and its corner angles add up to 2π, so kA = 2π − (${n(sides)} − 2)π. With k = ${kTxt(m)}, what is the area of one copy divided by π?`, answer: [per], explanation: `kA = 2π − ${n(sides - 2)}π = ${n(4 - sides)}π, so A = ${n(4 - sides)}π ÷ (${kTxt(m)}) = ${n(per)}π.` },
-   { prompt: `One copy has area ${n(per)}π and the region has area ${n(Q)}π. How many copies cover the region exactly?`, answer: [copies], explanation: `${n(Q)}π ÷ ${n(per)}π = ${n(copies)}.` },
+   { prompt: `One copy has area ${n(per)}π and the region has area ${n(Q)}π. How many copies make up the region?`, answer: [copies], explanation: `${n(Q)}π ÷ ${n(per)}π = ${n(copies)}.` },
    { prompt: `Each copy has ${n(sides)} corners, and every corner of every copy gets its own marker. How many markers are needed for ${n(copies)} copies?`, answer: [marks], explanation: `${n(copies)} × ${n(sides)} = ${n(marks)}.` }
   ] }; }
 });

@@ -148,7 +148,7 @@ mk({
    prompt: `A thermometer is dragged along a heating rod. At distance x metres from the pump end, for ${n(a)} ≤ x ≤ ${n(b)}, it reads T(x) = ${X.text}, in degrees. Enter the highest reading it can show on the rod, then the lowest.`,
    answer: [X.max, X.min],
    hints: [
-    'T is continuous on a closed interval, so it reaches a highest and a lowest value there. Each is at an end of the rod or at a critical point strictly inside it, where T′(x) = 0.',
+    'T is continuous on a closed interval, so it reaches a highest and a lowest value there. T is a polynomial, with a derivative everywhere, so each is at an end of the rod or at a critical point strictly inside it, where T′(x) = 0.',
     'Find the points where the derivative is 0 and keep only those strictly between the two ends. Work out T at both ends and at each point kept, then pick the greatest and the least.'
    ],
    solution: `T′(x) = ${X.dtext}, which is 0 at ${X.critTxt}. ${X.insideTxt} The values to compare are ${X.valTxt}. The highest reading is ${n(X.max)} and the lowest is ${n(X.min)}.`,
@@ -206,10 +206,10 @@ mk({
  build: ({ f, a, b }) => {
   const X = ext(f, a, b, 'F'), count = X.max - X.min + 1;
   return {
-   prompt: `A load sensor is run along a girder. At position x metres, for ${n(a)} ≤ x ≤ ${n(b)}, it reads F(x) = ${X.text}, in load units. The reading changes continuously as the sensor moves, so it passes through every value between its lowest and its highest reading (the intermediate value theorem). Enter the highest reading, then the lowest, then how many whole numbers the sensor reads at some position on the girder, counting the highest and the lowest readings, which are whole numbers themselves.`,
+   prompt: `A load sensor is run along a girder. At position x metres, for ${n(a)} ≤ x ≤ ${n(b)}, it reads F(x) = ${X.text}, in load units. The reading changes continuously as the sensor moves, so it passes through every value between its lowest and its highest reading (the intermediate value theorem). Enter the highest reading, then the lowest, then how many whole numbers, negative ones included, the sensor reads at some position on the girder, counting the highest and the lowest readings, which are whole numbers themselves.`,
    answer: [X.max, X.min, count],
    hints: [
-    'F is continuous on a closed interval, so its highest and lowest values are each at an end of the girder or at a critical point strictly inside, where F′(x) = 0. Here F′(x) has three zeros, so check each against the two ends.',
+    'F is continuous on a closed interval and is a polynomial, with a derivative everywhere, so its highest and lowest values are each at an end of the girder or at a critical point strictly inside, where F′(x) = 0. Here F′(x) has three zeros, so check each against the two ends.',
     'Once you have the highest and lowest readings, every value from the lowest up to the highest is read somewhere. Count the whole numbers in that range, including both ends of it.'
    ],
    solution: `F′(x) = ${X.dtext}, which is 0 at ${X.critTxt}. ${X.insideTxt} The values to compare are ${X.valTxt}. The highest reading is ${n(X.max)} and the lowest is ${n(X.min)}. Every value between them is read, so the whole numbers from ${n(X.min)} to ${n(X.max)} are all read: ${n(X.max)} − ${par(X.min)} + 1 = ${n(count)}.`,
@@ -244,12 +244,12 @@ mk({
  build: ({ pieces, a, b, L10, f }) => {
   const u = unionInfo(pieces), C = coverInfo(a, b, L10), X = ext(f, a, b, 'g');
   return {
-   prompt: `The relay mast's wire carries a signal along these stretches, in metres from the mast: S = ${u.S}. Enter the number of components of S, its separate pieces. Next, the crew lights the span from x = ${n(a)} to x = ${n(b)} with open beams, each lighting an open interval ${n(C.L)} metres long: enter the fewest beams that cover the closed interval [${n(a)}, ${n(b)}]. Finally, a gauge on that span reads g(x) = ${X.text}, in volts, for ${n(a)} ≤ x ≤ ${n(b)}: enter its largest reading.`,
+   prompt: `The relay mast's wire carries a signal along these stretches, in metres from the mast: S = ${u.S}. Enter the number of components of S, its separate pieces. Next, the crew lights the span from x = ${n(a)} to x = ${n(b)} with open beams, each lighting an open interval ${n(C.L)} metres long (a beam may reach past either end of the span): enter the fewest beams that cover the closed interval [${n(a)}, ${n(b)}]. Finally, a gauge on that span reads g(x) = ${X.text}, in volts, for ${n(a)} ≤ x ≤ ${n(b)}: enter its largest reading.`,
    answer: [u.comps, C.k, X.max],
    hints: [
     'Neighbouring pieces of S form one component when they share an end point that belongs to at least one of them. If the shared point belongs to neither, a gap of one point separates them.',
     'Open beams must overlap, so together their lengths have to add up to more than the length of the span, not just to the length itself.',
-    'The largest reading of a continuous g on a closed interval is at an end point or at a critical point strictly inside, where g′(x) = 0.'
+    'g is a polynomial, so it is continuous and has a derivative everywhere. Its largest reading on a closed interval is at an end point or at a critical point strictly inside, where g′(x) = 0.'
    ],
    solution: `${u.txt} So S has ${n(u.np)} − ${n(u.joins)} = ${pl(u.comps, 'component')}. The span is ${n(C.D)} metres long; ${C.txt.replace(/piece/g, 'beam')}, so ${n(C.k)} beams are needed. Finally g′(x) = ${X.dtext}, which is 0 at ${X.critTxt}. ${X.insideTxt} Comparing ${X.valTxt}, the largest reading is ${n(X.max)}.`,
    guidance: [
@@ -280,11 +280,11 @@ mk({
  build: ({ a, b, L10, cost, T, f }) => {
   const C = coverInfo(a, b, L10), X = ext(f, a, b, 'f'), margin = T - X.max;
   return {
-   prompt: `A cable run goes from post x = ${n(a)} to post x = ${n(b)}, in metres. Each clamp grips an open interval ${n(C.L)} metres long and costs ${n(cost)} credits. The strain along the run is f(x) = ${X.text} for ${n(a)} ≤ x ≤ ${n(b)}, and the cable is rated for a strain of at most ${n(T)}. Enter the fewest clamps that cover [${n(a)}, ${n(b)}], then the total cost of those clamps in credits, then the margin: ${n(T)} minus the largest strain on the run (a negative number if the largest strain is over the rating).`,
+   prompt: `A cable run goes from post x = ${n(a)} to post x = ${n(b)}, in metres. Each clamp grips an open interval ${n(C.L)} metres long, which may reach past either end of the run, and costs ${n(cost)} credits. The strain along the run is f(x) = ${X.text} for ${n(a)} ≤ x ≤ ${n(b)}, and the cable is rated for a strain of at most ${n(T)}. Enter the fewest clamps that cover [${n(a)}, ${n(b)}], then the total cost of those clamps in credits, then the margin: ${n(T)} minus the largest strain on the run (a negative number if the largest strain is over the rating).`,
    answer: [C.k, C.k * cost, margin],
    hints: [
     'Open clamps must overlap, so together their lengths have to add up to more than the length of the run, not just to the length itself. The total cost is the number of clamps times the cost of one.',
-    'The largest strain of a continuous f on a closed interval is at an end point or at a critical point strictly inside, where f′(x) = 0. Subtract it from the rating.'
+    'f is a polynomial, so it is continuous and has a derivative everywhere. Its largest strain on a closed interval is at an end point or at a critical point strictly inside, where f′(x) = 0. Subtract it from the rating.'
    ],
    solution: `The run is ${n(C.D)} metres long; ${C.txt.replace(/piece/g, 'clamp')}, so ${n(C.k)} clamps are needed and they cost ${n(C.k)} × ${n(cost)} = ${n(C.k * cost)} credits. Next f′(x) = ${X.dtext}, which is 0 at ${X.critTxt}. ${X.insideTxt} Comparing ${X.valTxt}, the largest strain is ${n(X.max)}. The margin is ${n(T)} − ${par(X.max)} = ${n(margin)}.`,
    guidance: [
@@ -316,12 +316,12 @@ mk({
  build: ({ pieces, a, b, L10, f }) => {
   const u = unionInfo(pieces), C = coverInfo(a, b, L10), X = ext(f, a, b, 'f');
   return {
-   prompt: `A signal line lies along S = ${u.S} on the bench, in metres. Enter the number of components of S. Then enter the number of boundary points of S, where a boundary point of S is a point such that every open interval round it holds a point of S and a point that is not in S. Next, a cable is laid from x = ${n(a)} to x = ${n(b)}: enter the fewest clamps, each gripping an open interval ${n(C.L)} metres long, that cover the closed interval [${n(a)}, ${n(b)}]. Finally, the strain along that cable is f(x) = ${X.text} for ${n(a)} ≤ x ≤ ${n(b)}: enter the largest value of f.`,
+   prompt: `A signal line lies along S = ${u.S} on the bench, in metres. Enter the number of components of S. Then enter the number of boundary points of S, where a boundary point of S is a point such that every open interval round it holds a point of S and a point that is not in S. Next, a cable is laid from x = ${n(a)} to x = ${n(b)}: enter the fewest clamps, each gripping an open interval ${n(C.L)} metres long (a clamp may reach past either end of the cable), that cover the closed interval [${n(a)}, ${n(b)}]. Finally, the strain along that cable is f(x) = ${X.text} for ${n(a)} ≤ x ≤ ${n(b)}: enter the largest value of f.`,
    answer: [u.comps, u.bound.length, C.k, X.max],
    hints: [
     'Neighbouring pieces of S form one component when they share an end point that belongs to at least one of them.',
     'Each component has its end points as boundary points, and a single isolated point is a boundary point of its own. Count each point once, even if two components meet there.',
-    'Open clamps must overlap, so their lengths have to add up to more than the length of the cable. For the largest value, compare f at the two ends and at each critical point strictly inside.'
+    'Open clamps must overlap, so their lengths have to add up to more than the length of the cable. For the largest value, f is a polynomial with a derivative everywhere, so compare f at the two ends and at each critical point strictly inside.'
    ],
    solution: `${u.txt} So S has ${n(u.np)} − ${n(u.joins)} = ${pl(u.comps, 'component')}. The end points of the components are ${andList(u.bound.map(n))}, and a joined point is no end point, so S has ${pl(u.bound.length, 'boundary point')}. The cable is ${n(C.D)} metres long; ${C.txt.replace(/piece/g, 'clamp')}, so ${n(C.k)} clamps are needed. Finally f′(x) = ${X.dtext}, which is 0 at ${X.critTxt}. ${X.insideTxt} Comparing ${X.valTxt}, the largest value is ${n(X.max)}.`,
    guidance: [

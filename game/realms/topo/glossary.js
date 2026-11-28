@@ -81,7 +81,7 @@ P['topo'] = {
   ['loop', 'q35', 'A path that starts and ends at the same point.', 'A drone flight from the pad, round a beacon and back to the pad.'],
   ['winding number', 'q35', 'The net number of times a loop goes anticlockwise round a point it avoids; clockwise turns count as negative.', 'A loop that goes twice round clockwise has winding number −2.'],
   ['homotopy', 'q35', 'A deformation of one loop into another, little by little, without tearing it or passing through a forbidden point.', 'A circle round a beacon can be squashed into an oval by a homotopy.', ['homotopic']],
-  ['fundamental group', 'q36', 'The loops at a base point, grouped by homotopy and combined by joining one after another.', 'The fundamental group of a circle is the whole numbers, under adding.'],
+  ['fundamental group', 'q36', 'The loops at a base point, grouped by homotopy and combined by joining one after another.', 'The fundamental group of a circle is the whole numbers, negative ones included, under adding.'],
   ['degree of a circle map', 'q37', 'The number of times a map of a circle to itself wraps it round, counted with sign: θ ↦ nθ has degree n.', 'θ ↦ −3θ has degree −3.'],
   ['independent loop', 'q38', 'One of the fewest loops in a graph from which every loop can be built; a connected graph has E − V + 1 of them.', 'A wheel with 5 spokes has 5 independent loops.'],
   ['spanning tree', 'q38', 'A part of a connected graph that reaches every vertex, has no loop and uses V − 1 edges.', 'A path through all 4 corners of a square, using 3 of its 4 sides.'],

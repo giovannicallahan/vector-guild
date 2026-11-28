@@ -631,7 +631,7 @@ mk({
  build: ({ a, b, L10, kind, c, d }) => {
   const C = coverInfo(a, b, L10), S = SETS[kind], comp = compactOf(S);
   return {
-   prompt: `A landing strip runs from x = ${n(a)} to x = ${n(b)}, measured in metres: it is the closed interval [${n(a)}, ${n(b)}]. Each floodlight lights an open stretch of the strip ${n(C.L)} metres long, wherever it is mounted, and lights nothing outside that stretch. Enter the fewest floodlights whose stretches together light every point of the strip. Then enter 1 if the set S = ${S.t(c, d)} is compact, or 0 if it is not.`,
+   prompt: `A landing strip runs from x = ${n(a)} to x = ${n(b)}, measured in metres: it is the closed interval [${n(a)}, ${n(b)}]. Each floodlight lights an open interval of the number line ${n(C.L)} metres long, wherever it is mounted, and lights nothing outside that interval; the interval may reach past either end of the strip. Enter the fewest floodlights whose intervals together light every point of the strip. Then enter 1 if the set S = ${S.t(c, d)} is compact, or 0 if it is not.`,
    answer: [C.k, comp],
    hints: [
     'An open stretch leaves out its two end points, so neighbouring floodlights must overlap: together they light the strip only if their total length is more than the strip’s length, not just equal to it.',
@@ -664,7 +664,7 @@ mk({
  build: ({ a, b, L1, p1, L2, p2 }) => {
   const c1 = coverInfo(a, b, L1), c2 = coverInfo(a, b, L2), t1 = c1.k * p1, t2 = c2.k * p2, win = t1 < t2 ? 1 : 2;
   return {
-   prompt: `The test cable on the bench is the closed interval [${n(a)}, ${n(b)}], measured in metres. Light clamps each grip an open stretch ${n(c1.L)} metres long and cost ${n(p1)} credits each. Heavy clamps each grip an open stretch ${n(c2.L)} metres long and cost ${n(p2)} credits each. A clamp may be placed wherever you like, and an open stretch leaves out its two end points. Enter the cost in credits of holding the whole cable with the fewest light clamps, then with the fewest heavy clamps, then enter 1 if the light clamps are the cheaper way or 2 if the heavy clamps are.`,
+   prompt: `The test cable on the bench is the closed interval [${n(a)}, ${n(b)}], measured in metres. Light clamps each grip an open stretch ${n(c1.L)} metres long and cost ${n(p1)} credits each. Heavy clamps each grip an open stretch ${n(c2.L)} metres long and cost ${n(p2)} credits each. A clamp may be placed wherever you like, even reaching past either end of the cable, and an open stretch leaves out its two end points. Enter the cost in credits of holding the whole cable with the fewest light clamps, then with the fewest heavy clamps, then enter 1 if the light clamps are the cheaper way or 2 if the heavy clamps are.`,
    answer: [t1, t2, win],
    hints: [
     'Open stretches leave out their end points, so neighbouring clamps must overlap: n clamps of length L hold a cable of length D only if n × L is more than D.',
@@ -696,7 +696,7 @@ mk({
  build: ({ a, b, L10, kind, c, d }) => {
   const C = coverInfo(a, b, L10), S = SETS[kind], comp = compactOf(S), compCl = S.bounded;
   return {
-   prompt: `A mast stay runs from x = ${n(a)} to x = ${n(b)}, measured in metres: it is the closed interval [${n(a)}, ${n(b)}]. Each clamp grips an open stretch ${n(C.L)} metres long, wherever its centre is put. Enter the fewest clamps whose open stretches together cover the whole stay. A signal set is S = ${S.t(c, d)}. The closure of S is S together with all its boundary points. Enter 1 if S is compact or 0 if it is not, and then 1 if the closure of S is compact or 0 if it is not.`,
+   prompt: `A mast stay runs from x = ${n(a)} to x = ${n(b)}, measured in metres: it is the closed interval [${n(a)}, ${n(b)}]. Each clamp grips an open stretch ${n(C.L)} metres long, wherever its centre is put, and it may reach past either end of the stay. Enter the fewest clamps whose open stretches together cover the whole stay. A signal set is S = ${S.t(c, d)}. The closure of S is S together with all its boundary points. Enter 1 if S is compact or 0 if it is not, and then 1 if the closure of S is compact or 0 if it is not.`,
    answer: [C.k, comp, compCl],
    hints: [
     'Open stretches leave out their end points, so neighbouring clamps must overlap: n clamps of length L cover a stay of length D only if n × L is more than D.',

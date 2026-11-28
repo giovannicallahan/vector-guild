@@ -12,9 +12,12 @@ const wind = seq => { const [a, c] = crossings(seq); return a - c; };
 const chiOf = (orientable, h) => orientable ? 2 - 2 * h : 2 - h;
 Object.assign(window.ORACLE, {
   /* Angles a·π/12, b·π/12, c·π/12 (a, b, c are the numerators over 12 in the printed text); radius s; second area A2.
-     kA = angle sum − π with k = 1 ÷ s². */
+     kA = angle sum − π with k = 1 ÷ s². The triangle must exist on the sphere: its polar triangle has sides π − α, π − β,
+     π − γ, which must obey the triangle inequality (each less than the sum of the other two) and add up to less than 2π. */
   q31: p => {
     const sum = (p.a + p.b + p.c) * Math.PI / 12, ex = sum - Math.PI, k = 1 / (p.s * p.s);
+    const pol = [p.a, p.b, p.c].map(x => Math.PI - x * Math.PI / 12), tot = pol[0] + pol[1] + pol[2];
+    if (pol.some(x => x <= 0 || x >= tot - x) || tot >= 2 * Math.PI) return ['no such spherical triangle'];
     return [rd(ex, 2), rd(ex / k, 2), rd(Math.PI + k * p.A2, 2)];
   },
   /* Genus g closed surface with k = −1 ÷ m: kA = 2πχ gives A ÷ π = 2χ ÷ k. Sphere of radius s: area 4πs². */

@@ -6,7 +6,7 @@ window.VARIANT_SETUP = window.VARIANT_SETUP || {};
 window.VARIANT_POOL = window.VARIANT_POOL || {};
 Object.assign(window.VARIANT_SETUP, {
  q01: t => `Two rovers stand on the Survey Grid at P = (0, 0) and Q = (${window.Gen.n(t)}, 4), in kilometres.`,
- q02: t => `A beacon stands at a grid point of the Survey Grid. Count the grid points (both coordinates whole numbers), the beacon included, at taxicab distance at most ${1 + (t + 10) % 10} from it.`,
+ q02: t => `A beacon stands at a grid point of the Survey Grid. Count the grid points (both coordinates whole numbers, negative ones included), the beacon included, at taxicab distance at most ${1 + (t + 10) % 10} from it.`,
  q03: t => `Three masts on a flat plain have d(x, y) = 10 km and d(y, z) = ${1 + (t + 10) % 9} km, with the usual straight-line distance.`,
  q04: t => `A cable runs along the open interval (0, 22), and a sensor sits at x = ${t + 11}.`,
  q05: t => { const k = 2 + (t + 10) % 6, parts = []; for (let i = 0; i < k; i++) parts.push(`[${2 * i}, ${2 * i + 1}]`); return `S = ${parts.join(' ∪ ')} on the x-axis, with the usual distance.`; },

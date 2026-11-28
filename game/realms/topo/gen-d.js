@@ -64,12 +64,14 @@ const circText = (set, t) => `${times(Math.abs(t))} ${t > 0 ? 'anticlockwise' : 
 
 window.MISSION_GEN = window.MISSION_GEN || {};
 Object.assign(window.MISSION_GEN, {
- /* Angles aπ/12, bπ/12, cπ/12 with a + b + c from 13 to 20 (angle excess π/12 to 8π/12); a second triangle of whole-number
+ /* Angles aπ/12, bπ/12, cπ/12 with a + b + c from 13 to 20 (angle excess π/12 to 8π/12), and a real spherical triangle:
+    the excess is less than twice the smallest angle (its polar triangle has sides 12 − a, 12 − b, 12 − c that obey the
+    triangle inequality); a second triangle of whole-number
     area A2. No answer or guided-step value lands near a rounding tie. Not the worked example (radius 5, three right angles). */
  q31: {
   canonical: { s: 10, a: 6, b: 4, c: 5, A2: 120 },
   draw: R => tries(() => { const s = R.int(4, 12), a = R.int(2, 10), b = R.int(2, 10), c = R.int(2, 10); return { s, a, b, c, A2: R.int(5, Math.floor(1.5 * s * s)) }; },
-   p => { const S = p.a + p.b + p.c, ex = (S - 12) * Math.PI / 12; return S >= 13 && S <= 20 && p.s !== 5 && ![S * Math.PI / 12, ex, ex * p.s * p.s, Math.PI + p.A2 / (p.s * p.s)].some(nearTie); },
+   p => { const S = p.a + p.b + p.c, ex = (S - 12) * Math.PI / 12; return S >= 13 && S <= 20 && S - 2 * Math.min(p.a, p.b, p.c) < 12 && p.s !== 5 && ![S * Math.PI / 12, ex, ex * p.s * p.s, Math.PI + p.A2 / (p.s * p.s)].some(nearTie); },
    { s: 10, a: 6, b: 4, c: 5, A2: 120 }),
   build: ({ s, a, b, c, A2 }) => { const S = a + b + c, sumV = S * Math.PI / 12, ex = (S - 12) * Math.PI / 12, s2 = s * s, area = ex * s2, sum2 = Math.PI + A2 / s2,
    ang = `${piFrac(a, 12)}, ${piFrac(b, 12)} and ${piFrac(c, 12)}`; return {
@@ -177,11 +179,11 @@ Object.assign(window.MISSION_GEN, {
   build: ({ a, b, k }) => { const d = a * b, cnt = Math.abs(d), w = d * k; return {
    prompt: `The Orbit Ring’s drive moves each point of a circular track: the point at angle θ goes to angle ${n(a)}θ, written f: ${mapText(a)}. A second gear then applies g: ${mapText(b)}. The combined map takes θ to g(f(θ)). Enter the degree of the combined map, then how many points of the track it sends to the single point at angle 0, then the winding number of the image of a loop that goes round the track ${k > 0 ? `${times(k)} anticlockwise` : `${times(-k)} clockwise`} (winding number ${n(k)}).`,
    answer: [d, cnt, w],
-   hints: ['θ ↦ nθ has degree n: as θ goes once round, nθ goes n times round. Doing one map after another multiplies the degrees.', 'A map of degree n (not 0) sends exactly |n| points to each point. A loop with winding number k goes to a loop with winding number n × k.'],
+   hints: ['θ ↦ nθ has degree n: as θ goes once round, nθ goes n times round. Doing one map after another multiplies the degrees.', 'The map θ ↦ nθ with n not 0 sends exactly |n| points to each point. A loop with winding number k goes to a loop with winding number n × k.'],
    solution: `f(θ) = ${n(a)}θ, so g(f(θ)) = ${n(b)} × ${n(a)}θ = ${n(d)}θ: the combined map has degree ${n(d)}. Angle ${n(d)}θ is a whole number of turns at exactly ${n(cnt)} angles θ round the circle (θ = 2πj ÷ ${n(cnt)} for j = 0 to ${n(cnt - 1)}), so ${n(cnt)} points land on angle 0. The loop with winding number ${n(k)} goes to a loop with winding number ${n(d)} × ${par(k)} = ${n(w)}.`,
    guidance: [
     { prompt: `What is the degree of g(f(θ)) = ${n(b)} × ${n(a)}θ?`, answer: [d], explanation: `Degrees multiply: ${n(b)} × ${par(a)} = ${n(d)}.` },
-    { prompt: `A map of degree ${n(d)} sends how many points to angle 0?`, answer: [cnt], explanation: `|${n(d)}| = ${n(cnt)}: one for each whole number of turns the angle ${n(d)}θ passes as θ goes once round.` },
+    { prompt: `The combined map is θ ↦ ${n(d)}θ. How many points does it send to angle 0?`, answer: [cnt], explanation: `|${n(d)}| = ${n(cnt)}: one for each whole number of turns the angle ${n(d)}θ passes as θ goes once round.` },
     { prompt: `What is the winding number of the image of a loop with winding number ${n(k)}?`, answer: [w], explanation: `${n(d)} × ${par(k)} = ${n(w)}.` }
    ] }; }
  },

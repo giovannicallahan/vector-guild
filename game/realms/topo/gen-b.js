@@ -341,7 +341,7 @@ Object.assign(window.MISSION_GEN, {
   build: ({ a, b, L10, kind, c, d }) => {
    const C = coverInfo(a, b, L10), S = SETS[kind], comp = S.closed && S.bounded ? 1 : 0;
    return {
-    prompt: `A straight cable on the bench runs from x = ${n(a)} to x = ${n(b)}, measured in metres: it is the closed interval [${n(a)}, ${n(b)}]. Each clamp grips an open interval ${n(C.L)} metres long, wherever its centre is put. Enter the fewest clamps whose open intervals together cover the whole cable. Then enter 1 if the set S = ${S.t(c, d)} is compact, or 0 if it is not.`,
+    prompt: `A straight cable on the bench runs from x = ${n(a)} to x = ${n(b)}, measured in metres: it is the closed interval [${n(a)}, ${n(b)}]. Each clamp grips an open interval ${n(C.L)} metres long, wherever its centre is put, and it may reach past either end of the cable. Enter the fewest clamps whose open intervals together cover the whole cable. Then enter 1 if the set S = ${S.t(c, d)} is compact, or 0 if it is not.`,
     answer: [C.k, comp],
     hints: [
      'Open intervals leave out their end points, so neighbouring clamps must overlap: the clamps cover the cable only if their total length is more than its length, not just equal to it.',
@@ -369,7 +369,7 @@ Object.assign(window.MISSION_GEN, {
     prompt: `A strain gauge slides along a cable and reads f(x) = ${X.F.text} at position x, for ${n(a)} ≤ x ≤ ${n(b)}. Enter the largest value of f on [${n(a)}, ${n(b)}], then the smallest.`,
     answer: [X.max, X.min],
     hints: [
-     'f is continuous and [a, b] is compact, so by the extreme value theorem f reaches a largest and a smallest value there, each at an end point or at a critical point strictly inside, where f′(x) = 0.',
+     'f is continuous and [a, b] is compact, so by the extreme value theorem f reaches a largest and a smallest value there. f is a polynomial, so it has a derivative everywhere, and each extreme is at an end point or at a critical point strictly inside, where f′(x) = 0.',
      'Work out f at both end points and at every critical point strictly between them, then compare the values.'
     ],
     solution: `f′(x) = ${X.F.dtext}, which is 0 at ${X.critTxt}. ${X.insideTxt} The values to compare are ${X.valTxt}. The largest is ${n(X.max)} and the smallest is ${n(X.min)}.`,
@@ -396,12 +396,12 @@ Object.assign(window.MISSION_GEN, {
   build: ({ pieces, a, b, L10, f }) => {
    const u = unionInfo(pieces), C = coverInfo(a, b, L10), X = extremes(f, a, b);
    return {
-    prompt: `Final check at the cable loom. A test cable lies along S = ${u.S} on the bench, in metres: enter the number of components of S. Next, a straight cable runs from x = ${n(a)} to x = ${n(b)}: enter the fewest clamps, each gripping an open interval ${n(C.L)} metres long, that cover the closed interval [${n(a)}, ${n(b)}]. Finally, a strain gauge sliding along it reads f(x) = ${X.F.text} for ${n(a)} ≤ x ≤ ${n(b)}: enter the largest value of f there.`,
+    prompt: `Final check at the cable loom. A test cable lies along S = ${u.S} on the bench, in metres: enter the number of components of S. Next, a straight cable runs from x = ${n(a)} to x = ${n(b)}: enter the fewest clamps, each gripping an open interval ${n(C.L)} metres long (a clamp may reach past either end of the cable), that cover the closed interval [${n(a)}, ${n(b)}]. Finally, a strain gauge sliding along it reads f(x) = ${X.F.text} for ${n(a)} ≤ x ≤ ${n(b)}: enter the largest value of f there.`,
     answer: [u.comps, C.k, X.max],
     hints: [
      'Two neighbouring pieces of S join into one component exactly when they share an end point that belongs to at least one of them.',
      'Open clamps must overlap, so their total length has to be more than the length of the cable, not just equal to it.',
-     'By the extreme value theorem the largest value of f is reached at an end point or at a critical point strictly inside, where f′(x) = 0.'
+     'By the extreme value theorem the largest value of f is reached somewhere. f is a polynomial, with a derivative everywhere, so that is at an end point or at a critical point strictly inside, where f′(x) = 0.'
     ],
     solution: `${u.joinTxt}${u.apartTxt} So S has ${n(pieces.length)} − ${n(u.joins)} = ${pl(u.comps, 'component')}. The cable is ${n(C.D)} metres long; ${C.txt}, so ${n(C.k)} clamps are needed. Finally f′(x) = ${X.F.dtext}, which is 0 at ${X.critTxt}. ${X.insideTxt} Comparing ${X.valTxt}, the largest value is ${n(X.max)}.`,
     guidance: [
