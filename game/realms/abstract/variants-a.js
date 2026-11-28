@@ -13,7 +13,7 @@ Object.assign(window.VARIANT_SETUP, {
  q06: t => `U(n) is the set of numbers from 1 to n − 1 coprime to n, multiplied mod n. Take n = ${t + 20}.`,
  q07: t => `A pulse starts at lamp 0 of a ring of 24 lamps, numbered 0 to 23, and jumps ${t + 11} lamps per beat.`,
  q08: t => `A beacon's code is multiplied by ${2 + (t + 10) % 11}, mod 13, on every beat. Work in U(13).`,
- q09: t => `Z_n is the numbers 0 to n − 1 added mod n, and g generates it when the multiples of g reach every element. Take n = ${t + 18}.`,
+ q09: t => `Zₙ is the numbers 0 to n − 1 added mod n, and g generates it when the multiples of g reach every element. Take n = ${t + 18}.`,
  q10: t => `A beacon multiplies its code by 3, mod 11, on every beat. Take k = ${410 + t} beats.`,
 });
 Object.assign(window.VARIANT_POOL, {

@@ -72,7 +72,7 @@ mk({
    if (!(a === 2 && b === 3) && !(a === 4 && b === 6) && (gcd(a, b) === 1) === want) return { a, b }; }
   return { a: 6, b: 10 }; },
  build: ({ a, b }) => { const size = a * b, g = gcd(a, b), L = lcm(a, b), iso = g === 1 ? 1 : 0; return {
-  prompt: `A hatch panel has a selector switch with ${n(a)} positions, numbered 0 to ${n(a - 1)}, and a channel wheel with ${n(b)} positions, numbered 0 to ${n(b - 1)}. One press of the master button moves each of them on by one position, and the pair of readings (s, c) is the state of the panel: the direct product ${Z(a)} × ${Z(b)}. Enter the number of states of the panel, then the largest order of any state, then 1 if ${Z(a)} × ${Z(b)} ≅ ${Z(size)} (the panel acts like one wheel of ${n(size)} positions) and 0 if it does not.`,
+  prompt: `A hatch panel has a selector switch with ${n(a)} positions, numbered 0 to ${n(a - 1)}, and a channel wheel with ${n(b)} positions, numbered 0 to ${n(b - 1)}. One press of the master button moves each of them on by one position, and the pair of readings (s, c) is the state of the panel: the direct product ${Z(a)} × ${Z(b)}. Enter the number of states of the panel, then the largest order of any state, then 1 if the panel acts like one wheel with as many positions as it has states (that is, it is isomorphic to it) and 0 if it does not.`,
   answer: [size, L, iso],
   hints: ['Count the pairs: every selector reading can sit with every wheel reading. The order of a pair is the lcm of the orders of its parts, so the largest order is the lcm of the two sizes.', 'A single wheel with N positions has a state of order N, and an isomorphism keeps orders. So the panel matches one wheel exactly when its largest order equals its number of states.'],
   solution: `The panel has ${n(a)} × ${n(b)} = ${n(size)} states. No pair has an order above lcm(${n(a)}, ${n(b)}) = ${n(size)} ÷ gcd(${n(a)}, ${n(b)}) = ${n(size)} ÷ ${n(g)} = ${n(L)}, and the pair (1, 1) reaches it. ${isoEnd(a, b, g, L, size, iso)}`,
@@ -124,7 +124,7 @@ mk({
   const end = iso ? `The largest order ${n(L)} equals ${n(a)} × ${n(b)} × ${n(c)} = ${n(size)}, the order of the reading 1 in ${Z(size)}, so the stack is a copy of ${Z(size)}: enter 1.`
    : `The largest order ${n(L)} is less than ${n(a)} × ${n(b)} × ${n(c)} = ${n(size)}, and ${Z(size)} has an element of order ${n(size)} (the reading 1). An isomorphism keeps every order, so the two are not isomorphic: enter 0.`;
   return {
-  prompt: `A relay stack couples three dials, ${Z(a)}, ${Z(b)} and ${Z(c)}. A state is a triple (x, y, z), and a step adds 1 in each dial separately, so the triple is home again when all three dials are home at once. The order of a triple is therefore the lcm of the orders of its three parts, and the lcm of three numbers is the smallest positive number that all three divide. Enter the largest order of any state of ${Z(a)} × ${Z(b)} × ${Z(c)}. Then enter the order of the state (${n(x)}, ${n(y)}, ${n(z)}). Then enter 1 if the stack is a copy of one dial of ${n(size)} positions, ${Z(a)} × ${Z(b)} × ${Z(c)} ≅ ${Z(size)}, and 0 if it is not.`,
+  prompt: `A relay stack couples three dials, ${Z(a)}, ${Z(b)} and ${Z(c)}. A state is a triple (x, y, z), and a step adds 1 in each dial separately, so the triple is home again when all three dials are home at once. The order of a triple is therefore the lcm of the orders of its three parts, and the lcm of three numbers is the smallest positive number that all three divide. Enter the largest order of any state of ${Z(a)} × ${Z(b)} × ${Z(c)}. Then enter the order of the state (${n(x)}, ${n(y)}, ${n(z)}). Then enter 1 if the stack is isomorphic to one dial with as many positions as it has states, and 0 if it is not.`,
   answer: [L, o, iso],
   hints: ['Every order in the stack divides the lcm of the three dial sizes, and the triple (1, 1, 1) reaches it. Take the lcm two numbers at a time.', 'The order of x in Zₙ is n ÷ gcd(x, n). The order of the triple is the lcm of its three part orders. The stack matches one dial when its largest order equals its number of states.'],
   solution: `The lcm of ${n(a)}, ${n(b)} and ${n(c)}: lcm(${n(a)}, ${n(b)}) = ${n(lcm(a, b))}, then lcm(${n(lcm(a, b))}, ${n(c)}) = ${n(L)}. The triple (1, 1, 1) reaches it and no state goes beyond it. For (${n(x)}, ${n(y)}, ${n(z)}): ${n(x)} has order ${n(a)} ÷ gcd(${n(x)}, ${n(a)}) = ${n(oa)} in ${Z(a)}, ${n(y)} has order ${n(b)} ÷ gcd(${n(y)}, ${n(b)}) = ${n(ob)} in ${Z(b)}, and ${n(z)} has order ${n(c)} ÷ gcd(${n(z)}, ${n(c)}) = ${n(oc)} in ${Z(c)}, so the order is lcm(${n(oa)}, ${n(ob)}, ${n(oc)}) = ${n(o)}. ${end}`,
@@ -223,8 +223,8 @@ mk({
 }, {
  /* Z_m / ⟨d⟩ with d a divisor of m, 12 <= m <= 60, 3 <= d <= m ÷ 2; x is not in ⟨d⟩. Not the parent's examples (Z₂₄ / ⟨8⟩, Z₁₈ / ⟨6⟩). */
  canonical: { m: 30, d: 10, x: 14 },
- draw: R => { for (let i = 0; i < 1000; i++) { const m = R.int(12, 60), d = R.int(3, Math.floor(m / 2)), x = R.int(1, m - 1);
-   if (m % d === 0 && x % d !== 0 && !(m === 24 && d === 8) && !(m === 18 && d === 6)) return { m, d, x }; }
+ draw: R => { const low = R.bool(); for (let i = 0; i < 1000; i++) { const m = R.int(12, 60), d = R.int(3, Math.floor(m / 2)), x = R.int(1, m - 1);
+   if (m % d === 0 && x % d !== 0 && (gcd(x, d) > 1) === low && !(m === 24 && d === 8) && !(m === 18 && d === 6)) return { m, d, x }; }
   return { m: 30, d: 10, x: 14 }; },
  build: ({ m, d, x }) => { const sz = m / d, g = gcd(x, d), o = d / g, low = x % d, H = multiples(d, m), steps = [];
   for (let j = 1; j <= o; j++) steps.push(j * x); return {
@@ -247,8 +247,8 @@ mk({
 }, {
  /* Z_m / ⟨d⟩ with d a divisor of m, 12 <= m <= 60, 3 <= d <= m ÷ 2; x is not in ⟨d⟩, and the fine dial takes more steps than the gauge. */
  canonical: { m: 40, d: 10, x: 6 },
- draw: R => { for (let i = 0; i < 1000; i++) { const m = R.int(12, 60), d = R.int(3, Math.floor(m / 2)), x = R.int(1, m - 1);
-   if (m % d === 0 && x % d !== 0 && m / gcd(x, m) > d / gcd(x, d)) return { m, d, x }; }
+ draw: R => { const low = R.bool(); for (let i = 0; i < 1000; i++) { const m = R.int(12, 60), d = R.int(3, Math.floor(m / 2)), x = R.int(1, m - 1);
+   if (m % d === 0 && x % d !== 0 && (gcd(x, d) > 1) === low && m / gcd(x, m) > d / gcd(x, d)) return { m, d, x }; }
   return { m: 40, d: 10, x: 6 }; },
  build: ({ m, d, x }) => { const sz = m / d, oq = d / gcd(x, d), of = m / gcd(x, m), H = multiples(d, m), sq = [], sf = [];
   for (let j = 1; j <= oq; j++) sq.push(j * x); for (let j = 1; j <= Math.min(of, 6); j++) sf.push(j * x); return {
@@ -271,8 +271,8 @@ mk({
 }, {
  /* Z_m / ⟨d⟩ with d a divisor of m, 36 <= m <= 120, 4 <= d <= 24 and d <= m ÷ 2; x is not in ⟨d⟩. */
  canonical: { m: 72, d: 18, x: 12 },
- draw: R => { for (let i = 0; i < 1000; i++) { const m = R.int(36, 120), d = R.int(4, 24), x = R.int(1, m - 1);
-   if (m % d === 0 && d <= m / 2 && x % d !== 0) return { m, d, x }; }
+ draw: R => { const low = R.bool(); for (let i = 0; i < 1000; i++) { const m = R.int(36, 120), d = R.int(4, 24), x = R.int(1, m - 1);
+   if (m % d === 0 && d <= m / 2 && x % d !== 0 && (gcd(x, d) > 1) === low) return { m, d, x }; }
   return { m: 72, d: 18, x: 12 }; },
  build: ({ m, d, x }) => { const sz = m / d, g = gcd(x, d), o = d / g, cop = coprimeList(d), cnt = cop.length, steps = [];
   for (let j = 1; j <= o; j++) steps.push(j * x); return {
@@ -346,8 +346,9 @@ mk({
 }, {
  /* φ(x) = kx mod M from Z_N, M divides kN, 6 <= M <= 36, N <= 72, N ≠ M; the kernel K = ⟨s⟩ has at least 2 elements, and x is not in K. */
  canonical: { N: 36, M: 24, k: 10, x: 8 },
- draw: R => { for (let i = 0; i < 1000; i++) { const h = drawHom(R, 6, 36, 2, 9, 72, (N, M, k) => (N === 20 && M === 12 && k === 9) || (N === 12 && M === 8));
-   if (h) { const s = hom(h.N, h.M, h.k).s, x = R.int(1, h.N - 1); if (x % s !== 0) return { ...h, x }; } }
+ draw: R => { const part = R.bool(); for (let i = 0; i < 1000; i++) { const h = drawHom(R, 6, 36, 2, 9, 72, (N, M, k) => (N === 20 && M === 12 && k === 9) || (N === 12 && M === 8));
+   /* In half the draws gcd(x, s) > 1, so the order of x + K is less than the size of the image. */
+   if (h) { const s = hom(h.N, h.M, h.k).s, x = R.int(1, h.N - 1); if (x % s !== 0 && (gcd(x, s) > 1) === part) return { ...h, x }; } }
   return { N: 36, M: 24, k: 10, x: 8 }; },
  build: ({ N, M, k, x }) => { const { g, s, ker, K, im } = hom(N, M, k), o = s / gcd(x, s), steps = [];
   for (let j = 1; j <= o; j++) steps.push(j * x); return {
@@ -418,10 +419,12 @@ mk({
  labels: ['orbit size', 'order of the step', 'patterns the motor makes'], tolerance: 0.01,
  gl: [['orbit size'], ['order of the step'], ['patterns the motor makes']]
 }, {
- /* A ring of r slots, 6 <= r <= 24, a repeated block of length p (p divides r, p >= 2) in red, blue or yellow; the step s, 2 <= s <= r − 1, is not a multiple of p. */
+ /* A ring of r slots, 6 <= r <= 24, a repeated block of length p (p divides r, 2 <= p < r) in red, blue or yellow; the step s, 2 <= s <= r − 1,
+    is not a multiple of p, and the motor makes fewer colourings than the order of its step (so the two answers differ). In half the
+    draws gcd(s, p) > 1, so the motor reaches only part of the orbit. */
  canonical: { pat: 'RBBYRBBYRBBYRBBY', st: 6 },
- draw: R => { for (let i = 0; i < 1000; i++) { const r = R.int(6, 24), pat = ringPattern(R, r, 'RBY'), p = period(pat), st = R.int(2, r - 1);
-   if (st % p !== 0 && !(pat === 'RBBYRBBYRBBYRBBY' && st === 6)) return { pat, st }; }
+ draw: R => { const part = R.bool(); for (let i = 0; i < 1000; i++) { const r = R.int(6, 24), pat = ringPattern(R, r, 'RBY'), p = period(pat), st = R.int(2, r - 1);
+   if (p < r && (gcd(st, p) > 1) === part && st % p !== 0 && p / gcd(st, p) !== r / gcd(st, r) && !(pat === 'RBBYRBBYRBBYRBBY' && st === 6)) return { pat, st }; }
   return { pat: 'RBBYRBBYRBBYRBBY', st: 6 }; },
  build: ({ pat, st }) => { const r = pat.length, p = period(pat), g = gcd(st, r), ord = r / g, gp = gcd(st, p), made = p / gp, steps = [];
   for (let j = 1; j <= ord; j++) steps.push(j * st); const stp = [];

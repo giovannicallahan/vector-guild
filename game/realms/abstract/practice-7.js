@@ -64,6 +64,8 @@ const facText = f => f.map(([p, e]) => pw(p, e)).join(' × ');
 const waysText = ([p, e]) => e === 1 ? `${pw(p, e)}: the exponent 1 can only be 1, so 1 way` : `${pw(p, e)}: ${n(e)} can be written as ${list(parts(e).map(wr))}, so ${n(PART[e])} ways`;
 /* Orders from 12 to 500 with two or more primes and at least one exponent of 2 or more; never 72 or 144 (q34's own examples). */
 const ABEL = []; for (let N = 12; N <= 500; N++) { const f = primesOf(N); if (f.length >= 2 && f.some(([, e]) => e >= 2) && N !== 72 && N !== 144) ABEL.push(N); }
+/* The orders in ABEL with two or more primes raised to a power of 2 or more: half the q34b draws use them, so that the two answers differ. */
+const ABEL2 = ABEL.filter(N => primesOf(N).filter(([, e]) => e >= 2).length >= 2);
 const divisors = m => { const d = []; for (let i = 1; i <= m; i++) if (m % i === 0) d.push(i); return d; };
 const COMP = (lo, hi, skip) => { const out = []; for (let N = lo; N <= hi; N++) if (!skip.includes(N) && primesOf(N).reduce((s, [, e]) => s + e, 0) >= 2) out.push(N); return out; };
 const many = (...xs) => xs.some(x => x >= 1000);
@@ -79,22 +81,23 @@ const RACK = [
 ];
 mk({
  id: 'q31b', parent: 'q31', kind: 'setting', title: 'The rack of swappable parts',
- brief: 'A parts rack lets every part be swapped into any place, and the crew wants to know how many swaps keep one chosen part where it is.',
- labels: ['orbit size', 'stabiliser size'], tolerance: 0.01,
- gl: [['orbit size'], ['stabiliser size']]
+ brief: 'A parts rack lets every part be swapped into any place, and the crew wants to know how many swaps keep one or two chosen parts where they are.',
+ labels: ['stabiliser of one part', 'reorderings fixing both parts'], tolerance: 0.01,
+ gl: [['stabiliser size'], ['reorderings fixing both parts']]
 }, {
- /* Every reordering of m items among m places, so the group has fact(m) moves. m from 4 to 8, the item number j from 1 to m,
-    and one of four wordings (an index into RACK). */
- canonical: { m: 5, j: 3, w: 0 },
- draw: R => { const m = R.int(4, 8); return { m, j: R.int(1, m), w: R.int(0, 3) }; },
- build: ({ m, j, w }) => { const { it, its, pc, pcs } = RACK[w], N = fact(m), s = N / m, big = many(s, N), prod = Array.from({ length: m - 1 }, (_, i) => n(m - 1 - i)).join(' × '); return {
-  prompt: `A rack in the Tile Studio holds ${n(m)} ${its}, one in each of ${n(m)} ${pcs} numbered 1 to ${n(m)}. Any reordering of the ${its} among the ${pcs} is allowed (the do-nothing reordering included), and the ${n(N)} reorderings form a group. Any ${it} can be sent to any ${pc}. Enter the size of the orbit of ${it} number ${n(j)}, the number of ${pcs} it can be sent to, then the size of its stabiliser: the number of these reorderings that leave ${it} number ${n(j)} in its own ${pc}${big ? ' (type the numbers without commas)' : ''}.`,
-  answer: [m, s],
-  hints: [`The orbit of one ${it} is every place it can be sent to. Any ${it} can reach any ${pc}, so count the ${pcs}.`, 'The orbit–stabiliser theorem: the size of the orbit times the size of the stabiliser is the size of the group.'],
-  solution: `Any ${it} can be sent to any ${pc}, so the orbit of ${it} number ${n(j)} is all ${n(m)} ${pcs}. By the orbit–stabiliser theorem, |stabiliser| = |G| ÷ |orbit| = ${n(N)} ÷ ${n(m)} = ${n(s)}. Check: with ${it} number ${n(j)} held in its ${pc}, the other ${pl(m - 1, it)} can be reordered among the other ${pl(m - 1, pc)} in ${prod} = ${n(s)} ways.`,
+ /* Every reordering of m items among m places, so the group has fact(m) moves. m from 4 to 8, the item numbers j and k (j ≠ k)
+    from 1 to m, and one of four wordings (an index into RACK). The stabiliser of j has (m − 1)! moves; inside it, k can still go to
+    any of the other m − 1 places, so (m − 2)! moves fix both. */
+ canonical: { m: 5, j: 3, k: 1, w: 0 },
+ draw: R => { const m = R.int(4, 8), j = R.int(1, m); let k = R.int(1, m - 1); if (k >= j) k++; return { m, j, k, w: R.int(0, 3) }; },
+ build: ({ m, j, k, w }) => { const { it, its, pc, pcs } = RACK[w], N = fact(m), s = N / m, s2 = s / (m - 1), big = many(s, N); return {
+  prompt: `A rack in the Tile Studio holds ${n(m)} ${its}, one in each of ${n(m)} ${pcs} numbered 1 to ${n(m)}. Any reordering of the ${its} among the ${pcs} is allowed (the do-nothing reordering included), and the ${n(N)} reorderings form a group. Any ${it} can be sent to any ${pc}. Enter the size of the stabiliser of ${it} number ${n(j)}: the number of these reorderings that leave it in its own ${pc}. Then enter how many of the reorderings leave both ${it} number ${n(j)} and ${it} number ${n(k)} in their own ${pcs}${big ? ' (type the numbers without commas)' : ''}.`,
+  answer: [s, s2],
+  hints: [`The orbit of one ${it} is every ${pc} it can be sent to. The orbit–stabiliser theorem: the size of the orbit times the size of the stabiliser is the size of the group.`, `The reorderings that keep the first ${it} in place form a group of their own, and they can still send the second ${it} to any ${pc} except the one the first ${it} keeps. Use the theorem again inside that group.`],
+  solution: `Any ${it} can be sent to any ${pc}, so the orbit of ${it} number ${n(j)} is all ${n(m)} ${pcs}. By the orbit–stabiliser theorem, its stabiliser has ${n(N)} ÷ ${n(m)} = ${n(s)} reorderings. Those ${n(s)} reorderings form a group, and in it ${it} number ${n(k)} can still reach any of the other ${pl(m - 1, pc)}, so the reorderings that also keep ${it} number ${n(k)} in place number ${n(s)} ÷ ${n(m - 1)} = ${n(s2)}.`,
   guidance: [
-   { prompt: `Any ${it} can be sent to any ${pc}. How many ${pcs} can ${it} number ${n(j)} reach?`, answer: [m], explanation: `The orbit is every place the ${it} can be sent to, which is every ${pc}: ${n(m)} of them.` },
-   { prompt: `The group has ${n(N)} reorderings and the orbit has ${n(m)} places. How many reorderings leave ${it} number ${n(j)} in its own ${pc}?`, answer: [s], explanation: `Orbit size × stabiliser size = group size, so the stabiliser has ${n(N)} ÷ ${n(m)} = ${n(s)} reorderings.` }
+   { prompt: `The orbit of ${it} number ${n(j)} is all ${n(m)} ${pcs}, and the group has ${n(N)} reorderings. How many reorderings leave ${it} number ${n(j)} in its own ${pc}?`, answer: [s], explanation: `Orbit size × stabiliser size = group size, so the stabiliser has ${n(N)} ÷ ${n(m)} = ${n(s)} reorderings.` },
+   { prompt: `Inside that stabiliser, ${it} number ${n(k)} can still be sent to any of the other ${pl(m - 1, pc)}. How many of those ${n(s)} reorderings also leave ${it} number ${n(k)} in its own ${pc}?`, answer: [s2], explanation: `Use the theorem inside the stabiliser: ${n(s)} ÷ ${n(m - 1)} = ${n(s2)}. Check: with both held, the other ${pl(m - 2, it)} can be reordered in ${n(s2)} ways.` }
   ] }; }
 });
 
@@ -207,10 +210,10 @@ mk({
  labels: ['class size', 'order', 'permutations outside the class'], tolerance: 0.01,
  gl: [['ways to order the tiles'], ['class size'], ['order'], ['permutations outside the class']]
 }, {
- /* m is 8 (so every answer stays under 100000); any type with a cycle of length 2 or more; w picks one of three floors (an index into FLOOR).
+ /* m is 7 or 8 (so every answer stays under 100000); any type with a cycle of length 2 or more; w picks one of three floors (an index into FLOOR).
     The third answer is large, so "without commas" is always said. */
  canonical: { m: 8, type: [4, 3], w: 0 },
- draw: R => ({ m: 8, type: R.pick(types(8)), w: R.int(0, 2) }),
+ draw: R => { const m = R.pick([7, 8]); return { m, type: R.pick(types(m)), w: R.int(0, 2) }; },
  build: ({ m, type, w }) => { const t = type32(m, type), out = t.N - t.size; return {
   prompt: `The ${FLOOR[w]} of the Tile Studio has a row of ${n(m)} tiles, labelled 1 to ${n(m)}. One reordering is made of ${t.desc}. Its conjugacy class is every permutation of the ${n(m)} tiles with exactly the same cycle lengths. Enter how many permutations are in that class, the order of each of them, then how many of all the permutations of the ${n(m)} tiles are not in that class. Type the numbers without commas.`,
   answer: [t.size, t.order, out],
@@ -303,14 +306,14 @@ mk({
  /* An order from ABEL (12 to 500, two or more primes, one exponent of 2 or more, never 72 or 144). P is the prime with the largest exponent
     (the smallest of them if tied). The order is given without its factorisation. */
  canonical: { N: 360 },
- draw: R => ({ N: R.pick(ABEL) }),
+ draw: R => ({ N: R.pick(R.bool() ? ABEL2 : ABEL) }),
  build: ({ N }) => { const a = abel(N); let top = a.f[0]; for (const pe of a.f) if (pe[1] > top[1]) top = pe; const [P, E] = top; return {
   prompt: `The Tile Studio’s glaze store files pigments on shelves, one shelf for each abelian group a pattern of order ${n(N)} could follow, counting groups that are isomorphic (copies of each other) as one. Write ${n(N)} as a product of prime powers. Enter the number of abelian groups whose order is the largest power of ${n(P)} that divides ${n(N)}, then the number of abelian groups of order ${n(N)}.`,
   answer: [PART[E], a.total],
   hints: ['By the fundamental theorem, an abelian group of order pᵉ is a product of cyclic groups whose orders are powers of p, with exponents adding up to e. Count the partitions of e.', 'Each prime is split on its own, so multiply the numbers of partitions of the exponents.'],
   solution: `${n(N)} = ${facText(a.f)}. Each abelian group of order ${n(N)} is a product of cyclic groups of prime-power order, one splitting of the exponent for each prime. ${a.f.map(waysText).join('; ')}. The largest power of ${n(P)} that divides ${n(N)} is ${pw(P, E)}, so there are ${n(PART[E])} abelian groups of that order, and ${a.f.map(([, e]) => n(PART[e])).join(' × ')} = ${n(a.total)} abelian groups of order ${n(N)}.`,
   guidance: [
-   { prompt: `${n(N)} = ${facText(a.f)}. In how many ways can the exponent ${n(E)} of ${n(P)} be written as a sum of positive whole numbers, ignoring order?`, answer: [PART[E]], explanation: `${n(E)} = ${parts(E).map(wr).join(' = ')}: ${n(PART[E])} partitions, so ${n(PART[E])} abelian groups of order ${pw(P, E)}.` },
+   { prompt: `${n(N)} = ${facText(a.f)}. In how many ways can the exponent ${n(E)} of ${n(P)} be written as a sum of positive whole numbers, ignoring order?`, answer: [PART[E]], explanation: `${n(E)} can be written as ${list(parts(E).map(wr))}: ${n(PART[E])} partitions, so ${n(PART[E])} abelian groups of order ${pw(P, E)}.` },
    { prompt: `Multiply the numbers of partitions of all the exponents of ${facText(a.f)}. How many abelian groups of order ${n(N)} are there?`, answer: [a.total], explanation: `The exponents ${list(a.f.map(([, e]) => n(e)))} have ${list(a.f.map(([, e]) => n(PART[e])))} partitions, and ${a.f.map(([, e]) => n(PART[e])).join(' × ')} = ${n(a.total)}.` }
   ] }; }
 });
@@ -353,14 +356,14 @@ mk({
  canonical: { f: [[2, 5], [3, 3]] },
  draw: R => ({ f: R.pick(BIG34) }),
  build: ({ f }) => { const N = f.reduce((s, [p, e]) => s * Math.pow(p, e), 1), total = f.reduce((s, [, e]) => s * PART[e], 1), nc = f.reduce((s, [, e]) => s * (PART[e] - 1), 1), [p1, e1] = f[0], big = many(total, nc); return {
-  prompt: `One of the biggest dome patterns follows an abelian group of order ${n(N)} = ${facText(f)}. Groups that are isomorphic (copies of each other) count as one. Each such group is a product of its prime-power parts, one for each prime, and the part for a prime p is cyclic only when its exponent is not split up at all, that is, it is a single cyclic group of order pᵉ. Enter the number of abelian groups of order ${n(N)}, then how many of them have a part that is not cyclic for every one of the primes${big ? ' (type the numbers without commas)' : ''}.`,
+  prompt: `One of the biggest dome patterns follows an abelian group of order ${n(N)} = ${facText(f)}. Groups that are isomorphic (copies of each other) count as one. Each such group is a product of its prime-power parts, one for each prime, and the part for a prime p is cyclic only when its exponent is not split up at all, that is, it is a single cyclic group of order pᵉ. Enter the number of abelian groups of order ${n(N)}, then how many of them have a non-cyclic part for each of the primes${big ? ' (type the numbers without commas)' : ''}.`,
   answer: [total, nc],
   hints: ['An abelian group of order pᵉ is a product of cyclic groups whose orders are powers of p, with exponents adding up to e. The number of ways is the number of partitions of e (1 has 1, 2 has 2, 3 has 3, 4 has 5, 5 has 7, 6 has 11), and the primes are split independently.', 'For one prime, exactly one of the partitions of e is the single number e, which is the cyclic part. Every other partition gives a part that is not cyclic.'],
-  solution: `${f.map(waysText).join('; ')}. So there are ${f.map(([, e]) => n(PART[e])).join(' × ')} = ${n(total)} abelian groups of order ${n(N)}. For each prime exactly one partition is the cyclic one, so ${f.map(([, e]) => n(PART[e] - 1)).join(' × ')} = ${n(nc)} of the groups have a part that is not cyclic for every prime.`,
+  solution: `${f.map(waysText).join('; ')}. So there are ${f.map(([, e]) => n(PART[e])).join(' × ')} = ${n(total)} abelian groups of order ${n(N)}. For each prime exactly one partition is the cyclic one, so ${f.map(([, e]) => n(PART[e] - 1)).join(' × ')} = ${n(nc)} of the groups have a non-cyclic part for each of the primes.`,
   guidance: [
-   { prompt: `In how many ways can the exponent ${n(e1)} of ${n(p1)} be written as a sum of positive whole numbers, ignoring order?`, answer: [PART[e1]], explanation: `${n(e1)} = ${parts(e1).map(wr).join(' = ')}: ${n(PART[e1])} partitions.` },
+   { prompt: `In how many ways can the exponent ${n(e1)} of ${n(p1)} be written as a sum of positive whole numbers, ignoring order?`, answer: [PART[e1]], explanation: `${n(e1)} can be written as ${list(parts(e1).map(wr))}: ${n(PART[e1])} partitions.` },
    { prompt: `Multiply the numbers of partitions of all the exponents of ${facText(f)}. How many abelian groups of order ${n(N)} are there?`, answer: [total], explanation: `The exponents ${list(f.map(([, e]) => n(e)))} have ${list(f.map(([, e]) => n(PART[e])))} partitions, and ${f.map(([, e]) => n(PART[e])).join(' × ')} = ${n(total)}.` },
-   { prompt: `For each prime, one partition is the cyclic one and the rest are not. Multiply, over the primes, the number of partitions that are not the cyclic one. How many groups have a part that is not cyclic for every prime?`, answer: [nc], explanation: `${f.map(([, e]) => `${n(PART[e])} − 1 = ${n(PART[e] - 1)}`).join(', ')}, and ${f.map(([, e]) => n(PART[e] - 1)).join(' × ')} = ${n(nc)}.` }
+   { prompt: `For each prime, one partition is the cyclic one and the rest are not. Multiply, over the primes, the number of partitions that are not the cyclic one. How many groups have a non-cyclic part for each of the primes?`, answer: [nc], explanation: `${f.map(([, e]) => `${n(PART[e])} − 1 = ${n(PART[e] - 1)}`).join(', ')}, and ${f.map(([, e]) => n(PART[e] - 1)).join(' × ')} = ${n(nc)}.` }
   ] }; }
 });
 
@@ -399,14 +402,14 @@ mk({
  canonical: { N: 24, a: 9 },
  draw: R => { const N = R.pick(COMP(8, 40, [10, 15])), zs = []; for (let a = 2; a < N; a++) if (gcd(a, N) > 1) zs.push(a); return { N, a: R.pick(zs) }; },
  build: ({ N, a }) => { const { u, z } = unitsOf(N), g = gcd(a, N), step = N / g, wiped = g - 1, bs = Array.from({ length: g - 1 }, (_, i) => step * (i + 1)); return {
-  prompt: `The Cipher Vault’s multiplier lock multiplies each code by a setting x mod ${n(N)}, so it works in the ring ${Z(N)}. The lock accepts a setting from 1 to ${n(N - 1)} only if some setting multiplies with it to give 1 (a unit) and refuses the rest, which are zero divisors. Enter how many settings the lock accepts, how many it refuses, then, for the refused setting ${n(a)}, how many codes b from 1 to ${n(N - 1)} it wipes out to 0, that is ${n(a)} × b = 0 in ${Z(N)}. (Those codes b are exactly the multiples of ${n(N)} ÷ gcd(${n(a)}, ${n(N)}) from there up to ${n(N - 1)}.)`,
+  prompt: `The Cipher Vault’s multiplier lock multiplies each code by a setting x mod ${n(N)}, so it works in the ring ${Z(N)}. The lock accepts a setting from 1 to ${n(N - 1)} only if some setting multiplies with it to give 1 (a unit) and refuses the rest, which are zero divisors. Enter how many settings the lock accepts, how many it refuses, then, for the refused setting ${n(a)}, how many codes b from 1 to ${n(N - 1)} it wipes out to 0, that is ${n(a)} × b = 0 in ${Z(N)}. (Those codes b are exactly the non-zero multiples of ${n(N)} ÷ gcd(${n(a)}, ${n(N)}) below ${n(N)}.)`,
   answer: [u.length, z.length, wiped],
   hints: ['A non-zero x in Zₙ is a unit when gcd(x, n) = 1 and a zero divisor when gcd(x, n) > 1. Every non-zero x is exactly one of the two.', 'Work out d = gcd(a, n), then list the multiples of n ÷ d that are less than n and count them.'],
-  solution: `The accepted settings are the units, the x with gcd(x, ${n(N)}) = 1: ${list(u.map(n))}, ${n(u.length)} of them. The other ${n(N - 1)} − ${n(u.length)} = ${n(z.length)} settings are refused. gcd(${n(a)}, ${n(N)}) = ${n(g)}, so ${n(a)} wipes out the multiples of ${n(N)} ÷ ${n(g)} = ${n(step)} below ${n(N)}: ${list(bs.map(n))}, which is ${n(wiped)} codes. Check: ${n(a)} × ${n(bs[0])} = ${n(a * bs[0])}, which is 0 mod ${n(N)}.`,
+  solution: `The accepted settings are the units, the x with gcd(x, ${n(N)}) = 1: ${list(u.map(n))}, ${n(u.length)} of them. The other ${n(N - 1)} − ${n(u.length)} = ${n(z.length)} settings are refused. gcd(${n(a)}, ${n(N)}) = ${n(g)}, so ${n(a)} wipes out the multiples of ${n(N)} ÷ ${n(g)} = ${n(step)} below ${n(N)}: ${list(bs.map(n))}, which is ${pl(wiped, 'code')}. Check: ${n(a)} × ${n(bs[0])} = ${n(a * bs[0])}, which is 0 mod ${n(N)}.`,
   guidance: [
    { prompt: `How many of the settings 1 to ${n(N - 1)} have gcd 1 with ${n(N)}, so that the lock accepts them?`, answer: [u.length], explanation: `They are ${list(u.map(n))}: ${n(u.length)} units.` },
    { prompt: `The other settings from 1 to ${n(N - 1)} are refused. How many are there?`, answer: [z.length], explanation: `${n(N - 1)} settings minus ${n(u.length)} accepted leaves ${n(z.length)} refused.` },
-   { prompt: `gcd(${n(a)}, ${n(N)}) = ${n(g)}, so the codes ${n(a)} wipes out are the multiples of ${n(step)} from ${n(step)} up to ${n(N - 1)}. How many are there?`, answer: [wiped], explanation: `They are ${list(bs.map(n))}: ${n(wiped)} codes.` }
+   { prompt: `gcd(${n(a)}, ${n(N)}) = ${n(g)}, so the codes ${n(a)} wipes out are the multiples of ${n(step)} from ${n(step)} up to ${n(N - 1)}. How many are there?`, answer: [wiped], explanation: `They are ${list(bs.map(n))}: ${pl(wiped, 'code')}.` }
   ] }; }
 });
 

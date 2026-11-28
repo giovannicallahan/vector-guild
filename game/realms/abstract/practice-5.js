@@ -33,6 +33,10 @@ const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹', SUB = '₀₁₂₃₄₅₆₇₈₉
 const sup = k => String(k).split('').map(d => SUP[d]).join('');
 const Z = m => 'Z' + String(m).split('').map(d => SUB[d]).join('');
 const list = xs => xs.map(n).join(', ');
+/* "a 6-position dial", "an 8-position dial", "an 11-position dial". */
+const an = x => /^(8|11|18|8\d)$/.test(String(x)) ? 'an' : 'a';
+/* 1st, 2nd, 3rd, 4th, 11th, 12th, 13th, 21st. */
+const ord = k => { const t = k % 100, u = k % 10; return n(k) + (t >= 11 && t <= 13 ? 'th' : u === 1 ? 'st' : u === 2 ? 'nd' : u === 3 ? 'rd' : 'th'); };
 const set = xs => xs.length <= 8 ? `{${list(xs)}}` : `{${list(xs.slice(0, 3))}, …, ${n(xs[xs.length - 1])}}`;
 const multiples = (step, below) => { const out = []; for (let x = 0; x < below; x += step) out.push(x); return out; };
 const powmod = (a, e, m) => { let r = 1 % m, b = a % m; while (e > 0) { if (e % 2 === 1) r = r * b % m; b = b * b % m; e = Math.floor(e / 2); } return r; };
@@ -206,7 +210,7 @@ mk({
  draw: R => { const { s, t } = twoPerms(R, 7, { s: [3, 1, 2, 6, 7, 5, 4], t: [2, 7, 1, 5, 3, 4, 6] }); return { s, t, i: R.int(1, 7) }; },
  build: ({ s, t, i }) => { const j = t.indexOf(i) + 1, k = s[j - 1], v = t[k - 1], cs = cyclesOf(s).filter(c => c.length > 1), lens = cs.map(c => c.length), o = lens.reduce(lcm, 1),
   chains = cs.map(c => `${c.map(n).join(' → ')} → ${n(c[0])}`).join('; '); return {
-  prompt: `A vault’s locking sequence works on seven bolts numbered 1 to 7. Two moves each send every bolt to another position, or leave it: ${perm('σ', s)}; ${perm('τ', t)}. Moves are combined right to left, so τ ∘ σ means σ first, then τ, and τ⁻¹ is the move that undoes τ. Enter (τ ∘ σ ∘ τ⁻¹)(${n(i)}), the position that τ⁻¹, then σ, then τ send bolt ${n(i)} to. Then enter the order of the move τ ∘ σ ∘ τ⁻¹: the smallest number of times, 1 or more, that the move must be repeated for every bolt to be back where it started. A conjugate has the same order as the move it comes from, so you can work the order out for σ.`,
+  prompt: `A vault’s locking sequence works on seven bolts numbered 1 to 7. Two moves each send every bolt to another position, or leave it: ${perm('σ', s)}; ${perm('τ', t)}. Moves are combined right to left, so τ ∘ σ means σ first, then τ, and τ⁻¹ is the move that undoes τ. Enter (τ ∘ σ ∘ τ⁻¹)(${n(i)}), the position that τ⁻¹, then σ, then τ send bolt ${n(i)} to. Then enter the order of the move τ ∘ σ ∘ τ⁻¹: the smallest number of times, 1 or more, that the move must be repeated for every bolt to be back where it started. A conjugate has the same order as the move it comes from, so you can work the order out for σ: follow each bolt under σ until it is back, and the order is the smallest number that all these cycle lengths divide.`,
   answer: [v, o],
   hints: ['Work from the right. τ⁻¹ sends a position back to the position that τ sends there. Then apply σ, then τ.', 'Follow one bolt under σ again and again until it returns to where it began: the number of steps is the length of its cycle. Do the same for every bolt that moves. The order is the smallest number that all the cycle lengths divide.'],
   solution: `τ sends ${n(j)} to ${n(i)}, so τ⁻¹(${n(i)}) = ${n(j)}. Then σ(${n(j)}) = ${n(k)} and τ(${n(k)}) = ${n(v)}, so (τ ∘ σ ∘ τ⁻¹)(${n(i)}) = ${n(v)}. Following σ round gives the cycles ${chains}, with lengths ${list(lens)}; the other bolts stay put. Every bolt is home again after the smallest number that all these lengths divide, which is ${n(o)}. The conjugate has the same order, ${n(o)}.`,
@@ -263,7 +267,7 @@ mk({
   solution: `gcd(${n(a)}, ${n(m)}) = ${n(g)}, so a courier collects the parts that differ by multiples of ${n(g)}: ${n(m)} ÷ ${n(g)} = ${n(h)} parts. The cosets are equal batches that cover the stock exactly once, so the number of couriers needed is ${n(m)} ÷ ${n(h)} = ${n(g)}. Part ${n(b)} leaves remainder ${n(rep)} on division by ${n(g)}, so its courier collects ${n(rep)}, ${n(rep + g)}, ${n(rep + 2 * g)} and so on, and the smallest label is ${n(rep)}.`,
   guidance: [
    { prompt: `Each courier collects the parts whose labels differ by multiples of gcd(${n(a)}, ${n(m)}). What is gcd(${n(a)}, ${n(m)})? It is also the number of couriers needed.`, answer: [g], explanation: `${n(g)} divides ${n(a)} and ${n(m)}, and no larger number divides both. The batches are ${n(g)} equal cosets, so ${n(g)} couriers cover the stock.` },
-   { prompt: `One courier collects every ${n(g)}th label from its start, round the ring of ${n(m)}. How many parts is that?`, answer: [h], explanation: `${n(m)} ÷ ${n(g)} = ${n(h)}. Check with Lagrange: ${n(h)} × ${n(g)} = ${n(m)}.` },
+   { prompt: `One courier collects every ${ord(g)} label from its start, round the ring of ${n(m)}. How many parts is that?`, answer: [h], explanation: `${n(m)} ÷ ${n(g)} = ${n(h)}. Check with Lagrange: ${n(h)} × ${n(g)} = ${n(m)}.` },
    { prompt: `The courier from part ${n(b)} collects the labels that leave the same remainder as ${n(b)} on division by ${n(g)}. What is the smallest label it collects?`, answer: [rep], explanation: `${n(b)} = ${n(g)} × ${n(Math.floor(b / g))} + ${n(rep)}, so it collects ${n(rep)}, ${n(rep + g)}, ${n(rep + 2 * g)} and so on, starting at ${n(rep)}.` }
   ] }; }
 });
@@ -311,7 +315,7 @@ mk({
    ? `The outputs agree. ${n(k)} × ${n(m)} = ${n(km)} is a multiple of ${n(t)}, so adding ${n(m)} to a reading never changes the output: φ is well defined, and it is a homomorphism. Enter 1.`
    : `The outputs differ. ${n(k)} × ${n(m)} = ${n(km)} is not a multiple of ${n(t)}, so adding ${n(m)} to a reading changes the output: φ is not well defined. Enter 0.`;
   return {
-  prompt: `A gearbox in the Relay Exchange copies readings from a ${n(m)}-position dial, ${Z(m)}, to a ${n(t)}-position dial, ${Z(t)}, by the rule φ(x) = ${n(k)}x mod ${n(t)}. On the first dial the readings x and x + ${n(m)} are the same position, so a gearbox that works must give both the same output; the rule is well defined when it always does, and then it is a homomorphism. Enter φ(${n(x)}), then φ(${n(x2)}), then 1 if φ is well defined and 0 if it is not.`,
+  prompt: `A gearbox in the Relay Exchange copies readings from ${an(m)} ${n(m)}-position dial, ${Z(m)}, to ${an(t)} ${n(t)}-position dial, ${Z(t)}, by the rule φ(x) = ${n(k)}x mod ${n(t)}. On the first dial the readings x and x + ${n(m)} are the same position, so a gearbox that works must give both the same output; the rule is well defined when it always does, and then it is a homomorphism. Enter φ(${n(x)}), then φ(${n(x2)}), then 1 if φ is well defined and 0 if it is not.`,
   answer: [f1, f2, wd],
   hints: ['Multiply the reading by k and keep the remainder mod the size of the second dial. Do it once for each of the two readings.', 'The two readings give outputs k × x and k × (x + m) = k × x + k × m, which differ by k × m. They always agree exactly when k × m is a multiple of the size of the second dial.'],
   solution: `φ(${n(x)}) = ${n(k)} × ${n(x)} mod ${n(t)} = ${n(k * x)} mod ${n(t)} = ${n(f1)}, and φ(${n(x2)}) = ${n(k)} × ${n(x2)} mod ${n(t)} = ${n(k * x2)} mod ${n(t)} = ${n(f2)}. ${end}`,
@@ -335,7 +339,7 @@ mk({
    if (t !== m && (k * m) % t === 0 && u + v + w >= m && tot !== 0 && (k * tot) % t !== 0) return { m, t, k, u, v, w }; }
   return { m: 8, t: 12, k: 3, u: 5, v: 6, w: 7 }; },
  build: ({ m, t, k, u, v, w }) => { const raw = u + v + w, tot = raw % m, out = k * tot % t, fu = k * u % t, fv = k * v % t, fw = k * w % t, chk = (fu + fv + fw) % t; return {
-  prompt: `At the Relay Exchange a master dial with ${n(m)} positions, ${Z(m)}, drives a slave dial with ${n(t)} positions, ${Z(t)}, by the rule φ(x) = ${n(k)}x mod ${n(t)}: the slave shows φ of the master’s reading. Here ${n(k)} × ${n(m)} is a multiple of ${n(t)}, so φ is well defined and keeps sums. The master starts at 0 and is nudged on by ${n(u)}, then by ${n(v)}, then by ${n(w)} positions, wrapping round past ${n(m - 1)} back to 0. Enter the master’s reading after the three nudges, then the slave’s reading.`,
+  prompt: `At the Relay Exchange a master dial with ${n(m)} positions, ${Z(m)}, drives a slave dial with ${n(t)} positions, ${Z(t)}, by the rule φ(x) = ${n(k)}x mod ${n(t)}: the slave shows φ of the master’s reading. Here ${n(k)} × ${n(m)} is a multiple of ${n(t)}, so φ is well defined and keeps sums. The master starts at 0 and is nudged on by ${n(u)}, then by ${n(v)}, then by ${n(w)} position${w === 1 ? '' : 's'}, wrapping round past ${n(m - 1)} back to 0. Enter the master’s reading after the three nudges, then the slave’s reading.`,
   answer: [tot, out],
   hints: ['Add the three nudges on the master dial and wrap round: keep the remainder on division by the number of positions of the master dial.', 'The slave shows the rule applied to the master’s final reading: multiply by k and keep the remainder mod the size of the slave dial. Because φ keeps sums, adding the three separate outputs on the slave dial gives the same reading, which is a check.'],
   solution: `The master reaches ${n(u)} + ${n(v)} + ${n(w)} = ${n(raw)}, which is ${n(tot)} mod ${n(m)}. The slave shows φ(${n(tot)}) = ${n(k)} × ${n(tot)} mod ${n(t)} = ${n(k * tot)} mod ${n(t)} = ${n(out)}. Check: φ(${n(u)}) + φ(${n(v)}) + φ(${n(w)}) = ${n(fu)} + ${n(fv)} + ${n(fw)} = ${n(fu + fv + fw)}, which is ${n(chk)} mod ${n(t)}, the same reading.`,

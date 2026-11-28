@@ -26,15 +26,15 @@ Object.assign(window.EXPERIMENTS, {
  /* |U(n)| for n = 10 … 30. */
  q06: t => { t = T(t); const m = t + 20, us = []; for (let x = 1; x < m; x++) { let a = x, b = m; while (b) { const r = a % b; a = b; b = r; } if (a === 1) us.push(x); }
   return E('Predict |U(n)|, the number of settings from 1 to n − 1 that are coprime to n.', `The numbers from 1 to ${n(m - 1)} coprime to ${n(m)} are ${us.map(n).join(', ')}, so |U(${n(m)})| = ${n(us.length)}.`, [['|U(n)|', us.length], ['n', m]]); },
- /* Order of a = 1 … 21 in Z_24: 24 ÷ gcd(a, 24). */
+ /* Order of a = 1 … 21 in Z₂₄: 24 ÷ gcd(a, 24). */
  q07: t => { t = T(t); const a = t + 11; let x = a, y = 24; while (y) { const r = x % y; x = y; y = r; } const o = 24 / x;
-  return E('Predict the order of the jump in Z_24: the beats until the pulse is back at lamp 0.', `gcd(${n(a)}, 24) = ${n(x)}, so the order of ${n(a)} is 24 ÷ ${n(x)} = ${n(o)}.`, [['Order', o], ['gcd with 24', x]]); },
+  return E('Predict the order of the jump in Z₂₄: the beats until the pulse is back at lamp 0.', `gcd(${n(a)}, 24) = ${n(x)}, so the order of ${n(a)} is 24 ÷ ${n(x)} = ${n(o)}.`, [['Order', o], ['gcd with 24', x]]); },
  /* Order of a = 2 … 12 in U(13), from the table of powers. */
  q08: t => { t = T(t); const a = 2 + (t + 10) % 11, ps = [a]; while (ps[ps.length - 1] !== 1) ps.push((ps[ps.length - 1] * a) % 13);
   return E('Predict the order of this element in U(13): the first power that leaves 1.', `Powers of ${n(a)} mod 13: ${ps.map(n).join(', ')}. The first 1 is power ${n(ps.length)}, so the order is ${n(ps.length)}.`, [['Order', ps.length], ['Square mod 13', ps[1]]]); },
- /* Number of generators of Z_n, n = 8 … 28. */
+ /* Number of generators of Zₙ, n = 8 … 28. */
  q09: t => { t = T(t); const m = t + 18, gs = []; for (let x = 1; x < m; x++) { let a = x, b = m; while (b) { const r = a % b; a = b; b = r; } if (a === 1) gs.push(x); }
-  return E('Predict how many generators Z_n has.', `The generators are the numbers from 1 to ${n(m - 1)} coprime to ${n(m)}: ${gs.map(n).join(', ')}. That is ${n(gs.length)} generators.`, [['Generators', gs.length], ['n', m]]); },
+  return E('Predict how many generators Zₙ has.', `The generators are the numbers from 1 to ${n(m - 1)} coprime to ${n(m)}: ${gs.map(n).join(', ')}. That is ${n(gs.length)} generators.`, [['Generators', gs.length], ['n', m]]); },
  /* 3ᵏ mod 11 with k = 400 … 420; the order of 3 is 5 (powers 3, 9, 5, 4, 1). */
  q10: t => { t = T(t); const k = 410 + t, r = k % 5, ps = [3, 9, 5, 4, 1], v = r === 0 ? 1 : ps[r - 1];
   return E('Predict 3ᵏ mod 11 for this exponent k.', `The powers of 3 mod 11 are 3, 9, 5, 4, 1, so the order of 3 is 5. ${n(k)} = ${n(Math.floor(k / 5))} × 5 + ${n(r)}, so 3ᵏ mod 11 is the same as ${r === 0 ? 'a whole number of blocks of 3⁵, which leaves 1' : `the power ${n(r)} of 3, which leaves ${n(v)}`}.`, [['Value', v], ['k mod 5', r]]); },

@@ -57,11 +57,11 @@ Object.assign(window.ORACLE, {
     const T = table(p.m, (x, y) => { let v = x + y - p.s; while (v < 0) v += p.m; while (v >= p.m) v -= p.m; return v; });
     const e = identityOf(T); return [e, inverseIn(T, p.a, e), inverseIn(T, p.b, e)];
   },
-  /* q05b: digits 1..m-1 under multiplication mod m; scramble of a and b; closed?; all inverses?; group? */
+  /* q05b: digits 1..m-1 (0..m-1 when z = 1) under multiplication mod m; scramble of a and b; closed?; group? */
   q05b: p => {
-    const els = []; for (let i = 1; i < p.m; i++) els.push(i);
+    const els = []; for (let i = p.z ? 0 : 1; i < p.m; i++) els.push(i);
     const g = isGroup(els, (x, y) => (x * y) % p.m);
-    return [(p.a * p.b) % p.m, g.closed, g.inv, g.group];
+    return [(p.a * p.b) % p.m, g.closed, g.group];
   },
   /* q05c: plan A add mod m on 0..m-1, inverse of a; number of self-inverse settings; plan B 1..m-1 multiplying a group? */
   q05c: p => {

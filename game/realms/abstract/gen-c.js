@@ -158,10 +158,10 @@ Object.assign(window.MISSION_GEN, {
    return { a: 4, b: 6 }; },
   build: ({ a, b }) => { const size = a * b, g = gcd(a, b), L = lcm(a, b), iso = g === 1 ? 1 : 0;
    const end = iso
-    ? `gcd(${n(a)}, ${n(b)}) = 1, so the largest order is ${n(a)} × ${n(b)} = ${n(size)}: the pair (1, 1) passes through all ${n(size)} states before it comes home, just as 1 does on a ${n(size)}-position dial. Matching k(1, 1) with k in ${Z(size)} is an isomorphism, so enter 1.`
+    ? `gcd(${n(a)}, ${n(b)}) = 1, so the largest order is ${n(a)} × ${n(b)} = ${n(size)}: the pair (1, 1) passes through all ${n(size)} states before it comes home, just as 1 does on ${an(size)} ${n(size)}-position dial. Matching k(1, 1) with k in ${Z(size)} is an isomorphism, so enter 1.`
     : `gcd(${n(a)}, ${n(b)}) = ${n(g)}, so the largest order is ${n(L)}, less than ${n(size)}. ${Z(size)} has an element of order ${n(size)} (the reading 1), and an isomorphism keeps every order, so the two are not isomorphic: enter 0.`;
    return {
-   prompt: `Two dials, ${Z(a)} and ${Z(b)}, are coupled into one relay whose states are the pairs (x, y): the direct product ${Z(a)} × ${Z(b)}. Enter the number of states, then the largest order of any state, then 1 if ${Z(a)} × ${Z(b)} ≅ ${Z(size)} (the coupled relay is a copy of one ${n(size)}-position dial) and 0 if it is not.`,
+   prompt: `Two dials, ${Z(a)} and ${Z(b)}, are coupled into one relay whose states are the pairs (x, y): the direct product ${Z(a)} × ${Z(b)}. Enter the number of states, then the largest order of any state, then 1 if the coupled relay is isomorphic to one dial with as many positions as it has states, and 0 if it is not.`,
    answer: [size, L, iso],
    hints: ['The order of a pair is the lcm of the orders of its two parts: the first time both dials are home together. The largest order is the lcm of the two dial sizes.', 'An isomorphism keeps every order, and a one-dial relay with N positions has a state of order N. So the product is a copy of one dial exactly when its largest order equals its number of states.'],
    solution: `There are ${n(a)} × ${n(b)} = ${n(size)} pairs. The order of a pair (x, y) is the lcm of the order of x, which divides ${n(a)}, and the order of y, which divides ${n(b)}, so no pair beats (1, 1), whose order is lcm(${n(a)}, ${n(b)}) = ${n(size)} ÷ ${n(g)} = ${n(L)}. ${end}`,
@@ -195,8 +195,9 @@ Object.assign(window.MISSION_GEN, {
  /* Z_m / ⟨d⟩ with d a divisor of m, 2 <= d <= m ÷ 2; x is not in ⟨d⟩. Not the worked example (Z₁₈ / ⟨6⟩). */
  q28: {
   canonical: { m: 24, d: 8, x: 6 },
-  draw: R => { for (let i = 0; i < 1000; i++) { const m = R.int(12, 48), d = R.int(2, Math.floor(m / 2)), x = R.int(1, m - 1);
-    if (m % d === 0 && x % d !== 0 && !(m === 18 && d === 6)) return { m, d, x }; }
+  /* Half the draws have gcd(x, d) above 1, so the order of x + H is less than the number of cosets. */
+  draw: R => { const low = R.bool(); for (let i = 0; i < 1000; i++) { const m = R.int(12, 48), d = R.int(2, Math.floor(m / 2)), x = R.int(1, m - 1);
+    if (m % d === 0 && x % d !== 0 && (gcd(x, d) > 1) === low && !(m === 18 && d === 6)) return { m, d, x }; }
    return { m: 24, d: 8, x: 6 }; },
   build: ({ m, d, x }) => { const sz = m / d, g = gcd(x, d), o = d / g, H = multiples(d, m), steps = [];
    for (let j = 1; j <= o; j++) steps.push(j * x); return {

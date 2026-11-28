@@ -109,7 +109,7 @@ mk({
   ] }; }
 });
 
-/* ---- q07 Order of an element in Z_n [4.1] ---- */
+/* ---- q07 Order of an element in Zₙ [4.1] ---- */
 
 /* Parent: m = 24, a = 18. Here: an airlock hatch, and laps instead of a check step. */
 mk({
@@ -348,10 +348,10 @@ mk({
  draw: R => { for (let i = 0; i < 1000; i++) { const m = R.int(9, 40), us = unitsOf(m).filter(x => x !== 1); if (!us.length) continue; const a = R.pick(us), o = powers(a, m).length, k = R.int(500, 2999);
    if (o < 4 || o > 14 || k % o === 0 || (m === CANON.q10[0] && a === CANON.q10[1])) continue; return { m, a, k }; } return { m: 22, a: 5, k: 1237 }; },
  build: ({ m, a, k }) => { const pw = powers(a, m), o = pw.length, r = k % o, v = pw[r - 1], q = Math.floor(k / o), wait = o - r; return {
-  prompt: `A beacon on the Beacon Tower starts with the code 1. On every beat the code is multiplied by ${n(a)}, mod ${n(m)}, so after k beats it is ${n(a)}ᵏ mod ${n(m)}. The beacon resets itself on any beat on which its code is 1 again. Enter the order of ${n(a)} in U(${n(m)}), the smallest k, at least 1, with ${n(a)}ᵏ mod ${n(m)} = 1. Then enter the code after ${n(k)} beats. Then enter how many more beats after beat ${n(k)} pass before the code is next 1.`,
+  prompt: `A beacon on the Beacon Tower starts with the code 1. On every beat the code is multiplied by ${n(a)}, mod ${n(m)}, so after k beats it is ${n(a)}ᵏ mod ${n(m)}. The beacon resets itself on any beat on which its code is 1 again. Enter the order of ${n(a)} in U(${n(m)}), the smallest k, at least 1, with ${n(a)}ᵏ mod ${n(m)} = 1. Then enter the code after ${n(k)} beats. The code after ${n(k)} beats is not 1. Then enter how many beats after beat ${n(k)} the code is next 1: the smallest j, at least 1, for which the code on beat ${n(k)} + j is 1.`,
   answer: [o, v, wait],
   hints: ['Find the order first with a table of powers: multiply by the element and reduce until you reach 1.', 'Only the remainder of the number of beats on division by the order matters: whole blocks of the order bring the code back to 1.', 'The code is 1 again when the beat number is a multiple of the order. Count the beats from the leftover to the next multiple.'],
-  solution: `Powers of ${n(a)} mod ${n(m)}: ${list(pw)}. The first 1 is at power ${n(o)}, so the order is ${n(o)}. ${n(k)} = ${n(q)} × ${n(o)} + ${n(r)}, so the code after ${n(k)} beats is the code after ${beats(r)}, ${n(a)}${sup(r)} mod ${n(m)} = ${n(v)}. The code is next 1 on beat ${n((q + 1) * o)}, the next multiple of ${n(o)}, which is ${n(o)} − ${n(r)} = ${n(wait)} beats after beat ${n(k)}.`,
+  solution: `Powers of ${n(a)} mod ${n(m)}: ${list(pw)}. The first 1 is at power ${n(o)}, so the order is ${n(o)}. ${n(k)} = ${n(q)} × ${n(o)} + ${n(r)}, so the code after ${n(k)} beats is the code after ${beats(r)}, ${n(a)}${sup(r)} mod ${n(m)} = ${n(v)}. The code is next 1 on beat ${n((q + 1) * o)}, the next multiple of ${n(o)}, which is ${n(o)} − ${n(r)} = ${beats(wait)} after beat ${n(k)}.`,
   guidance: [
    { prompt: `Make the table of powers of ${n(a)} mod ${n(m)}. What is the order of ${n(a)}?`, answer: [o], explanation: `The powers are ${list(pw)}. The first 1 is the power ${n(o)}.` },
    { prompt: `${n(k)} = ${n(q)} × ${n(o)} + ${n(r)}. So the code after ${n(k)} beats equals the code after ${beats(r)}. What is ${n(a)}${sup(r)} mod ${n(m)}?`, answer: [v], explanation: `From the table, ${n(a)}${sup(r)} mod ${n(m)} = ${n(v)}.` },

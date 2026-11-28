@@ -89,7 +89,7 @@ mk({
   guidance: [
    { prompt: `Count the forward steps as positive and the back steps as negative, starting from position ${n(s)}. What is ${n(s)} + ${n(a)} − ${n(b)} + ${n(c)}?`, answer: [net], explanation: `${n(s)} + ${n(a)} − ${n(b)} + ${n(c)} = ${n(net)}.` },
    { prompt: `What is ${n(net)} mod ${n(m)}, the position from 0 to ${n(m - 1)} where the dial ends?`, answer: [pos], explanation: `${net < 0 ? `${n(net)} is negative, so ${modText(net, m)}` : divText(net, m)}. The dial ends at position ${n(pos)}.` },
-   { prompt: `Turning forward from position ${n(pos)}, the dial reaches position 0 when it reaches ${n(m)}. How many steps is that, ${n(m)} − ${n(pos)}?`, answer: [z], explanation: `X` }
+   { prompt: `Turning forward from position ${n(pos)}, the dial reaches position 0 when it reaches ${n(m)}. How many steps is that?`, answer: [z], explanation: `${n(m)} − ${n(pos)} = ${steps(z)}: that many steps forward carry the dial past position ${n(m - 1)} and onto 0.` }
   ] }; }
 });
 
@@ -121,8 +121,8 @@ mk({
 mk({
  id: 'q02b', parent: 'q02', kind: 'setting', title: 'The stamping drum',
  brief: 'A stamping drum turns a fixed amount on every pass of the arm, and the crew needs to know which slot is in line after a run of passes.',
- labels: ['slot after the passes', 'slot after s passes'], tolerance: 0.01,
- gl: [['s mod n'], ['p mod n'], ['(s × p) mod n'], ['s² mod n']]
+ labels: ['slot after the first run', 'slot after the second run'], tolerance: 0.01,
+ gl: [['slots per pass mod n'], ['passes mod n'], ['product mod n'], ['square mod n']]
 }, {
  /* Shift s per pass (larger than m), p passes. Both reduce to at least 2 mod m. The second answer is s² mod m, the
     slot after s passes. Not the worked example (m = 10, 13 and 6). */
@@ -335,26 +335,29 @@ mk({
 mk({
  id: 'q05b', parent: 'q05', kind: 'setting', title: 'The scrambler rule check',
  brief: 'A digit scrambler is about to be fitted to a vault keypad, and the crew wants it checked against the rules before anyone trusts it.',
- labels: ['scramble', 'closed (1 or 0)', 'inverses (1 or 0)', 'group (1 or 0)'], tolerance: 0.01,
+ labels: ['scramble', 'closed (1 or 0)', 'group (1 or 0)'], tolerance: 0.01,
  gl: [['scramble'], ['closed (1 or 0)'], ['inverses (1 or 0)'], ['group (1 or 0)']]
 }, {
- /* Digits 1 … m − 1 under × mod m, m from 4 to 20: closed, with inverses and a group exactly when m is prime. The scramble is at
+ /* Digits 1 … m − 1 (z = 0) or 0 … m − 1 (z = 1, about a third of the draws) under × mod m, m from 4 to 20. Without 0: closed,
+    with inverses and a group exactly when m is prime. With 0: closed, but 0 has no inverse, so never a group. The scramble is at
     least 2. Not the worked example (m = 6). */
- canonical: { m: 13, a: 6, b: 9 },
- draw: R => { for (let i = 0; i < 1000; i++) { const m = R.bool() ? R.pick(PRIMES) : R.pick(COMPOSITES), p = { m, a: R.int(2, m - 1), b: R.int(2, m - 1) };
-   if (m !== 6 && p.a !== p.b && (p.a * p.b) % m >= 2) return p; } return { m: 13, a: 6, b: 9 }; },
- build: ({ m, a, b }) => { const pr = a * b, r = pr % m, prime = isPrime(m), d = small(m), q = m / d, f = prime ? 1 : 0; return {
-  prompt: `A digit scrambler in the Lock Workshop uses the digits 1 to ${n(m - 1)}; the digit 0 is not used. To scramble two digits it multiplies them and keeps the remainder on division by ${n(m)}. Multiplying is associative, so take that rule as given. First enter the scramble of ${n(a)} and ${n(b)}, (${n(a)} × ${n(b)}) mod ${n(m)}. Then enter 1 if every scramble of two digits is again one of the digits, 0 if not. Then enter 1 if every digit has an inverse, 0 if not. Last enter 1 if the digits with this scrambling form a group, 0 if not.`,
-  answer: [r, f, f, f],
-  hints: ['A scramble of two digits can leave the digits when the product is a whole number of turns of the dial, because the remainder is then 0, which is not a digit. Look for two digits whose product is the dial size.', 'The digit 1 changes nothing, so an identity always exists here. A group needs all four rules: closed, associative, an identity and an inverse for every digit.'],
-  solution: `${n(a)} × ${n(b)} = ${n(pr)}, and ${divText(pr, m)}, so the scramble is ${n(r)}. ` + (prime
-   ? `${n(m)} is prime, so a product of two digits from 1 to ${n(m - 1)} is never a multiple of ${n(m)}: the remainder is never 0, and the digits are closed under scrambling (1). For any digit x, the ${n(m - 1)} products x × 1, x × 2, …, x × ${n(m - 1)} mod ${n(m)} are all different and none is 0, so one of them is 1: every digit has an inverse (1). Multiplying is associative as given, and 1 × x = x, so the digits form a group (1).`
-   : `${n(m)} = ${n(d)} × ${n(q)}, and both ${n(d)} and ${n(q)} are digits, but (${n(d)} × ${n(q)}) mod ${n(m)} = 0, which is not a digit: the digits are not closed (0). Every product ${n(d)} × x is a multiple of ${n(d)}, and so is ${n(m)}, so its remainder is a multiple of ${n(d)} and never 1: ${n(d)} has no inverse (0). With a rule failing, the digits do not form a group (0).`),
+ canonical: { m: 13, a: 6, b: 9, z: 0 },
+ draw: R => { for (let i = 0; i < 1000; i++) { const m = R.bool() ? R.pick(PRIMES) : R.pick(COMPOSITES), p = { m, a: R.int(2, m - 1), b: R.int(2, m - 1), z: R.int(0, 2) === 0 ? 1 : 0 };
+   if (m !== 6 && p.a !== p.b && (p.a * p.b) % m >= 2) return p; } return { m: 13, a: 6, b: 9, z: 0 }; },
+ build: ({ m, a, b, z }) => { const pr = a * b, r = pr % m, prime = isPrime(m), d = small(m), q = m / d, c = z || prime ? 1 : 0, f = !z && prime ? 1 : 0; return {
+  prompt: `A digit scrambler in the Lock Workshop uses the digits ${z ? `0 to ${n(m - 1)}; the digit 0 is used too` : `1 to ${n(m - 1)}; the digit 0 is not used`}. To scramble two digits it multiplies them and keeps the remainder on division by ${n(m)}. Multiplying is associative, so take that rule as given. First enter the scramble of ${n(a)} and ${n(b)}, (${n(a)} × ${n(b)}) mod ${n(m)}. Then enter 1 if every scramble of two digits is again one of the digits, 0 if not. Last enter 1 if the digits with this scrambling form a group, 0 if not.`,
+  answer: [r, c, f],
+  hints: ['When 0 is not a digit, a scramble of two digits can leave the digits: if the product is a whole number of turns of the dial, the remainder is 0. Look for two digits whose product is the dial size.', 'The digit 1 changes nothing, so an identity always exists here. A group needs all four rules: closed, associative, an identity and an inverse for every digit. 0 times any digit is 0, never 1, so the digit 0 has no inverse.'],
+  solution: `${n(a)} × ${n(b)} = ${n(pr)}, and ${divText(pr, m)}, so the scramble is ${n(r)}. ` + (z
+   ? `Every remainder on division by ${n(m)} is a digit from 0 to ${n(m - 1)}, so the digits are closed under scrambling (1). But 0 × x = 0 for every digit x, never 1, so 0 has no inverse, and the digits do not form a group (0).`
+   : prime
+   ? `${n(m)} is prime, so a product of two digits from 1 to ${n(m - 1)} is never a multiple of ${n(m)}: the remainder is never 0, and the digits are closed under scrambling (1). For any digit x, the ${n(m - 1)} products x × 1, x × 2, …, x × ${n(m - 1)} mod ${n(m)} are all different and none is 0, so one of them is 1: every digit has an inverse. Multiplying is associative as given, and 1 × x = x, so the digits form a group (1).`
+   : `${n(m)} = ${n(d)} × ${n(q)}, and both ${n(d)} and ${n(q)} are digits, but (${n(d)} × ${n(q)}) mod ${n(m)} = 0, which is not a digit: the digits are not closed (0). Every product ${n(d)} × x is a multiple of ${n(d)}, and so is ${n(m)}, so its remainder is a multiple of ${n(d)} and never 1: ${n(d)} has no inverse either. With rules failing, the digits do not form a group (0).`),
   guidance: [
    { prompt: `What is (${n(a)} × ${n(b)}) mod ${n(m)}?`, answer: [r], explanation: `${n(a)} × ${n(b)} = ${n(pr)}, and ${divText(pr, m)}.` },
-   { prompt: `Is every scramble of two digits again a digit? Enter 1 for yes, 0 for no.`, answer: [f], explanation: prime ? `Yes: ${n(m)} has no factors to multiply to a whole number of turns, so no scramble gives 0.` : `No: ${n(d)} × ${n(q)} = ${n(m)} is exactly one full turn, so scrambling ${n(d)} with ${n(q)} gives 0, which is not a digit.` },
-   { prompt: `Does every digit have an inverse? Enter 1 for yes, 0 for no.`, answer: [f], explanation: prime ? `Yes: for each digit x, the products x × 1 to x × ${n(m - 1)} are all different and never 0, so one of them is 1.` : `No: every product ${n(d)} × x leaves a multiple of ${n(d)}, never 1, so ${n(d)} has no inverse.` },
-   { prompt: `Is it a group? It must be closed, associative, have an identity and give every digit an inverse. Enter 1 for yes, 0 for no.`, answer: [f], explanation: prime ? `Yes: all four rules hold.` : `No: it fails closure and inverses.` }
+   { prompt: `Is every scramble of two digits again a digit? Enter 1 for yes, 0 for no.`, answer: [c], explanation: z ? `Yes: every remainder on division by ${n(m)} lies from 0 to ${n(m - 1)}, and all of those are digits here.` : prime ? `Yes: ${n(m)} has no factors to multiply to a whole number of turns, so no scramble gives 0.` : `No: ${n(d)} × ${n(q)} = ${n(m)} is exactly one full turn, so scrambling ${n(d)} with ${n(q)} gives 0, which is not a digit.` },
+   { prompt: `Does every digit have an inverse? Enter 1 for yes, 0 for no.`, answer: [f], explanation: z ? `No: 0 × x = 0 for every digit x, never 1, so 0 has no inverse.` : prime ? `Yes: for each digit x, the products x × 1 to x × ${n(m - 1)} are all different and never 0, so one of them is 1.` : `No: every product ${n(d)} × x leaves a multiple of ${n(d)}, never 1, so ${n(d)} has no inverse.` },
+   { prompt: `Is it a group? It must be closed, associative, have an identity and give every digit an inverse. Enter 1 for yes, 0 for no.`, answer: [f], explanation: f ? `Yes: all four rules hold.` : z ? `No: it is closed, but 0 has no inverse.` : `No: it fails closure and inverses.` }
   ] }; }
 });
 

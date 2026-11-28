@@ -60,6 +60,8 @@ const PART = [1, 1, 2, 3, 5, 7, 11, 15, 22];
 const abel34 = N => { const f = primesOf(N); let top = f[0]; for (const pe of f) if (pe[1] > top[1]) top = pe;
  return { f, top, sub: Math.pow(top[0], top[1]), ways: PART[top[1]], total: f.reduce((s, [, e]) => s * PART[e], 1) }; };
 const ABEL = []; for (let N = 12; N <= 500; N++) { const f = primesOf(N); if (f.length >= 2 && f.some(([, e]) => e >= 2) && N !== 72) ABEL.push(N); }
+/* The orders in ABEL with two or more primes raised to a power of 2 or more: half the q34 draws use them, so that the two answers differ. */
+const ABEL2 = ABEL.filter(N => primesOf(N).filter(([, e]) => e >= 2).length >= 2);
 /* q40: the prime powers p^k (k >= 2) below 2500, without GF(2³) (the worked example). */
 const GF = []; for (const p of [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]) for (let k = 2; Math.pow(p, k) < 2500; k++) if (!(p === 2 && k === 3)) GF.push({ p, k });
 /* q38: Euclid's algorithm with the steps written out, and whole x, y with ax + by = gcd. */
@@ -95,7 +97,7 @@ Object.assign(window.MISSION_GEN, {
    hints: ['Write the n symbols in any of the n! orders into the brackets of the pattern. Each k-cycle can be started at any of its k symbols, and cycles of the same length can be listed in any order, so divide n! by kᵐ × m! for each length k that appears m times (fixed symbols count as cycles of length 1).', 'The order of a permutation is the lcm of its cycle lengths, and every permutation in the class has the same cycle lengths.'],
    solution: `There are ${n(m)}! = ${n(c.N)} ways to write the tiles into the pattern. Each permutation comes up once for every way of writing it: for the cycles of length ${list(c.factors.map(f => n(f.k)))} that is ${list(c.factors.map(f => f.text))}, so ${n(c.den)} ways in all. So the class has ${n(c.N)} ÷ ${n(c.den)} = ${n(c.size)} permutations. Each has order ${c.ordText}.`,
    guidance: [
-    { prompt: `How many ways are there to write the ${n(m)} tiles in a row: what is ${n(m)}!?`, answer: [c.N], explanation: `${n(m)}! = ${Array.from({ length: m }, (_, i) => n(i + 1)).join(' × ')} = ${n(c.N)}.` },
+    { prompt: `How many ways are there to write the ${n(m)} tiles in a row: what is ${n(m)}!${c.N >= 1000 ? ' (type it without commas)' : ''}?`, answer: [c.N], explanation: `${n(m)}! = ${Array.from({ length: m }, (_, i) => n(i + 1)).join(' × ')} = ${n(c.N)}.` },
     { prompt: `Each permutation of this type is written ${n(c.den)} different ways. How many permutations are in the class?`, answer: [c.size], explanation: `${n(c.N)} ÷ ${n(c.den)} = ${n(c.size)}. The ${n(c.den)} comes from ${list(c.factors.map(f => f.text))}, multiplied together.` },
     { prompt: `What is the order of a permutation made of ${c.desc}?`, answer: [c.order], explanation: `The order is the lcm of the cycle lengths: ${c.ordText}.` }
    ] }; }
@@ -118,7 +120,7 @@ Object.assign(window.MISSION_GEN, {
  /* An order N ≤ 500 with at least two primes and one exponent of 2 or more; never 72, the worked example. */
  q34: {
   canonical: { N: 144 },
-  draw: R => ({ N: R.pick(ABEL) }),
+  draw: R => ({ N: R.pick(R.bool() ? ABEL2 : ABEL) }),
   build: ({ N }) => { const a = abel34(N), [tp, te] = a.top, fac = a.f.map(([p, e]) => pw(p, e)).join(' × ');
    const ways = a.f.map(([p, e]) => `${pw(p, e)}: ${e === 1 ? 'the exponent 1 can only be 1, so 1 way' : `${n(e)} can be written as ${list(parts(e).map(t => t.map(n).join(' + ')))}, so ${n(PART[e])} ways`}`); return {
    prompt: `The Tile Studio is listing every abelian group a dome pattern could follow, counting groups that are isomorphic (copies of each other) as one. Take the order ${n(N)} = ${fac}. Enter the number of abelian groups of order ${n(a.sub)} (the part ${pw(tp, te)}), then the number of abelian groups of order ${n(N)}.`,
@@ -126,7 +128,7 @@ Object.assign(window.MISSION_GEN, {
    hints: ['By the fundamental theorem, an abelian group of order pᵉ is a product of cyclic groups whose orders are powers of p, with exponents adding up to e. Count the partitions of e.', 'Each prime is split on its own, so multiply the numbers of partitions of the exponents.'],
    solution: `Each abelian group of order ${n(N)} is a product of cyclic groups of prime-power order, one splitting of the exponent for each prime. ${ways.join('; ')}. So there are ${n(a.ways)} abelian groups of order ${n(a.sub)}, and ${a.f.map(([, e]) => n(PART[e])).join(' × ')} = ${n(a.total)} abelian groups of order ${n(N)}.`,
    guidance: [
-    { prompt: `In how many ways can the exponent ${n(te)} be written as a sum of positive whole numbers, ignoring order?`, answer: [a.ways], explanation: `${n(te)} = ${parts(te).map(t => t.map(n).join(' + ')).join(' = ')}: ${n(a.ways)} partitions, so ${n(a.ways)} abelian groups of order ${n(a.sub)}.` },
+    { prompt: `In how many ways can the exponent ${n(te)} be written as a sum of positive whole numbers, ignoring order?`, answer: [a.ways], explanation: `${n(te)} can be written as ${list(parts(te).map(t => t.map(n).join(' + ')))}: ${n(a.ways)} partitions, so ${n(a.ways)} abelian groups of order ${n(a.sub)}.` },
     { prompt: `Multiply the numbers of partitions of the exponents of ${fac}. How many abelian groups of order ${n(N)} are there?`, answer: [a.total], explanation: `The exponents ${list(a.f.map(([, e]) => n(e)))} have ${list(a.f.map(([, e]) => n(PART[e])))} partitions, and ${a.f.map(([, e]) => n(PART[e])).join(' × ')} = ${n(a.total)}.` }
    ] }; }
  },
@@ -209,15 +211,15 @@ Object.assign(window.MISSION_GEN, {
   canonical: { p: 3, k: 4 },
   draw: R => R.pick(GF),
   build: ({ p, k }) => { const q = Math.pow(p, k), m = q - 1, ph = phi(m), f = primesOf(m), many = q >= 1000;
-   const fac = f.map(([r, e]) => pw(r, e)).join(' × '), terms = f.map(([r]) => `(1 − 1 ÷ ${n(r)})`).join(' × '); return {
+   const fac = f.length === 1 && f[0][1] === 1 ? `${n(m)} is prime` : `${n(m)} = ${f.map(([r, e]) => pw(r, e)).join(' × ')}`, terms = f.map(([r]) => `(1 − 1 ÷ ${n(r)})`).join(' × '); return {
    prompt: `The vault’s strongest cipher runs in the finite field GF(${pw(p, k)}). Enter how many elements the field has, then the order of its multiplication group (the non-zero elements under ×), then how many generators that cyclic group has${many ? '. Type the numbers without commas' : ''}.`,
    answer: [q, m, ph],
    hints: ['GF(pᵏ) has exactly pᵏ elements, and every element except 0 has an inverse under ×, so the non-zero ones form a group.', 'That group is cyclic. A cyclic group of order m has one generator for each number from 1 to m that is coprime to m: m × (1 − 1 ÷ r) for each prime r dividing m.'],
-   solution: `GF(${pw(p, k)}) has ${pw(p, k)} = ${n(q)} elements. Leaving out 0, the multiplication group has order ${n(q)} − 1 = ${n(m)}, and it is cyclic. ${n(m)} = ${fac}, so ${n(m)} × ${terms} = ${n(ph)} of the numbers from 1 to ${n(m)} are coprime to ${n(m)}, and the group has ${n(ph)} generators.`,
+   solution: `GF(${pw(p, k)}) has ${pw(p, k)} = ${n(q)} elements. Leaving out 0, the multiplication group has order ${n(q)} − 1 = ${n(m)}, and it is cyclic. ${fac}, so ${n(m)} × ${terms} = ${n(ph)} of the numbers from 1 to ${n(m)} are coprime to ${n(m)}, and the group has ${n(ph)} generators.`,
    guidance: [
     { prompt: `How many elements does GF(${pw(p, k)}) have?`, answer: [q], explanation: `${pw(p, k)} = ${n(q)}.` },
     { prompt: `Leave out 0. What is the order of the multiplication group?`, answer: [m], explanation: `${n(q)} − 1 = ${n(m)}: every non-zero element has an inverse, so they form a group.` },
-    { prompt: `${n(m)} = ${fac}. How many numbers from 1 to ${n(m)} are coprime to ${n(m)}: how many generators does the cyclic group have?`, answer: [ph], explanation: `${n(m)} × ${terms} = ${n(ph)}. Each such number a makes gᵃ a generator, where g is any one generator.` }
+    { prompt: `${fac}. How many numbers from 1 to ${n(m)} are coprime to ${n(m)}: how many generators does the cyclic group have?`, answer: [ph], explanation: `${n(m)} × ${terms} = ${n(ph)}. Each such number a makes gᵃ a generator, where g is any one generator.` }
    ] }; }
  }
 });

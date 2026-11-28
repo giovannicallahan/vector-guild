@@ -199,7 +199,7 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: 'In how many ways can the exponent 4 be written as a sum of positive whole numbers, ignoring order?', answer: [5], labels: ['partitions'], explanation: '4 = 4 = 3 + 1 = 2 + 2 = 2 + 1 + 1 = 1 + 1 + 1 + 1: 5 partitions, so 5 abelian groups of order 16.' },
+   { prompt: 'In how many ways can the exponent 4 be written as a sum of positive whole numbers, ignoring order?', answer: [5], labels: ['partitions'], explanation: '4 can be written as 4, 3 + 1, 2 + 2, 2 + 1 + 1 and 1 + 1 + 1 + 1: 5 partitions, so 5 abelian groups of order 16.' },
    { prompt: 'Multiply the numbers of partitions of the exponents of 2⁴ × 3². How many abelian groups of order 144 are there?', answer: [10], labels: ['abelian groups'], explanation: 'The exponents 4 and 2 have 5 and 2 partitions, and 5 × 2 = 10.' }
   ]
  },

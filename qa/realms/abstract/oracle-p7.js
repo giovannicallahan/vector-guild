@@ -118,12 +118,13 @@ const features = (shape, what) => {
 };
 const pointKey = v => v.map(x => Math.round(x * 1000) / 1000 + 0).join(',');
 Object.assign(window.ORACLE, {
-  /* q31b: m labelled slots, every reordering listed; j is the bolt number, w only picks the wording (bolts/lamps). */
+  /* q31b: m labelled slots, every reordering listed; j and k are the item numbers, w only picks the wording (bolts/lamps). Count the
+     reorderings fixing j, then those fixing both j and k. */
   q31b: p => {
-    const perms = allPerms(p.m), j = p.j - 1, reach = new Set();
-    let stab = 0;
-    for (const q of perms) { reach.add(q[j]); if (q[j] === j) stab++; }
-    return [reach.size, stab];
+    const perms = allPerms(p.m), j = p.j - 1, k = p.k - 1;
+    let stab = 0, both = 0;
+    for (const q of perms) { if (q[j] === j) { stab++; if (q[k] === k) both++; } }
+    return [stab, both];
   },
   /* q31c: kind is a solid letter group + C/E/F (corners, edges, faces): list the 24 (or 12) turns, send the marked
      feature through all of them, then count the turns that land it in the first k places of its orbit. */

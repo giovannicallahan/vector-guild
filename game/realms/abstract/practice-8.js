@@ -79,7 +79,7 @@ mk({ id: 'q36c', parent: 'q36', kind: 'applied', title: 'Two linked dials',
   hints: ['Find x as in any field: take away the constant (mod p), then multiply by the inverse of the coefficient.', 'Once x is known, dial B is just a product, reduced mod p.'],
   solution: `Take away ${n(b)}: ${n(a)}x mod ${n(p)} = (${n(c)} − ${n(b)}) mod ${n(p)} = ${n(e)}. The inverse of ${n(a)} is ${n(ia)}, since ${n(a)} × ${n(ia)} = ${n(a * ia)}, which is 1 mod ${n(p)}. So x = ${n(e)} × ${n(ia)} mod ${n(p)} = ${n(e * ia)} mod ${n(p)} = ${n(x)}. Then y = ${n(d)} × ${n(x)} mod ${n(p)} = ${n(d * x)} mod ${n(p)} = ${n(y)}.`,
   guidance: [
-   { prompt: `Which y from 1 to ${n(p - 1)} has ${n(a)} × y mod ${n(p)} = 1?`, answer: [ia], explanation: `${n(a)} × ${n(ia)} = ${n(a * ia)}, which is 1 more than a multiple of ${n(p)}, so the inverse of ${n(a)} is ${n(ia)}.` },
+   { prompt: `Which number c from 1 to ${n(p - 1)} has ${n(a)} × c mod ${n(p)} = 1?`, answer: [ia], explanation: `${n(a)} × ${n(ia)} = ${n(a * ia)}, which is 1 more than a multiple of ${n(p)}, so the inverse of ${n(a)} is ${n(ia)}.` },
    { prompt: `Taking ${n(b)} away leaves ${n(a)}x mod ${n(p)} = ${n(e)}. Multiply ${n(e)} by the inverse ${n(ia)} and reduce mod ${n(p)}. What is x?`, answer: [x], explanation: `${n(e)} × ${n(ia)} = ${n(e * ia)}, which is ${n(x)} mod ${n(p)}.` },
    { prompt: `Dial B reads (${n(d)} × x) mod ${n(p)}. What does it read?`, answer: [y], explanation: `${n(d)} × ${n(x)} = ${n(d * x)}, which is ${n(y)} mod ${n(p)}.` }
   ] }; }
@@ -254,9 +254,9 @@ mk({ id: 'q39c', parent: 'q39', kind: 'applied', title: 'Two candidate ciphers',
 /* q39d (uses q37): a quadratic over a bigger field: the remainder on dividing by x − t, irreducibility, the count. */
 mk({ id: 'q39d', parent: 'q39', kind: 'challenge', uses: 'q37', title: 'Vetting a long cipher',
  brief: 'A longer cipher over a bigger dial must be probed and tested before the vault will accept it.',
- labels: ['remainder', 'irreducible (1 or 0)', 'irreducible quadratics'], tolerance: 0.01, gl: [['remainder'], ['irreducible (1 or 0)'], ['irreducible quadratics']] }, {
+ labels: ['remainder', 'irreducible (1 or 0)', 'irreducible quadratics'], tolerance: 0.01, gl: [['remainder'], ['irreducible (1 or 0)'], ['factorable quadratics'], ['irreducible quadratics']] }, {
  canonical: { p: 11, b: 3, c: 7, t: 4 },
- draw: R => { const want = R.bool(); for (let i = 0; i < 1000; i++) { const p = R.pick([11, 13]), b = R.int(0, p - 1), c = R.int(1, p - 1); if ((rootsOf(valsOf([b, c], p)).length === 0) === want) return { p, b, c, t: R.int(1, p - 1) }; } return { p: 11, b: 3, c: 7, t: 4 }; },
+ draw: R => { const want = R.bool(); for (let i = 0; i < 1000; i++) { const p = R.pick([11, 13, 17, 19]), b = R.int(0, p - 1), c = R.int(1, p - 1); if ((rootsOf(valsOf([b, c], p)).length === 0) === want) return { p, b, c, t: R.int(1, p - 1) }; } return { p: 11, b: 3, c: 7, t: 4 }; },
  build: ({ p, b, c, t }) => { const vals = valsOf([b, c], p), roots = rootsOf(vals), irr = roots.length ? 0 : 1, ft = t * t + b * t + c, rem = mod(ft, p), red = p * (p + 1) / 2, count = p * p - red; return {
   prompt: `A long cipher for the vault is f(x) = ${poly([b, c])} over ${Z(p)}, with arithmetic mod ${n(p)}. The crew divides it by x − ${n(t)}, then tests whether it is irreducible, then counts the irreducible monic quadratics x² + Bx + C (B and C each from 0 to ${n(p - 1)}) the vault could have used instead. Enter the remainder on dividing f(x) by x − ${n(t)}, then 1 if f is irreducible over ${Z(p)} and 0 if it is not, then how many such quadratics are irreducible.`,
   answer: [rem, irr, count],
@@ -265,21 +265,23 @@ mk({ id: 'q39d', parent: 'q39', kind: 'challenge', uses: 'q37', title: 'Vetting 
   guidance: [
    { prompt: `Work out f(${n(t)}) and reduce it mod ${n(p)}. What is the remainder on dividing by x − ${n(t)}?`, answer: [rem], explanation: `f(${n(t)}) = ${n(ft)}, and ${n(ft)} mod ${n(p)} = ${n(rem)}.` },
    { prompt: `The values of f(x) mod ${n(p)} for x = 0 to ${n(p - 1)} are ${list(vals.map(n))}. Is f irreducible? Enter 1 for yes, 0 for no.`, answer: [irr], explanation: irr ? 'No value is 0, so there is no root and no linear factor: irreducible.' : `f(${n(roots[0])}) = 0, so x − ${n(roots[0])} divides f: not irreducible.` },
-   { prompt: `Of the ${n(p * p)} monic quadratics, ${n(red)} can be factored. How many are irreducible?`, answer: [count], explanation: `${n(p * p)} − ${n(red)} = ${n(count)}.` }
+   { prompt: `How many monic quadratics (x − r)(x − s) can be made with r and s from 0 to ${n(p - 1)}, counting (x − r)(x − s) and (x − s)(x − r) once?`, answer: [red], explanation: `${n(p)} have r = s, and ${n(p)} × ${n(p - 1)} ÷ 2 = ${n(p * (p - 1) / 2)} have r and s different: ${n(red)} in all.` },
+   { prompt: `There are ${n(p)}² = ${n(p * p)} monic quadratics x² + Bx + C. How many of them are irreducible?`, answer: [count], explanation: `${n(p * p)} − ${n(red)} = ${n(count)}.` }
   ] }; }
 });
 
 /* ---- q40 Finite fields; realm review and bridge to Number theory [22.1] ---- */
 
-/* q40b: keypad codes; generators and non-generators. q below 1000, never GF(2³), the worked example. */
-const GF1000 = GF.filter(({ p, k }) => Math.pow(p, k) < 1000);
+/* q40b: keypad codes; generators and non-generators. Any field of GF (below 2500, never GF(2³), the worked example), and never the
+   canonical GF(5³). */
+const GF40B = GF.filter(({ p, k }) => !(p === 5 && k === 3));
 mk({ id: 'q40b', parent: 'q40', kind: 'setting', title: 'The keypad codes',
  brief: 'The vault keypad’s codes are the elements of a finite field, and the crew wants to know how many of them can stand in for all the rest.',
  labels: ['codes', 'generators', 'not generators'], tolerance: 0.01, gl: [['codes'], ['generators'], ['not generators']] }, {
  canonical: { p: 5, k: 3 },
- draw: R => R.pick(GF1000),
+ draw: R => R.pick(GF40B),
  build: ({ p, k }) => { const q = Math.pow(p, k), m = q - 1, ph = phi(m), non = m - ph, f = primesOf(m), fac = f.map(([r, e]) => e === 1 ? n(r) : pw(r, e)).join(' × '), terms = f.map(([r]) => `(1 − 1 ÷ ${n(r)})`).join(' × '), factxt = f.length === 1 && f[0][1] === 1 ? `${n(m)} is prime` : `${n(m)} = ${fac}`; return {
-  prompt: `The codes on a Cipher Vault keypad are the elements of the finite field GF(${pw(p, k)}). Its non-zero codes form a cyclic group under multiplication, and a generator is a non-zero code whose powers give every non-zero code. Enter how many codes the field has, how many of the non-zero codes are generators, then how many non-zero codes are not.`,
+  prompt: `The codes on a Cipher Vault keypad are the elements of the finite field GF(${pw(p, k)}). Its non-zero codes form a cyclic group under multiplication, and a generator is a non-zero code whose powers give every non-zero code. Enter how many codes the field has, how many of the non-zero codes are generators, then how many non-zero codes are not${q >= 1000 ? '. Type the numbers without commas' : ''}.`,
   answer: [q, ph, non],
   hints: ['GF(pᵏ) has exactly pᵏ elements, and the non-zero ones are all but one of them.', 'A cyclic group of order m has one generator for each number from 1 to m that is coprime to m: m × (1 − 1 ÷ r) for each prime r dividing m.'],
   solution: `GF(${pw(p, k)}) has ${pw(p, k)} = ${n(q)} codes. Leaving out 0 there are ${n(q)} − 1 = ${n(m)} non-zero codes, and they form a cyclic group. ${factxt}, so ${n(m)} × ${terms} = ${n(ph)} of the numbers from 1 to ${n(m)} are coprime to ${n(m)}, and the group has ${n(ph)} generators. The other ${n(m)} − ${n(ph)} = ${n(non)} non-zero codes are not generators.`,
@@ -295,7 +297,7 @@ mk({ id: 'q40c', parent: 'q40', kind: 'applied', title: 'Sizing the door field',
  brief: 'A new door needs a fixed number of different non-zero codes, and the crew must pick the smallest field that supplies them.',
  labels: ['k', 'group order', 'generators'], tolerance: 0.01, gl: [['k'], ['group order'], ['generators']] }, {
  canonical: { p: 3, k: 4, N: 50 },
- draw: R => { const { p, k } = R.pick(GF.filter(({ p, k }) => p <= 7)), lo = Math.pow(p, k - 1), hi = Math.pow(p, k) - 1; return { p, k, N: lo + R.int(0, hi - lo) }; },
+ draw: R => { const { p, k } = R.pick(GF.filter(({ p, k }) => p <= 7 && k >= 3)), lo = Math.pow(p, k - 1), hi = Math.pow(p, k) - 1; return { p, k, N: lo + R.int(0, hi - lo) }; },
  build: ({ p, k, N }) => { const q = Math.pow(p, k), m = q - 1, ph = phi(m), f = primesOf(m), fac = f.map(([r, e]) => e === 1 ? n(r) : pw(r, e)).join(' × '), terms = f.map(([r]) => `(1 − 1 ÷ ${n(r)})`).join(' × '), factxt = f.length === 1 && f[0][1] === 1 ? `${n(m)} is prime` : `${n(m)} = ${fac}`, many = m >= 1000; return {
   prompt: `A new door in the Cipher Vault needs at least ${n(N)} different non-zero codes. The crew builds codes as the elements of the field GF(${n(p)}ᵏ), and k is a whole number from 2 up. Enter the smallest k that gives at least ${n(N)} non-zero codes, then the order of the multiplication group of that field (its non-zero elements), then how many generators that cyclic group has${many ? '. Type the numbers without commas' : ''}.`,
   answer: [k, m, ph],
@@ -315,7 +317,7 @@ mk({ id: 'q40d', parent: 'q40', kind: 'challenge', uses: 'q07', title: 'A key’
  canonical: { p: 5, k: 3, s: 30 },
  draw: R => { for (let i = 0; i < 1000; i++) { const { p, k } = R.pick(GF), m = Math.pow(p, k) - 1, s = R.int(2, m - 1); if (gcd(s, m) >= 2) return { p, k, s }; } return { p: 5, k: 3, s: 30 }; },
  build: ({ p, k, s }) => { const q = Math.pow(p, k), m = q - 1, g = gcd(s, m), d = m / g, cnt = phi(d), many = m >= 1000, cop = []; for (let i = 1; i <= d && d <= 40; i++) if (gcd(i, d) === 1) cop.push(i); return {
-  prompt: `A vault key in the field GF(${pw(p, k)}) is the power g${sup(s)} of a generator g of the field’s multiplication group, the cyclic group of its non-zero elements. In a cyclic group of order m, the power gˢ has order m ÷ gcd(s, m), and the elements of any one order d are the generators of the subgroup of size d, so there are as many of them as that subgroup has generators. Enter the order of the multiplication group, the order of g${sup(s)}, then how many elements of the group have exactly that order${many ? ' (type the numbers without commas)' : ''}.`,
+  prompt: `A vault key in the field GF(${pw(p, k)}) is the power g${sup(s)} of a generator g of the field’s multiplication group, the cyclic group of its non-zero elements. In a cyclic group of order m, the power gˢ has order m ÷ gcd(s, m), and the elements of any one order d are the generators of the one subgroup (a group inside the group) of size d, so there are as many of them as that subgroup has generators. Enter the order of the multiplication group, the order of g${sup(s)}, then how many elements of the group have exactly that order${many ? ' (type the numbers without commas)' : ''}.`,
   answer: [m, d, cnt],
   hints: ['The multiplication group has pᵏ − 1 elements, all the elements but 0.', 'The order of gˢ is m ÷ gcd(s, m). The number of elements of that order is the number of generators of a cyclic group of that size: the numbers from 1 up to it that are coprime to it.'],
   solution: `GF(${pw(p, k)}) has ${n(q)} elements, so the multiplication group has order ${n(q)} − 1 = ${n(m)}. gcd(${n(s)}, ${n(m)}) = ${n(g)}, so g${sup(s)} has order ${n(m)} ÷ ${n(g)} = ${n(d)}. The elements of order ${n(d)} are the generators of the subgroup of size ${n(d)}, so there are as many as the numbers from 1 to ${n(d)} that are coprime to ${n(d)}: ${cop.length ? `${list(cop.map(n))}, which is ${n(cnt)}` : n(cnt)}.`,

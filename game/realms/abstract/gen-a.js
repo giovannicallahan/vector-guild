@@ -13,6 +13,8 @@ const invOf = (a, m) => { for (let b = 1; b < m; b++) if ((a * b) % m === 1) ret
 const powers = (a, m) => { const out = [a % m]; while (out[out.length - 1] !== 1 && out.length < 100) out.push((out[out.length - 1] * a) % m); return out; };
 const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
 const sup = k => String(k).split('').map(d => SUP[Number(d)]).join('');
+const SUB = '₀₁₂₃₄₅₆₇₈₉';
+const sub = k => String(k).split('').map(d => SUB[Number(d)]).join('');
 /* "64 = 3 × 17 + 13", or "13 already lies from 0 to 16" when no division is needed. */
 const divText = (x, m) => x < m ? `${n(x)} already lies from 0 to ${n(m - 1)}` : `${n(x)} = ${n(Math.floor(x / m))} × ${n(m)} + ${n(x % m)}`;
 /* Bring a negative number into 0 … m − 1 by adding m: "−18 + 17 = −1" style, written as one sum. */
@@ -89,31 +91,37 @@ Object.assign(window.MISSION_GEN, {
    hints: ['For e ∗ x to come back to x, the amount e adds, together with the fixed extra amount, must make a whole number of full turns.', 'For the inverse of a, the setting b must make (a + b + the extra amount) leave the remainder e. Subtract, then bring the result into the range of the dial.'],
    solution: `e ∗ x = (e + x + ${n(k)}) mod ${n(m)} equals x for every x only when e + ${n(k)} is a whole number of turns of ${n(m)}. With e from 0 to ${n(m - 1)} that means e + ${n(k)} = ${n(m)}, so e = ${n(e)}. Check: ${n(e)} ∗ 1 = (${n(e)} + 1 + ${n(k)}) mod ${n(m)} = ${n(m + 1)} mod ${n(m)} = 1. For the inverse, ${n(a)} ∗ b = (${n(a)} + b + ${n(k)}) mod ${n(m)} must be ${n(e)}, so b = (${n(e)} − ${n(s)}) mod ${n(m)} = ${n(raw)} mod ${n(m)} = ${n(b)}. Check: ${n(a)} ∗ ${n(b)} = (${n(a)} + ${n(b)} + ${n(k)}) mod ${n(m)} = ${n(tot)} mod ${n(m)} = ${n(e)}.`,
    guidance: [
-    { prompt: `e ∗ x = x for every x means e + ${n(k)} is a whole number of turns of ${n(m)}. Which multiple of ${n(m)} lies from ${n(k)} to ${n(m - 1 + k)}?`, answer: [m], explanation: `The only multiple of ${n(m)} in that range is ${n(m)} itself, so e + ${n(k)} = ${n(m)}.` },
-    { prompt: `So what is the identity element e?`, answer: [e], explanation: `e = ${n(m)} − ${n(k)} = ${n(e)}. Check: ${n(e)} ∗ 1 = ${n(m + 1)} mod ${n(m)} = 1.` },
+    { prompt: `e ∗ x = x for every x means e + ${n(k)} is a whole number of turns of ${n(m)}. Which setting e from 0 to ${n(m - 1)} does this?`, answer: [e], explanation: `e + ${n(k)} lies from ${n(k)} to ${n(m - 1 + k)}, and the only multiple of ${n(m)} in that range is ${n(m)} itself, so e = ${n(m)} − ${n(k)} = ${n(e)}. Check: ${n(e)} ∗ 1 = ${n(m + 1)} mod ${n(m)} = 1.` },
+    { prompt: `For the inverse b of ${n(a)}, add the two fixed numbers first. What is ${n(a)} + ${n(k)}?`, answer: [s], explanation: `${n(a)} + ${n(k)} = ${n(s)}, so ${n(a)} ∗ b = (${n(s)} + b) mod ${n(m)}.` },
     { prompt: `The inverse b of ${n(a)} needs (${n(a)} + b + ${n(k)}) mod ${n(m)} = ${n(e)}. What is b = (${n(e)} − ${n(s)}) mod ${n(m)}?`, answer: [b], explanation: `${n(e)} − ${n(s)} = ${n(raw)}, and ${n(raw)} mod ${n(m)} = ${n(b)}. Check: ${n(a)} ∗ ${n(b)} = ${n(tot)} mod ${n(m)} = ${n(e)}.` }
    ] }; }
  },
  /* {1, …, n − 1} under × mod n, n from 4 to 20: closed and with inverses exactly when n is prime; 1 is always the
     identity. The warm-up product uses a, b from 2 to n − 1. Not the worked example (n = 6). */
  q05: {
-  canonical: { m: 15, a: 4, b: 7 },
-  draw: R => { for (let i = 0; i < 1000; i++) { const m = R.bool() ? R.pick(PRIMES) : R.pick(COMPOSITES), p = { m, a: R.int(2, m - 1), b: R.int(2, m - 1) }; if (m !== 6 && p.a !== p.b) return p; } return { m: 15, a: 4, b: 7 }; },
-  build: ({ m, a, b }) => { const pr = a * b, r = pr % m, prime = isPrime(m); let d = 2; while (m % d) d++; const q = m / d, big = (m - 1) * (m - 1);
-   const closed = prime ? 1 : 0, invs = prime ? 1 : 0; return {
-   prompt: `The Lock Workshop tests a dial whose settings are the numbers 1 to ${n(m - 1)}, combined by multiplying mod ${n(m)}; the setting 0 is not part of it. First enter (${n(a)} × ${n(b)}) mod ${n(m)}. Then check the group rules for this set and this operation: enter 1 if the set is closed, 0 if not; 1 if it has an identity element, 0 if not; 1 if every element has an inverse, 0 if not.`,
-   answer: [r, closed, 1, invs],
-   hints: ['Closed means every product lands back in the set. Look for two settings whose product is a whole number of turns of the dial: its remainder is 0, which is not in the set.', 'Multiplying by 1 changes nothing. For inverses: if the dial size is a product d × q with d at least 2, then every product d × x minus whole turns is still a multiple of d, so it can never leave the remainder 1.'],
-   solution: `${n(a)} × ${n(b)} = ${n(pr)}, and ${divText(pr, m)}, so the product is ${n(r)}. ` + (prime
-    ? `${n(m)} is prime, so a product of two numbers from 1 to ${n(m - 1)} is never a multiple of ${n(m)}: the remainder is never 0, and the set is closed (1). 1 × x = x for every x, so 1 is the identity element (1). For any setting a, the ${n(m - 1)} products a × 1, a × 2, …, a × ${n(m - 1)} mod ${n(m)} are all different and none is 0, so one of them is 1: every element has an inverse (1). For example ${n(m - 1)} × ${n(m - 1)} = ${n(big)}, which leaves 1, so ${n(m - 1)} is its own inverse.`
-    : `${n(m)} = ${n(d)} × ${n(q)}, and both ${n(d)} and ${n(q)} are settings, but (${n(d)} × ${n(q)}) mod ${n(m)} = 0, which is not in the set: it is not closed (0). 1 × x = x for every x, so 1 is the identity element (1). Every product ${n(d)} × x is a multiple of ${n(d)}, and so is ${n(m)}, so its remainder is a multiple of ${n(d)} and never 1: ${n(d)} has no inverse (0).`),
+  canonical: { m: 15, a: 4, b: 7, z: 0 },
+  /* z = 1 (about a third of the draws) puts the setting 0 in the set: then it is closed but 0 has no inverse, so the
+     closed and inverses answers do not always agree. */
+  draw: R => { for (let i = 0; i < 1000; i++) { const m = R.bool() ? R.pick(PRIMES) : R.pick(COMPOSITES), p = { m, a: R.int(2, m - 1), b: R.int(2, m - 1), z: R.int(0, 2) === 0 ? 1 : 0 }; if (m !== 6 && p.a !== p.b) return p; } return { m: 15, a: 4, b: 7, z: 0 }; },
+  build: ({ m, a, b, z }) => { const pr = a * b, r = pr % m, prime = isPrime(m); let d = 2; while (m % d) d++; const q = m / d, big = (m - 1) * (m - 1);
+   const closed = z || prime ? 1 : 0, invs = !z && prime ? 1 : 0; return {
+   prompt: `The Lock Workshop tests a dial whose settings are the numbers ${z ? `0 to ${n(m - 1)}` : `1 to ${n(m - 1)}`}, combined by multiplying mod ${n(m)}; ${z ? 'the setting 0 is part of it' : 'the setting 0 is not part of it'}. First enter (${n(a)} × ${n(b)}) mod ${n(m)}. The identity element is 1, since 1 × x = x for every setting x. Then check two more group rules for this set and this operation: enter 1 if the set is closed, 0 if not; then 1 if every element has an inverse, 0 if not.`,
+   answer: [r, closed, invs],
+   hints: ['Closed means every product lands back in the set. When 0 is not a setting, look for two settings whose product is a whole number of turns of the dial: its remainder is 0, which is not in the set.', 'An inverse of a is a setting b with a × b leaving 1. 0 times anything is 0, so 0 never has one. If the dial size is a product d × q with d at least 2, every product d × x minus whole turns is still a multiple of d, so it can never leave the remainder 1.'],
+   solution: `${n(a)} × ${n(b)} = ${n(pr)}, and ${divText(pr, m)}, so the product is ${n(r)}. ` + (z
+    ? `Every remainder on division by ${n(m)} lies from 0 to ${n(m - 1)}, and all of those are settings, so the set is closed (1). 1 is the identity element. But 0 × x = 0 for every x, never 1, so 0 has no inverse (0).`
+    : prime
+    ? `${n(m)} is prime, so a product of two numbers from 1 to ${n(m - 1)} is never a multiple of ${n(m)}: the remainder is never 0, and the set is closed (1). 1 is the identity element. For any setting a, the ${n(m - 1)} products a × 1, a × 2, …, a × ${n(m - 1)} mod ${n(m)} are all different and none is 0, so one of them is 1: every element has an inverse (1). For example ${n(m - 1)} × ${n(m - 1)} = ${n(big)}, which leaves 1, so ${n(m - 1)} is its own inverse.`
+    : `${n(m)} = ${n(d)} × ${n(q)}, and both ${n(d)} and ${n(q)} are settings, but (${n(d)} × ${n(q)}) mod ${n(m)} = 0, which is not in the set: it is not closed (0). 1 is the identity element. Every product ${n(d)} × x is a multiple of ${n(d)}, and so is ${n(m)}, so its remainder is a multiple of ${n(d)} and never 1: ${n(d)} has no inverse (0).`),
    guidance: [
     { prompt: `What is (${n(a)} × ${n(b)}) mod ${n(m)}?`, answer: [r], explanation: `${n(a)} × ${n(b)} = ${n(pr)}, and ${divText(pr, m)}.` },
-    prime
+    z
+     ? { prompt: `Try the setting 0 with the largest setting. What is (0 × ${n(m - 1)}) mod ${n(m)}?`, answer: [0], explanation: `0 × ${n(m - 1)} = 0. The product is a setting, since 0 is in the set, but 0 times any setting is 0, never 1.` }
+     : prime
      ? { prompt: `Try the largest setting with itself. What is (${n(m - 1)} × ${n(m - 1)}) mod ${n(m)}?`, answer: [1], explanation: `${n(m - 1)} × ${n(m - 1)} = ${n(big)}, and ${divText(big, m)}. The product lands back in the set, and since ${n(m)} is prime no product of two settings is a multiple of it, so none lands on 0.` }
      : { prompt: `${n(m)} = ${n(d)} × ${n(q)}. What is (${n(d)} × ${n(q)}) mod ${n(m)}?`, answer: [0], explanation: `${n(d)} × ${n(q)} = ${n(m)}, exactly one full turn, so the remainder is 0, and 0 is not one of the settings.` },
-    { prompt: `So is the set closed? Enter 1 for yes, 0 for no.`, answer: [closed], explanation: prime ? `Yes: every product of two settings leaves a remainder from 1 to ${n(m - 1)}.` : `No: ${n(d)} and ${n(q)} are in the set but their product is not.` },
-    { prompt: `Does every element have an inverse? Enter 1 for yes, 0 for no.`, answer: [invs], explanation: prime ? `Yes: for each setting a, the products a × 1 to a × ${n(m - 1)} are all different and never 0, so one of them is 1.` : `No: every product ${n(d)} × x leaves a multiple of ${n(d)}, never 1, so ${n(d)} has no inverse.` }
+    { prompt: `So is the set closed? Enter 1 for yes, 0 for no.`, answer: [closed], explanation: z ? `Yes: every product leaves a remainder from 0 to ${n(m - 1)}, and all of those are settings.` : prime ? `Yes: every product of two settings leaves a remainder from 1 to ${n(m - 1)}.` : `No: ${n(d)} and ${n(q)} are in the set but their product is not.` },
+    { prompt: `Does every element have an inverse? Enter 1 for yes, 0 for no.`, answer: [invs], explanation: z ? `No: 0 × x = 0 for every x, never 1, so 0 has no inverse.` : prime ? `Yes: for each setting a, the products a × 1 to a × ${n(m - 1)} are all different and never 0, so one of them is 1.` : `No: every product ${n(d)} × x leaves a multiple of ${n(d)}, never 1, so ${n(d)} has no inverse.` }
    ] }; }
  },
  /* |U(n)| and the inverse of a in U(n), for composite n from 10 to 30. g is the largest number below n that shares
@@ -132,20 +140,20 @@ Object.assign(window.MISSION_GEN, {
     { prompt: `Which element b of U(${n(m)}) gives (${n(a)} × b) mod ${n(m)} = 1?`, answer: [b], explanation: `${n(a)} × ${n(b)} = ${n(pr)}, and ${divText(pr, m)}. So b = ${n(b)}.` }
    ] }; }
  },
- /* Order of a in Z_n (adding): n ÷ gcd(a, n), n from 6 to 40, gcd at least 2 so the beacon comes home early, order
+ /* Order of a in Zₙ (adding): n ÷ gcd(a, n), n from 6 to 40, gcd at least 2 so the beacon comes home early, order
     at least 2. Not the worked example (n = 12, a = 8). */
  q07: {
   canonical: { m: 24, a: 18 },
   draw: R => { for (let i = 0; i < 1000; i++) { const m = R.int(6, 40), a = R.int(2, m - 1), g = gcd(a, m); if (g >= 2 && !(m === 12 && a === 8)) return { m, a }; } return { m: 24, a: 18 }; },
   build: ({ m, a }) => { const g = gcd(a, m), o = m / g, tot = o * a; return {
-   prompt: `A ring of ${n(m)} lamps on the Beacon Tower is numbered 0 to ${n(m - 1)}. A light pulse starts at lamp 0 and jumps ${n(a)} lamps round the ring on every beat, so after k beats it is at (k × ${n(a)}) mod ${n(m)}. In Z_${n(m)} this asks for the order of ${n(a)}. Enter gcd(${n(a)}, ${n(m)}), then the order of ${n(a)}: the smallest number of beats, at least 1, that brings the pulse back to lamp 0.`,
+   prompt: `A ring of ${n(m)} lamps on the Beacon Tower is numbered 0 to ${n(m - 1)}. A light pulse starts at lamp 0 and jumps ${n(a)} lamps round the ring on every beat, so after k beats it is at (k × ${n(a)}) mod ${n(m)}. In Z${sub(m)} this asks for the order of ${n(a)}. Enter gcd(${n(a)}, ${n(m)}), then the order of ${n(a)}: the smallest number of beats, at least 1, that brings the pulse back to lamp 0.`,
    answer: [g, o],
-   hints: ['The greatest common divisor is the largest number that divides both. Euclid\'s algorithm finds it: divide, keep the remainder, and repeat until the remainder is 0.', 'The order of a in Z_n is n ÷ gcd(a, n): after that many jumps the pulse has gone a whole number of times round the ring, and not before.'],
+   hints: ['The greatest common divisor is the largest number that divides both. Euclid\'s algorithm finds it: divide, keep the remainder, and repeat until the remainder is 0.', 'The order of a in Zₙ is n ÷ gcd(a, n): after that many jumps the pulse has gone a whole number of times round the ring, and not before.'],
    solution: `${euclid(m, a)}, so gcd(${n(a)}, ${n(m)}) = ${n(g)}. Write ${n(a)} = ${n(g)} × ${n(a / g)} and ${n(m)} = ${n(g)} × ${n(o)}. After k beats the pulse is home when k × ${n(a)} is a multiple of ${n(m)}, that is when k × ${n(a / g)} is a multiple of ${n(o)}. ${n(a / g)} and ${n(o)} share no factor, so k itself must be a multiple of ${n(o)}. The order of ${n(a)} is ${n(m)} ÷ ${n(g)} = ${n(o)}. Check: ${n(o)} × ${n(a)} = ${n(tot)} = ${n(tot / m)} × ${n(m)}, a whole number of times round.`,
    guidance: [
     { prompt: `What is gcd(${n(a)}, ${n(m)})?`, answer: [g], explanation: `${euclid(m, a)}. The last remainder that is not 0 is ${n(g)}.` },
     { prompt: `The order is ${n(m)} ÷ gcd(${n(a)}, ${n(m)}). What is it?`, answer: [o], explanation: `${n(m)} ÷ ${n(g)} = ${n(o)} beats.` },
-    { prompt: `Check: after ${beats(o)} the pulse has jumped ${n(o)} × ${n(a)} = ${n(tot)} lamps. What is ${n(tot)} mod ${n(m)}?`, answer: [0], explanation: `${n(tot)} = ${n(tot / m)} × ${n(m)} + 0, so the pulse is back at lamp 0.` }
+    { prompt: `Check: after ${beats(o)} the pulse has jumped ${n(o)} × ${n(a)} = ${n(tot)} lamps. How many full times round the ring of ${n(m)} lamps is that?`, answer: [tot / m], explanation: `${n(tot)} = ${n(tot / m)} × ${n(m)} + 0: a whole number of times round, so the pulse is back at lamp 0.` }
    ] }; }
  },
  /* Order of a in U(n), n from 5 to 25, read off the powers a, a², a³, …; the order is at least 4, so the first
@@ -165,16 +173,16 @@ Object.assign(window.MISSION_GEN, {
     { prompt: `Keep multiplying by ${n(a)} and reducing. At which power does the table first reach 1?`, answer: [o], explanation: `The powers mod ${n(m)} are ${ps.map(n).join(', ')}. The last of these is ${n(a)}${sup(o)}, so the order is ${n(o)}.` }
    ] }; }
  },
- /* Generators of Z_n: the a from 1 to n − 1 with gcd(a, n) = 1. n from 8 to 40, not prime (so some a fail);
+ /* Generators of Zₙ: the a from 1 to n − 1 with gcd(a, n) = 1. n from 8 to 40, not prime (so some a fail);
     a from 2 to n − 1, half the time coprime to n. Not the worked example (n = 8, a = 3). */
  q09: {
   canonical: { m: 18, a: 10 },
   draw: R => { for (let i = 0; i < 1000; i++) { const m = R.int(8, 40); if (isPrime(m)) continue; const want = R.bool(), as = []; for (let x = 2; x < m; x++) if ((gcd(x, m) === 1) === want) as.push(x); if (!as.length) continue; const a = R.pick(as); if (m === 8 && a === 3) continue; return { m, a }; } return { m: 18, a: 10 }; },
   build: ({ m, a }) => { const us = unitsOf(m), g = gcd(a, m), o = m / g, gen = g === 1 ? 1 : 0; return {
-   prompt: `The Beacon Tower's ring of ${n(m)} lamps, 0 to ${n(m - 1)}, works like Z_${n(m)}. A pulse that jumps g lamps per beat lights the lamps of ⟨g⟩, and g is a generator of Z_${n(m)} when it lights every lamp. Enter how many generators Z_${n(m)} has. Then enter 1 if ${n(a)} generates Z_${n(m)}, 0 if not.`,
+   prompt: `The Beacon Tower's ring of ${n(m)} lamps, 0 to ${n(m - 1)}, works like Z${sub(m)}. A pulse that jumps g lamps per beat lights the lamps of ⟨g⟩, and g is a generator of Z${sub(m)} when it lights every lamp. Enter how many generators Z${sub(m)} has. Then enter 1 if ${n(a)} generates Z${sub(m)}, 0 if not.`,
    answer: [us.length, gen],
    hints: ['g lights every lamp exactly when its order is the whole ring size, and its order is the ring size divided by gcd(g, ring size).', 'So the generators are the numbers from 1 to one less than the ring size that share no factor bigger than 1 with the ring size. Count them.'],
-   solution: `g generates Z_${n(m)} exactly when its order ${n(m)} ÷ gcd(g, ${n(m)}) is ${n(m)}, that is when gcd(g, ${n(m)}) = 1. The numbers from 1 to ${n(m - 1)} coprime to ${n(m)} are ${us.map(n).join(', ')}, so Z_${n(m)} has ${n(us.length)} generators. gcd(${n(a)}, ${n(m)}) = ${n(g)}, so the order of ${n(a)} is ${n(m)} ÷ ${n(g)} = ${n(o)}` + (gen ? `, the whole ring: ${n(a)} is a generator (1).` : `, less than ${n(m)}: ⟨${n(a)}⟩ lights only ${n(o)} lamps, and ${n(a)} is not a generator (0).`),
+   solution: `g generates Z${sub(m)} exactly when its order ${n(m)} ÷ gcd(g, ${n(m)}) is ${n(m)}, that is when gcd(g, ${n(m)}) = 1. The numbers from 1 to ${n(m - 1)} coprime to ${n(m)} are ${us.map(n).join(', ')}, so Z${sub(m)} has ${n(us.length)} generators. gcd(${n(a)}, ${n(m)}) = ${n(g)}, so the order of ${n(a)} is ${n(m)} ÷ ${n(g)} = ${n(o)}` + (gen ? `, the whole ring: ${n(a)} is a generator (1).` : `, less than ${n(m)}: ⟨${n(a)}⟩ lights only ${n(o)} lamps, and ${n(a)} is not a generator (0).`),
    guidance: [
     { prompt: `What is gcd(${n(a)}, ${n(m)})?`, answer: [g], explanation: `${euclid(m, a)}. The last remainder that is not 0 is ${n(g)}.` },
     { prompt: `How many lamps does ⟨${n(a)}⟩ light? That is the order of ${n(a)}, ${n(m)} ÷ gcd(${n(a)}, ${n(m)}).`, answer: [o], explanation: `${n(m)} ÷ ${n(g)} = ${n(o)}. ${gen ? `That is every lamp, so ${n(a)} is a generator.` : `That is fewer than ${n(m)}, so ${n(a)} is not a generator.`}` },
