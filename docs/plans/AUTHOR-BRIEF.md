@@ -46,6 +46,18 @@ You get a list of failures and disagreements. Fix the generator or mission at fa
 - Each generator should give 30 or more distinct prompts in 300 draws, never draw its own worked example (or, for practice, its parent's), and never reject its own draws.
 - Oracles compute from the stated maths (tables, search, numerical methods); a parameter that is only an index into a list of texts gets a one-line comment saying so.
 
+## Lessons from wave 2 (every author and repairer)
+- A practice mission's `uses` field does not gate unlocking; it only prints a line. If a practice mission needs a rule its parent did not teach, teach that rule in a sentence in the prompt. A learn mission may rely only on its declared `prereqs` (and theirs).
+- Bound every retry loop in a draw: at most 1000 tries, then fall back to the canonical parameters. One unbounded loop hangs every check for the pack.
+- Counts of things are whole numbers in every draw (no "312.5 seeds"). If a draw multiplies a share by a size, round the base first and build the story from the rounded count.
+- When a lookup table is printed, vary which row holds the answer; never always the middle row.
+- Never state as a general fact something that is only true of the draws (for example "equal counts mean the same shape"). Say "for these small cases" and say what the general truth is.
+- If the prompt says how many there are of something, do not then ask for that number.
+- State conventions the answer depends on: sign conventions, orientation, "net" against "total", whether whole numbers include negatives, which table to read a value from, and whether a decision uses the rounded or unrounded value.
+- Ordinals and plurals come from helpers (1st, 2nd, 3rd, 11th; "1 metre"); never glue "th" or "s" on.
+- A source row may credit a section only with what that section states. Anything else is "worked out in this mission". Never invent a citation.
+- A guided step asks one thing and has one answer box. An applied (c) mission has two or three guided steps.
+
 ## Working rules for every agent (wave 2 on)
 - Edit only the file or files your task names. Do not commit. Temporary files go in your own uniquely named subfolder of the session scratchpad given in your task, never `/tmp`.
 - Other authors are writing other files of the same pack at the same time. A failure, NOTE or hang caused by a half-written file of theirs is not yours: re-run later, and judge your work by the lines for your own ids.
