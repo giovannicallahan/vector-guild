@@ -218,14 +218,14 @@ mk({
  canonical: { k: 2, m: 3, c0: -4, x0: 2 },
  draw: R => retry(() => ({ k: R.int(2, 4), m: R.int(1, 5), c0: R.int(-6, 6), x0: R.int(-3, 3) }), p => 3 * p.k * p.x0 * p.x0 + p.m >= 2, { k: 2, m: 3, c0: -4, x0: 2 }),
  build: ({ k, m, c0, x0 }) => { const y = k * x0 ** 3 + m * x0 + c0, D = 3 * k * x0 * x0 + m, fx = poly([[k, 'x³'], [m, 'x'], [c0, '']]), dfx = poly([[3 * k, 'x²'], [m, '']]); return {
-  prompt: `A flow meter turns a valve setting x into a flow f(x) = ${fx}. Its derivative f′(x) = ${dfx} is positive for every x (it is at least ${n(m)}), so f is strictly increasing and has an inverse function f⁻¹ that turns a measured flow back into a valve setting. The meter reads the flow y = ${n(y)}, and the setting behind it is a whole number between −3 and 3. Enter x₀ = f⁻¹(${n(y)}), then f′(x₀), then the derivative (f⁻¹)′(${n(y)}) as a fraction.`,
+  prompt: `A flow meter turns a valve setting x into a flow f(x) = ${fx}. Its derivative f′(x) = ${dfx} is positive for every x (it is at least ${n(m)}), so f is strictly increasing and has an inverse function f⁻¹ that turns a measured flow back into a valve setting. The meter reads the flow y = ${n(y)}, and the setting behind it is a whole number between −3 and 3. Enter x₀ = f⁻¹(${n(y)}), then f′(x₀), then the derivative (f⁻¹)′(${n(y)}), either as a fraction typed like 2/3 or as a decimal rounded to 5 decimal places.`,
   answer: [x0, D, 1 / D],
   hints: ['Try the whole numbers from −3 to 3 for x until f(x) equals the measured flow; that x is the setting f⁻¹ gives.', 'The inverse function theorem: (f⁻¹)′(f(x₀)) = 1 ÷ f′(x₀), provided f′(x₀) is not 0.'],
   solution: `f(${n(x0)}) = ${n(k)} × ${par(x0)}³ + ${n(m)} × ${par(x0)} ${c0 < 0 ? '−' : '+'} ${n(Math.abs(c0))} = ${poly([[k * x0 ** 3, ''], [m * x0, ''], [c0, '']])} = ${n(y)}, and f is strictly increasing, so no other x gives ${n(y)}: x₀ = ${n(x0)}. f′(${n(x0)}) = ${n(3 * k)} × ${par(x0)}² + ${n(m)} = ${n(D)}. By the inverse function theorem, (f⁻¹)′(${n(y)}) = 1 ÷ f′(${n(x0)}) = 1/${n(D)}.`,
   guidance: [
    { prompt: `Which whole number x₀ gives f(x₀) = ${n(y)}?`, answer: [x0], explanation: `f(${n(x0)}) = ${n(y)}. Since f is strictly increasing, it is the only one.` },
    { prompt: `What is f′(${n(x0)})?`, answer: [D], explanation: `f′(${n(x0)}) = ${n(3 * k)} × ${par(x0)}² + ${n(m)} = ${n(D)}.` },
-   { prompt: `What is (f⁻¹)′(${n(y)}) = 1 ÷ f′(${n(x0)})? Enter it as a fraction.`, answer: [1 / D], explanation: `1 ÷ ${n(D)} = 1/${n(D)}.` }
+   { prompt: `What is (f⁻¹)′(${n(y)}) = 1 ÷ f′(${n(x0)})? Enter it as a fraction, or as a decimal rounded to 5 decimal places.`, answer: [1 / D], explanation: `1 ÷ ${n(D)} = 1/${n(D)}.` }
   ] }; }
 });
 
@@ -264,14 +264,14 @@ mk({
   p => 3 * (p.x0 + p.p) ** 2 + p.j >= 2, { p: 1, j: 2, c0: -3, x0: -2 }),
  build: ({ p, j, c0, x0 }) => { const b = 3 * p * p + j, y = x0 ** 3 + 3 * p * x0 * x0 + b * x0 + c0, D = 3 * (x0 + p) ** 2 + j;
   const fx = poly([[1, 'x³'], [3 * p, 'x²'], [b, 'x'], [c0, '']]), dfx = poly([[3, 'x²'], [6 * p, 'x'], [b, '']]); return {
-  prompt: `The newest gauge in the workshop has a curved response: it turns a dial position x into a reading f(x) = ${fx}. Its derivative is f′(x) = ${dfx}, which can be written 3(${xp(p)})² + ${n(j)}. A square is never negative, so f′(x) is at least ${n(j)} for every x: f is strictly increasing and has an inverse function f⁻¹. The reading is y = ${n(y)}, and the dial position behind it is a whole number between −4 and 3. Enter x₀ = f⁻¹(${n(y)}), then f′(x₀), then the derivative (f⁻¹)′(${n(y)}) as a fraction.`,
+  prompt: `The newest gauge in the workshop has a curved response: it turns a dial position x into a reading f(x) = ${fx}. Its derivative is f′(x) = ${dfx}, which can be written 3(${xp(p)})² + ${n(j)}. A square is never negative, so f′(x) is at least ${n(j)} for every x: f is strictly increasing and has an inverse function f⁻¹. The reading is y = ${n(y)}, and the dial position behind it is a whole number between −4 and 3. Enter x₀ = f⁻¹(${n(y)}), then f′(x₀), then the derivative (f⁻¹)′(${n(y)}), either as a fraction typed like 2/3 or as a decimal rounded to 5 decimal places.`,
   answer: [x0, D, 1 / D],
   hints: ['Try the whole numbers from −4 to 3 for x, taking care with the signs of the cubes and squares, until f(x) equals the reading.', 'The inverse function theorem: (f⁻¹)′(f(x₀)) = 1 ÷ f′(x₀). Use the form of f′ given in the problem to evaluate f′(x₀).'],
   solution: `f(${n(x0)}) = ${par(x0)}³ + 3 × ${par(p)} × ${par(x0)}² + ${n(b)} × ${par(x0)} ${c0 < 0 ? '−' : '+'} ${n(Math.abs(c0))} = ${poly([[x0 ** 3, ''], [3 * p * x0 * x0, ''], [b * x0, ''], [c0, '']])} = ${n(y)}, and f is strictly increasing, so no other x gives ${n(y)}: x₀ = ${n(x0)}. f′(${n(x0)}) = 3(${n(x0)} ${p < 0 ? '−' : '+'} ${n(Math.abs(p))})² + ${n(j)} = 3 × ${n((x0 + p) ** 2)} + ${n(j)} = ${n(D)}. By the inverse function theorem, (f⁻¹)′(${n(y)}) = 1 ÷ f′(${n(x0)}) = 1/${n(D)}.`,
   guidance: [
    { prompt: `Which whole number x₀ gives f(x₀) = ${n(y)}?`, answer: [x0], explanation: `f(${n(x0)}) = ${n(y)}. Since f is strictly increasing, it is the only one.` },
    { prompt: `What is f′(${n(x0)})?`, answer: [D], explanation: `f′(${n(x0)}) = 3(${n(x0)} ${p < 0 ? '−' : '+'} ${n(Math.abs(p))})² + ${n(j)} = 3 × ${n((x0 + p) ** 2)} + ${n(j)} = ${n(D)}.` },
-   { prompt: `What is (f⁻¹)′(${n(y)}) = 1 ÷ f′(${n(x0)})? Enter it as a fraction.`, answer: [1 / D], explanation: `1 ÷ ${n(D)} = 1/${n(D)}.` }
+   { prompt: `What is (f⁻¹)′(${n(y)}) = 1 ÷ f′(${n(x0)})? Enter it as a fraction, or as a decimal rounded to 5 decimal places.`, answer: [1 / D], explanation: `1 ÷ ${n(D)} = 1/${n(D)}.` }
   ] }; }
 });
 

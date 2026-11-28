@@ -234,7 +234,7 @@ mk({
   solution: `The ratio of the (k + 1)-th term to the k-th has size |${dist(x0)}| ÷ ${n(b)}, below 1 when the distance from ${n(x0)} is below ${n(b)}: the radius is ${n(b)}. The ends of the interval are ${n(dl)} to the left and ${n(dr)} to the right of ${n(x0)}, so the largest distance is r = ${n(r)}, which is below the radius. Each term is then at most Mₖ = ${n(c)} × (${n(r)} ÷ ${n(b)})ᵏ = ${n(c)} × ${n(rho)}ᵏ, a geometric series with sum ${n(c)} ÷ (1 − ${n(rho)}) = ${n(S)}. By the M-test the series converges uniformly on the interval.`,
   guidance: [
    { prompt: `The ratio of consecutive terms has size |${dist(x0)}| ÷ ${n(b)}. Below what distance from ${n(x0)} does the series converge?`, answer: [b], explanation: `|${dist(x0)}| ÷ ${n(b)} < 1 exactly when |${dist(x0)}| < ${n(b)}, so the radius is ${n(b)}.` },
-   { prompt: `The interval [${n(lo)}, ${n(hi)}] has ends at distance ${n(dl)} and ${n(dr)} from ${n(x0)}. What is the larger distance?`, answer: [r], explanation: `The larger of ${n(dl)} and ${n(dr)} is ${n(r)}.` },
+   { prompt: `On [${n(lo)}, ${n(hi)}], the distance from x to ${n(x0)} is largest at one of the two ends. How far is the farther end from ${n(x0)}?`, answer: [r], explanation: `The ends are at distance ${n(dl)} and ${n(dr)} from ${n(x0)}; the larger is ${n(r)}.` },
    { prompt: `With r = ${n(r)} the bounding ratio is ${n(r)} ÷ ${n(b)} = ${n(rho)}, and Mₖ = ${n(c)} × ${n(rho)}ᵏ. What is the sum of all the Mₖ?`, answer: [S], explanation: `${n(c)} ÷ (1 − ${n(rho)}) = ${n(S)}.` }
   ] }; }
 });

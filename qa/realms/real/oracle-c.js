@@ -41,7 +41,7 @@ Object.assign(window.ORACLE, {
   },
   /* f(x) = x² + p x on [a, b]. The smallest K is the supremum of the difference quotients; for a quadratic the
      quotient is x + y + p, so sample |x + y + p| over all pairs on a fine grid including both ends, take the largest,
-     and round to the whole number it approaches. δ = ε ÷ K, where ε = d·K is the prompt's tolerance (d is δ). */
+     and round to the whole number it approaches. δ = ε ÷ K, with ε = e as printed in the prompt. */
   q22: p => {
     const f = x => x * x + p.p * x;
     const N = 200, xs = [];
@@ -52,15 +52,13 @@ Object.assign(window.ORACLE, {
       if (q > K) K = q;
     }
     K = Math.round(K);
-    const eps = p.d * K;
-    return [K, eps / K];
+    return [K, p.e / K];
   },
-  /* T(x) = m x + t0: |T(x) − T(x₀)| = |m||x − x₀| < ε, with ε = |m| d as printed, gives δ = ε ÷ |m|.
+  /* T(x) = m x + t0: |T(x) − T(x₀)| = |m||x − x₀| < ε, with ε = e as printed, gives δ = ε ÷ |m|.
      g(x) = x² + u (x < s), g(s) = z, right piece v x + w with w chosen so the right limit is s² + u + j. Classify
      from the one-sided limits and g(s). h(x) = x² + p x on [a, b]: largest |x + y + p| over x, y in the interval. */
   q23: p => {
-    const eps = Math.abs(p.m) * p.d;
-    const delta = eps / Math.abs(p.m);
+    const delta = p.e / Math.abs(p.m);
     const left = p.s * p.s + p.u;
     const w = left + p.j - p.v * p.s;
     const right = p.v * p.s + w;

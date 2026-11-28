@@ -47,7 +47,7 @@ const GEN = {
   draw: R => tries(() => ({ c: R.nz(-5, 9), k: R.int(2, 9), e: R.pick([0.1, 0.05, 0.04, 0.025, 0.02, 0.01]), u: R.pick([2, 4, 5]), v: R.pick([8, 10, 20, 25, 40, 50]) }),
    p => !(p.k === 2 && p.e === 0.05), GEN.q12.canonical),
   build: ({ c, k, e, u, v }) => { const gap = G.tidy(k * (1 / u - 1 / v)), N = Math.round(k / e), xu = G.tidy(c + k / u), xv = G.tidy(c + k / v); return {
-   prompt: `A relay repeater’s n-th reading is xₙ = ${n(c)} + ${n(k)} ÷ n, for n = 1, 2, 3, …. To certify it as a Cauchy sequence without using its limit, first enter the gap |x${sub(u)} − x${sub(v)}|. Then enter the smallest N such that |xₘ − xₙ| < ${n(e)} for all m, n ≥ N.`,
+   prompt: `A relay repeater’s n-th reading is xₙ = ${n(c)} + ${n(k)} ÷ n, for n = 1, 2, 3, …. To certify it as a Cauchy sequence without using its limit, first enter the gap |x${sub(u)} − x${sub(v)}|. For m, n ≥ N the gap |xₘ − xₙ| is always strictly below ${n(k)} ÷ N, and some pairs come as close to ${n(k)} ÷ N as we like. Enter the smallest N such that |xₘ − xₙ| < ${n(e)} for all m, n ≥ N.`,
    answer: [gap, N],
    hints: ['The constant part of the reading cancels in every gap, so only the part that shrinks with n matters.', 'For m and n both at least N, the shrinking parts both lie between 0 and their value at N. Find the largest gap they can come close to, then compare it with ε.'],
    solution: `x${sub(u)} = ${n(c)} + ${n(k)} ÷ ${n(u)} = ${n(xu)} and x${sub(v)} = ${n(c)} + ${n(k)} ÷ ${n(v)} = ${n(xv)}, so the gap is ${n(k)} × (1 ÷ ${n(u)} − 1 ÷ ${n(v)}) = ${n(gap)}; the ${n(c)} cancels. For m, n ≥ N, both ${n(k)} ÷ m and ${n(k)} ÷ n lie between 0 and ${n(k)} ÷ N, so |xₘ − xₙ| = |${n(k)} ÷ m − ${n(k)} ÷ n| is less than ${n(k)} ÷ N. Taking m = N and n very large makes the gap as close to ${n(k)} ÷ N as we like. So N works exactly when ${n(k)} ÷ N ≤ ${n(e)}, that is N ≥ ${n(k)} ÷ ${n(e)} = ${n(N)}. The smallest N is ${n(N)}.`,
@@ -80,7 +80,7 @@ const GEN = {
     prompt: `The relay applies a chain of corrections without end: the n-th correction is ${n(k)} ÷ (n(n + 1)), for n = 1, 2, 3, …. The total correction is the sum of this series. Enter the partial sum s${NN}, the sum of the first ${n(N)} corrections, then the tail after ${n(N)} corrections: the sum of all the corrections from the ${next} on.`,
     answer: [sN, m],
     hints: ['A partial sum adds only the first few terms. The sum of the whole series is the limit of its partial sums.', 'Split each term as a difference, k ÷ n − k ÷ (n + 1). In a partial sum almost every piece cancels. The tail is the whole sum minus the partial sum.'],
-    solution: `Since 1 ÷ n − 1 ÷ (n + 1) = 1 ÷ (n(n + 1)), each term is ${n(k)} ÷ n − ${n(k)} ÷ (n + 1). Adding the first ${n(N)} terms, every piece cancels except the first and the last: s${NN} = ${n(k)} − ${n(k)} ÷ ${n(N + 1)} = ${n(k)} − ${n(m)} = ${n(sN)}. In general s_N = ${n(k)} − ${n(k)} ÷ (N + 1), which tends to ${n(k)}, so the series sums to ${n(k)}. The tail after ${n(N)} terms is ${n(k)} − ${n(sN)} = ${n(m)}.`,
+    solution: `Since 1 ÷ n − 1 ÷ (n + 1) = 1 ÷ (n(n + 1)), each term is ${n(k)} ÷ n − ${n(k)} ÷ (n + 1). Adding the first ${n(N)} terms, every piece cancels except the first and the last: s${NN} = ${n(k)} − ${n(k)} ÷ ${n(N + 1)} = ${n(k)} − ${n(m)} = ${n(sN)}. In general the first N terms add up to ${n(k)} − ${n(k)} ÷ (N + 1), which tends to ${n(k)} as N grows, so the series sums to ${n(k)}. The tail after ${n(N)} terms is ${n(k)} − ${n(sN)} = ${n(m)}.`,
     guidance: [
      { prompt: `Each term is ${n(k)} ÷ n − ${n(k)} ÷ (n + 1), so the first ${n(N)} terms add up to ${n(k)} − ${n(k)} ÷ ${n(N + 1)}. What is s${NN}?`, answer: [sN], explanation: `${n(k)} ÷ ${n(N + 1)} = ${n(m)}, so s${NN} = ${n(k)} − ${n(m)} = ${n(sN)}.` },
      { prompt: `The partial sums are ${n(k)} − ${n(k)} ÷ (N + 1). What number do they tend to as N grows?`, answer: [k], explanation: `${n(k)} ÷ (N + 1) shrinks to 0, so the partial sums tend to ${n(k)}: that is the sum of the series.` },
@@ -125,7 +125,8 @@ const GEN = {
     solution: `Since ${n(q)}ⁿ + ${n(c)} > ${n(q)}ⁿ, every aₙ is smaller than bₙ. Σ bₙ is geometric with first term ${n(k)} ÷ ${n(q)} = ${n(b1)} and ratio 1 ÷ ${n(q)}, so it sums to ${n(b1)} ÷ (1 − 1 ÷ ${n(q)}) = ${n(k)} ÷ ${n(q - 1)} = ${n(B)}. So Σ aₙ ≤ ${n(B)}. For the sharper bound, a₁ = ${n(k)} ÷ ${n(q + c)} = ${n(a1)} and b₁ = ${n(b1)}, so Σ aₙ ≤ ${n(a1)} + (${n(B)} − ${n(b1)}) = ${n(S2)}.`,
     guidance: [
      { prompt: `Σ bₙ is geometric with first term ${n(k)} ÷ ${n(q)} and ratio 1 ÷ ${n(q)}. What is its sum?`, answer: [B], explanation: `(${n(k)} ÷ ${n(q)}) ÷ (1 − 1 ÷ ${n(q)}) = ${n(k)} ÷ ${n(q - 1)} = ${n(B)}. Every aₙ is below bₙ, so Σ aₙ ≤ ${n(B)}.` },
-     { prompt: `What are the exact first term a₁ = ${n(k)} ÷ (${n(q)} + ${n(c)}) and the comparison’s first term b₁ = ${n(k)} ÷ ${n(q)}?`, answer: [a1, b1], explanation: `a₁ = ${n(k)} ÷ ${n(q + c)} = ${n(a1)} and b₁ = ${n(k)} ÷ ${n(q)} = ${n(b1)}.` },
+     { prompt: `What is the exact first term a₁ = ${n(k)} ÷ (${n(q)} + ${n(c)})?`, answer: [a1], explanation: `a₁ = ${n(k)} ÷ ${n(q + c)} = ${n(a1)}.` },
+     { prompt: `What is the comparison’s first term b₁ = ${n(k)} ÷ ${n(q)}?`, answer: [b1], explanation: `b₁ = ${n(k)} ÷ ${n(q)} = ${n(b1)}, a little more than a₁ = ${n(a1)}.` },
      { prompt: `Keep a₁ exact and compare only the rest: a₁ + (Σ bₙ − b₁). What is the sharper bound?`, answer: [S2], explanation: `${n(a1)} + (${n(B)} − ${n(b1)}) = ${n(S2)}.` }
     ] }; }
    const B = k, a1 = k / (1 + c), b1 = k / 2, S2 = a1 + B - b1; return {
@@ -135,7 +136,8 @@ const GEN = {
     solution: `For n ≥ 1, n² + ${n(c)}n ≥ n² + n, so every aₙ is at most bₙ. Since bₙ = ${n(k)} ÷ (n(n + 1)) = ${n(k)} ÷ n − ${n(k)} ÷ (n + 1), the partial sums of Σ bₙ are ${n(k)} − ${n(k)} ÷ (N + 1), which tend to ${n(k)}. So Σ aₙ ≤ ${n(B)}. For the sharper bound, a₁ = ${n(k)} ÷ ${n(1 + c)} = ${n(a1)} and b₁ = ${n(k)} ÷ 2 = ${n(b1)}, so Σ aₙ ≤ ${n(a1)} + (${n(B)} − ${n(b1)}) = ${n(S2)}.`,
     guidance: [
      { prompt: `bₙ = ${n(k)} ÷ (n(n + 1)) telescopes, with partial sums ${n(k)} − ${n(k)} ÷ (N + 1). What is Σ bₙ?`, answer: [B], explanation: `${n(k)} ÷ (N + 1) shrinks to 0, so Σ bₙ = ${n(k)}. Every aₙ is at most bₙ, so Σ aₙ ≤ ${n(B)}.` },
-     { prompt: `What are the exact first term a₁ = ${n(k)} ÷ (1 + ${n(c)}) and the comparison’s first term b₁ = ${n(k)} ÷ 2?`, answer: [a1, b1], explanation: `a₁ = ${n(k)} ÷ ${n(1 + c)} = ${n(a1)} and b₁ = ${n(k)} ÷ 2 = ${n(b1)}.` },
+     { prompt: `What is the exact first term a₁ = ${n(k)} ÷ (1 + ${n(c)})?`, answer: [a1], explanation: `a₁ = ${n(k)} ÷ ${n(1 + c)} = ${n(a1)}.` },
+     { prompt: `What is the comparison’s first term b₁ = ${n(k)} ÷ 2?`, answer: [b1], explanation: `b₁ = ${n(k)} ÷ 2 = ${n(b1)}, at least as large as a₁ = ${n(a1)}.` },
      { prompt: `Keep a₁ exact and compare only the rest: a₁ + (Σ bₙ − b₁). What is the sharper bound?`, answer: [S2], explanation: `${n(a1)} + (${n(B)} − ${n(b1)}) = ${n(S2)}.` }
    ] }; }
  },
@@ -152,10 +154,10 @@ const GEN = {
    hints: ['Divide the (n + 1)-th term by the n-th term and cancel. A power of n over a power of n + 1 tends to 1.', 'The ratio test: a limit below 1 means convergence, above 1 means divergence. For series B, solve the bound inequality for N + 1 first.'],
    solution: `aₙ₊₁ ÷ aₙ = ${rk} × ${n(p)} ÷ ${n(q)}. As n grows, (n + 1) ÷ n tends to 1, so the ratio tends to ${n(p)}/${n(q)}. ${code ? `This is below 1, so by the ratio test Σ aₙ converges (absolutely): 1.` : `This is above 1, so the terms eventually grow and by the ratio test Σ aₙ diverges: 0.`} The root test agrees: the n-th root of aₙ also tends to ${n(p)}/${n(q)}. For series B, ${n(c)} ÷ (N + 1) < ${n(e)} means N + 1 > ${n(c)} ÷ ${n(e)} = ${n(K)}, so N ≥ ${n(K)}. The smallest N is ${n(K)}.`,
    guidance: [
-    { prompt: `aₙ₊₁ ÷ aₙ = ${rk} × ${n(p)} ÷ ${n(q)}. What fraction does it tend to? Enter its numerator and denominator.`, answer: [p, q], explanation: `(n + 1) ÷ n tends to 1, so the ratio tends to ${n(p)}/${n(q)}, already in lowest terms.` },
+    { prompt: `aₙ₊₁ ÷ aₙ = ${rk} × ${n(p)} ÷ ${n(q)}. It tends to a fraction. Written in lowest terms, what is its numerator?`, answer: [p], explanation: `(n + 1) ÷ n tends to 1, so the ratio tends to ${n(p)}/${n(q)}, already in lowest terms. Its numerator is ${n(p)}.` },
+    { prompt: `Same limit of the ratio, in lowest terms. What is its denominator?`, answer: [q], explanation: `The limit is ${n(p)}/${n(q)}, so its denominator is ${n(q)}.` },
     { prompt: `The ratio limit is ${n(p)}/${n(q)}. Enter 1 if the ratio test shows convergence, 0 if it shows divergence.`, answer: [code], explanation: code ? `${n(p)}/${n(q)} < 1, so Σ aₙ converges: 1.` : `${n(p)}/${n(q)} > 1, so Σ aₙ diverges: 0.` },
-    { prompt: `For series B, try N = ${n(K - 1)}. What is the bound ${n(c)} ÷ (N + 1) then?`, answer: [e], explanation: `${n(c)} ÷ ${n(K)} = ${n(e)}. That equals ${n(e)} instead of being below it, so N = ${n(K - 1)} is not enough.` },
-    { prompt: `The bound ${n(c)} ÷ (N + 1) < ${n(e)} needs N + 1 > ${n(c)} ÷ ${n(e)} = ${n(K)}. What is the smallest whole number N that does it?`, answer: [K], explanation: `N + 1 > ${n(K)} means N + 1 is at least ${n(K + 1)}, so N is at least ${n(K)}.` }
+    { prompt: `For series B, the bound ${n(c)} ÷ (N + 1) must be strictly below ${n(e)}. Solve for N + 1 first. What is the smallest whole number N that does it?`, answer: [K], explanation: `${n(c)} ÷ (N + 1) < ${n(e)} needs N + 1 > ${n(c)} ÷ ${n(e)} = ${n(K)}, so N + 1 is at least ${n(K + 1)} and N is at least ${n(K)}. At N = ${n(K - 1)} the bound would equal ${n(e)} instead of being below it.` }
    ] }; }
  },
  /* cₙ = (−1)ⁿ⁺¹ k ÷ (n + d)ᵖ. p = 2: |cₙ| ≤ k ÷ n², a convergent p-series, so absolute (1). p = 1: |cₙ| ≥ k ÷ ((1 + d)n),

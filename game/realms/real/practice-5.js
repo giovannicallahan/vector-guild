@@ -197,7 +197,7 @@ mk({
   ] }; }
 });
 
-/* ---- q23 Chapter review: certifying a thermostat [3.2–3.4] ---- */
+/* ---- q23 Chapter review: certifying a thermostat [3.2, 3.4] ---- */
 
 /* A dial T(x) = m x + k with ε = |m|·δ; a two-piece curve g (x² + u left of c, s x + w right of c, value val at c; kind 0 continuous,
    1 removable, 2 jump); h(x) = x² + p x on [a, b]. The worked example is T = −5x + 9, g at 3 with 2x + 4, and x² + 4x on [−3, 2]. */

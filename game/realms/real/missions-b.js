@@ -78,7 +78,7 @@ window.QUESTS.push(
   id: "q12", title: "The repeater that settles", topic: "Cauchy sequences", tier: "Intermediate", sector: "Relay Station",
   brief: "A relay repeater’s readings must be certified as settling before anyone knows what they settle to.",
   lesson: "A Cauchy sequence is one whose terms all end up within ε of each other: for every ε there is an N with |xₘ − xₙ| < ε for all m, n ≥ N.",
-  prompt: "A relay repeater’s n-th reading is xₙ = 7 + 3 ÷ n, for n = 1, 2, 3, …. To certify it as a Cauchy sequence without using its limit, first enter the gap |x₄ − x₁₀|. Then enter the smallest N such that |xₘ − xₙ| < 0.02 for all m, n ≥ N.",
+  prompt: "A relay repeater’s n-th reading is xₙ = 7 + 3 ÷ n, for n = 1, 2, 3, …. To certify it as a Cauchy sequence without using its limit, first enter the gap |x₄ − x₁₀|. For m, n ≥ N the gap |xₘ − xₙ| is always strictly below 3 ÷ N, and some pairs come as close to 3 ÷ N as we like. Enter the smallest N such that |xₘ − xₙ| < 0.02 for all m, n ≥ N.",
   answer: [0.45,150], labels: ["gap","smallest N"], tolerance: 0.0005,
   hints: [
    "The constant part of the reading cancels in every gap, so only the part that shrinks with n matters.",
@@ -242,7 +242,8 @@ window.QUESTS.push(
   },
   guidance: [
    { prompt: "Σ bₙ is geometric with first term 12 ÷ 3 and ratio 1 ÷ 3. What is its sum?", answer: [6], labels: ["comparison bound"], explanation: "(12 ÷ 3) ÷ (1 − 1 ÷ 3) = 12 ÷ 2 = 6. Every aₙ is below bₙ, so Σ aₙ ≤ 6." },
-   { prompt: "What are the exact first term a₁ = 12 ÷ (3 + 1) and the comparison’s first term b₁ = 12 ÷ 3?", answer: [3,4], labels: ["a₁","b₁"], explanation: "a₁ = 12 ÷ 4 = 3 and b₁ = 12 ÷ 3 = 4." },
+   { prompt: "What is the exact first term a₁ = 12 ÷ (3 + 1)?", answer: [3], labels: ["a₁"], explanation: "a₁ = 12 ÷ 4 = 3." },
+   { prompt: "What is the comparison’s first term b₁ = 12 ÷ 3?", answer: [4], labels: ["b₁"], explanation: "b₁ = 12 ÷ 3 = 4, a little more than a₁ = 3." },
    { prompt: "Keep a₁ exact and compare only the rest: a₁ + (Σ bₙ − b₁). What is the sharper bound?", answer: [5], labels: ["sharper bound"], explanation: "3 + (6 − 4) = 5." }
   ]
  },
@@ -284,10 +285,10 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: "aₙ₊₁ ÷ aₙ = ((n + 1) ÷ n)² × 2 ÷ 3. What fraction does it tend to? Enter its numerator and denominator.", answer: [2,3], labels: ["numerator","denominator"], explanation: "(n + 1) ÷ n tends to 1, so the ratio tends to 2/3, already in lowest terms." },
+   { prompt: "aₙ₊₁ ÷ aₙ = ((n + 1) ÷ n)² × 2 ÷ 3. It tends to a fraction. Written in lowest terms, what is its numerator?", answer: [2], labels: ["numerator"], explanation: "(n + 1) ÷ n tends to 1, so the ratio tends to 2/3, already in lowest terms. Its numerator is 2." },
+   { prompt: "Same limit of the ratio, in lowest terms. What is its denominator?", answer: [3], labels: ["denominator"], explanation: "The limit is 2/3, so its denominator is 3." },
    { prompt: "The ratio limit is 2/3. Enter 1 if the ratio test shows convergence, 0 if it shows divergence.", answer: [1], labels: ["1 or 0"], explanation: "2/3 < 1, so Σ aₙ converges: 1." },
-   { prompt: "For series B, try N = 499. What is the bound 5 ÷ (N + 1) then?", answer: [0.01], labels: ["bound"], explanation: "5 ÷ 500 = 0.01. That equals 0.01 instead of being below it, so N = 499 is not enough." },
-   { prompt: "The bound 5 ÷ (N + 1) < 0.01 needs N + 1 > 5 ÷ 0.01 = 500. What is the smallest whole number N that does it?", answer: [500], labels: ["N"], explanation: "N + 1 > 500 means N + 1 is at least 501, so N is at least 500." }
+   { prompt: "For series B, the bound 5 ÷ (N + 1) must be strictly below 0.01. Solve for N + 1 first. What is the smallest whole number N that does it?", answer: [500], labels: ["N"], explanation: "5 ÷ (N + 1) < 0.01 needs N + 1 > 5 ÷ 0.01 = 500, so N + 1 is at least 501 and N is at least 500. At N = 499 the bound would equal 0.01 instead of being below it." }
   ]
  },
  {

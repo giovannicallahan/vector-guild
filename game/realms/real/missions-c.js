@@ -4,7 +4,7 @@
    qa/realms/real/oracle-c.js. One author per file. The missions of this file (id, chapter, tier and XP, sector):
      q21  ch 4 Limits and continuity · Intermediate, 150 XP · sector 'Thermostat Hall' · Extreme and intermediate value theorems; bisection [3.3]
      q22  ch 4 Limits and continuity · Intermediate, 150 XP · sector 'Thermostat Hall' · Uniform continuity and Lipschitz constants [3.4]
-     q23  ch 4 Limits and continuity · Intermediate, 150 XP · sector 'Thermostat Hall' · Chapter review: certifying a thermostat [3.2–3.4]
+     q23  ch 4 Limits and continuity · Intermediate, 150 XP · sector 'Thermostat Hall' · Chapter review: certifying a thermostat [3.2, 3.4]
      q24  ch 5 The derivative made precise · Intermediate, 150 XP · sector 'Gauge Workshop' · The derivative as a limit; differentiability [4.1]
      q25  ch 5 The derivative made precise · Intermediate, 150 XP · sector 'Gauge Workshop' · Rolle's theorem and the mean value theorem [4.2]
      q26  ch 5 The derivative made precise · Intermediate, 150 XP · sector 'Gauge Workshop' · Bounds from the mean value theorem [4.2]
@@ -329,7 +329,7 @@ window.QUESTS.push(
   id: 'q28', title: 'Reading the dial backwards', topic: 'The derivative of an inverse function', tier: 'Intermediate', sector: 'Gauge Workshop',
   brief: 'Operators read the gauge and need to know which dial position produced it, and how sensitive that answer is to a small error in the reading.',
   lesson: 'If f is strictly monotone and f′(x₀) ≠ 0, the inverse function f⁻¹ is differentiable at y₀ = f(x₀), and (f⁻¹)′(y₀) = 1 ÷ f′(x₀).',
-  prompt: 'A gauge turns a dial position x into a reading f(x) = x³ + 2x + 1. Its derivative f′(x) = 3x² + 2 is positive, so f is strictly increasing and has an inverse function f⁻¹ that turns a reading back into a dial position. For the reading y = 13, enter x₀ = f⁻¹(13), then f′(x₀), then the derivative (f⁻¹)′(13), as a fraction such as 1/7.',
+  prompt: 'A gauge turns a dial position x into a reading f(x) = x³ + 2x + 1. Its derivative f′(x) = 3x² + 2 is positive, so f is strictly increasing and has an inverse function f⁻¹ that turns a reading back into a dial position. For the reading y = 13, enter x₀ = f⁻¹(13), then f′(x₀), then the derivative (f⁻¹)′(13), either as a fraction typed like 2/3 or as a decimal rounded to 5 decimal places.',
   answer: [2, 14, 0.071428571], labels: ['x₀', 'f′(x₀)', '(f⁻¹)′(y)'], tolerance: 0.00005,
   hints: [
    'Try small whole numbers for x until f(x) equals the reading; that x is the dial position f⁻¹ gives.',
@@ -365,7 +365,7 @@ window.QUESTS.push(
   guidance: [
    { prompt: 'Which whole number x₀ gives f(x₀) = 13?', answer: [2], labels: ['x₀'], explanation: 'f(2) = 13. Since f is strictly increasing, it is the only one.' },
    { prompt: 'What is f′(2)?', answer: [14], labels: ['f′(x₀)'], explanation: 'f′(2) = 3 × 2² + 2 = 14.' },
-   { prompt: 'What is (f⁻¹)′(13) = 1 ÷ f′(2)? Enter it as a fraction.', answer: [0.071428571], labels: ['(f⁻¹)′(y)'], explanation: '1 ÷ 14 = 1/14. A small change in the reading moves the dial 14 times less.' }
+   { prompt: 'What is (f⁻¹)′(13) = 1 ÷ f′(2)? Enter it as a fraction, or as a decimal rounded to 5 decimal places.', answer: [0.071428571], labels: ['(f⁻¹)′(y)'], explanation: '1 ÷ 14 = 1/14. A small change in the reading moves the dial 14 times less.' }
   ]
  },
  {

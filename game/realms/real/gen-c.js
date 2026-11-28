@@ -93,10 +93,12 @@ Object.assign(window.MISSION_GEN, {
  /* f(x) = x² + px on [a, b]: K = max(|2a + p|, |2b + p|) and δ = ε ÷ K with ε = Kδ. p is never ±1 (no written
     coefficient 1). Not the worked example (x² on [0, 5] with δ = 0.005). */
  q22: {
-  canonical: { p: 3, a: 1, b: 4, d: 0.01 },
-  draw: R => { for (let i = 0; i < 1000; i++) { const p = R.except(-6, 6, [-1, 1]), a = R.int(-6, 3), b = a + R.int(2, 6), d = R.pick(DELTA);
-   if (lipK(p, a, b) < 2 || (p === 0 && a === 0 && b === 5 && d === 0.005)) continue; return { p, a, b, d }; } return { p: 3, a: 1, b: 4, d: 0.01 }; },
-  build: ({ p, a, b, d }) => { const K = lipK(p, a, b), e = r6(K * d), fx = poly([[1, 'x²'], [p, 'x']]), s = `x + y${tail(p, '')}`; return {
+  /* The draw picks a short δ from DELTA and stores ε = K × δ as the parameter e, so the printed ε is the given number
+     and δ = ε ÷ K is worked out from it. */
+  canonical: { p: 3, a: 1, b: 4, e: 0.11 },
+  draw: R => { for (let i = 0; i < 1000; i++) { const p = R.except(-6, 6, [-1, 1]), a = R.int(-6, 3), b = a + R.int(2, 6), K = lipK(p, a, b), e = r6(K * R.pick(DELTA));
+   if (K < 2 || (p === 0 && a === 0 && b === 5 && e === 0.05)) continue; return { p, a, b, e }; } return { p: 3, a: 1, b: 4, e: 0.11 }; },
+  build: ({ p, a, b, e }) => { const K = lipK(p, a, b), d = r6(e / K), fx = poly([[1, 'x²'], [p, 'x']]), s = `x + y${tail(p, '')}`; return {
    prompt: `A thermostat turns a dial setting x, anywhere in [${n(a)}, ${n(b)}], into a heater power f(x) = ${fx}. Mira wants one δ that works at every setting at once. Enter the smallest Lipschitz constant of f on [${n(a)}, ${n(b)}], that is the smallest K with |f(x) − f(y)| ≤ K|x − y| for all x and y in the interval, then the δ = ε ÷ K that this constant gives for ε = ${n(e)}.`,
    answer: [K, d],
    hints: ['Factor the difference with x² − y² = (x + y)(x − y): f(x) − f(y) is (x − y) times a sum of x, y and a number. The smallest K is the supremum of the size of that sum over the interval.', 'If |x − y| < ε ÷ K, then |f(x) − f(y)| ≤ K|x − y| < ε, wherever x and y lie in the interval. One δ for every point is what uniformly continuous means.'],
@@ -109,23 +111,24 @@ Object.assign(window.MISSION_GEN, {
  /* Three checks: δ = ε ÷ |m| for T(x) = mx + t0; the code of g at s (0 continuous, 1 removable, 2 jump; kind is the code);
     the Lipschitz constant of x² + px on [a, b] as in q22. */
  q23: {
-  canonical: { m: 4, t0: 15, d: 0.05, u: 1, s: 2, v: 3, kind: 1, j: 0, z: 7, p: -2, a: 1, b: 5 },
-  draw: R => { for (let i = 0; i < 1000; i++) { const m = R.pick([2, 3, 4, 5, 8, -2, -4, -5]), t0 = R.int(5, 30), d = R.pick([0.1, 0.05, 0.02, 0.01]);
+  /* ε is the parameter e = |m| × δ for a short δ, so the printed ε is the given number and δ = ε ÷ |m| is worked out from it. */
+  canonical: { m: 4, t0: 15, e: 0.2, u: 1, s: 2, v: 3, kind: 1, j: 0, z: 7, p: -2, a: 1, b: 5 },
+  draw: R => { for (let i = 0; i < 1000; i++) { const m = R.pick([2, 3, 4, 5, 8, -2, -4, -5]), t0 = R.int(5, 30), e = r6(Math.abs(m) * R.pick([0.1, 0.05, 0.02, 0.01]));
    const u = R.int(-3, 4), s = R.int(1, 3), v = R.pick([2, 3, 4, -2, -3]), kind = R.int(0, 2), left = s * s + u;
    const j = kind === 2 ? R.nz(-4, 4) : 0, z = kind === 1 ? left + R.nz(-3, 3) : left + j * R.int(0, 1);
    const p = R.except(-6, 6, [-1, 1]), a = R.int(-4, 3), b = a + R.int(2, 5);
-   if (lipK(p, a, b) < 2 || (m === -5 && t0 === 9 && d === 0.1 && u === -1 && s === 3)) continue; return { m, t0, d, u, s, v, kind, j, z, p, a, b }; }
-   return { m: 4, t0: 15, d: 0.05, u: 1, s: 2, v: 3, kind: 1, j: 0, z: 7, p: -2, a: 1, b: 5 }; },
-  build: ({ m, t0, d, u, s, v, kind, j, z, p, a, b }) => { const e = r6(Math.abs(m) * d), left = s * s + u, w = left - v * s + j, right = v * s + w;
+   if (lipK(p, a, b) < 2 || (m === -5 && t0 === 9 && e === 0.5 && u === -1 && s === 3)) continue; return { m, t0, e, u, s, v, kind, j, z, p, a, b }; }
+   return { m: 4, t0: 15, e: 0.2, u: 1, s: 2, v: 3, kind: 1, j: 0, z: 7, p: -2, a: 1, b: 5 }; },
+  build: ({ m, t0, e, u, s, v, kind, j, z, p, a, b }) => { const d = r6(e / Math.abs(m)), left = s * s + u, w = left - v * s + j, right = v * s + w;
    const K = lipK(p, a, b), fx = poly([[1, 'x²'], [p, 'x']]), sm = `x + y${tail(p, '')}`, gl = poly([[1, 'x²'], [u, '']]), gr = poly([[v, 'x'], [w, '']]);
    const code = left !== right ? 2 : z !== left ? 1 : 0, verdict = ['g is continuous at x = ' + n(s) + ', code 0', 'the discontinuity is removable, code 1', 'the discontinuity is a jump, code 2'][code]; return {
    prompt: `Mira certifies a thermostat in three checks. First, its dial reads T(x) = ${poly([[m, 'x'], [t0, '']])}: enter the largest δ such that |x − x₀| < δ always gives |T(x) − T(x₀)| < ${n(e)}. Second, its switch-over curve is g(x) = ${gl} for x < ${n(s)}, g(${n(s)}) = ${n(z)}, and g(x) = ${gr} for x > ${n(s)}: enter 0 if g is continuous at x = ${n(s)}, 1 if it has a removable discontinuity there, or 2 if it has a jump discontinuity. Third, enter the smallest Lipschitz constant of h(x) = ${fx} on [${n(a)}, ${n(b)}].`,
    answer: [d, code, K],
    hints: ['A straight line changes by the size of its slope times the change in x, so δ is ε divided by the size of the slope.', 'Compare the left-hand limit, the right-hand limit and the value at the switch: different one-sided limits make a jump; equal limits with a different value make a removable discontinuity.', 'For x² + px, h(x) − h(y) = (x − y)(x + y + p), so the constant is the supremum of |x + y + p| over the interval.'],
-   solution: `|T(x) − T(x₀)| = ${n(Math.abs(m))}|x − x₀|, which is below ${n(e)} exactly when |x − x₀| < ${n(e)} ÷ ${n(Math.abs(m))} = ${n(d)}, so the largest δ is ${n(d)}. For g, the left-hand limit at ${n(s)} is ${n(s * s)}${tail(u, '')} = ${n(left)}, the right-hand limit is ${n(v)} × ${n(s)}${tail(w, '')} = ${n(right)}, and g(${n(s)}) = ${n(z)}: ${verdict}. For h, h(x) − h(y) = (x − y)(${sm}), and on [${n(a)}, ${n(b)}] the sum comes as close as you like to ${n(2 * a + p)} and ${n(2 * b + p)}, so the smallest Lipschitz constant is ${n(K)}.`,
+   solution: `|T(x) − T(x₀)| = ${n(Math.abs(m))}|x − x₀|, which is below ${n(e)} exactly when |x − x₀| < ${n(e)} ÷ ${n(Math.abs(m))} = ${n(d)}, so the largest δ is ${n(d)}. For g, the left-hand limit at ${n(s)} is ${u ? `${n(s * s)}${tail(u, '')} = ` : ''}${n(left)}, the right-hand limit is ${n(v)} × ${n(s)}${tail(w, '')} = ${n(right)}, and g(${n(s)}) = ${n(z)}: ${verdict}. For h, h(x) − h(y) = (x − y)(${sm}), and on [${n(a)}, ${n(b)}] the sum comes as close as you like to ${n(2 * a + p)} and ${n(2 * b + p)}, so the smallest Lipschitz constant is ${n(K)}.`,
    guidance: [
     { prompt: `T(x) − T(x₀) = ${n(m)}(x − x₀). What is the largest δ that makes |T(x) − T(x₀)| < ${n(e)} whenever |x − x₀| < δ?`, answer: [d], explanation: `|T(x) − T(x₀)| = ${n(Math.abs(m))}|x − x₀| < ${n(e)} exactly when |x − x₀| < ${n(e)} ÷ ${n(Math.abs(m))} = ${n(d)}. Any larger δ lets in an x with an error of ${n(e)} or more.` },
-    { prompt: `What does g(x) approach as x approaches ${n(s)} from the left?`, answer: [left], explanation: `For x < ${n(s)}, g(x) = ${gl}, which approaches ${n(s * s)}${tail(u, '')} = ${n(left)}.` },
+    { prompt: `What does g(x) approach as x approaches ${n(s)} from the left?`, answer: [left], explanation: `For x < ${n(s)}, g(x) = ${gl}, which approaches ${u ? `${n(s * s)}${tail(u, '')} = ` : ''}${n(left)}.` },
     { prompt: `What does g(x) approach as x approaches ${n(s)} from the right?`, answer: [right], explanation: `For x > ${n(s)}, g(x) = ${gr}, which approaches ${n(v)} × ${n(s)}${tail(w, '')} = ${n(right)}.` },
     { prompt: `The one-sided limits are ${n(left)} and ${n(right)}, and g(${n(s)}) = ${n(z)}. Enter the code: 0 continuous, 1 removable, 2 jump.`, answer: [code], explanation: `${left !== right ? 'The one-sided limits differ, so the discontinuity is a jump' : z !== left ? 'The limit exists and equals ' + n(left) + ', but g(' + n(s) + ') is ' + n(z) + ', so the discontinuity is removable' : 'The limit exists and equals the value g(' + n(s) + '), so g is continuous there'}: code ${n(code)}.` },
     { prompt: `h(x) − h(y) = (x − y)(${sm}). On [${n(a)}, ${n(b)}], what is the supremum of |${sm}|?`, answer: [K], explanation: `The sum comes as close as you like to ${n(2 * a + p)} and ${n(2 * b + p)} and lies between them, so the supremum of its size is ${n(K)}.` }
@@ -218,14 +221,14 @@ Object.assign(window.MISSION_GEN, {
    const D = deg * Math.pow(p.x0, deg - 1) + p.b; if (D < 2 || (deg === 3 && p.b === 1 && p.c0 === 0 && p.x0 === 2)) continue; return p; } return { deg: 3, b: 2, c0: 1, x0: 2 }; },
   build: ({ deg, b, c0, x0 }) => { const P = deg === 3 ? '³' : '⁵', Q = deg === 3 ? '²' : '⁴', y = Math.pow(x0, deg) + b * x0 + c0, D = deg * Math.pow(x0, deg - 1) + b;
    const fx = poly([[1, 'x' + P], [b, 'x'], [c0, '']]), dfx = `${n(deg)}x${Q}${tail(b, '')}`; return {
-   prompt: `A gauge turns a dial position x into a reading f(x) = ${fx}. Its derivative f′(x) = ${dfx} is positive, so f is strictly increasing and has an inverse function f⁻¹ that turns a reading back into a dial position. For the reading y = ${n(y)}, enter x₀ = f⁻¹(${n(y)}), then f′(x₀), then the derivative (f⁻¹)′(${n(y)}), as a fraction such as 1/7.`,
+   prompt: `A gauge turns a dial position x into a reading f(x) = ${fx}. Its derivative f′(x) = ${dfx} is positive, so f is strictly increasing and has an inverse function f⁻¹ that turns a reading back into a dial position. For the reading y = ${n(y)}, enter x₀ = f⁻¹(${n(y)}), then f′(x₀), then the derivative (f⁻¹)′(${n(y)}), either as a fraction typed like 2/3 or as a decimal rounded to 5 decimal places.`,
    answer: [x0, D, 1 / D],
    hints: ['Try small whole numbers for x until f(x) equals the reading; that x is the dial position f⁻¹ gives.', 'The inverse function theorem: (f⁻¹)′(f(x₀)) = 1 ÷ f′(x₀), provided f′(x₀) is not 0.'],
    solution: `f(${n(x0)}) = ${par(x0)}${P} + ${b === 1 ? '' : n(b) + ' × '}${par(x0)}${tail(c0, '')} = ${n(y)}, and f is strictly increasing, so no other x gives ${n(y)}: x₀ = ${n(x0)}. f′(${n(x0)}) = ${n(deg)} × ${par(x0)}${Q}${tail(b, '')} = ${n(D)}. By the inverse function theorem, (f⁻¹)′(${n(y)}) = 1 ÷ f′(${n(x0)}) = 1/${n(D)}.`,
    guidance: [
     { prompt: `Which whole number x₀ gives f(x₀) = ${n(y)}?`, answer: [x0], explanation: `f(${n(x0)}) = ${n(y)}. Since f is strictly increasing, it is the only one.` },
     { prompt: `What is f′(${n(x0)})?`, answer: [D], explanation: `f′(${n(x0)}) = ${n(deg)} × ${par(x0)}${Q}${tail(b, '')} = ${n(D)}.` },
-    { prompt: `What is (f⁻¹)′(${n(y)}) = 1 ÷ f′(${n(x0)})? Enter it as a fraction.`, answer: [1 / D], explanation: `1 ÷ ${n(D)} = 1/${n(D)}. A small change in the reading moves the dial ${n(D)} times less.` }
+    { prompt: `What is (f⁻¹)′(${n(y)}) = 1 ÷ f′(${n(x0)})? Enter it as a fraction, or as a decimal rounded to 5 decimal places.`, answer: [1 / D], explanation: `1 ÷ ${n(D)} = 1/${n(D)}. A small change in the reading moves the dial ${n(D)} times less.` }
    ] }; }
  },
  /* Review: an MVT bound M(b − a) (M in tenths) and the smallest Taylor degree for ε, as in q26 and q27. */

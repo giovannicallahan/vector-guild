@@ -100,7 +100,9 @@ mk({
  /* P = {x0, x1, x2, x3} with whole-number widths 1–3. L and U add (end value) × width piece by piece, as in q30.
     The equal-pieces gap is D ÷ n with D = |f(b) − f(a)|(b − a); it is below g ÷ q (g = U − L of P) when n > qD ÷ g, so the smallest n is floor(qD ÷ g) + 1, in integers. */
  canonical: { kind: 0, a: 1, w1: 1, w2: 2, w3: 2, q: 5 },
- draw: R => ({ kind: R.int(0, 2), a: R.int(0, 3), w1: R.int(1, 3), w2: R.int(1, 3), w3: R.int(1, 3), q: R.pick([2, 4, 5, 10]) }),
+ /* For 100 − x² the last point must stay below 10, so every rate is positive. */
+ draw: R => tryDraw(() => ({ kind: R.int(0, 2), a: R.int(0, 3), w1: R.int(1, 3), w2: R.int(1, 3), w3: R.int(1, 3), q: R.pick([2, 4, 5, 10]) }),
+  p => p.kind !== 2 || p.a + p.w1 + p.w2 + p.w3 < 10, { kind: 0, a: 1, w1: 1, w2: 2, w3: 2, q: 5 }),
  build: ({ kind, a, w1, w2, w3, q }) => { const F = [{ t: 'x²', f: x => x * x, up: true }, { t: 'x³', f: x => x * x * x, up: true }, { t: '100 − x²', f: x => 100 - x * x, up: false }][kind],
   pts = [a, a + w1, a + w1 + w2, a + w1 + w2 + w3], ws = [w1, w2, w3], b = pts[3], dir = F.up ? 'increasing' : 'decreasing',
   lows = [0, 1, 2].map(i => F.f(pts[F.up ? i : i + 1])), highs = [0, 1, 2].map(i => F.f(pts[F.up ? i + 1 : i])),
@@ -125,7 +127,7 @@ mk({
  id: 'q32b', parent: 'q32', kind: 'setting', title: 'The surging recirculation pump',
  brief: 'The cooling loop’s recirculation pump surges and eases, and the audit needs one certified stretch checked against hard bounds.',
  labels: ['integral over the stretch (litres)', 'lower bound (litres)', 'upper bound (litres)'], tolerance: 0.01,
- gl: [['integral of the piece (litres)'], ['m'], ['M'], ['lower bound (litres)', 'upper bound (litres)']]
+ gl: [['integral of the piece (litres)'], ['m'], ['M'], ['lower bound (litres)'], ['upper bound (litres)']]
 }, {
  /* f(t) = k − (t − h)², a downward parabola, written out as −t² + 2ht + (k − h²). b and c are multiples of 3, so every integral
     k x − ((x − h)³ + h³) ÷ 3 from 0 to x is a whole number (x³ ≡ x mod 3). k exceeds the larger of h² and (c − h)², so f is positive on [0, c].
@@ -143,7 +145,8 @@ mk({
    { prompt: `The integral from 0 to ${n(c)} is ${n(tot)} and the integral from 0 to ${n(b)} is ${n(first)}. By additivity, what is the integral from ${n(b)} to ${n(c)}?`, answer: [piece], explanation: `The whole is the first part plus the rest, so the rest is ${n(tot)} − ${n(first)} = ${n(piece)} litres.` },
    { prompt: `f(t) = ${n(k)} − (t − ${n(h)})² opens downward. What is its smallest value m on [${n(b)}, ${n(c)}]? Compare the two end values.`, answer: [mm], explanation: `f(${n(b)}) = ${n(fb)} and f(${n(c)}) = ${n(fc)}. A downward curve is lowest at an end of the interval, so m = ${n(mm)}.` },
    { prompt: `What is the largest value M of f on [${n(b)}, ${n(c)}]?`, answer: [MM], explanation: inside ? `The highest point t = ${n(h)} lies in the interval, where f = ${n(k)}, so M = ${n(k)}.` : `The highest point t = ${n(h)} lies outside the interval, so f is monotone on it and the largest value is at the end nearer ${n(h)}: M = ${n(MM)}.` },
-   { prompt: `The piece has length ${n(len)}. What are m × ${n(len)} and M × ${n(len)}?`, answer: [lo, hi], labels: ['lower bound (litres)', 'upper bound (litres)'], explanation: `${n(mm)} × ${n(len)} = ${n(lo)} and ${n(MM)} × ${n(len)} = ${n(hi)}. The piece, ${n(piece)} litres, lies between them.` }
+   { prompt: `The piece has length ${n(len)}. What is the lower bound m × ${n(len)}?`, answer: [lo], labels: ['lower bound (litres)'], explanation: `${n(mm)} × ${n(len)} = ${n(lo)}. Since f ≥ m on the piece, its integral is at least this.` },
+   { prompt: `What is the upper bound M × ${n(len)}?`, answer: [hi], labels: ['upper bound (litres)'], explanation: `${n(MM)} × ${n(len)} = ${n(hi)}. The piece, ${n(piece)} litres, lies between ${n(lo)} and ${n(hi)}.` }
   ] }; }
 });
 
@@ -175,7 +178,7 @@ mk({
  id: 'q32d', parent: 'q32', kind: 'challenge', uses: 'q21', title: 'The booster pump’s hills and valleys',
  brief: 'The booster pump’s flow rises, dips and rises again, so the stretch’s hard bounds depend on where the turning points fall.',
  labels: ['integral over the stretch (litres)', 'lower bound (litres)', 'upper bound (litres)'], tolerance: 0.005,
- gl: [['integral of the piece (litres)'], ['m'], ['M'], ['lower bound (litres)', 'upper bound (litres)']]
+ gl: [['integral of the piece (litres)'], ['m'], ['M'], ['lower bound (litres)'], ['upper bound (litres)']]
 }, {
  /* f(t) = t³ − 6t² + 9t + k = t(t − 3)² + k, with f′(t) = 3(t − 1)(t − 3): a local peak 4 + k at t = 1 and a local valley k at t = 3.
     The integral from 0 to x is x⁴ ÷ 4 − 2x³ + 4.5x² + kx, a multiple of 0.25. On [s, e] the extremes are the end values and, when inside, f(1) and f(3):
@@ -183,7 +186,7 @@ mk({
  canonical: { k: 3, s: 2, e: 6 },
  draw: R => { const s = R.int(1, 4), e = s + R.int(2, 6 - s); return { k: R.int(1, 9), s, e }; },
  build: ({ k, s, e }) => { const f = t => t * t * t - 6 * t * t + 9 * t + k, I = x => x * x * x * x / 4 - 2 * x * x * x + 4.5 * x * x + k * x, tot = I(e), first = I(s), piece = tot - first, len = e - s,
-  cand = [[s, f(s)], [e, f(e)]].concat(s <= 1 && e >= 1 ? [[1, f(1)]] : [], s <= 3 && e >= 3 ? [[3, f(3)]] : []), mm = Math.min(...cand.map(c => c[1])), MM = Math.max(...cand.map(c => c[1])),
+  cand = [[s, f(s)], [e, f(e)]].concat(s < 1 && e > 1 ? [[1, f(1)]] : [], s < 3 && e > 3 ? [[3, f(3)]] : []), mm = Math.min(...cand.map(c => c[1])), MM = Math.max(...cand.map(c => c[1])),
   at = v => cand.filter(c => c[1] === v).map(c => c[0])[0], lo = mm * len, hi = MM * len, turns = cand.slice(2).map(c => `f(${n(c[0])}) = ${n(c[1])}`),
   list = `f(${n(s)}) = ${n(f(s))}, f(${n(e)}) = ${n(f(e))}${turns.length ? `, ${turns.join(', ')}` : ''}`; return {
   prompt: `A booster pump’s flow is f(t) = t³ − 6t² + 9t + ${n(k)} litres per hour, t hours into a cycle, for 0 ≤ t ≤ 6. Its flow rises until t = 1, falls from t = 1 to t = 3, and rises again after t = 3. The meter certifies that the integral of f from 0 to ${n(e)} is ${n(tot)} litres and the integral of f from 0 to ${n(s)} is ${n(first)} litres. Enter the integral of f from ${n(s)} to ${n(e)}, then the lower bound m × (${n(e)} − ${n(s)}) and the upper bound M × (${n(e)} − ${n(s)}), where m and M are the smallest and largest values of f on [${n(s)}, ${n(e)}].`,
@@ -194,7 +197,8 @@ mk({
    { prompt: `The integral from 0 to ${n(e)} is ${n(tot)} and the integral from 0 to ${n(s)} is ${n(first)}. By additivity, what is the integral from ${n(s)} to ${n(e)}?`, answer: [piece], explanation: `The whole is the first part plus the rest, so the rest is ${n(tot)} − ${n(first)} = ${n(piece)} litres.` },
    { prompt: `The interval is [${n(s)}, ${n(e)}]. The turning points t = 1 and t = 3 count only when they lie inside it. Compare f at both ends and at every turning point inside. What is the smallest value m?`, answer: [mm], explanation: `${list}. The smallest is m = ${n(mm)}, reached at t = ${n(at(mm))}.` },
    { prompt: `From the same list of values, what is the largest value M?`, answer: [MM], explanation: `The largest value in the list ${list} is M = ${n(MM)}, reached at t = ${n(at(MM))}.` },
-   { prompt: `The piece has length ${n(len)}. What are m × ${n(len)} and M × ${n(len)}?`, answer: [lo, hi], labels: ['lower bound (litres)', 'upper bound (litres)'], explanation: `${n(mm)} × ${n(len)} = ${n(lo)} and ${n(MM)} × ${n(len)} = ${n(hi)}. The piece, ${n(piece)} litres, lies between them.` }
+   { prompt: `The piece has length ${n(len)}. What is the lower bound m × ${n(len)}?`, answer: [lo], labels: ['lower bound (litres)'], explanation: `${n(mm)} × ${n(len)} = ${n(lo)}. Since f ≥ m on the piece, its integral is at least this.` },
+   { prompt: `What is the upper bound M × ${n(len)}?`, answer: [hi], labels: ['upper bound (litres)'], explanation: `${n(MM)} × ${n(len)} = ${n(hi)}. The piece, ${n(piece)} litres, lies between ${n(lo)} and ${n(hi)}.` }
   ] }; }
 });
 
@@ -296,7 +300,7 @@ mk({
  draw: R => tryDraw(() => { const p = R.int(2, 4); return { c: R.int(5, 40), p, N: R.int(3, p === 2 ? 12 : p === 3 ? 8 : 5) }; },
   q => { const x = q34p(q); return !nearTie(x.I) && !nearTie(x.I + x.next) && r3(x.I) !== r3(x.I + x.next); }, { c: 12, p: 3, N: 4 }),
  build: ({ c, p, N }) => { const x = q34p({ c, p, N }), K = x.K, pw = SUP[p], term = `${n(c)} ÷ n${pw}`, xt = `${n(c)} ÷ x${pw}`, lo = r3(x.I), hi = r3(x.I + x.next); return {
-  prompt: `A drift log lists entries of ${term} litres for n = 1, 2, 3, … . The first ${n(N)} entries have been checked by hand. Let T be the total of all the later entries, n = ${n(K)}, ${n(K + 1)}, ${n(K + 2)}, … . Using the improper integral of ${xt} from ${n(K)} to infinity, enter a lower bound and an upper bound for T, each rounded to 3 decimal places (keep full precision until the last step).`,
+  prompt: `A drift log lists entries of ${term} litres for n = 1, 2, 3, … . The first ${n(N)} entries have been checked by hand. Let T be the total of all the later entries, n = ${n(K)}, ${n(K + 1)}, ${n(K + 2)}, … . Using the improper integral of ${xt} from ${n(K)} to infinity, enter the lower bound for T given by that integral alone, then the upper bound given by the first later entry (n = ${n(K)}) plus the integral, each rounded to 3 decimal places (keep full precision until the last step).`,
   answer: [lo, hi],
   hints: ['The improper integral of c ÷ xᵖ from K to infinity is c ÷ ((p − 1) × Kᵖ⁻¹) when p > 1. The entries are positive and shrink as n grows.', 'For a decreasing positive f, the tail f(K) + f(K + 1) + … lies between the integral of f from K to infinity and f(K) plus that integral. Here K is the number of the first unchecked entry.'],
   solution: `The entries are positive and shrink, and T starts at n = ${n(K)}. The improper integral of ${xt} from ${n(K)} to infinity is ${n(c)} ÷ (${n(p - 1)} × ${kpow(K, p - 1)}) = ${n(lo)} (to 3 decimal places), so T ≥ ${n(lo)}. The first term of T is ${n(c)} ÷ ${n(K)}${pw} = ${n(r3(x.next))} (to 3 decimal places), so T ≤ ${n(r3(x.next))} + ${n(lo)}; with full precision the bounds are ${n(lo)} and ${n(hi)}.`,

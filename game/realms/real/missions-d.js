@@ -26,7 +26,7 @@ const source = {
  s6_1: {"title":"Lebl, Basic Analysis — 6.1 Pointwise and uniform convergence","url":"https://www.jirka.org/ra/html/sec_puconv.html","description":"Pointwise convergence (N may depend on x), uniform convergence (one N for all x) and the uniform norm.","verified":"2026-11-28"},
  s6_2: {"title":"Lebl, Basic Analysis — 6.2 Interchange of limits","url":"https://www.jirka.org/ra/html/sec_liminter.html","description":"Uniform limits keep continuity and let a limit pass through an integral; power series converge uniformly on closed intervals inside the radius.","verified":"2026-11-28"},
  s11_2: {"title":"Lebl, Basic Analysis — 11.2 Swapping limits","url":"https://www.jirka.org/ra/html/sec_swaplim.html","description":"The Weierstrass M-test, and integrating a uniformly convergent series term by term.","verified":"2026-11-28"},
- s7_1: {"title":"Lebl, Basic Analysis — 7.1 Metric spaces","url":"https://www.jirka.org/ra/html/sec_metric.html","description":"The definition of a metric and a metric space, the euclidean metric, the complex numbers as the plane, and the discrete metric.","verified":"2026-11-28"}
+ s7_1: {"title":"Lebl, Basic Analysis — 7.1 Metric spaces","url":"https://www.jirka.org/ra/html/sec_metric.html","description":"The definition of a metric and a metric space, the euclidean metric, the complex numbers as the plane, and the discrete metric. The taxicab and maximum metrics and the open ball B(x, ρ) are not stated in this section; they are worked out in these missions.","verified":"2026-11-28"}
 };
 window.QUESTS = window.QUESTS || [];
 window.QUESTS.push(
@@ -114,7 +114,8 @@ window.QUESTS.push(
    { prompt: "The integral from 0 to 6 is 36 and the integral from 0 to 3 is 27. By additivity, what is the integral from 3 to 6?", answer: [9], labels: ["integral of the piece (litres)"], explanation: "The whole is the first part plus the rest, so the rest is 36 − 27 = 9 litres." },
    { prompt: "f(t) = (t − 4)² + 2. What is the smallest value m of f on [3, 6]?", answer: [2], labels: ["m"], explanation: "The square is 0 at t = 4, which lies in the interval, so m = 2." },
    { prompt: "What is the largest value M of f on [3, 6]?", answer: [6], labels: ["M"], explanation: "The square grows away from t = 4, so the largest value is at an end: f(3) = 3 and f(6) = 6, so M = 6." },
-   { prompt: "The piece has length 3. What are m × 3 and M × 3?", answer: [6,18], labels: ["lower bound (litres)","upper bound (litres)"], explanation: "2 × 3 = 6 and 6 × 3 = 18. The piece, 9 litres, lies between them." }
+   { prompt: "The piece has length 3. What is the lower bound m × 3?", answer: [6], labels: ["lower bound (litres)"], explanation: "2 × 3 = 6. Since f ≥ m on the piece, its integral is at least this." },
+   { prompt: "What is the upper bound M × 3?", answer: [18], labels: ["upper bound (litres)"], explanation: "6 × 3 = 18. The piece, 9 litres, lies between 6 and 18." }
   ]
  },
  {
@@ -209,13 +210,13 @@ window.QUESTS.push(
   id: 'q35', title: "Models that settle one load at a time", topic: "Pointwise convergence", tier: 'Advanced', sector: 'Simulation Hall',
   brief: "Each new gauge model improves on the last, and the hall wants to know what they settle on at each load and how soon.",
   lesson: "fₙ → f pointwise when, for each fixed x, the numbers fₙ(x) converge to f(x); the N that meets ε may depend on x.",
-  prompt: "A simulated gauge’s n-th model gives the reading fₙ(x) = (2 + 8nx) ÷ (1 + nx) at load x ≥ 0. Enter the pointwise limit f(0), then the pointwise limit f(0.5), then the smallest N for which |fₙ(0.5) − f(0.5)| < 0.1 holds for every n ≥ N (type it without commas).",
-  answer: [2,8,119], labels: ["f(0)","f at the second load","N"], tolerance: 0.01,
+  prompt: "A simulated gauge’s n-th model gives the reading fₙ(x) = (2 + 8nx) ÷ (1 + nx) at load x ≥ 0. Enter the pointwise limit f(0), then the pointwise limit f(1.5), then the smallest N for which |fₙ(1.5) − f(1.5)| < 0.1 holds for every n ≥ N (type it without commas).",
+  answer: [2,8,40], labels: ["f(0)","f at the second load","N"], tolerance: 0.01,
   hints: [
    "Fix x first, then let n grow. At x = 0 every model gives the same number; for x > 0 divide the top and the bottom by n.",
    "For x > 0, write fₙ(x) − f(x) over the common bottom 1 + nx: the terms with nx cancel, leaving a constant ÷ (1 + nx), which shrinks as n grows. Solve “that < the tolerance” for n; the inequality is strict."
   ],
-  solution: "At x = 0, fₙ(0) = 2 ÷ 1 = 2 for every n, so f(0) = 2. For x > 0, dividing the top and the bottom by n gives (2 ÷ n + 8x) ÷ (1 ÷ n + x), which approaches 8x ÷ x = 8; so f(0.5) = 8. The gap is |fₙ(0.5) − 8| = 6 ÷ (1 + 0.5n). It is below 0.1 when 1 + 0.5n > 60, that is n > 59 ÷ 0.5 = 118 (strictly). The gap only shrinks as n grows, so the smallest N is 119.",
+  solution: "At x = 0, fₙ(0) = 2 ÷ 1 = 2 for every n, so f(0) = 2. For x > 0, dividing the top and the bottom by n gives (2 ÷ n + 8x) ÷ (1 ÷ n + x), which approaches 8x ÷ x = 8; so f(1.5) = 8. The gap is |fₙ(1.5) − 8| = 6 ÷ (1 + 1.5n). It is below 0.1 when 1 + 1.5n > 60, that is n > 59 ÷ 1.5 = about 39.33. The gap only shrinks as n grows, so the smallest N is 40.",
   xp: 200, prereqs: ["q07"],
   artifact: {"name":"Load-by-load table","description":"Readings that settle at every load, but not all at the same pace."},
   sources: [source.s6_1],
@@ -243,9 +244,9 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: "Put x = 0 into fₙ(x). What number does every model give there, and so what is f(0)?", answer: [2], labels: ["f(0)"], explanation: "fₙ(0) = 2 ÷ 1 = 2 for every n, and a sequence that never changes converges to that value." },
-   { prompt: "Fix x = 0.5 and let n grow. What is the limit f(0.5)?", answer: [8], labels: ["f at the second load"], explanation: "Divide the top and the bottom by n: (2 ÷ n + 4) ÷ (1 ÷ n + 0.5) approaches 4 ÷ 0.5 = 8." },
-   { prompt: "The gap at x = 0.5 is 6 ÷ (1 + 0.5n). What is the smallest N with this below 0.1 for every n ≥ N?", answer: [119], labels: ["N"], explanation: "6 ÷ (1 + 0.5n) < 0.1 means 1 + 0.5n > 60, so n > 118. The smallest whole number strictly above it is 119, and larger n only make the gap smaller." }
+   { prompt: "Put x = 0 into fₙ(x): every model gives the same number there. What is the pointwise limit f(0)?", answer: [2], labels: ["f(0)"], explanation: "fₙ(0) = 2 ÷ 1 = 2 for every n, and a sequence that never changes converges to that value." },
+   { prompt: "Fix x = 1.5 and let n grow. What is the limit f(1.5)?", answer: [8], labels: ["f at the second load"], explanation: "Divide the top and the bottom by n: (2 ÷ n + 12) ÷ (1 ÷ n + 1.5) approaches 12 ÷ 1.5 = 8." },
+   { prompt: "The gap at x = 1.5 is 6 ÷ (1 + 1.5n). What is the smallest N with this below 0.1 for every n ≥ N?", answer: [40], labels: ["N"], explanation: "6 ÷ (1 + 1.5n) < 0.1 means 1 + 1.5n > 60, so n > about 39.33. The smallest whole number strictly above it is 40, and larger n only make the gap smaller." }
   ]
  },
  {
@@ -431,7 +432,7 @@ window.QUESTS.push(
    "The sign (−1)ᵏ never changes the size of a term, so the ratio test sees |x| ÷ b.",
    "On [−r, r] each term is at most c(r ÷ b)ᵏ in size; sum that geometric series. The euclidean distance from the origin is the square root of the sum of the squared coordinates."
   ],
-  solution: "The size of the ratio of consecutive terms is |x| ÷ 6, below 1 exactly when |x| < 6: the radius is 6. On [−2, 2] each term is at most Mₖ = 5 × (2/6)ᵏ, and these sum to 5 ÷ (1 − 0.3333) = 7.5, which certifies uniform convergence there. The point (3, −4) is at distance √(9 + 16) = √25 = 5 from the origin. In complex analysis the same series is summed at points of the plane, and it converges in the open ball of radius 6 about the origin, so this point lies inside that disc.",
+  solution: "The size of the ratio of consecutive terms is |x| ÷ 6, below 1 exactly when |x| < 6: the radius is 6. On [−2, 2] each term is at most Mₖ = 5 × (2/6)ᵏ, and these sum to 5 ÷ (1 − 2/6) = 7.5, which certifies uniform convergence there. The point (3, −4) is at distance √(9 + 16) = √25 = 5 from the origin. In complex analysis the same series is summed at points of the plane, and it converges in the open ball of radius 6 about the origin, so this point lies inside that disc.",
   xp: 200, prereqs: ["q38","q39"],
   artifact: {"name":"Master certificate","description":"The last seal of the Standards Laboratory, drawn as a disc in the plane."},
   sources: [source.s6_2, source.s7_1],
@@ -460,7 +461,7 @@ window.QUESTS.push(
   },
   guidance: [
    { prompt: "The ratio of consecutive terms has size |x| ÷ 6. What is the radius of convergence?", answer: [6], labels: ["radius of convergence"], explanation: "|x| ÷ 6 < 1 exactly when |x| < 6, so the radius is 6." },
-   { prompt: "On [−2, 2], Mₖ = 5 × 0.3333ᵏ. What is the sum of the Mₖ?", answer: [7.5], labels: ["M-test bound"], explanation: "5 ÷ (1 − 0.3333) = 5 ÷ 0.6667 = 7.5." },
+   { prompt: "On [−2, 2], Mₖ = 5 × (2/6)ᵏ. What is the sum of the Mₖ?", answer: [7.5], labels: ["M-test bound"], explanation: "5 ÷ (1 − 2/6) = 5 × 6 ÷ 4 = 7.5." },
    { prompt: "What is the euclidean distance from (0, 0) to (3, −4)?", answer: [5], labels: ["distance"], explanation: "√(3² + (−4)²) = √25 = 5." }
   ]
  }

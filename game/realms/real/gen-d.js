@@ -73,7 +73,8 @@ Object.assign(window.MISSION_GEN, {
     { prompt: `The integral from 0 to ${n(c)} is ${n(tot)} and the integral from 0 to ${n(b)} is ${n(first)}. By additivity, what is the integral from ${n(b)} to ${n(c)}?`, answer: [piece], explanation: `The whole is the first part plus the rest, so the rest is ${n(tot)} − ${n(first)} = ${n(piece)} litres.` },
     { prompt: `f(t) = (t − ${n(h)})² + ${n(k)}. What is the smallest value m of f on [${n(b)}, ${n(c)}]?`, answer: [mm], explanation: inside ? `The square is 0 at t = ${n(h)}, which lies in the interval, so m = ${n(k)}.` : `t = ${n(h)} lies outside the interval, so the smallest value is at an end: f(${n(b)}) = ${n(fb)} and f(${n(c)}) = ${n(fc)}, so m = ${n(mm)}.` },
     { prompt: `What is the largest value M of f on [${n(b)}, ${n(c)}]?`, answer: [MM], explanation: `The square grows away from t = ${n(h)}, so the largest value is at an end: f(${n(b)}) = ${n(fb)} and f(${n(c)}) = ${n(fc)}, so M = ${n(MM)}.` },
-    { prompt: `The piece has length ${n(len)}. What are m × ${n(len)} and M × ${n(len)}?`, answer: [lo, hi], labels: ['lower bound (litres)', 'upper bound (litres)'], explanation: `${n(mm)} × ${n(len)} = ${n(lo)} and ${n(MM)} × ${n(len)} = ${n(hi)}. The piece, ${n(piece)} litres, lies between them.` }
+    { prompt: `The piece has length ${n(len)}. What is the lower bound m × ${n(len)}?`, answer: [lo], labels: ['lower bound (litres)'], explanation: `${n(mm)} × ${n(len)} = ${n(lo)}. Since f ≥ m on the piece, its integral is at least this.` },
+    { prompt: `What is the upper bound M × ${n(len)}?`, answer: [hi], labels: ['upper bound (litres)'], explanation: `${n(MM)} × ${n(len)} = ${n(hi)}. The piece, ${n(piece)} litres, lies between ${n(lo)} and ${n(hi)}.` }
    ] }; }
  },
  /* Step rate: p before s, a single reading r at s, q after s. F(x) = ps for x = s, ps + q(x − s) after.
@@ -118,9 +119,9 @@ Object.assign(window.MISSION_GEN, {
     |fₙ(x₁) − K| = D ÷ (1 + nx₁) with D = |B − K|; with ε = 1 ÷ w and x₁ = u ÷ v the smallest n with this below ε is
     floor(v(Dw − 1) ÷ u) + 1, in integers. The gap shrinks as n grows, so it stays below ε from then on. */
  q35: {
-  canonical: { B: 2, K: 8, xi: 0, wi: 2 },
+  canonical: { B: 2, K: 8, xi: 6, wi: 2 },
   draw: R => tryDraw(() => { const B = R.int(0, 9); return { B, K: R.except(2, 9, [B]), xi: R.int(0, Q35X.length - 1), wi: R.int(0, Q35W.length - 1) }; },
-   p => !(p.B === 1 && p.K === 5), { B: 2, K: 8, xi: 0, wi: 2 }),
+   p => !(p.B === 1 && p.K === 5), { B: 2, K: 8, xi: 6, wi: 2 }),
   build: ({ B, K, xi, wi }) => { const [u, v] = Q35X[xi], w = Q35W[wi], x1 = u / v, eps = 1 / w, D = Math.abs(B - K), Q = D * w,
    N = Math.floor(v * (Q - 1) / u) + 1, bound = v * (Q - 1) / u, exact = (v * (Q - 1)) % u === 0, ftext = `(${n(B)} + ${n(K)}nx) ÷ (1 + nx)`.replace('(0 + ', '('); return {
    prompt: `A simulated gauge’s n-th model gives the reading fₙ(x) = ${ftext} at load x ≥ 0. Enter the pointwise limit f(0), then the pointwise limit f(${n(x1)}), then the smallest N for which |fₙ(${n(x1)}) − f(${n(x1)})| < ${n(eps)} holds for every n ≥ N (type it without commas).`,
@@ -128,7 +129,7 @@ Object.assign(window.MISSION_GEN, {
    hints: ['Fix x first, then let n grow. At x = 0 every model gives the same number; for x > 0 divide the top and the bottom by n.', 'For x > 0, write fₙ(x) − f(x) over the common bottom 1 + nx: the terms with nx cancel, leaving a constant ÷ (1 + nx), which shrinks as n grows. Solve “that < the tolerance” for n; the inequality is strict.'],
    solution: `At x = 0, fₙ(0) = ${n(B)} ÷ 1 = ${n(B)} for every n, so f(0) = ${n(B)}. For x > 0, dividing the top and the bottom by n gives (${n(B)} ÷ n + ${n(K)}x) ÷ (1 ÷ n + x), which approaches ${n(K)}x ÷ x = ${n(K)}; so f(${n(x1)}) = ${n(K)}. The gap is |fₙ(${n(x1)}) − ${n(K)}| = ${n(D)} ÷ (1 + ${n(x1)}n). It is below ${n(eps)} when 1 + ${n(x1)}n > ${n(Q)}, that is n > ${n(Q - 1)} ÷ ${n(x1)} = ${approx(bound)}${exact ? ' (strictly)' : ''}. The gap only shrinks as n grows, so the smallest N is ${n(N)}.`,
    guidance: [
-    { prompt: `Put x = 0 into fₙ(x). What number does every model give there, and so what is f(0)?`, answer: [B], explanation: `fₙ(0) = ${n(B)} ÷ 1 = ${n(B)} for every n, and a sequence that never changes converges to that value.` },
+    { prompt: `Put x = 0 into fₙ(x): every model gives the same number there. What is the pointwise limit f(0)?`, answer: [B], explanation: `fₙ(0) = ${n(B)} ÷ 1 = ${n(B)} for every n, and a sequence that never changes converges to that value.` },
     { prompt: `Fix x = ${n(x1)} and let n grow. What is the limit f(${n(x1)})?`, answer: [K], explanation: `Divide the top and the bottom by n: (${n(B)} ÷ n + ${n(K * x1)}) ÷ (1 ÷ n + ${n(x1)}) approaches ${n(K * x1)} ÷ ${n(x1)} = ${n(K)}.` },
     { prompt: `The gap at x = ${n(x1)} is ${n(D)} ÷ (1 + ${n(x1)}n). What is the smallest N with this below ${n(eps)} for every n ≥ N?`, answer: [N], explanation: `${n(D)} ÷ (1 + ${n(x1)}n) < ${n(eps)} means 1 + ${n(x1)}n > ${n(Q)}, so n > ${approx(bound)}. The smallest whole number strictly above it is ${n(N)}, and larger n only make the gap smaller.` }
    ] }; }
@@ -220,10 +221,10 @@ Object.assign(window.MISSION_GEN, {
    prompt: `For the final certificate the simulation core sums ${n(c)}(−1)ᵏxᵏ ÷ ${n(b)}ᵏ for k = 0, 1, 2, … . Enter its radius of convergence, then the Weierstrass M-test bound on [−${n(r)}, ${n(r)}], then the euclidean distance from the origin to the point (${n(u)}, ${n(v)}) of the plane, where complex analysis will next evaluate such series.`,
    answer: [b, S, d],
    hints: ['The sign (−1)ᵏ never changes the size of a term, so the ratio test sees |x| ÷ b.', 'On [−r, r] each term is at most c(r ÷ b)ᵏ in size; sum that geometric series. The euclidean distance from the origin is the square root of the sum of the squared coordinates.'],
-   solution: `The size of the ratio of consecutive terms is |x| ÷ ${n(b)}, below 1 exactly when |x| < ${n(b)}: the radius is ${n(b)}. On [−${n(r)}, ${n(r)}] each term is at most Mₖ = ${n(c)} × (${n(r)}/${n(b)})ᵏ, and these sum to ${n(c)} ÷ (1 − ${n(q)}) = ${n(S)}, which certifies uniform convergence there. The point (${n(u)}, ${n(v)}) is at distance √(${n(u * u)} + ${n(v * v)}) = √${n(d * d)} = ${n(d)} from the origin. In complex analysis the same series is summed at points of the plane, and it converges in the open ball of radius ${n(b)} about the origin, so this point lies ${inside ? 'inside' : d === b ? 'on the edge of' : 'outside'} that disc.`,
+   solution: `The size of the ratio of consecutive terms is |x| ÷ ${n(b)}, below 1 exactly when |x| < ${n(b)}: the radius is ${n(b)}. On [−${n(r)}, ${n(r)}] each term is at most Mₖ = ${n(c)} × (${n(r)}/${n(b)})ᵏ, and these sum to ${n(c)} ÷ (1 − ${n(r)}/${n(b)}) = ${n(S)}, which certifies uniform convergence there. The point (${n(u)}, ${n(v)}) is at distance √(${n(u * u)} + ${n(v * v)}) = √${n(d * d)} = ${n(d)} from the origin. In complex analysis the same series is summed at points of the plane, and it converges in the open ball of radius ${n(b)} about the origin, so this point lies ${inside ? 'inside' : d === b ? 'on the edge of' : 'outside'} that disc.`,
    guidance: [
     { prompt: `The ratio of consecutive terms has size |x| ÷ ${n(b)}. What is the radius of convergence?`, answer: [b], labels: ['radius of convergence'], explanation: `|x| ÷ ${n(b)} < 1 exactly when |x| < ${n(b)}, so the radius is ${n(b)}.` },
-    { prompt: `On [−${n(r)}, ${n(r)}], Mₖ = ${n(c)} × ${n(q)}ᵏ. What is the sum of the Mₖ?`, answer: [S], labels: ['M-test bound'], explanation: `${n(c)} ÷ (1 − ${n(q)}) = ${n(c)} ÷ ${n(1 - q)} = ${n(S)}.` },
+    { prompt: `On [−${n(r)}, ${n(r)}], Mₖ = ${n(c)} × (${n(r)}/${n(b)})ᵏ. What is the sum of the Mₖ?`, answer: [S], labels: ['M-test bound'], explanation: `${n(c)} ÷ (1 − ${n(r)}/${n(b)}) = ${n(c)} × ${n(b)} ÷ ${n(b - r)} = ${n(S)}.` },
     { prompt: `What is the euclidean distance from (0, 0) to (${n(u)}, ${n(v)})?`, answer: [d], labels: ['distance'], explanation: `√(${par(u)}² + ${par(v)}²) = √${n(d * d)} = ${n(d)}.` }
    ] }; }
  }
