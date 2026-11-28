@@ -1,0 +1,225 @@
+{
+ "id": "topo",
+ "name": "Topology: shape without size",
+ "short": "Topology",
+ "description": "Distance, open sets, continuity, surfaces and loops: the shape of things that can stretch and bend, taught at the Kepler outpost.",
+ "about": "Topology realm (\"Topology: shape without size\"): distance, open and closed sets, continuity, connectedness, compactness,\nsurfaces, curvature and loops, for an adult who has finished Foundations, Calculus 1 and 2, Logic and proof and Real analysis.\nSame Kepler outpost, now the Shape Lab, where the crew builds domes, cable looms and hull panels whose shape matters more than\ntheir size. Mira is still the mentor. The concept plan is docs/plans/TOPO-PLAN.md.",
+ "registry": {
+  "part": "topo"
+ },
+ "achievements": {
+  "done": "Same shape, any size",
+  "master": "Every surface named"
+ },
+ "chapters": [
+  {
+   "name": "Distance and open sets",
+   "blurb": "Three ways to measure distance, balls, open and closed sets, interior and boundary.",
+   "tier": "Basic",
+   "size": 6,
+   "sector": {
+    "name": "Survey Grid",
+    "purpose": "measure distance the way each rover really travels"
+   },
+   "landmark": {
+    "name": "Grid beacon",
+    "glyph": "survey-tower"
+   }
+  },
+  {
+   "name": "Topological spaces",
+   "blurb": "Open sets without distance, closed sets, bases and continuous maps.",
+   "tier": "Basic",
+   "size": 5,
+   "sector": {
+    "name": "Relay Network",
+    "purpose": "say which places are near without a ruler"
+   },
+   "landmark": {
+    "name": "Relay node",
+    "glyph": "relay-pylons"
+   }
+  },
+  {
+   "name": "Connected and compact",
+   "blurb": "Components, cut points, homeomorphisms, open covers and compact sets.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Cable Works",
+    "purpose": "know when a cable is in one piece"
+   },
+   "landmark": {
+    "name": "Cable loom",
+    "glyph": "coil-tower"
+   }
+  },
+  {
+   "name": "Gluing surfaces",
+   "blurb": "Quotient spaces, the standard surfaces and the Euler characteristic.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Fabric Bay",
+    "purpose": "sew flat panels into closed hulls"
+   },
+   "landmark": {
+    "name": "Panel frame",
+    "glyph": "lattice-frame"
+   }
+  },
+  {
+   "name": "Classifying surfaces",
+   "blurb": "Connected sums, genus, cross-caps, orientability and the classification.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Hull Gallery",
+    "purpose": "name every hull shape we could ever build"
+   },
+   "landmark": {
+    "name": "Hull models",
+    "glyph": "knot-sculpture"
+   }
+  },
+  {
+   "name": "Curvature and shape",
+   "blurb": "Curvature, curved triangles, Gauss–Bonnet and fundamental domains.",
+   "tier": "Advanced",
+   "size": 5,
+   "sector": {
+    "name": "Observatory",
+    "purpose": "tell the shape of our world from inside it"
+   },
+   "landmark": {
+    "name": "Star dome",
+    "glyph": "observatory"
+   }
+  },
+  {
+   "name": "Loops",
+   "blurb": "Winding numbers, joining loops, circle maps, loops in graphs and fixed points.",
+   "tier": "Advanced",
+   "size": 6,
+   "sector": {
+    "name": "Orbit Ring",
+    "purpose": "count how often a path goes round"
+   },
+   "landmark": {
+    "name": "Orbit ring",
+    "glyph": "torus-ring"
+   }
+  }
+ ],
+ "landmarkCost": 4,
+ "ranks": [
+  "GRID WALKER",
+  "RELAY KEEPER",
+  "CABLE TESTER",
+  "PANEL SEWER",
+  "HULL NAMER",
+  "SKY READER",
+  "LOOP TRACKER",
+  "SHAPE ANALYST",
+  "MASTER OF SHAPE"
+ ],
+ "source": {
+  "pattern": "LibreTexts|Wikibooks",
+  "label": "LibreTexts or Wikibooks",
+  "book": "Jiří Lebl, Basic Analysis: Introduction to Real Analysis; Hitchman, Geometry with an Introduction to Cosmic Topology; Wikibooks, Topology",
+  "url": "https://math.libretexts.org/Bookshelves/Analysis/Introduction_to_Real_Analysis_(Lebl)/08%3A_Metric_Spaces/8.0<N>%3A_<Section>",
+  "example": "Lebl, Introduction to Real Analysis (LibreTexts) — 8.2 Open and Closed Sets"
+ },
+ "mentor": {
+  "name": "Mira",
+  "role": "field engineer",
+  "cardEyebrow": "MIRA / YOUR FIELD ENGINEER",
+  "opening": "I’m Mira. Every cable, panel and dome in the Shape Lab changes its measurements when we bend it, and we have to {purpose}. Your task is “{title}.” {brief} The idea we need: {topic}.",
+  "closing": "You already have everything this needs from Foundations, Calculus and Real analysis. I’ll work the first example with you, and the guided steps are there whenever you want them."
+ },
+ "copy": {
+  "sceneLabel": "KEPLER OUTPOST / SHAPE LAB",
+  "homeEyebrow": "THE SHAPE LAB IS OPEN",
+  "homeTitle": "Stretch it, bend it, it stays the same.<br><em>Learn what shape really means.</em>",
+  "firstVisit": "Welcome to the Shape Lab. Our domes inflate, our cables bend and our hull panels stretch, so the measurements we used to trust keep changing. We start with the question underneath all of it: what does it mean for two places to be close?",
+  "allDone": "You can now name every hull we could ever sew and count every loop round the ring. Complex analysis opens next at the Antenna Field, where winding numbers turn into integrals.",
+  "beginFirst": "Measure the first distance",
+  "missionNoun": "topology missions",
+  "chaptersNote": "Seven chapters. Learn every concept in a chapter to unlock a landmark for the outpost. Practice missions are optional.",
+  "skills": {
+   "eyebrow": "YOUR DEVELOPMENT",
+   "title": "The skill tree",
+   "text": "Follow the prerequisite branches from distance to loops. Each mission you finish opens the ideas that are built on it."
+  },
+  "guideNoun": "topology topics",
+  "visual": {
+   "eyebrow": "TRY IT YOURSELF",
+   "title": "The concept bench",
+   "text": "Pick any mission, change its numbers and predict the answer before you check it. Nothing here affects your progress, and it all works offline."
+  }
+ },
+ "help": {
+  "eyebrow": "WELCOME TO THE SHAPE LAB",
+  "title": "Look for what stays the same when you stretch.",
+  "intro": "Topology starts where real analysis ends: with a set of places and a way of saying which ones are near. It studies the shape of things that can be stretched, bent and glued but not torn. Every new word and symbol is explained before you are asked to use it, with a worked example first.",
+  "answers": "Answers are numbers: a distance, a radius, a count, an Euler characteristic, a genus, a winding number, an area or a curvature. A shape is never typed. A yes or no is typed as 1 or 0. Decimals are given to 2 places unless a mission says otherwise."
+ },
+ "glossaryRequired": [
+  "metric",
+  "open set",
+  "closed set",
+  "topology",
+  "continuous",
+  "homeomorphism",
+  "connected",
+  "compact",
+  "surface",
+  "Euler characteristic",
+  "genus",
+  "orientable",
+  "curvature",
+  "winding number"
+ ],
+ "concepts": {
+  "q01": "Three ways to measure distance [L 8.1]",
+  "q02": "Balls in different metrics [L 8.1, 8.2]",
+  "q03": "The metric rules [L 8.1]",
+  "q04": "Open sets: room round every point [L 8.2]",
+  "q05": "Interior, closure and boundary [L 8.2]",
+  "q06": "Unions and intersections of open sets [L 8.2]",
+  "q07": "Topologies on a finite set [W Topological Spaces]",
+  "q08": "Closed sets and closure [W Topological Spaces]",
+  "q09": "Bases [W Bases]",
+  "q10": "Continuous maps [W Continuity and Homeomorphisms, L 8.5]",
+  "q11": "Chapter review: the relay map [W Topological Spaces, W Continuity]",
+  "q12": "Connected sets and components [L 8.2, W Connectedness]",
+  "q13": "Cut points [W Connectedness]",
+  "q14": "Homeomorphisms: telling shapes apart [W Continuity and Homeomorphisms]",
+  "q15": "Open covers and compactness [L 8.4, W Compactness]",
+  "q16": "Continuous images of compact sets [L 8.5]",
+  "q17": "Chapter review: one-piece cables [L 8.4, L 8.5]",
+  "q18": "Gluing: quotient spaces [H 7.7]",
+  "q19": "The standard surfaces [H 7.5]",
+  "q20": "Euler characteristic of a cell division [H 7.5]",
+  "q21": "Graphs and surfaces with holes [H 7.5]",
+  "q22": "Surfaces from labelled polygons [H 7.5, 7.7]",
+  "q23": "Chapter review: closing a hull [H 7.5]",
+  "q24": "Connected sums [H 7.5]",
+  "q25": "Genus [H 7.5]",
+  "q26": "Cross-caps [H 7.5]",
+  "q27": "Classification of surfaces [H 7.5]",
+  "q28": "Orientability from a gluing word [H 7.5]",
+  "q29": "Chapter review: naming every hull [H 7.5]",
+  "q30": "Curvature of a sphere [H 7.1]",
+  "q31": "Triangles on curved surfaces [H 7.2, 7.4]",
+  "q32": "Gauss–Bonnet [H 7.6]",
+  "q33": "Which geometry a surface allows [H 7.4, 7.6]",
+  "q34": "Fundamental domains [H 7.7]",
+  "q35": "Loops and winding numbers [W The fundamental group]",
+  "q36": "Joining loops: winding numbers add [W The fundamental group]",
+  "q37": "Wrapping maps of the circle [W The fundamental group]",
+  "q38": "Independent loops in a graph [H 7.5]",
+  "q39": "Fixed points [L 8.5]",
+  "q40": "Realm review and bridge to Complex analysis [W The fundamental group, H 7.5]"
+ }
+}

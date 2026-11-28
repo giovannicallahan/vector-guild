@@ -92,5 +92,25 @@ window.VG_PACKS = {
   title: 'Complex analysis: the plane of numbers',
   styles: ['styles.css', 'update.css'],
   scripts: ['realms/complex/pack.js', 'realms/complex/missions-a.js', 'realms/complex/missions-b.js', 'realms/complex/missions-c.js', 'realms/complex/missions-d.js', 'gen-core.js', 'realms/complex/gen-a.js', 'realms/complex/gen-b.js', 'realms/complex/gen-c.js', 'realms/complex/gen-d.js', 'gameplay.js', 'realms/complex/experiments-a.js', 'realms/complex/experiments-b.js', 'realms/complex/experiments-c.js', 'realms/complex/experiments-d.js', 'realms/complex/variants-a.js', 'realms/complex/variants-b.js', 'realms/complex/variants-c.js', 'realms/complex/variants-d.js', 'realms/complex/practice-1.js', 'realms/complex/practice-2.js', 'realms/complex/practice-3.js', 'realms/complex/practice-4.js', 'realms/complex/practice-5.js', 'realms/complex/practice-6.js', 'realms/complex/practice-7.js', 'realms/complex/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/complex/glossary.js', 'glossary.js']
+ },
+ topo: {
+  title: 'Topology: shape without size',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/topo/pack.js', 'realms/topo/missions-a.js', 'realms/topo/missions-b.js', 'realms/topo/missions-c.js', 'realms/topo/missions-d.js', 'gen-core.js', 'realms/topo/gen-a.js', 'realms/topo/gen-b.js', 'realms/topo/gen-c.js', 'realms/topo/gen-d.js', 'gameplay.js', 'realms/topo/experiments-a.js', 'realms/topo/experiments-b.js', 'realms/topo/experiments-c.js', 'realms/topo/experiments-d.js', 'realms/topo/variants-a.js', 'realms/topo/variants-b.js', 'realms/topo/variants-c.js', 'realms/topo/variants-d.js', 'realms/topo/practice-1.js', 'realms/topo/practice-2.js', 'realms/topo/practice-3.js', 'realms/topo/practice-4.js', 'realms/topo/practice-5.js', 'realms/topo/practice-6.js', 'realms/topo/practice-7.js', 'realms/topo/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/topo/glossary.js', 'glossary.js']
+ },
+ mech: {
+  title: 'Mechanics: motion and force',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/mech/pack.js', 'realms/mech/missions-a.js', 'realms/mech/missions-b.js', 'realms/mech/missions-c.js', 'realms/mech/missions-d.js', 'gen-core.js', 'realms/mech/gen-a.js', 'realms/mech/gen-b.js', 'realms/mech/gen-c.js', 'realms/mech/gen-d.js', 'gameplay.js', 'realms/mech/experiments-a.js', 'realms/mech/experiments-b.js', 'realms/mech/experiments-c.js', 'realms/mech/experiments-d.js', 'realms/mech/variants-a.js', 'realms/mech/variants-b.js', 'realms/mech/variants-c.js', 'realms/mech/variants-d.js', 'realms/mech/practice-1.js', 'realms/mech/practice-2.js', 'realms/mech/practice-3.js', 'realms/mech/practice-4.js', 'realms/mech/practice-5.js', 'realms/mech/practice-6.js', 'realms/mech/practice-7.js', 'realms/mech/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/mech/glossary.js', 'glossary.js']
+ },
+ em: {
+  title: 'Electricity and magnetism: fields',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/em/pack.js', 'realms/em/missions-a.js', 'realms/em/missions-b.js', 'realms/em/missions-c.js', 'realms/em/missions-d.js', 'gen-core.js', 'realms/em/gen-a.js', 'realms/em/gen-b.js', 'realms/em/gen-c.js', 'realms/em/gen-d.js', 'gameplay.js', 'realms/em/experiments-a.js', 'realms/em/experiments-b.js', 'realms/em/experiments-c.js', 'realms/em/experiments-d.js', 'realms/em/variants-a.js', 'realms/em/variants-b.js', 'realms/em/variants-c.js', 'realms/em/variants-d.js', 'realms/em/practice-1.js', 'realms/em/practice-2.js', 'realms/em/practice-3.js', 'realms/em/practice-4.js', 'realms/em/practice-5.js', 'realms/em/practice-6.js', 'realms/em/practice-7.js', 'realms/em/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/em/glossary.js', 'glossary.js']
+ },
+ waves: {
+  title: 'Waves: sound and light',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/waves/pack.js', 'realms/waves/missions-a.js', 'realms/waves/missions-b.js', 'realms/waves/missions-c.js', 'realms/waves/missions-d.js', 'gen-core.js', 'realms/waves/gen-a.js', 'realms/waves/gen-b.js', 'realms/waves/gen-c.js', 'realms/waves/gen-d.js', 'gameplay.js', 'realms/waves/experiments-a.js', 'realms/waves/experiments-b.js', 'realms/waves/experiments-c.js', 'realms/waves/experiments-d.js', 'realms/waves/variants-a.js', 'realms/waves/variants-b.js', 'realms/waves/variants-c.js', 'realms/waves/variants-d.js', 'realms/waves/practice-1.js', 'realms/waves/practice-2.js', 'realms/waves/practice-3.js', 'realms/waves/practice-4.js', 'realms/waves/practice-5.js', 'realms/waves/practice-6.js', 'realms/waves/practice-7.js', 'realms/waves/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/waves/glossary.js', 'glossary.js']
  }
 };

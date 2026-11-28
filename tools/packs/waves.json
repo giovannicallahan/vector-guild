@@ -1,0 +1,160 @@
+{
+ "id": "waves",
+ "name": "Waves: sound and light",
+ "short": "Sound and light",
+ "description": "Oscillations, travelling waves, sound, light, interference and diffraction, taught at the Kepler outpost.",
+ "about": "Waves realm (\"Waves: sound and light\"): oscillations, travelling waves, superposition, sound, light, interference and\ndiffraction, for an adult who has finished Foundations, Calculus 1 and Mechanics and nothing more. Same Kepler outpost, now\nlistening and looking: the Signal Ridge. Mira is still the mentor. The concept plan is docs/plans/WAVES-PLAN.md.",
+ "registry": {"part": "waves"},
+ "achievements": {"done": "Perfect pitch", "master": "Interference pattern"},
+ "chapters": [
+  {
+   "name": "Oscillations",
+   "blurb": "Springs and pendulums that swing back and forth, losing energy or being driven.",
+   "tier": "Basic",
+   "size": 6,
+   "sector": {"name": "Quake Station", "purpose": "read every tremor the ground sends us"},
+   "landmark": {"name": "Seismometer", "glyph": "pendulum-frame"}
+  },
+  {
+   "name": "Travelling waves",
+   "blurb": "Wavelength, frequency, the wave function and the speed of a wave on a cable.",
+   "tier": "Basic",
+   "size": 5,
+   "sector": {"name": "Mast Cables", "purpose": "send pulses up the mast without snapping a line"},
+   "landmark": {"name": "Guyed mast", "glyph": "wave-mast"}
+  },
+  {
+   "name": "Superposition and sound",
+   "blurb": "Waves that add, standing waves, the speed and loudness of sound, and pipes.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {"name": "Assembly Hall", "purpose": "make every voice in the hall clear"},
+   "landmark": {"name": "Organ pipes", "glyph": "obelisk"}
+  },
+  {
+   "name": "Sound on the move",
+   "blurb": "Beats, the Doppler effect, shock waves and speakers that cancel.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {"name": "Rover Track", "purpose": "hear a rover coming and know its speed"},
+   "landmark": {"name": "Siren tower", "glyph": "lighthouse"}
+  },
+  {
+   "name": "Rays of light",
+   "blurb": "How light bends, reflects, gets trapped and is focused by mirrors and lenses.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {"name": "Lens Workshop", "purpose": "grind lenses that put an image exactly where we want it"},
+   "landmark": {"name": "Telescope dome", "glyph": "telescope"}
+  },
+  {
+   "name": "Interference of light",
+   "blurb": "Double slits, thin films, the interferometer and the first single-slit pattern.",
+   "tier": "Advanced",
+   "size": 5,
+   "sector": {"name": "Fringe Lab", "purpose": "measure lengths smaller than a wavelength"},
+   "landmark": {"name": "Interferometer arm", "glyph": "lattice-frame"}
+  },
+  {
+   "name": "Diffraction",
+   "blurb": "Diffraction patterns, gratings, the limit of a telescope and X-rays in crystals.",
+   "tier": "Advanced",
+   "size": 6,
+   "sector": {"name": "Crystal Observatory", "purpose": "split starlight and see inside crystals"},
+   "landmark": {"name": "Spectrograph", "glyph": "crystal-spire"}
+  }
+ ],
+ "landmarkCost": 4,
+ "ranks": ["LISTENER", "TREMOR READER", "CABLE TUNER", "SOUND ENGINEER", "DOPPLER WATCHER", "LENS GRINDER", "FRINGE COUNTER", "SPECTROSCOPIST", "MASTER OF WAVES"],
+ "source": {
+  "pattern": "OpenStax",
+  "label": "OpenStax",
+  "book": "OpenStax University Physics Volume 1 (chapters 15–17) and Volume 3 (chapters 1–4)",
+  "url": "https://openstax.org/books/university-physics-volume-1/pages/<section-slug>",
+  "example": "OpenStax University Physics Volume 1 — 16.1 Traveling Waves"
+ },
+ "mentor": {
+  "name": "Mira",
+  "role": "field engineer",
+  "cardEyebrow": "MIRA / YOUR FIELD ENGINEER",
+  "opening": "I’m Mira. Everything on the Signal Ridge is a wobble that travels, and we have to {purpose}. Your task is “{title}.” {brief} The idea we need: {topic}.",
+  "closing": "You already have everything this needs from Foundations, Calculus 1 and Mechanics. I’ll work the first example with you, and the guided steps are there whenever you want them."
+ },
+ "copy": {
+  "sceneLabel": "KEPLER OUTPOST / SIGNAL RIDGE",
+  "homeEyebrow": "THE SIGNAL RIDGE IS LISTENING",
+  "homeTitle": "Everything shakes.<br><em>Some of it sings.</em>",
+  "firstVisit": "A wave is just a wobble that travels, and the outpost is full of them: tremors in the rock, notes in the hall, light in the telescope. Learn one wobble well and the rest follow. We begin on a spring in the Quake Station.",
+  "allDone": "Sound and light now answer to you. Light is an electromagnetic wave: see where it comes from in Electricity and magnetism.",
+  "beginFirst": "Start the seismometer",
+  "missionNoun": "wave missions",
+  "chaptersNote": "Seven chapters. Learn every concept in a chapter to unlock a landmark for the outpost. Practice missions are optional.",
+  "skills": {"eyebrow": "YOUR DEVELOPMENT", "title": "The skill tree", "text": "Follow the prerequisite branches from oscillations to diffraction. Each mission you finish opens the ideas that are built on it."},
+  "guideNoun": "wave topics",
+  "visual": {"eyebrow": "TRY IT YOURSELF", "title": "The concept bench", "text": "Pick any mission, change its numbers and predict the result before you check it. Nothing here affects your progress, and it all works offline."}
+ },
+ "help": {
+  "eyebrow": "WELCOME TO THE SIGNAL RIDGE",
+  "title": "Find the wobble, then follow it.",
+  "intro": "Waves starts where Mechanics ends: with springs, pendulums and energy. It teaches how a wobble travels, and how waves add up, bounce, bend and spread. Every new word and symbol is explained before you are asked to use it, with a worked example first.",
+  "answers": "Answers are numbers: a period in seconds, a frequency in hertz, a speed, a wavelength, a count, or a yes or no typed as 1 or 0; angles are always in radians, and every prompt names the unit of its box."
+ },
+ "glossaryRequired": [
+  "oscillation",
+  "frequency",
+  "amplitude",
+  "wavelength",
+  "interference",
+  "standing wave",
+  "harmonic",
+  "decibel",
+  "Doppler effect",
+  "refraction",
+  "total internal reflection",
+  "focal length",
+  "diffraction",
+  "grating"
+ ],
+ "concepts": {
+  "q01": "Period and frequency of a repeating motion [V1 15.1]",
+  "q02": "Mass on a spring: ω = √(k/m) and the period [V1 15.1]",
+  "q03": "x(t) = A cos(ωt + φ): position, greatest speed and acceleration [V1 15.1, 15.3]",
+  "q04": "Energy in simple harmonic motion [V1 15.2]",
+  "q05": "The simple pendulum [V1 15.4]",
+  "q06": "Damped and driven oscillations: decay and resonance [V1 15.5, 15.6]",
+  "q07": "Waves: wavelength, frequency and v = fλ [V1 16.1]",
+  "q08": "The wave function y = A sin(kx − ωt) [V1 16.2]",
+  "q09": "Wave speed on a stretched cable, v = √(T/μ) [V1 16.3]",
+  "q10": "Power of a wave and the inverse-square law [V1 16.4]",
+  "q11": "Chapter review: a pulse on the mast cable [V1 16.2, 16.3]",
+  "q12": "Superposition: two waves out of phase, amplitude 2A cos(φ/2) [V1 16.5]",
+  "q13": "Standing waves on a string: nodes and harmonics [V1 16.6]",
+  "q14": "The speed of sound in air and its temperature [V1 17.2]",
+  "q15": "Sound intensity and decibels, β = 10 log₁₀(I/I₀) [V1 17.3]",
+  "q16": "Open and closed pipes: normal modes [V1 17.4]",
+  "q17": "Chapter review: strings and pipes in tune [V1 16.6, 17.4]",
+  "q18": "Beats [V1 17.6]",
+  "q19": "Doppler effect for a moving source [V1 17.7]",
+  "q20": "Doppler effect for a moving listener, and both moving [V1 17.7]",
+  "q21": "Shock waves and the Mach angle [V1 17.8]",
+  "q22": "Two speakers: path difference, loud and quiet spots [V1 16.5, 17.4]",
+  "q23": "Chapter review: a siren on the track [V1 17.6, 17.7]",
+  "q24": "The speed of light and the index of refraction, n = c/v [V3 1.1]",
+  "q25": "Reflection and Snell's law, n₁ sin θ₁ = n₂ sin θ₂ [V3 1.2, 1.3]",
+  "q26": "Critical angle and total internal reflection [V3 1.4]",
+  "q27": "Polarisation and Malus's law, I = I₀ cos² θ [V3 1.7]",
+  "q28": "Mirrors and thin lenses: 1/d₀ + 1/dᵢ = 1/f and magnification [V3 2.2, 2.4]",
+  "q29": "Chapter review: a telescope lens bench [V3 1.3, 2.4]",
+  "q30": "Young's double slit: bright and dark angles, d sin θ = mλ [V3 3.1, 3.2]",
+  "q31": "Fringes on a screen: the small-angle approximation, y = mλD/d [V3 3.2]",
+  "q32": "Thin films: thickness for a bright or dark reflection [V3 3.4]",
+  "q33": "The Michelson interferometer: counting fringes to measure distance [V3 3.5]",
+  "q34": "Single-slit diffraction minima, a sin θ = mλ [V3 4.1]",
+  "q35": "Intensity in a single-slit pattern [V3 4.2]",
+  "q36": "Two slits with width: missing orders [V3 4.3]",
+  "q37": "Diffraction gratings [V3 4.4]",
+  "q38": "Circular apertures and the Rayleigh criterion, θ = 1.22λ/D [V3 4.5]",
+  "q39": "X-ray diffraction and Bragg's law, mλ = 2d sin θ [V3 4.6]",
+  "q40": "Realm review: identifying a lamp from its fringes; bridge to Electricity and magnetism [V3 3.2, 4.4]"
+ }
+}

@@ -51,9 +51,9 @@ window.VG_REALMS = [
  {node:'topo',name:'Topology',pos:[-2,15,-13],color:'violet',needs:['anal'],
   learn:'The properties of a shape that survive stretching and bending.',
   world:'Untangle DNA, find holes in data, plan a robot arm\'s reach.',
-  parts:[{id:'topo',name:'Topology',status:'coming'}]},
+  parts:[{id:'topo',name:'Topology: shape without size',status:'ready',missions:160,learn:40,ach:{short:'Topology',done:'Same shape, any size',master:'Every surface named'}}]},
  {node:'phys',name:'Physics',pos:[14,-4,6],color:'warn',needs:['calc'],
   learn:'The laws of motion, energy and fields, written in the math from the other realms.',
   world:'Land a rover, size a solar array, tune an antenna.',
-  parts:[{id:'mech',name:'Mechanics',status:'coming'},{id:'em',name:'Electricity and magnetism',status:'coming'},{id:'waves',name:'Waves',status:'coming'}]}
+  parts:[{id:'mech',name:'Mechanics: motion and force',status:'ready',missions:160,learn:40,ach:{short:'Mechanics',done:'First principles',master:'Perpetual motion'}},{id:'em',name:'Electricity and magnetism: fields',status:'ready',missions:160,learn:40,ach:{short:'Electromagnetism',done:'Closed circuit',master:'Maxwell\'s heir'}},{id:'waves',name:'Waves: sound and light',status:'ready',missions:160,learn:40,ach:{short:'Sound and light',done:'Perfect pitch',master:'Interference pattern'}}]}
 ];
