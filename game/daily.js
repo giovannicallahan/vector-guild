@@ -22,7 +22,7 @@
 (function (root) {
   'use strict';
   var DAY_MS = 86400000;
-  var FALLBACK = { dust: 15, problems: 3, unlock: 3, milestones: [[3, 20], [7, 40], [14, 80], [30, 150]] };
+  var FALLBACK = { dust: 15, problems: 3, unlock: 3, restEvery: 7, milestones: [[3, 20], [7, 40], [14, 80], [30, 150]] };
   function rules() { var C = root.VGCollection; return C && C.DAILY ? C.DAILY : FALLBACK; }
   function isObject(o) { return !!o && typeof o === 'object' && !Array.isArray(o); }
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
@@ -58,22 +58,49 @@
   }
 
   /* ---------- what the card says today ---------- */
+  /* A streak that forgives (2.8): one missed day is a rest day and the streak carries on over it, at most once in
+     any seven days. The same rule as VGCollection.streakOn, which pays it. d: meta.daily; day: the day finished.
+     { streak, rest }: the streak once that day is finished, and the missed day it rests over (or null). */
+  function restEvery() { var n = rules().restEvery; return Number.isInteger(n) && n > 0 ? n : 7; }
+  function restFree(d, missed) {
+    var rests = isObject(d) && Array.isArray(d.rests) ? d.rests : [];
+    return rests.every(function (r) { return !Number.isInteger(r) || (r !== missed && (r > missed || missed - r >= restEvery())); });
+  }
+  function streakOn(daily, day) {
+    var d = isObject(daily) ? daily : {}, last = Number.isInteger(d.day) ? d.day : null, kept = last !== null && Number.isInteger(d.streak) && d.streak > 0 ? d.streak : 1;
+    if (last === null) return { streak: 1, rest: null };
+    if (day === last + 1) return { streak: kept + 1, rest: null };
+    if (day === last + 2 && restFree(d, last + 1)) return { streak: kept + 1, rest: last + 1 };
+    return { streak: 1, rest: null };
+  }
+  /* The seven dots: Monday to Sunday of the week that holds `day`. played: meta.played (days with a solve, a drill,
+     a daily review or a run); daily: meta.daily, whose last paid day also counts (saves from before 2.8). */
+  var WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  function week(played, daily, day) {
+    var set = {}, monday = day - ((day % 7) + 10) % 7; /* day 0 (1 January 1970) was a Thursday */
+    (Array.isArray(played) ? played : []).forEach(function (n) { if (Number.isInteger(n)) set[n] = 1; });
+    if (isObject(daily) && Number.isInteger(daily.day)) set[daily.day] = 1;
+    var days = [];
+    for (var i = 0; i < 7; i++) { var n = monday + i; days.push({ day: n, name: WEEKDAYS[i], played: n <= day && has(set, n), today: n === day, later: n > day }); }
+    return { days: days, count: days.filter(function (x) { return x.played; }).length };
+  }
   /* daily: meta.daily (or nothing); day: today; solved: missions solved in the card's scope.
      state  'done'    today's review is paid
             'clock'   the device's date is earlier than the last paid day: nothing can be earned until it passes
             'locked'  fewer than three missions solved
             'ready'   there is a review to do
-     streak the streak as it stands today: 0 after a missed day (nothing else is lost). */
+     streak the streak as it stands today: 0 after a missed day that cannot be a rest day (nothing else is lost)
+     resting true when yesterday was missed and today's review keeps the streak going (a rest day) */
   function status(daily, day, solved) {
     var R = rules(), d = isObject(daily) ? daily : {}, last = Number.isInteger(d.day) ? d.day : null;
     var kept = last === null ? 0 : (Number.isInteger(d.streak) && d.streak > 0 ? d.streak : 1);
     var best = Math.max(Number.isInteger(d.best) ? d.best : 0, kept), paid = Array.isArray(d.paid) ? d.paid : [];
     var state = last !== null && day < last ? 'clock' : last !== null && day === last ? 'done' : (solved | 0) < R.unlock ? 'locked' : 'ready';
-    var alive = last !== null && day <= last + 1, streak = alive ? kept : 0;
+    var resting = last !== null && day === last + 2 && restFree(d, last + 1), alive = last !== null && (day <= last + 1 || resting), streak = alive ? kept : 0;
     var progress = state === 'ready' && isObject(d.at) && d.at.day === day && Number.isInteger(d.at.n) ? Math.max(0, Math.min(R.problems - 1, d.at.n)) : 0;
     var next = null;
     for (var i = 0; i < R.milestones.length && !next; i++) { var ms = R.milestones[i]; if (ms[0] > streak && paid.indexOf(ms[0]) < 0) next = { days: ms[0], dust: ms[1], left: ms[0] - streak }; }
-    return { state: state, streak: streak, best: best, lapsed: last !== null && !alive && kept > 0, progress: progress, next: next, last: last, need: Math.max(0, R.unlock - (solved | 0)) };
+    return { state: state, streak: streak, best: best, lapsed: last !== null && !alive && kept > 0, resting: resting && state === 'ready', progress: progress, next: next, last: last, need: Math.max(0, R.unlock - (solved | 0)) };
   }
 
   /* ---------- which missions to ask ---------- */
@@ -132,7 +159,7 @@
     });
     return dust > 0 ? '+' + dust + ' stardust · ' + parts.join(', ') : '';
   }
-  var Logic = { dayOf: dayOf, status: status, conceptId: conceptId, solvedIds: solvedIds, openError: openError, pool: pool, weight: weight, pick: pick,
+  var Logic = { dayOf: dayOf, status: status, streakOn: streakOn, week: week, conceptId: conceptId, solvedIds: solvedIds, openError: openError, pool: pool, weight: weight, pick: pick,
     parseNumber: parseNumber, readNumber: readNumber, rewardLine: rewardLine, plural: plural };
   var API = { logic: Logic, today: today, setClock: function (fn) { clockFn = typeof fn === 'function' ? fn : null; }, mount: function () {}, refresh: function () {} };
   root.VGDaily = API;
@@ -211,9 +238,25 @@
     var card = el('section', 'vgd'), head = el('div', 'vgd-head'), h = el(M.heading, 'vgd-title', 'Daily review');
     h.id = 'vgd-title'; card.setAttribute('aria-labelledby', 'vgd-title'); card.setAttribute('data-state', st.state);
     head.appendChild(h); head.appendChild(el('span', 'vgd-streak', streakText(st)));
-    var body = el('div', 'vgd-body'); card.appendChild(head); card.appendChild(body);
+    card.appendChild(head);
+    if (M.scope === 'home') card.appendChild(weekRow());
+    var body = el('div', 'vgd-body'); card.appendChild(body);
     M.host.textContent = ''; M.host.appendChild(card);
     return body;
+  }
+  /* Seven dots, Monday to Sunday: a filled dot for each day played this week. The sentence says the same in words. */
+  function weekRow() {
+    var m = null; try { var S = store(); m = S && S.meta(); } catch (e) { m = null; }
+    var w = week(m && m.played, m && m.daily, today()), row = el('div', 'vgd-week'), dots = el('span', 'vgd-dots');
+    dots.setAttribute('aria-hidden', 'true');
+    w.days.forEach(function (x) {
+      var dot = el('span', 'vgd-dot' + (x.played ? ' is-played' : '') + (x.today ? ' is-today' : '') + (x.later ? ' is-later' : ''));
+      dot.appendChild(el('span', 'vgd-dot-mark')); dot.appendChild(el('span', 'vgd-dot-day', x.name.charAt(0)));
+      dot.title = x.name + (x.played ? ': played' : ''); dots.appendChild(dot);
+    });
+    row.appendChild(dots);
+    row.appendChild(el('span', 'vgd-week-text', 'Days played this week: ' + w.count + ' of 7' + (w.count ? '' : '. Any solved mission counts.')));
+    return row;
   }
   function milestoneLine(st) {
     return st.next ? plural(st.next.left, 'more day', 'more days') + ' in a row for the ' + st.next.days + '-day bonus: ' + st.next.dust + ' stardust.' : '';
@@ -234,7 +277,8 @@
       body.appendChild(el('p', 'vgd-note', st.need === R.unlock ? 'Solve three missions to unlock it.' : 'Solve ' + plural(st.need, 'more mission', 'more missions') + ' to unlock it.'));
     } else {
       body.appendChild(el('p', 'vgd-text', 'Three short problems with fresh numbers, from missions you have already solved. Finish all three for ' + R.dust + ' stardust.'));
-      if (st.lapsed) body.appendChild(el('p', 'vgd-note', 'You missed a day, so your streak starts again today. Nothing was taken away: your stardust is safe, and your best streak of ' + plural(st.best, 'day', 'days') + ' still stands.'));
+      if (st.lapsed) body.appendChild(el('p', 'vgd-note', 'Welcome back. A new streak starts today. Your stardust is safe, and your best streak of ' + plural(st.best, 'day', 'days') + ' still stands.'));
+      else if (st.resting) body.appendChild(el('p', 'vgd-note', 'Yesterday was a rest day, and your streak of ' + plural(st.streak, 'day', 'days') + ' is still here. Finish today’s review to keep it going. One rest day a week is fine.'));
       else if (st.next) body.appendChild(el('p', 'vgd-note', st.streak ? 'Keep the streak going: ' + milestoneLine(st) : 'Do it several days in a row for bonus stardust at 3, 7, 14 and 30 days.'));
       var row = el('div', 'vgd-actions');
       row.appendChild(button('vgd-btn vgd-primary', st.progress ? 'Continue: ' + st.progress + ' of ' + R.problems + ' done' : 'Start today’s review', start));

@@ -111,8 +111,13 @@ problems with fresh numbers, drawn from missions the player has already solved, 
   worked through all three, so a review can always be finished.
 - **Unlock.** Three solved missions (in that realm, on a realm page). Until then the card says so.
 - **Pay.** Finishing pays 15 stardust once per day. A day streak counts days in a row; streaks of 3, 7, 14 and
-  30 days pay 20, 40, 80 and 150 once each, ever. A missed day sets the streak back to 0 and takes nothing
-  away (stardust, figures and the best streak stay); the card says so.
+  30 days pay 20, 40, 80 and 150 once each, ever. Since 2.8 the streak forgives: one missed day is a rest day
+  and the streak carries on over it, at most once in any seven days (`daily.rests` lists the missed days used).
+  Two missed days in a row, or a second rest within seven days, set the streak back to 0 and take nothing away
+  (stardust, figures and the best streak stay); the card says so without blame.
+- **Days played this week** (2.8, home card only): seven dots, Monday to Sunday. A day counts when the player
+  solved a mission, finished a drill, a daily review or a five-minute run. `meta.played` holds those local day
+  numbers for the last 14 days (absent in older saves; the last daily review day also counts).
 - **Never twice.** `VGCollection.onDailyDone(day)` is the only place that pays. `day` is the local calendar day
   as whole days since 1970. It pays only when `day` is later than `meta.daily.day`, so a reload, a second tab,
   a re-import of the same backup, or a device clock set back pays nothing. With the clock set back, the card
@@ -126,6 +131,7 @@ meta.daily: {             // absent until the player first makes progress; older
   streak: 0,              // days in a row ending on `day`
   best: 0,                // longest streak
   paid: [3, 7],           // streak milestones already paid
+  rests: [20400],         // since 2.8, only once used: missed days the streak rested over
   at: { day, n },         // problems done on a day not finished yet (dropped when the day is paid)
   seen: { "<realm>:<qid>": <day> }   // when a concept was last passed in a daily review (at most 400)
 }

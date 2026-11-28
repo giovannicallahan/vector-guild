@@ -165,6 +165,8 @@ window.VGCollection = (() => {
       }
     }
     events.push(...award(m, realms, rc));
+    /* A solve made just now counts as a day played. */
+    if (isObject(opts) && opts.perks === true && events.some(e => e.type === 'solve')) markPlayed(m);
     if (!events.length || !commit(m, before)) return [];
     return events;
   }
@@ -172,15 +174,40 @@ window.VGCollection = (() => {
   function onDrillDone() {
     if (!store()) return [];
     const m = read(), before = JSON.stringify(m), dust = RULES.drill * (perkOf(figure(m.equipped)) === 'drill' ? RULES.perkDrill : 1);
-    m.drills++; m.dust += dust; m.earned += dust;
+    m.drills++; m.dust += dust; m.earned += dust; markPlayed(m);
     const events = [{ type: 'drill', dust }, ...award(m, slices(), realmOf())];
     return commit(m, before) ? events : [];
   }
   /* The daily review of one local calendar day is finished (game/daily.js; docs/COLLECTION.md, "Daily review").
      day: whole days since 1970 in local time. Pays DAILY.dust once per day and counts the day streak; a streak
      milestone pays once ever. A day that is not later than the last paid day pays nothing, so a reload, a second
-     tab, or a device clock set back never pays twice. A missed day starts the streak again at 1; nothing is taken. */
-  const DAILY = Object.freeze({ dust: 15, problems: 3, unlock: 3, milestones: Object.freeze([[3, 20], [7, 40], [14, 80], [30, 150]].map(Object.freeze)) });
+     tab, or a device clock set back never pays twice. Since 2.8 one missed day is a rest day: the streak carries on
+     over it, at most once in any seven days (the missed days used so far are in daily.rests). Two missed days, or a
+     second rest within seven days, start the streak again at 1; nothing is taken. */
+  const DAILY = Object.freeze({ dust: 15, problems: 3, unlock: 3, restEvery: 7, milestones: Object.freeze([[3, 20], [7, 40], [14, 80], [30, 150]].map(Object.freeze)) });
+  /* The streak if the review of `day` is finished now: { streak, rest } where rest is the missed day the streak rests
+     over, or null. The same rule as VGDaily.logic.streakOn (qa/daily.test.js checks that they agree). */
+  function streakOn(d, day) {
+    const last = isObject(d) && Number.isInteger(d.day) ? d.day : null, kept = last !== null && Number.isInteger(d.streak) && d.streak > 0 ? d.streak : 1;
+    if (last === null) return { streak: 1, rest: null };
+    if (day === last + 1) return { streak: kept + 1, rest: null };
+    const rests = Array.isArray(d.rests) ? d.rests.filter(Number.isInteger) : [], missed = last + 1;
+    if (day === last + 2 && rests.every(r => r !== missed && (r > missed || missed - r >= DAILY.restEvery))) return { streak: kept + 1, rest: missed };
+    return { streak: 1, rest: null };
+  }
+  /* Days the player did something that counts (a solve, a drill, a daily review, a five-minute run), for the
+     "days played this week" dots: meta.played, the last 14 local calendar days at most. Changes m only. */
+  function today() {
+    try { const D = window.VGDaily; if (D && typeof D.today === 'function') { const n = D.today(); if (Number.isInteger(n)) return n; } } catch (e) { /* fall through */ }
+    const d = new Date(); return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+  }
+  function markPlayed(m, day) {
+    if (!isObject(m)) return m;
+    const n = Number.isInteger(day) ? day : today(), list = Array.isArray(m.played) ? m.played.filter(x => Number.isInteger(x) && x > n - 14 && x <= n) : [];
+    if (!list.includes(n)) list.push(n);
+    m.played = [...new Set(list)].sort((a, b) => a - b);
+    return m;
+  }
   function onDailyDone(day) {
     if (!store() || !Number.isInteger(day) || day < 0) return [];
     /* Another tab may write the save between this call's read and its write. So the save is read once more just
@@ -194,7 +221,9 @@ window.VGCollection = (() => {
   function dailyOnce(day) {
     const m = read(), before = JSON.stringify(m), d = isObject(m.daily) ? m.daily : (m.daily = { day: null, streak: 0, best: 0, paid: [], seen: {} });
     if (Number.isInteger(d.day) && day <= d.day) return [];
-    const streak = Number.isInteger(d.day) && day === d.day + 1 ? (Number.isInteger(d.streak) && d.streak > 0 ? d.streak : 1) + 1 : 1;
+    const on = streakOn(d, day), streak = on.streak;
+    if (on.rest !== null) d.rests = [...(Array.isArray(d.rests) ? d.rests.filter(r => Number.isInteger(r) && r > day - 60) : []), on.rest];
+    markPlayed(m, day);
     const paid = Array.isArray(d.paid) ? d.paid : [], events = [{ type: 'daily', day, streak, dust: DAILY.dust }];
     for (const [days, dust] of DAILY.milestones) if (streak >= days && !paid.includes(days)) { paid.push(days); events.push({ type: 'streak', days, dust }); }
     Object.assign(d, { day, streak, best: Math.max(Number.isInteger(d.best) ? d.best : 0, streak), paid }); delete d.at;
@@ -338,7 +367,7 @@ window.VGCollection = (() => {
   const earned = () => read().earned;
   const state = () => read();
   const stored = () => lastStored;
-  return { RULES, RARITIES, PERKS, DAILY, settle, onDrillDone, onDailyDone, finishDaily, summary, describe, pull, canPull, cost, odds, baseOdds, guarantees, rollRarity,
+  return { RULES, RARITIES, PERKS, DAILY, streakOn, markPlayed, today, settle, onDrillDone, onDailyDone, finishDaily, summary, describe, pull, canPull, cost, odds, baseOdds, guarantees, rollRarity,
     equip, equipped, perk, perkInfo, secondLookAvailable, useSecondLook, figures, owned, counts, figure, achievements, context: () => context(read(), slices(), realmOf()),
     dust, earned, state, stored, pageRealm };
 })();
