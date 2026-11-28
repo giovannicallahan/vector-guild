@@ -19,7 +19,7 @@
    credited only with what it states; the rest (for example the period 2π ÷ √(ac) in q38, and the string rule ω = c√λ
    in q40) is worked out or given in the mission itself. */
 const source = {
- s6_1: { title: "Lebl, Notes on Diffy Qs — 6.1 The Laplace transform", url: "https://www.jirka.org/diffyqs/html/laplace_section.html", description: "The transform of exponentials, the inverse transform found with partial fractions, and the Heaviside function.", verified: "2026-11-28" },
+ s6_1: { title: "Lebl, Notes on Diffy Qs — 6.1 The Laplace transform", url: "https://www.jirka.org/diffyqs/html/laplace_section.html", description: "The transform as an integral from 0 to ∞ of e^(−st)f(t), a table of transforms, linearity, when the transform exists, the inverse transform found with partial fractions, and the Heaviside (unit step) function.", verified: "2026-11-28" },
  s6_2: { title: "Lebl, Notes on Diffy Qs — 6.2 Transforms of derivatives and ODEs", url: "https://www.jirka.org/diffyqs/html/transformsofders_section.html", description: "The transforms of y′ and y″, solving initial value problems with the transform, the shift rule and switched-on forcing with the Heaviside function.", verified: "2026-11-28" },
  s6_3: { title: "Lebl, Notes on Diffy Qs — 6.3 Convolution", url: "https://www.jirka.org/diffyqs/html/convolution_section.html", description: "The convolution integral and the rule that its transform is the product of the transforms.", verified: "2026-11-28" },
  s6_4: { title: "Lebl, Notes on Diffy Qs — 6.4 Dirac delta and impulse response", url: "https://www.jirka.org/diffyqs/html/diracdelta_section.html", description: "The Dirac delta, its transform e^(−as), and the impulse response of an equation.", verified: "2026-11-28" },

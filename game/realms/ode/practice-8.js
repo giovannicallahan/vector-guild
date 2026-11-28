@@ -77,24 +77,24 @@ mk({
 
 mk({
  id: 'q36c', parent: 'q36', kind: 'applied', title: 'A nudge at the vent',
- brief: 'A sensor in the air vent has been knocked off its resting reading, and the crew wants to know how fast it starts to drift.',
- labels: ['x', 'y', 'u′', 'v′'], tolerance: 0.01,
- gl: [['y'], ['u′'], ['v′']]
+ brief: 'A sensor in the air vent has been knocked off its resting reading, and the crew wants a quick estimate of how fast it starts to drift.',
+ labels: ['x', 'y', 'estimated u′', 'estimated v′'], tolerance: 0.01,
+ gl: [['y'], ['estimated u′'], ['estimated v′']]
 }, {
  /* x′ = xy − c·y0², y′ = x − c·y: y′ = 0 gives x = c y, and then c y² = c y0², so y = ±y0. The critical point with positive x is (c·y0, y0) (y0 > 0).
     There ∂f/∂x = y0, ∂f/∂y = c·y0, ∂g/∂x = 1, ∂g/∂y = −c. The sensor is displaced by (u, v) = (nu, nv), and u′ = y0·nu + c·y0·nv, v′ = nu − c·nv. */
  canonical: { c: 2, y0: 3, nu: 1, nv: -2 },
  draw: R => ({ c: R.int(1, 4), y0: R.int(1, 5), nu: R.nz(-3, 3), nv: R.nz(-3, 3) }),
  build: ({ c, y0, nu, nv }) => { const P = c * y0 * y0, xs = c * y0, ys = y0, up = ys * nu + xs * nv, vp = nu - c * nv, f = `xy${tail([[-P, '']])}`, g = expr([[1, 'x'], [-c, 'y']]); return {
-  prompt: `Two readings from the dome’s air vent, x and y, obey x′ = ${f} and y′ = ${g}. First find the critical point with positive x. Then a sensor is displaced from that point by u = ${n(nu)} in x and v = ${n(nv)} in y. Near the critical point the displacement changes at the rates u′ = (∂f/∂x)u + (∂f/∂y)v and v′ = (∂g/∂x)u + (∂g/∂y)v, with the partial derivatives worked out at the critical point, where f and g are the two right-hand sides. Enter x, then y, then u′, then v′ for this displacement.`,
+  prompt: `Two readings from the dome’s air vent, x and y, obey x′ = ${f} and y′ = ${g}. First find the critical point with positive x. Then a sensor is displaced from that point by u = ${n(nu)} in x and v = ${n(nv)} in y. The linearised system estimates how fast the displacement changes: u′ ≈ (∂f/∂x)u + (∂f/∂y)v and v′ ≈ (∂g/∂x)u + (∂g/∂y)v, with the partial derivatives worked out at the critical point, where f and g are the two right-hand sides. These are estimates, not the exact rates, because the linearisation leaves out a small product term in u and v. Enter x, then y, then the estimated rates u′ and v′ for this displacement.`,
   answer: [xs, ys, up, vp],
   hints: ['At a critical point both right-hand sides are 0. The second equation gives x in terms of y; put it into the first and solve for y, keeping the root that makes x positive.',
-   'The partial derivative of xy in x is y, and in y it is x. Put the critical point into each of the four partial derivatives, then multiply out the two rates with the displacement.'],
-  solution: `y′ = 0 gives x = ${cy(c, 'y')}. Putting this into ${f} = 0 gives ${c === 1 ? '' : n(c)}y² = ${n(P)}, so y² = ${n(y0 * y0)} and y = ±${n(y0)}. Positive x needs positive y, so the critical point is (${n(xs)}, ${n(ys)}). For f = ${f}: ∂f/∂x = y = ${n(ys)} and ∂f/∂y = x = ${n(xs)}. For g = ${g}: ∂g/∂x = 1 and ∂g/∂y = ${n(-c)}. So u′ = ${n(ys)} × ${par(nu)} + ${n(xs)} × ${par(nv)} = ${n(up)} and v′ = 1 × ${par(nu)} + ${par(-c)} × ${par(nv)} = ${n(vp)}.`,
+   'The partial derivative of xy in x is y, and in y it is x. Put the critical point into each of the four partial derivatives, then multiply out the two estimated rates with the displacement.'],
+  solution: `y′ = 0 gives x = ${cy(c, 'y')}. Putting this into ${f} = 0 gives ${c === 1 ? `y² = ${n(P)}` : `${n(c)}y² = ${n(P)}, so y² = ${n(y0 * y0)}`}, and y = ±${n(y0)}. Positive x needs positive y, so the critical point is (${n(xs)}, ${n(ys)}). For f = ${f}: ∂f/∂x = y = ${n(ys)} and ∂f/∂y = x = ${n(xs)}. For g = ${g}: ∂g/∂x = 1 and ∂g/∂y = ${n(-c)}. So the linearised system estimates u′ ≈ ${n(ys)} × ${par(nu)} + ${n(xs)} × ${par(nv)} = ${n(up)} and v′ ≈ 1 × ${par(nu)} + ${par(-c)} × ${par(nv)} = ${n(vp)}.`,
   guidance: [
    { prompt: `y′ = 0 gives x = ${cy(c, 'y')}. Put it into ${f} = 0 to get ${c === 1 ? '' : n(c)}y² = ${n(P)}. What is y at the critical point with positive x?`, answer: [ys], explanation: `y² = ${n(y0 * y0)}, so y = ±${n(y0)}. Since x = ${cy(c, 'y')}, positive x needs positive y: y = ${n(ys)}, and then x = ${n(xs)}.` },
-   { prompt: `At the critical point (${n(xs)}, ${n(ys)}), ∂f/∂x = y and ∂f/∂y = x. What is u′ = (∂f/∂x)u + (∂f/∂y)v for u = ${n(nu)} and v = ${n(nv)}?`, answer: [up], explanation: `u′ = ${n(ys)} × ${par(nu)} + ${n(xs)} × ${par(nv)} = ${n(up)}.` },
-   { prompt: `For g = ${g}, ∂g/∂x = 1 and ∂g/∂y = ${n(-c)}. What is v′ = (∂g/∂x)u + (∂g/∂y)v for the same u and v?`, answer: [vp], explanation: `v′ = 1 × ${par(nu)} + ${par(-c)} × ${par(nv)} = ${n(vp)}.` }
+   { prompt: `At the critical point (${n(xs)}, ${n(ys)}), ∂f/∂x = y and ∂f/∂y = x. What is the linearised estimate u′ ≈ (∂f/∂x)u + (∂f/∂y)v for u = ${n(nu)} and v = ${n(nv)}?`, answer: [up], explanation: `u′ ≈ ${n(ys)} × ${par(nu)} + ${n(xs)} × ${par(nv)} = ${n(up)}.` },
+   { prompt: `For g = ${g}, ∂g/∂x = 1 and ∂g/∂y = ${n(-c)}. What is the linearised estimate v′ ≈ (∂g/∂x)u + (∂g/∂y)v for the same u and v?`, answer: [vp], explanation: `v′ ≈ 1 × ${par(nu)} + ${par(-c)} × ${par(nv)} = ${n(vp)}.` }
   ] }; }
 });
 
