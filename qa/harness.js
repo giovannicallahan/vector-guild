@@ -883,7 +883,7 @@ if (!isLA && learn.length) {
     drill.qa.review(q.id); const v = drill.qa.variant();
     if (!Number.isInteger(v.target)) continue;
     wholeDrills++;
-    assert.doesNotMatch(drill.dc._html, /within 2%/, `${q.id}: a whole-number drill does not promise a 2% margin`); assert.match(drill.dc._html, /exact whole number/);
+    assert.doesNotMatch(drill.dc._html, /within 2%/, `${q.id}: a whole-number drill does not promise a 2% margin`); assert.match(drill.dc._html, /exact whole number|Type the exact value/); /* a model with its own tolerance says "exact value" */
     drill.el('#review-answer').value = String(v.target + 1); drill.el('#review-check').onclick();
     assert.match(drill.el('#review-feedback').textContent, /^Not quite/, `${q.id}: ${v.target + 1} is not accepted for ${v.target}`);
     const slice = JSON.parse(drill.storage.get('vector-guild-save-v2')).realms[REALM.saveId];
