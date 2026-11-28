@@ -61,3 +61,7 @@ meta: { v: 1,
 - `exportAll()` -> v2 object for the backup file (with `meta` when there is one)
 - `importAny(obj)` -> accepts a v2 object or a 1.x object (becomes realms.la); returns {ok, error, kind}. `ok` is false, and nothing is changed, when the file is not a (complete) save or when the device could not store it (`error` says which)
 - `reset(id)` -> removes one realm's slice; `resetAll()`
+
+Mission flow fields (since 2.8, both optional, both in `meta`, both kept in a backup)
+- `meta.tryFirst`: `'try'` or `'learn'`, the start the player chose last on a learn mission (`game/try-first.js`). Missing or anything else means `'learn'`, the flow of earlier releases.
+- `meta.sectorScenes`: `{ <realm id>: [sector index, ...] }`, the sectors whose payoff scene Mira has already shown (`game/sector-scene.js`). Missing means none; entries that are not whole numbers from 0 to 99 are ignored on read. A scene is replayable whatever this says.
