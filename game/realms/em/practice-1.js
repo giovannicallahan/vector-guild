@@ -54,10 +54,10 @@ mk({
 }, {
  /* N electrons missing (a multiple of 5, so the charge N × 0.016 × 10⁻¹⁷ C has at most 2 decimals); m returned. m may exceed N
     (about one draw in four), leaving the insulator negative; m never equals N. Never the q01 worked numbers (300 and 120). */
- canonical: { N: 200, m: 80 },
- draw: R => pick(() => { const N = 5 * R.int(12, 100), flip = R.int(0, 3) === 0; return { N, m: flip ? N + 5 * R.int(1, 40) : 5 * R.int(1, N / 5 - 1) }; },
-  p => p.m !== p.N && !(p.N === 300 && p.m === 120), { N: 200, m: 80 }),
- build: ({ N, m }) => { const q = Math.round(N * 1.6) / 100, left = N - m, nq = Math.round(left * 1.6) / 100; return {
+ canonical: { c: 3.2, m: 80 },
+ draw: R => pick(() => { const N = 5 * R.int(12, 160), flip = R.int(0, 3) === 0; return { c: Math.round(N * 1.6) / 100, m: flip ? N + 5 * R.int(1, 40) : 5 * R.int(1, N / 5 - 1) }; },
+  p => { const N = Math.round(p.c / 0.016); return p.m !== N && !(N === 300 && p.m === 120); }, { c: 3.2, m: 80 }),
+ build: ({ c, m }) => { const N = Math.round(c / 0.016), q = c, left = N - m, nq = Math.round(left * 1.6) / 100; return {
   prompt: `A glass insulator on a cable run was rubbed with a cloth and now carries a net charge of +${n(q)} × 10⁻¹⁷ C (coulombs). It lost electrons, so it has more protons than electrons. Charge comes only in whole numbers of the elementary charge e = 1.60 × 10⁻¹⁹ C: each electron carries −e and each proton +e. Enter how many electrons the insulator is short of (how many more protons than electrons it has). The cloth then gives ${n(m)} electrons back to the insulator. Enter the insulator’s new charge as the number that multiplies 10⁻¹⁷ C (negative if it ends up with more electrons than protons).`,
   answer: [N, nq],
   hints: ['The number of missing electrons is the size of the charge divided by e. Dividing 10⁻¹⁷ by 10⁻¹⁹ gives 10², which is 100.', 'Each electron handed back cancels one proton’s +e. Find how many more protons than electrons are left (negative if electrons now outnumber protons), then multiply that count by +e.'],
@@ -99,9 +99,9 @@ mk({
 }, {
  /* Plate charge −0.8t nC holds 5t billion extra electrons (one billion electrons carry 0.16 nC). m billion are drained; m may exceed 5t
     (the plate then ends positive) but never equals it. The new charge −0.16(5t − m) nC has at most 2 decimals. */
- canonical: { t: 7, m: 15 },
- draw: R => pick(() => ({ t: R.int(2, 40), m: R.int(1, 260) }), p => p.m !== 5 * p.t && p.m <= 5 * p.t + 40 && !(p.t === 7 && p.m === 15), { t: 7, m: 15 }),
- build: ({ t, m }) => { const Q = Math.round(8 * t) / 10, N = 5 * t, left = N - m, nq = Math.round(-left * 16) / 100; return {
+ canonical: { Q: 5.6, m: 15 },
+ draw: R => pick(() => { const t = R.int(2, 80); return { Q: Math.round(8 * t) / 10, m: R.int(1, 5 * t + 40) }; }, p => { const t = Math.round(p.Q / 0.8); return p.m !== 5 * t && !(t === 7 && p.m === 15); }, { Q: 5.6, m: 15 }),
+ build: ({ Q, m }) => { const t = Math.round(Q / 0.8), N = 5 * t, left = N - m, nq = Math.round(-left * 16) / 100; return {
   prompt: `A small metal plate on the comms mast has built up a net charge of −${n(Q)} nC (1 nC = 10⁻⁹ C, a nanocoulomb). Charge comes only in whole numbers of the elementary charge e = 1.60 × 10⁻¹⁹ C, and each electron carries −e. Enter how many extra electrons the plate holds, in billions (the number that multiplies 10⁹ electrons). A grounding strap then drains ${n(m)} billion electrons from the plate. Enter the plate’s new charge in nC, to 2 decimal places (negative for a negative charge).`,
   answer: [N, nq],
   hints: ['One billion electrons carry 10⁹ × 1.60 × 10⁻¹⁹ C. Write that in nC, then divide the size of the plate’s charge by it to count the extra electrons in billions.', 'Draining electrons takes charge −e away for each one, so subtract the drained count from the extra count (negative if protons now outnumber electrons) and convert that count back to nC with the same figure for one billion.'],
@@ -172,7 +172,7 @@ mk({
    const W = 9.8 * p.m, r2v = 8.99 * p.a * p.b / W, r = Math.sqrt(r2v);
    return r >= 0.5 && r < 3 && !tie(r) && !tie(r2v) && Math.abs(r2(Math.sqrt(r2(r2v))) - r2(r)) < 1e-9 && !(p.m === 20 && p.a === 4 && p.b === 5); }, { m: 20, a: 4, b: 5, s: 1 }),
  build: ({ m, a, b, s }) => { const W = Math.round(98 * m) / 10, P = a * b, rr = 8.99 * P / W, r = Math.sqrt(rr); return {
-  prompt: `A tiny bead of mass ${n(m)} g hangs motionless in the air directly above a fixed sphere on the test rig, held up by the electric repulsion between them alone. The fixed sphere has charge ${n(s * a)} μC and the bead has charge ${n(s * b)} μC (1 μC = 10⁻⁶ C; 1 g = 10⁻³ kg). Use ${K}, and take the bead’s weight as its mass times 9.8 N/kg. Enter the bead’s weight in millinewtons (mN, 10⁻³ N). Then enter the distance between the two centres in metres, rounded to 2 decimal places.`,
+  prompt: `A small bead of mass ${n(m)} g hangs motionless in the air directly above a fixed sphere on the test rig, held up by the electric repulsion between them alone. The fixed sphere has charge ${n(s * a)} μC and the bead has charge ${n(s * b)} μC (1 μC = 10⁻⁶ C; 1 g = 10⁻³ kg). Use ${K}, and take the bead’s weight as its mass times 9.8 N/kg. Enter the bead’s weight in millinewtons (mN, 10⁻³ N). Then enter the distance between the two centres in metres, rounded to 2 decimal places.`,
   answer: [W, r2(r)],
   hints: ['The bead hangs still, so the upward electric force equals its weight. Convert the mass to kilograms, multiply by 9.8, and give the weight in mN.', 'Coulomb’s law: F = k|q₁q₂| ÷ r². Set F equal to the weight, turn the equation around to get r², then take the square root. With charges in μC and the weight in mN, k|q₁q₂| is 8.99 × |q₁q₂| mN·m² (8.99 × 10⁹ × 10⁻¹² N·m² = 8.99 × 10⁻³ N·m²).'],
   solution: `The weight is ${n(m)} g × 9.8 N/kg = ${n(m)} × 10⁻³ kg × 9.8 N/kg = ${n(W)} × 10⁻³ N = ${n(W)} mN. The bead hangs still, so the repulsion equals that: k|q₁q₂| ÷ r² = ${n(W)} mN. Here k|q₁q₂| = 8.99 × 10⁹ × ${n(P)} × 10⁻¹² = ${n(8.99 * P)} × 10⁻³ N·m² = ${n(8.99 * P)} mN·m², so r² = ${n(8.99 * P)} ÷ ${n(W)} ${eq(rr)} ${n(rr)} m² and r = √${n(rr)} ${eq(r)} ${n(r)} m, which is ${f2(r)} m to 2 decimal places.`,
@@ -244,14 +244,14 @@ mk({
  labels: ['balance point (cm)', 'net force at the middle (μN)'], tolerance: 0.005,
  gl: [['√|Q₁| + √|Q₂| (√nC)'], ['balance point (cm)'], ['net force at the middle (μN)']]
 }, {
- /* Posts with charges s·a² nC at x = 0 and s·b² nC at x = L = (a + b)·u cm, the same sign s. The forces on a bead balance where x ÷ (L − x) = a ÷ b,
+ /* Params are the printed values: posts with charges Q1 = s·a² nC at x = 0 and Q2 = s·b² nC at x = L = (a + b)·u cm (drawn from whole a, b, u), the same sign s. The forces on a bead balance where x ÷ (L − x) = a ÷ b,
     that is x = u·a. At the middle Fx = 89.9·q·(Q1 − Q2) ÷ (L/2)² = 359.6·q·s·(a² − b²) ÷ L². Force at least 0.5 and under 900, off ties. */
- canonical: { a: 3, b: 2, s: 1, u: 4, q: 2 },
- draw: R => pick(() => ({ a: R.int(1, 5), b: R.int(1, 5), s: R.bool() ? 1 : -1, u: R.int(2, 6), q: R.nz(-6, 6) }), p => {
-   const L = (p.a + p.b) * p.u, F = 359.6 * p.q * p.s * (p.a * p.a - p.b * p.b) / (L * L);
-   return p.a !== p.b && Math.abs(F) >= 0.5 && Math.abs(F) < 900 && !tie(F) && !(p.a === 3 && p.b === 2 && p.u === 4 && p.s === 1); }, { a: 3, b: 2, s: 1, u: 4, q: 2 }),
- build: ({ a, b, s, u, q }) => { const Q1 = s * a * a, Q2 = s * b * b, L = (a + b) * u, x = u * a, D = Q1 - Q2, F = 359.6 * q * D / (L * L), h = L / 2; return {
-  prompt: `Two fixed posts stand on the cable rail, an x-axis marked in centimetres: a post with charge ${n(Q1)} nC at x = 0 and a post with charge ${n(Q2)} nC at x = ${n(L)} cm (1 nC = 10⁻⁹ C); the two charges have the same sign. Use ${K}. A free test bead with charge q = ${n(q)} nC is placed on the rail between the posts. Enter the position x, in centimetres from the first post, where the net electric force on the bead is zero. Then the bead is moved to the middle of the rail, at x = ${n(h)} cm: enter the x component of the net electric force on it there, in micronewtons (μN, 10⁻⁶ N), rounded to 2 decimal places (positive towards +x).`,
+ canonical: { Q1: 9, Q2: 4, L: 20, q: 2 },
+ draw: R => pick(() => { const a = R.int(1, 5), b = R.int(1, 5), s = R.bool() ? 1 : -1; return { Q1: s * a * a, Q2: s * b * b, L: (a + b) * R.int(2, 6), q: R.nz(-6, 6) }; }, p => {
+   const F = 359.6 * p.q * (p.Q1 - p.Q2) / (p.L * p.L);
+   return p.Q1 !== p.Q2 && Math.abs(F) >= 0.5 && Math.abs(F) < 900 && !tie(F) && !(p.Q1 === 9 && p.Q2 === 4 && p.L === 20); }, { Q1: 9, Q2: 4, L: 20, q: 2 }),
+ build: ({ Q1, Q2, L, q }) => { const a = Math.round(Math.sqrt(Math.abs(Q1))), b = Math.round(Math.sqrt(Math.abs(Q2))), u = L / (a + b), x = u * a, D = Q1 - Q2, F = 359.6 * q * D / (L * L), h = L / 2; return {
+  prompt: `Two fixed posts stand on the cable rail, an x-axis marked in centimetres: a post with charge ${n(Q1)} nC at x = 0 and a post with charge ${n(Q2)} nC at x = ${n(L)} cm (1 nC = 10⁻⁹ C); the two charges have the same sign. Use ${K}. A free test bead with charge q = ${n(q)} nC is placed on the rail between the posts. Enter the position x, in centimetres from the first post to 2 decimal places, where the net electric force on the bead is zero. Then the bead is moved to the middle of the rail, at x = ${n(h)} cm: enter the x component of the net electric force on it there, in micronewtons (μN, 10⁻⁶ N), rounded to 2 decimal places (positive towards +x).`,
   answer: [x, r2(F)],
   hints: ['The two posts have the same sign, so between them they push the bead in opposite directions. The forces cancel where they have equal size: k|q Q₁| ÷ x² = k|q Q₂| ÷ (g − x)², where g is the gap between the two posts. The factors k and |q| cancel. Take the square root of both sides to get x ÷ (g − x) = √|Q₁| ÷ √|Q₂|, then solve for x.', `With charges in nC and distances in cm, a force is 89.9 × (charge product) ÷ d² micronewtons, because ${U_MICRO}. At the middle both posts are the same distance away. A post at x = 0 pushes the bead towards +x when q Q₁ is positive (they repel), and the post at the far end pushes it towards −x when q Q₂ is positive.`],
   solution: `The forces on the bead have equal size where ${n(Math.abs(Q1))} ÷ x² = ${n(Math.abs(Q2))} ÷ (${n(L)} − x)², since k and the bead’s charge cancel. Taking square roots, x ÷ (${n(L)} − x) = √${n(Math.abs(Q1))} ÷ √${n(Math.abs(Q2))} = ${n(a)} ÷ ${n(b)}. So x takes ${n(a)} of ${n(a + b)} equal parts of the ${n(L)} cm: x = ${n(L)} × ${n(a)} ÷ ${n(a + b)} = ${n(x)} cm. At the middle the bead is ${n(h)} cm from each post. The post at x = 0 contributes 89.9 × ${par(q)} × ${par(Q1)} ÷ ${n(h * h)} and the post at x = ${n(L)} cm contributes −89.9 × ${par(q)} × ${par(Q2)} ÷ ${n(h * h)} (positive means towards +x), so Fₓ = 89.9 × ${par(q)} × (${n(Q1)} − ${par(Q2)}) ÷ ${n(h * h)} = 89.9 × ${par(q)} × ${par(D)} ÷ ${n(h * h)} ${eq(F)} ${n(F)} μN${rnd(F, 'μN')}.`,
@@ -275,7 +275,7 @@ mk({
  canonical: { q: 5, d: 4, s: -1, Q: -3 },
  draw: R => pick(() => ({ q: R.nz(-9, 9), d: R.int(2, 9), s: R.bool() ? 1 : -1, Q: R.nz(-5, 5) }), p => {
    const E = 89.9 * p.q * p.s / (p.d * p.d), F = p.Q * E;
-   return Math.abs(E) >= 0.2 && Math.abs(E) < 900 && Math.abs(F) < 900 && !tie(E) && !tie(F) && r2(p.Q * r2(E)) === r2(F) && !(p.q === 5 && p.d === 4 && p.s === -1); }, { q: 5, d: 4, s: -1, Q: -3 }),
+   return p.Q !== 1 && Math.abs(E) >= 0.2 && Math.abs(E) < 900 && Math.abs(F) < 900 && !tie(E) && !tie(F) && r2(p.Q * r2(E)) === r2(F) && !(p.q === 5 && p.d === 4 && p.s === -1); }, { q: 5, d: 4, s: -1, Q: -3 }),
  build: ({ q, d, s, Q }) => { const E = 89.9 * q * s / (d * d), F = Q * E, Es = Math.abs(E); return {
   prompt: `A charged beacon with charge q = ${n(q)} nC sits at the origin of the cable rail, an x-axis marked in centimetres (1 nC = 10⁻⁹ C). The point P is at x = ${n(s * d)} cm. Use ${K}. Enter the x component of the electric field at P in kilonewtons per coulomb (kN/C, 1 kN/C = 1000 N/C), rounded to 2 decimal places: positive if it points towards +x. Then a dust grain with charge Q = ${n(Q)} μC is placed at P (1 μC = 10⁻⁶ C). Enter the x component of the force on it in millinewtons (mN, 10⁻³ N), using the unrounded field and rounding to 2 decimal places.`,
   answer: [r2(E), r2(F)],
@@ -296,10 +296,10 @@ mk({
 }, {
  /* Source charge of size q0 nC (1 to 9), grain of size |Q| μC at d tenths of a metre, so the force is F = 899·q0·|Q| ÷ d² μN, printed exactly
     (at most 2 decimals, between 0.5 and 900). The grain's sign sQ and attract/repel are drawn; the source's sign is −sQ when attracting and sQ when repelling. */
- canonical: { q0: 3, d: 5, Q: 4, sQ: 1, att: true },
- draw: R => pick(() => ({ q0: R.int(1, 9), d: R.int(1, 6), Q: R.int(1, 5), sQ: R.bool() ? 1 : -1, att: R.bool() }), p => {
-   const F = 899 * p.q0 * p.Q / (p.d * p.d), E = F / p.Q; return Math.abs(F * 100 - Math.round(F * 100)) < 1e-6 && F >= 0.5 && F < 900 && !tie(E) && !(p.q0 === 3 && p.d === 5 && p.Q === 4); }, { q0: 3, d: 5, Q: 4, sQ: 1, att: true }),
- build: ({ q0, d, Q, sQ, att }) => { const F = Math.round(899 * q0 * Q * 100 / (d * d)) / 100, r = d / 10, E = F / Q, qs = (att ? -sQ : sQ) * q0; return {
+ canonical: { F: 431.52, d: 5, Q: 4, sQ: 1, att: true },
+ draw: R => pick(() => { const q0 = R.int(1, 9), d = R.int(1, 6), Q = R.int(1, 5); return { F: Math.round(899 * q0 * Q * 100 / (d * d)) / 100, d, Q, sQ: R.bool() ? 1 : -1, att: R.bool() }; }, p => {
+   const q0 = Math.round(p.F * p.d * p.d / (899 * p.Q)), F = 899 * q0 * p.Q / (p.d * p.d), E = F / p.Q; return Math.abs(F * 100 - Math.round(F * 100)) < 1e-6 && F >= 0.5 && F < 900 && !tie(E) && !(q0 === 3 && p.d === 5 && p.Q === 4); }, { F: 431.52, d: 5, Q: 4, sQ: 1, att: true }),
+ build: ({ F, d, Q, sQ, att }) => { const q0 = Math.round(F * d * d / (899 * Q)), r = d / 10, E = F / Q, qs = (att ? -sQ : sQ) * q0; return {
   prompt: `Something buried in the outer wall holds a charge, and Mira tests it with a dust grain. The source is small enough to treat as a point charge. A grain with charge Q = ${sQ > 0 ? '+' : '−'}${n(Q)} μC (1 μC = 10⁻⁶ C) is placed ${n(r)} m from the source, and it feels a force of ${n(F)} μN ${att ? 'towards' : 'away from'} the source (1 μN = 10⁻⁶ N). Use ${K}. Enter the size of the electric field at the grain in N/C, rounded to 2 decimal places. Then enter the source’s charge in nC (1 nC = 10⁻⁹ C), with its sign: a whole number of nC.`,
   answer: [r2(E), qs],
   hints: ['The field is the force per coulomb on a charge placed there: the size of the field is E = F ÷ |Q|. A force in μN on a charge in μC gives the field directly in N/C.', 'Turn E = k|q| ÷ r² around: |q| = E r² ÷ k. Written in nC this is E r² ÷ 8.99, because 10⁹ ÷ (8.99 × 10⁹) = 1 ÷ 8.99. Like charges repel and unlike charges attract, so the pull or push on the grain tells you the sign of the source.'],
@@ -324,7 +324,7 @@ mk({
  canonical: { q1: 6, d1: 3, q2: -4, d2: 5, Q: 2 },
  draw: R => pick(() => ({ q1: R.nz(-9, 9), d1: R.int(2, 8), q2: R.nz(-9, 9), d2: R.int(2, 9), Q: R.nz(-5, 5) }), p => {
    const E1 = 89.9 * p.q1 / (p.d1 * p.d1), E2 = -89.9 * p.q2 / (p.d2 * p.d2), E = E1 + E2, F = p.Q * E;
-   return Math.abs(E1) >= 0.2 && Math.abs(E2) >= 0.2 && Math.abs(E) >= 0.2 && Math.abs(E1) < 900 && Math.abs(E2) < 900 && Math.abs(F) < 900 && !tie(E1) && !tie(E2) && !tie(E) && !tie(F)
+   return p.Q !== 1 && Math.abs(E1) >= 0.2 && Math.abs(E2) >= 0.2 && Math.abs(E) >= 0.2 && Math.abs(E1) < 900 && Math.abs(E2) < 900 && Math.abs(F) < 900 && !tie(E1) && !tie(E2) && !tie(E) && !tie(F)
     && Math.abs(r2(E1) + r2(E2) - r2(E)) < 1e-9 && r2(p.Q * r2(E)) === r2(F) && !(p.q1 === 6 && p.d1 === 3 && p.q2 === -4 && p.d2 === 5); }, { q1: 6, d1: 3, q2: -4, d2: 5, Q: 2 }),
  build: ({ q1, d1, q2, d2, Q }) => { const E1 = 89.9 * q1 / (d1 * d1), E2 = -89.9 * q2 / (d2 * d2), E = E1 + E2, F = Q * E, dir = f => f > 0 ? '+x' : '−x'; return {
   prompt: `Two charged beacons stand on the cable rail, an x-axis marked in centimetres: a beacon with charge ${n(q1)} nC at x = −${n(d1)} cm and a beacon with charge ${n(q2)} nC at x = ${n(d2)} cm (1 nC = 10⁻⁹ C). Use ${K}. Enter the x component of the net electric field at the origin in kilonewtons per coulomb (kN/C, 1 kN/C = 1000 N/C), rounded to 2 decimal places: positive if it points towards +x. Then a dust grain with charge Q = ${n(Q)} μC is placed at the origin (1 μC = 10⁻⁶ C). Enter the x component of the force on it in millinewtons (mN, 10⁻³ N), using the unrounded field and rounding to 2 decimal places.`,
@@ -380,7 +380,7 @@ mk({
     |F| under 900, off ties, and rounding the field first leaves the rounded force unchanged. */
  canonical: { lam: 10, a: 10, b: 50, Q: 3 },
  draw: R => pick(() => { const i = R.int(0, 7), j = R.int(i + 1, 8); return { lam: R.int(4, 60), a: ENDS[i], b: ENDS[j], Q: R.nz(-6, 6) }; },
-  p => { const E = -8.99 * p.lam * (100 / p.a - 100 / p.b) / 1000, F = p.Q * E; return Math.abs(E) >= 0.5 && Math.abs(E) < 99 && Math.abs(F) < 900 && !tie(E) && !tie(F) && r2(p.Q * r2(E)) === r2(F) && !(p.lam === 10 && p.a === 10 && p.b === 50); }, { lam: 10, a: 10, b: 50, Q: 3 }),
+  p => { const E = -8.99 * p.lam * (100 / p.a - 100 / p.b) / 1000, F = p.Q * E; return p.Q !== 1 && Math.abs(E) >= 0.5 && Math.abs(E) < 99 && Math.abs(F) < 900 && !tie(E) && !tie(F) && r2(p.Q * r2(E)) === r2(F) && !(p.lam === 10 && p.a === 10 && p.b === 50); }, { lam: 10, a: 10, b: 50, Q: 3 }),
  build: ({ lam, a, b, Q }) => { const ia = 100 / a, ib = 100 / b, D = ia - ib, Es = 8.99 * lam * D / 1000, E = -Es, F = Q * E; return {
   prompt: `A charged shield rail lies along the x-axis of the solar field from x = ${n(a / 100)} m to x = ${n(b / 100)} m. Its charge is positive and spread evenly, with linear charge density λ = ${n(lam)} nC/m (nanocoulombs per metre; 1 nC = 10⁻⁹ C). A dust grain with charge Q = ${n(Q)} μC (1 μC = 10⁻⁶ C) is parked at the origin, x = 0. Enter the x component of the electric field the rail makes at the origin in kilonewtons per coulomb (kN/C, 1 kN/C = 1000 N/C), rounded to 2 decimal places: positive if it points towards +x. Then enter the x component of the force on the grain in millinewtons (mN, 10⁻³ N), using the unrounded field and rounding to 2 decimal places. Use ${K}.`,
   answer: [r2(E), r2(F)],

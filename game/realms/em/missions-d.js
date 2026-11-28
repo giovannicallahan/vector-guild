@@ -52,7 +52,7 @@ window.QUESTS.push(
    "The magnetic force qvB is the centripetal force mv²/r that keeps the particle on its circle. Solve qvB = mv²/r for the radius r.",
    "The period is the circumference 2πr divided by the speed v. That gives T = 2πm/(qB): the speed cancels out."
   ],
-  solution: "The velocity is at right angles to the field, so the magnetic force has size qvB, and it supplies the centripetal force: qvB = mv²/r, so r = mv/(qB) = (1.67 × 10⁻²⁷ × 3 × 10⁵) ÷ (1.60 × 10⁻¹⁹ × 0.2) m ≈ 15.6563 mm, which is 15.66 mm to 2 decimal places. One circle is 2πr ≈ 98.3711 mm long, and the particle covers it at 3 × 10⁵ m/s, so the cyclotron period is T = 2πr/v = 2πm/(qB) ≈ 327.9037 ns, which is 327.9 ns to 2 decimal places.",
+  solution: "The velocity is at right angles to the field, so the magnetic force has size qvB, and it supplies the centripetal force: qvB = mv²/r, so r = mv/(qB) = (1.67 × 10⁻²⁷ × 3 × 10⁵) ÷ (1.60 × 10⁻¹⁹ × 0.2) m ≈ 15.6563 mm, which is 15.66 mm to 2 decimal places. One circle is 2πr ≈ 98.3711 mm long, and the particle covers it at 3 × 10⁵ m/s, so the cyclotron period is T = 2πr/v = 2πm/(qB) ≈ 327.9037 ns, which is 327.90 ns to 2 decimal places.",
   xp: 200, prereqs: ["q30"],
   artifact: { name: "Sorter orbit gauge", description: "A dial that reads how wide a charged fragment swings in the magnet box." },
   sources: [source.s11_3],

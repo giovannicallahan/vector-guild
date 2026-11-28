@@ -10,13 +10,14 @@ const clean = x => Math.round(x * 1e9) / 1e9;
 /* Composite Simpson's rule for the integral of f over [a, b]. */
 const simpson = (f, a, b, n = 4000) => { const h = (b - a) / n; let s = f(a) + f(b); for (let i = 1; i < n; i++) s += f(a + i * h) * (i % 2 ? 4 : 2); return s * h / 3; };
 Object.assign(window.ORACLE, {
-  /* N is the number of extra electrons the grain has (the printed charge is N × 1.60 × 10⁻¹⁹ C); m electrons are removed.
+  /* c is the printed charge size, the number multiplying 10⁻¹⁷ C; the extra electrons are N = c × 10⁻¹⁷ ÷ (1.60 × 10⁻¹⁹); m electrons are removed.
      Count in whole electrons, then new charge in units of 10⁻¹⁷ C = −(N − m) × 1.60 × 10⁻¹⁹ ÷ 10⁻¹⁷ = −(N − m) × 16 ÷ 1000. */
   q01: p => {
-    let electrons = p.N, protonsMinusElectrons = 0;
+    const N = Math.round(p.c * 1e-17 / 1.60e-19);
+    let electrons = N, protonsMinusElectrons = 0;
     for (let i = 0; i < p.m; i++) electrons--;
     protonsMinusElectrons = -electrons;
-    return [p.N, clean(protonsMinusElectrons * 16 / 1000)];
+    return [N, clean(protonsMinusElectrons * 16 / 1000)];
   },
   /* a and b are the charges in μC; d is the separation in tenths of a metre (d = 7 prints 0.7 m). Magnitude by Coulomb's law;
      repel (1) when the product of the charges is positive, attract (−1) when negative. */
@@ -61,10 +62,10 @@ Object.assign(window.ORACLE, {
     for (let i = 0; i < n; i++) second += p.c * ((i + 0.5) * dx) * p.h * dx;
     return [rd(first, 2), rd(second, 2)];
   },
-  /* Gauss's law: only the charges inside count (q1, q2 nC). Second surface: m is the flux in units of 200 N·m²/C (m = 5 prints 1000);
+  /* Gauss's law: only the charges inside count (q1, q2 nC). Second surface: P is its printed flux in N·m²/C;
      enclosed charge = flux × ε₀, shown in nC. */
   q08: p => {
-    const flux = (p.q1 + p.q2) * 1e-9 / EPS0, flux2 = p.m * 200;
+    const flux = (p.q1 + p.q2) * 1e-9 / EPS0, flux2 = p.P;
     return [Math.round(flux), rd(flux2 * EPS0 * 1e9, 2)];
   },
   /* Shells (R1, Q1 nC) and (R2, Q2 nC); field at radius r is k Q_enclosed / r², where the enclosed charge is the sum of shells with

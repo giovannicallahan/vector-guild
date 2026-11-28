@@ -12,19 +12,19 @@ const sgn = x => (x > 0 ? 1 : -1);
    side, 0 < |x0| < |x1|): integral of k lam dx (0 − x) / |x|³ = −k lam (1/x0 − 1/x1) for x > 0, mirrored for x < 0. */
 const lineField = (lam, x0, x1) => x0 > 0 ? -K * lam * (1 / x0 - 1 / x1) : K * lam * (1 / -x0 - 1 / -x1);
 Object.assign(window.ORACLE, {
-  /* N = electrons missing, an index-free count: charge N e printed as the number multiplying 1e-17 C.
-     m electrons come back: new charge = (N − m) e (parameters are N and m). */
-  q01b: p => [p.N, r6((p.N - p.m) * QE / 1e-17)],
+  /* c = printed charge as the number multiplying 1e-17 C; electrons missing N = c × 1e-17 ÷ e.
+     m electrons come back: new charge = (N − m) e. */
+  q01b: p => { const N = Math.round(p.c * 1e-17 / QE); return [N, r6((N - p.m) * QE / 1e-17)]; },
   /* a: grain A has 10a more electrons than protons (charge −10a e); b: grain B has 10b more protons (+10b e).
      Each ends with half of the total charge. Answer 1: electrons in excess per grain; answer 2: charge in 1e-17 C. */
   q01c: p => {
     const total = (-10 * p.a + 10 * p.b) * QE, each = total / 2;
     return [r6(-each / QE), r6(each / 1e-17)];
   },
-  /* Charge −0.8 t nC (t = 36 prints −28.8 nC, 23 prints −18.4 nC): count = |Q| / e in billions;
+  /* Charge −Q nC (Q printed): count = |Q| / e in billions;
      then m billion electrons leave, so the charge rises by m × 1e9 e. */
   q01d: p => {
-    const Q = -0.8 * p.t * 1e-9, n = -Q / QE;
+    const Q = -p.Q * 1e-9, n = -Q / QE;
     return [r6(n / 1e9), r2((Q + p.m * 1e9 * QE) * 1e9)];
   },
   /* Coulomb: F = k |q1 q2| / d², nC and cm to SI, back to μN; repel (1) when the charges have the same sign. */
@@ -52,8 +52,12 @@ Object.assign(window.ORACLE, {
   /* Posts at 0 and L with charges s a² and s b² nC and gap L = u (a + b) cm (read off the printed draws, e.g. a=5,b=3,u=5 → 40 cm).
      Zero force where sqrt(Q1)/x = sqrt(Q2)/(L − x), i.e. x = L a / (a + b) = u a. At x = L/2 the force is k q (Q1 / x² − Q2 / (L − x)²). */
   q03d: p => {
-    const L = p.u * (p.a + p.b), Q1 = p.s * p.a * p.a * 1e-9, Q2 = p.s * p.b * p.b * 1e-9, q = p.q * 1e-9;
-    const x0 = L * Math.sqrt(Math.abs(Q1)) / (Math.sqrt(Math.abs(Q1)) + Math.sqrt(Math.abs(Q2)));
+    const L = p.L, Q1 = p.Q1 * 1e-9, Q2 = p.Q2 * 1e-9, q = p.q * 1e-9;
+    /* Balance point by bisection on the net force (x in cm, between the posts). */
+    const net = x => Q1 / (x * x) - Q2 / ((L - x) * (L - x));
+    let lo = 1e-9 * L, hi = L * (1 - 1e-9);
+    for (let i = 0; i < 200; i++) { const mid = (lo + hi) / 2; if (Math.sign(net(mid)) === Math.sign(net(lo))) lo = mid; else hi = mid; }
+    const x0 = (lo + hi) / 2;
     const h = L / 2 * 1e-2;
     return [r2(x0), r2(K * q * (Q1 / (h * h) - Q2 / (h * h)) * 1e6)];
   },
@@ -64,8 +68,9 @@ Object.assign(window.ORACLE, {
   },
   /* Grain charge sQ × Q μC at d × 0.1 m. Field size = k q0 / r² (q0 in nC); attraction means the source has the opposite sign to the grain. */
   q04c: p => {
-    const r = p.d * 0.1, src = (p.att ? -p.sQ : p.sQ) * p.q0;
-    return [r2(K * p.q0 * 1e-9 / (r * r)), src];
+    /* F is the printed force in μN; E = F ÷ |Q|; the source size from E = k|q| ÷ r², a whole number of nC. */
+    const r = p.d * 0.1, E = p.F * 1e-6 / (p.Q * 1e-6), size = Math.round(E * r * r / K * 1e9);
+    return [r2(E), (p.att ? -p.sQ : p.sQ) * size];
   },
   /* Beacons at −d1 and +d2: E_x = k q1 / d1² − k q2 / d2²; F = Q E. */
   q04d: p => {

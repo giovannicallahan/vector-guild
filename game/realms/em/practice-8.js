@@ -11,6 +11,8 @@
    reproduce the authored prompt, hints, solution and guidance exactly. Oracles: qa/realms/em/oracle-p8.js. */
 (function(){
 'use strict';
+/* 'a' or 'an' before a number as it is read aloud (an 8, an 11, an 18, an 80, an 11000). */
+const aan = s => (/^8/.test(s) || /^1[18](\d{3})?$/.test(String(s).split('.')[0])) ? 'an' : 'a';
 const G = window.Gen, { n, plus, par } = G;
 const PRACTICE = window.PRACTICE = window.PRACTICE || [];
 const GEN = window.MISSION_GEN = window.MISSION_GEN || {};
@@ -184,7 +186,7 @@ mk({
   guidance: [
    { prompt: `What is the timer's time constant RC, in milliseconds?`, answer: [tau], explanation: `${n(Rt)} × ${n(Ct)} = ${n(tau)} ms.` },
    { prompt: `The coil's L/R must equal ${n(tau)} ms, and L = ${n(L)} mH. What resistance does the coil circuit need, in ohms, to 2 decimal places?`, answer: [r2(Rc)], explanation: `R = L/τ = ${n(L)} ÷ ${n(tau)} ${ap(Rc)} ${n(Rc)} Ω.` },
-   { prompt: `On a ${n(eps)} V supply, what current does the coil settle at, in amperes, to 2 decimal places?`, answer: [r2(I)], explanation: `ε/R = ${n(eps)} ÷ ${n(Rc)} ${ap(I)} ${n(I)} A.` },
+   { prompt: `On ${aan(n(eps))} ${n(eps)} V supply, what current does the coil settle at, in amperes, to 2 decimal places?`, answer: [r2(I)], explanation: `ε/R = ${n(eps)} ÷ ${n(Rc)} ${ap(I)} ${n(I)} A.` },
    { prompt: `Using the unrounded current, what energy does the coil store, in millijoules, to 2 decimal places?`, answer: [r2(U)], explanation: `½LI² = ½ × ${n(L)} × ${n(I)}² ${ap(U)} ${n(U)} mJ.` }
   ] }; }
 });
@@ -209,7 +211,7 @@ mk({
   hints: ['With ω = 2πf, a coil\'s reactance is ωL (L in henries) and a capacitor\'s is 1/(ωC) (C in farads).', 'The rms current is the rms voltage divided by the reactance, as in Ohm\'s law. The peak current is √2 times the rms current, because the rms value of a sine wave is its peak divided by √2.'],
   solution: `ω = 2π × ${n(f)} ${ap(w)} ${n(w)} rad/s, so the ${part}'s reactance is ${ind ? `X_L = ωL = ${n(w)} × ${n(val / 1000)}` : `X_C = 1/(ωC) = 1 ÷ (${n(w)} × ${n(val)} × 10⁻⁶)`} ${res(X, 'Ω')}. The rms current is V_rms/X = ${n(Vr)} ÷ ${n(X)} ${res(I, 'A')}. The peak current is √2 × ${n(I)} ${res(Ip, 'A')}.`,
   guidance: [
-   { prompt: `What is the angular frequency ω = 2πf of a ${n(f)} Hz supply, in radians per second, to 2 decimal places?`, answer: [r2(w)], explanation: `2π × ${n(f)} ${ap(w)} ${n(w)} rad/s.` },
+   { prompt: `What is the angular frequency ω = 2πf of ${aan(n(f))} ${n(f)} Hz supply, in radians per second, to 2 decimal places?`, answer: [r2(w)], explanation: `2π × ${n(f)} ${ap(w)} ${n(w)} rad/s.` },
    { prompt: `Using the unrounded angular frequency, what is the ${part}'s reactance, in ohms, to 2 decimal places?`, answer: [r2(X)], explanation: ind ? `X_L = ωL = ${n(w)} × ${n(val / 1000)} H ${ap(X)} ${n(X)} Ω.` : `X_C = 1/(ωC) = 1 ÷ (${n(w)} × ${n(val)} × 10⁻⁶ F) ${ap(X)} ${n(X)} Ω.` },
    { prompt: `The rms voltage is ${n(Vr)} V. What is the rms current, in amperes, to 2 decimal places?`, answer: [r2(I)], explanation: `I_rms = V_rms/X = ${n(Vr)} ÷ ${n(X)} ${ap(I)} ${n(I)} A.` },
    { prompt: `What is the peak current, which is √2 times the rms current, in amperes, to 2 decimal places?`, answer: [r2(Ip)], explanation: `√2 × ${n(I)} ${ap(Ip)} ${n(Ip)} A.` }
@@ -253,7 +255,7 @@ mk({
   const w = TWO_PI * p.f, X = w * p.L / 1000, I0 = p.V0 / X, U = p.L * I0 * I0 / 2; return X < 90000 && I0 >= 0.05 && I0 < 1000 && U < 90000 && allSafe([w, X, I0, U]); },
   { V0: 90, f: 120, L: 70 }),
  build: ({ V0, f, L }) => { const w = TWO_PI * f, X = w * L / 1000, I0 = V0 / X, U = L * I0 * I0 / 2; return {
-  prompt: `A coil (an inductor) of ${n(L)} mH (1 mH = 10⁻³ H) is connected across a ${n(f)} Hz alternating supply whose peak voltage is ${n(V0)} V, and nothing else; take the resistance of the wires as zero. Enter the reactance of the coil in ohms (Ω), then the peak current in amperes (A), found from the peak voltage divided by the reactance. The current swings up and down, and the energy stored in the coil, ½LI², is greatest at the moment the current is at its peak. Enter that greatest energy in millijoules (mJ). Give each to 2 decimal places, use unrounded values in later steps, and type numbers without commas.`,
+  prompt: `A coil (an inductor) of ${n(L)} mH (1 mH = 10⁻³ H) is connected across ${aan(n(f))} ${n(f)} Hz alternating supply whose peak voltage is ${n(V0)} V, and nothing else; take the resistance of the wires as zero. Enter the reactance of the coil in ohms (Ω), then the peak current in amperes (A), found from the peak voltage divided by the reactance. The current swings up and down, and the energy stored in the coil, ½LI², is greatest at the moment the current is at its peak. Enter that greatest energy in millijoules (mJ). Give each to 2 decimal places, use unrounded values in later steps, and type numbers without commas.`,
   answer: [r2(X), r2(I0), r2(U)],
   hints: ['With ω = 2πf, a coil\'s reactance is X_L = ωL, with L in henries. The peak current is the peak voltage divided by the reactance.', 'A coil carrying current I stores ½LI². With L in millihenries and I in amperes the energy comes out in millijoules, and it is largest when I has its largest size.'],
   solution: `ω = 2π × ${n(f)} ${ap(w)} ${n(w)} rad/s, so X_L = ωL = ${n(w)} × ${n(L / 1000)} ${res(X, 'Ω')}. The peak current is V₀/X = ${n(V0)} ÷ ${n(X)} ${res(I0, 'A')}. The greatest energy is stored at that peak current: ½LI₀² = ½ × ${n(L)} × ${n(I0)}² ${res(U, 'mJ')}.`,
@@ -378,7 +380,7 @@ mk({
  canonical: { lam: 540, E: 135, d: 8 },
  draw: R => retry(R, R => ({ lam: R.int(400, 750), E: R.int(20, 600), d: R.int(2, 60) }), p => allSafe([300000 / p.lam, p.E / 0.3, p.d * 1000 / p.lam]) && !(p.lam === 600), { lam: 540, E: 135, d: 8 }),
  build: ({ lam, E, d }) => { const f = 3e8 / (lam * 1e-9) / 1e12, B = E / 3e8 * 1e9, cnt = d * 1000 / lam; return {
-  prompt: `The mast carries a signal lamp that flashes visible light of wavelength ${n(lam)} nm (1 nm = 10⁻⁹ m). The electric field amplitude in the beam is ${n(E)} V/m. Take c = 3.00 × 10⁸ m/s. Enter the frequency of the light in terahertz (THz, 1 THz = 10¹² Hz); then the amplitude of the beam's magnetic field in nanotesla (nT, 1 nT = 10⁻⁹ T); then how many wavelengths of this light fit across the ${n(d)} μm gap in the lens (1 μm = 10⁻⁶ m, so the gap is ${n(d)} thousand nanometres). Give each to 2 decimal places and type numbers without commas.`,
+  prompt: `The mast carries a signal lamp that flashes visible light of wavelength ${n(lam)} nm (1 nm = 10⁻⁹ m). The electric field amplitude in the beam is ${n(E)} V/m. Take c = 3.00 × 10⁸ m/s. Enter the frequency of the light in terahertz (THz, 1 THz = 10¹² Hz); then the amplitude of the beam's magnetic field in nanotesla (nT, 1 nT = 10⁻⁹ T); then the width of the ${n(d)} μm gap in the lens divided by the wavelength, which is how many wavelengths span the gap and need not be a whole number (1 μm = 10⁻⁶ m, so the gap is ${n(d)} thousand nanometres). Give each to 2 decimal places and type numbers without commas.`,
   answer: [r2(f), r2(B), r2(cnt)],
   hints: ['The wavelength must be in metres before dividing: c = fλ gives f = c/λ in hertz, and 1 THz = 10¹² Hz.', 'The field amplitudes satisfy E = cB, so B = E/c. The number of wavelengths in a gap is the gap divided by one wavelength, with both in the same unit.'],
   solution: `The frequency is f = c/λ = 3.00 × 10⁸ ÷ (${n(lam)} × 10⁻⁹) ${ap(f * 1e12)} ${n(f * 1e12)} Hz ${res(f, 'THz')}. The magnetic field amplitude is B = E/c = ${n(E)} ÷ (3.00 × 10⁸) T ${res(B, 'nT')}. The gap is ${n(d)} μm = ${n(d * 1000)} nm, so ${n(d * 1000)} ÷ ${n(lam)} ${res(cnt, 'wavelengths')} fit across it.`,

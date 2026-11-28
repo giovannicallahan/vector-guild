@@ -59,7 +59,7 @@ Object.assign(window.ORACLE, {
   },
   /* The prompt prints R and the supply voltage V = I R (I a parameter). Current by Ohm's law, power by V × I. */
   q25: p => {
-    const V = p.I * p.R, I = V / p.R;
+    const V = p.V, I = V / p.R;
     return [clean(I), clean(V * I)];
   },
   /* R1 feed in series with R2 ∥ R3. Parallel resistance found by the product-over-sum rule; current by Ohm. */
@@ -72,7 +72,7 @@ Object.assign(window.ORACLE, {
   /* R in kΩ, C in μF: τ = R C / 1000 s. The prompt's time is m × τ (m a multiplier, printed as the seconds).
      Voltage by stepping the charging equation dV = (E − V) dt / τ in tiny steps. */
   q28: p => {
-    const tau = p.R * p.C / 1000, t = p.m * tau, n = 2000000, dt = t / n;
+    const tau = p.R * p.C / 1000, t = p.t, n = 2000000, dt = t / n;
     let V = 0; for (let i = 0; i < n; i++) V += (p.E - V) * dt / tau;
     return [clean(tau), rd(V, 2)];
   },

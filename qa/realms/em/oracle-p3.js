@@ -35,9 +35,9 @@ Object.assign(window.ORACLE, {
     const q2 = (p.U * 1e-3) * (p.r * 1e-2) / (K * p.q1 * 1e-6);
     return [r2(q2 * 1e6), r2(-p.U)];
   },
-  /* i indexes the printed distance list GAP. U = k q1 q2 ÷ d; all of it becomes ½ m v² far away (m in mg). */
+  /* r is the printed distance in m. U = k q1 q2 ÷ r; all of it becomes ½ m v² far away (m in mg). */
   q12c: p => {
-    const U = K * p.q1 * 1e-6 * p.q2 * 1e-6 / GAP[p.i];
+    const U = K * p.q1 * 1e-6 * p.q2 * 1e-6 / p.r;
     return [r2(U * 1e3), r2(Math.sqrt(2 * U / (p.m * 1e-6)))];
   },
   /* Beads at 0, a cm, b cm. Sum over pairs; removing bead 3 costs minus its interaction with the other two. */
@@ -64,7 +64,7 @@ Object.assign(window.ORACLE, {
   },
   /* s scales the rectangle: AB = 0.3 s, BC = 0.4 s; A at origin, B along x, C up, D above A. Centre is half a diagonal from each. */
   q14b: p => {
-    const ab = 0.3 * p.s, bc = 0.4 * p.s, c = 1e-6;
+    const ab = p.ab, bc = p.bc, c = 1e-6;
     const vD = K * c * (p.q1 / dist(0, bc, 0, 0) + p.q2 / dist(0, bc, ab, 0) + p.q3 / dist(0, bc, ab, bc));
     const vC = K * c * (p.q1 + p.q2 + p.q3) / dist(ab / 2, bc / 2, 0, 0);
     return [r2(vD / 1e3), r2(vC / 1e3)];

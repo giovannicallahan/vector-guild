@@ -11,6 +11,8 @@
    reproduce the authored prompt, hints, solution and guidance exactly. Oracles: qa/realms/em/oracle-p4.js. */
 (function(){
 'use strict';
+/* 'a' or 'an' before a number as it is read aloud (an 8, an 11, an 18, an 80, an 11000). */
+const aan = s => (/^8/.test(s) || /^1[18](\d{3})?$/.test(String(s).split('.')[0])) ? 'an' : 'a';
 const G = window.Gen, { n, plus, par } = G;
 const PRACTICE = window.PRACTICE = window.PRACTICE || [];
 const GEN = window.MISSION_GEN = window.MISSION_GEN || {};
@@ -116,10 +118,10 @@ mk({
 }, {
  /* Proton at v = 40k km/s against a uniform field E (kV/m) across a gap g (mm): the potential difference is E × g, the kinetic energy is 8.35k² eV and the
     proton stops after s = KE ÷ E, inside the gap, off a rounding tie. Not the worked example (120 km/s, 20 kV/m) nor the parent (200 km/s, 75 kV/m). */
- canonical: { k: 4, E: 40, g: 6 },
- draw: R => tries(() => ({ k: R.int(2, 9), E: R.pick([10, 16, 20, 25, 32, 40, 50, 64, 80, 100]), g: R.pick([4, 5, 6, 8, 10]) }),
-  p => ke(p.k) < p.E * p.g && !(p.k === 3 && p.E === 20) && !(p.k === 5 && p.E === 75) && !tie2(ke(p.k) / p.E), { k: 4, E: 40, g: 6 }),
- build: ({ k, E, g }) => { const v = 40 * k, V = E * g, KE = ke(k), s = rd2(KE / E); return {
+ canonical: { v: 160, E: 40, g: 6 },
+ draw: R => tries(() => ({ v: 40 * R.int(2, 9), E: R.pick([10, 16, 20, 25, 32, 40, 50, 64, 80, 100]), g: R.pick([4, 5, 6, 8, 10]) }),
+  p => { const k = p.v / 40; return ke(k) < p.E * p.g && !(k === 3 && p.E === 20) && !(k === 5 && p.E === 75) && !tie2(ke(k) / p.E); }, { v: 160, E: 40, g: 6 }),
+ build: ({ v, E, g }) => { const k = v / 40, V = E * g, KE = ke(k), s = rd2(KE / E); return {
   prompt: `In the reflector stage of the ion gun a proton (mass 1.67 × 10⁻²⁷ kg, charge e = 1.60 × 10⁻¹⁹ C) passes through a hole in the low-potential plate at ${n(v)} km/s, heading straight for the high-potential plate. The plates are ${n(g)} mm apart and the uniform field between them is ${n(E)} kV/m. Enter the potential difference between the plates in V, then the proton’s kinetic energy at the hole in eV, then how far it gets past the hole before it stops, in mm to 2 decimal places (type them without commas).`,
   answer: [V, KE, s],
   hints: ['A field of 1 kV/m is 1 V for every millimetre, so the potential difference across the gap is the field times the gap in millimetres.', 'Work out ½mv² in joules (km/s × 1000 gives m/s), then divide by 1.60 × 10⁻¹⁹ J per eV. Moving towards higher potential, a proton loses 1 eV of kinetic energy for every volt it climbs.', 'It stops once it has climbed as many volts as it has electron-volts. The potential rises by the field for every millimetre, so divide those volts by the field.'],
@@ -161,10 +163,10 @@ mk({
 }, {
  /* v = 40k km/s, KE0 = 8.35k² eV. The gap's potential difference E × g is below KE0 (the proton reaches the plate) and above KE0 ÷ 2
     (the half-energy point is inside the gap). The distance KE0 ÷ (2E) is off a rounding tie. Not the parent (200 km/s, 75 kV/m). */
- canonical: { k: 8, E: 50, g: 8 },
- draw: R => tries(() => ({ k: R.int(6, 11), E: R.pick([20, 25, 40, 50, 64, 80, 100]), g: R.pick([4, 5, 6, 8, 10]) }),
-  p => { const K = ke(p.k), Vg = p.E * p.g; return Vg < K && 2 * Vg > K && !tie2(K / 2 / p.E) && !(p.k === 5 && p.E === 75); }, { k: 8, E: 50, g: 8 }),
- build: ({ k, E, g }) => { const v = 40 * k, KE0 = ke(k), Vg = E * g, KE1 = rd2(KE0 - Vg), d = rd2(KE0 / 2 / E); return {
+ canonical: { v: 320, E: 50, g: 8 },
+ draw: R => tries(() => ({ v: 40 * R.int(6, 11), E: R.pick([20, 25, 40, 50, 64, 80, 100]), g: R.pick([4, 5, 6, 8, 10]) }),
+  p => { const K = ke(p.v / 40), Vg = p.E * p.g; return Vg < K && 2 * Vg > K && !tie2(K / 2 / p.E); }, { v: 320, E: 50, g: 8 }),
+ build: ({ v, E, g }) => { const k = v / 40, KE0 = ke(k), Vg = E * g, KE1 = rd2(KE0 - Vg), d = rd2(KE0 / 2 / E); return {
   prompt: `A fast proton (mass 1.67 × 10⁻²⁷ kg, charge e = 1.60 × 10⁻¹⁹ C) passes through a hole in the low-potential plate of an ion-gun gap at ${n(v)} km/s, heading straight for the high-potential plate. The plates are ${n(g)} mm apart and the uniform field between them is ${n(E)} kV/m. Enter the proton’s kinetic energy at the hole in eV, then its kinetic energy when it arrives at the high-potential plate in eV, then the distance from the hole to the point where its kinetic energy has fallen to half its value at the hole, in mm to 2 decimal places (type them without commas).`,
   answer: [KE0, KE1, d],
   hints: ['Work out ½mv² in joules (km/s × 1000 gives m/s), then divide by 1.60 × 10⁻¹⁹ J per eV.', 'A field of 1 kV/m is 1 V for every millimetre. Across the whole gap the proton climbs that many volts, and loses 1 eV for every volt it climbs.', 'Half of the starting energy is lost after climbing half that many volts. Divide those volts by the field to get the distance.'],
@@ -239,7 +241,7 @@ mk({
  draw: R => tries(() => ({ A: 100 * R.int(2, 25), d: R.pick([0.5, 1, 2, 2.5, 4, 5]), V: 50 * R.int(2, 40) }),
   p => { const C = cap(p.A, p.d), Q = C * p.V / 1000; return !tie2(C) && !tie2(Q) && !tie2(Q / 2) && !tie2(p.V / p.d) && rd2(rd2(C) * p.V / 1000) === rd2(Q) && rd2(rd2(C) * p.V / 2000) === rd2(Q / 2) && !(p.A === 400 && p.d === 2 && p.V === 300); }, { A: 800, d: 2, V: 150 }),
  build: ({ A, d, V }) => { const Cx = cap(A, d), C = rd2(Cx), Qx = Cx * V / 1000, Q = rd2(Qx), E = rd2(V / d), Q2 = rd2(Qx / 2); return {
-  prompt: `A test capacitor in the Battery Vault has two plates of area ${n(A)} cm², ${n(d)} mm apart with air between them, connected to a ${n(V)} V battery. Use ε₀ = 8.85 × 10⁻¹² F/m. Enter the capacitance in pF, the charge on the positive plate in nC, and the uniform field between the plates in kV/m (the potential difference divided by the gap), then the charge on the positive plate in nC after the plates are pulled apart to double the gap with the battery still connected. Give each to 2 decimal places (type them without commas).`,
+  prompt: `A test capacitor in the Battery Vault has two plates of area ${n(A)} cm², ${n(d)} mm apart with air between them, connected to ${aan(n(V))} ${n(V)} V battery. Use ε₀ = 8.85 × 10⁻¹² F/m. Enter the capacitance in pF, the charge on the positive plate in nC, and the uniform field between the plates in kV/m (the potential difference divided by the gap), then the charge on the positive plate in nC after the plates are pulled apart to double the gap with the battery still connected. Give each to 2 decimal places (type them without commas).`,
   answer: [C, Q, E, Q2],
   hints: ['Turn the area into m² (10000 cm² = 1 m²) and the gap into metres, then C = ε₀A ÷ d. A picofarad times a volt is a picocoulomb, and 1000 pC = 1 nC.', 'A field of 1 kV/m is 1 V for every millimetre, so the field is the battery’s voltage divided by the gap in millimetres.', 'Doubling the gap changes the capacitance by the same factor, in the opposite sense, and the battery still holds the same voltage. Use Q = CV with the new capacitance.'],
   solution: `A = ${n(A)} cm² = ${n(A / 10000)} m² and d = ${n(d)} mm = ${n(d / 1000)} m. C = ε₀A ÷ d = 8.85 × 10⁻¹² × ${n(A / 10000)} ÷ ${n(d / 1000)} F ${eq(Cx)} ${n(C)} pF (to 2 decimal places). Q = CV = ${n(Cx)} pF × ${n(V)} V = ${n(Cx * V)} pC, which is ${n(Q)} nC (to 2 decimal places). The field is ${n(V)} V ÷ ${n(d)} mm ${eq(V / d)} ${n(E)} kV/m. With the gap doubled the capacitance is halved and the voltage is still ${n(V)} V, so the charge is half of ${n(Qx)} nC, which is ${n(Q2)} nC (to 2 decimal places).`,
@@ -290,7 +292,7 @@ mk({
  canonical: { c1: 12, c2: 4, Ct: 8, V: 18 },
  draw: R => tries(() => ({ c1: R.int(2, 15), c2: R.int(2, 15), Ct: R.int(6, 24), V: 2 * R.int(3, 24) }), p => is2(ser(p.c1, p.c2)) && p.Ct - ser(p.c1, p.c2) >= 1 && is2(p.Ct - ser(p.c1, p.c2)) && !(p.c1 === 2 && p.c2 === 6) && !(p.c1 === 6 && p.c2 === 2), { c1: 12, c2: 4, Ct: 8, V: 18 }),
  build: ({ c1, c2, Ct, V }) => { const pair = rd2(ser(c1, c2)), ex = rd2(Ct - pair), Q = Ct * V; return {
-  prompt: `A spare bank in the Battery Vault has a ${n(c1)} μF capacitor and a ${n(c2)} μF capacitor joined in series. The crew will join that pair in parallel with one more capacitor, so that the finished bank has an equivalent capacitance of ${n(Ct)} μF. Enter the equivalent capacitance of the series pair in μF, then the capacitance the extra capacitor must have in μF, then the charge a ${n(V)} V supply moves onto the finished bank in μC. Give each to 2 decimal places (type them without commas).`,
+  prompt: `A spare bank in the Battery Vault has ${aan(n(c1))} ${n(c1)} μF capacitor and ${aan(n(c2))} ${n(c2)} μF capacitor joined in series. The crew will join that pair in parallel with one more capacitor, so that the finished bank has an equivalent capacitance of ${n(Ct)} μF. Enter the equivalent capacitance of the series pair in μF, then the capacitance the extra capacitor must have in μF, then the charge ${aan(n(V))} ${n(V)} V supply moves onto the finished bank in μC. Give each to 2 decimal places (type them without commas).`,
   answer: [pair, ex, Q],
   hints: ['For two capacitors in series, the equivalent is their product divided by their sum.', 'The extra capacitor is in parallel with the pair, and in parallel capacitances add. So the extra one must make up the difference between the target and the pair.', 'The finished bank behaves like one capacitor of the target capacitance, so the charge is Q = C × V.'],
   solution: `In series, C = ${n(c1)} × ${n(c2)} ÷ (${n(c1)} + ${n(c2)}) = ${n(c1 * c2)} ÷ ${n(c1 + c2)} ${eq(ser(c1, c2))} ${n(pair)} μF (to 2 decimal places). In parallel capacitances add, so the extra capacitor must be ${n(Ct)} − ${n(pair)} = ${n(ex)} μF. The finished bank holds Q = CV = ${n(Ct)} μF × ${n(V)} V = ${n(Q)} μC.`,
@@ -339,7 +341,7 @@ mk({
  draw: R => tries(() => ({ c1: 10 * R.int(1, 50), c2: 10 * R.int(1, 50), V: 10 * R.int(1, 10), t: R.pick([2, 4, 5, 10, 20, 25, 50]) }),
   p => { const C = ser(p.c1, p.c2), U = C * p.V * p.V / 2000; return is2(C) && is2(U) && is2(U / p.t) && U / p.t >= 0.1 && p.c1 !== p.c2 && !(p.c1 === 220 && p.c2 === 330); }, { c1: 300, c2: 600, V: 30, t: 10 }),
  build: ({ c1, c2, V, t }) => { const C = rd2(ser(c1, c2)), U = rd2(C * V * V / 2000), P = rd2(U / t); return {
-  prompt: `A flash unit in the Battery Vault joins a ${n(c1)} μF capacitor and a ${n(c2)} μF capacitor in series, and a ${n(V)} V supply is connected across the whole chain. Enter the equivalent capacitance of the chain in μF, then the energy stored in the chain in mJ, then the average power in W if all that energy is released in ${n(t)} ms. Give each to 2 decimal places (type them without commas).`,
+  prompt: `A flash unit in the Battery Vault joins ${aan(n(c1))} ${n(c1)} μF capacitor and ${aan(n(c2))} ${n(c2)} μF capacitor in series, and ${aan(n(V))} ${n(V)} V supply is connected across the whole chain. Enter the equivalent capacitance of the chain in μF, then the energy stored in the chain in mJ, then the average power in W if all that energy is released in ${n(t)} ms. Give each to 2 decimal places (type them without commas).`,
   answer: [C, U, P],
   hints: ['For two capacitors in series, the equivalent is their product divided by their sum. The chain stores energy like one capacitor of that capacitance across the full supply voltage.', 'The energy stored is U = ½CV², and 1 μF × (1 V)² = 1 μJ. Then 1000 μJ = 1 mJ.', 'Average power is energy divided by time, and 1 mJ ÷ 1 ms = 1 W.'],
   solution: `In series, C = ${n(c1)} × ${n(c2)} ÷ (${n(c1)} + ${n(c2)}) = ${n(c1 * c2)} ÷ ${n(c1 + c2)} ${eq(ser(c1, c2))} ${n(C)} μF (to 2 decimal places). U = ½CV² = ½ × ${n(C)} μF × ${n(V * V)} V² = ${n(C * V * V / 2)} μJ, which is ${n(U)} mJ. Released in ${n(t)} ms, the average power is ${n(U)} mJ ÷ ${n(t)} ms = ${n(P)} W.`,

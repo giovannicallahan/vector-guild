@@ -38,9 +38,9 @@ Object.assign(window.ORACLE, {
     const I = (p.m * 1e-3 * G) / ((p.L / 100) * (p.b * 1e-3));
     return [r2(I), r2(I * p.R)];
   },
-  /* q32d: the supply is I × R volts (I amperes through R ohms); L in cm, b in mT, m in g, t in s. */
+  /* q32d: supply V volts across R ohms; L in cm, b in mT, m in g, t in s. */
   q32d: p => {
-    const V = p.I * p.R, I = V / p.R;
+    const I = p.V / p.R;
     const F = I * (p.L / 100) * (p.b * 1e-3);
     const a = F / (p.m * 1e-3);
     return [I, r2(F), r2(a * p.t)];
@@ -72,17 +72,16 @@ Object.assign(window.ORACLE, {
     const loop = MU0 * I;
     return [I, r2(loop * 1e6), r2(Math.abs(loop / (2 * Math.PI * p.r / 100)) * 1e6)];
   },
-  /* q34c: n1, n2 in turns per metre, l1, l2 in cm, h1, h2 = twice the current in A. The prompt prints turns N = n × l and current h ÷ 2. */
+  /* q34c: N1, N2 turns along l1, l2 cm, carrying I1, I2 A. */
   q34c: p => {
-    const N1 = p.n1 * p.l1 / 100, N2 = p.n2 * p.l2 / 100;
-    const b1 = MU0 * (N1 / (p.l1 / 100)) * (p.h1 / 2), b2 = MU0 * (N2 / (p.l2 / 100)) * (p.h2 / 2);
+    const b1 = MU0 * (p.N1 / (p.l1 / 100)) * p.I1, b2 = MU0 * (p.N2 / (p.l2 / 100)) * p.I2;
     /* Same sense: both fields point the same way along the axis. Opposite sense: the outer field points the other way. */
     const net = p.same ? b1 + b2 : b1 - b2;
     return [r2(Math.abs(net) * 1e3), net > 0 ? 1 : -1];
   },
-  /* q34d: n in turns per metre, h = twice the coil current in A, iw cable current in A, r cm to the axis. */
+  /* q34d: n in turns per metre, coil current I A, iw cable current in A, r cm to the axis. */
   q34d: p => {
-    const bc = MU0 * p.n * (p.h / 2), bw = fieldOfWire(p.iw, p.r / 100);
+    const bc = MU0 * p.n * p.I, bw = fieldOfWire(p.iw, p.r / 100);
     return [r2(bc * 1e3), r2(bw * 1e3), r2(Math.hypot(bc, bw) * 1e3)];
   },
   /* q35b: the field points down and changes b1 to b2 (mT). Lenz: the induced field opposes the change.

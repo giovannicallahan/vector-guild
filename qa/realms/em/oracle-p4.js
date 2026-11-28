@@ -19,9 +19,9 @@ Object.assign(window.ORACLE, {
     const v1 = p.E1 * 1e3 * p.d1 * 1e-3, v2 = v1 + p.E2 * 1e3 * p.d2 * 1e-3;
     return [r2(v1), r2(v2), r2(v2 / ((p.d1 + p.d2) * 1e-3) / 1e3)];
   },
-  /* Speed is 40 k km/s (the prompt prints 120 km/s for k = 3, 240 for k = 6, 280 for k = 7); stops after KE/(e E) metres. */
+  /* v is the printed speed in km/s; stops after KE/(e E) metres. */
   q17b: p => {
-    const ke = keEV(40 * p.k * 1e3);
+    const ke = keEV(p.v * 1e3);
     return [r2(p.E * 1e3 * p.g * 1e-3), r2(ke), r2(ke * QE / (QE * p.E * 1e3) * 1e3)];
   },
   /* Booster gains e E1 s1; brake force e E2 stops it after that energy ÷ force. */
@@ -29,9 +29,9 @@ Object.assign(window.ORACLE, {
     const gain = QE * p.E1 * 1e3 * p.s1 * 1e-3, back = gain / (QE * p.E2 * 1e3) * 1e3;
     return [r2(gain / QE), r2(back), r2(p.s1 + back)];
   },
-  /* Speed is 40 k km/s (360 for k = 9, 400 for k = 10, 320 for k = 8). KE at plate = KE − e E g; half-KE at KE/2 ÷ (e E). */
+  /* v is the printed speed in km/s. KE at plate = KE − e E g; half-KE at KE/2 ÷ (e E). */
   q17d: p => {
-    const ke = keEV(40 * p.k * 1e3);
+    const ke = keEV(p.v * 1e3);
     return [r2(ke), r2(ke - p.E * 1e3 * p.g * 1e-3), r2(ke / 2 / (p.E * 1e3) * 1e3)];
   },
   /* Plates L × W cm; C = ε0 A ÷ d; Q = C V. */

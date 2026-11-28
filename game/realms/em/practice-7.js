@@ -11,6 +11,8 @@
    reproduce the authored prompt, hints, solution and guidance exactly. Oracles: qa/realms/em/oracle-p7.js. */
 (function(){
 'use strict';
+/* 'a' or 'an' before a number as it is read aloud (an 8, an 11, an 18, an 80, an 11000). */
+const aan = s => (/^8/.test(s) || /^1[18](\d{3})?$/.test(String(s).split('.')[0])) ? 'an' : 'a';
 const G = window.Gen, { n, plus, par } = G;
 const PRACTICE = window.PRACTICE = window.PRACTICE || [];
 const GEN = window.MISSION_GEN = window.MISSION_GEN || {};
@@ -167,12 +169,12 @@ mk({
  labels: ['current (A)', 'force (N)', 'speed (m/s)'], tolerance: 0.005,
  gl: [['current (A)'], ['force (N)'], ['speed (m/s)']]
 }, {
- /* Supply V = I R volts, rod length L cm at right angles to a field of b mT, rod mass m g, pushed for t seconds from rest. F = ILB, a = F/m, v = a t. */
- canonical: { I: 15, R: 4, L: 60, b: 250, m: 150, t: 2 },
- draw: R => retry(R, R => ({ I: R.int(5, 30), R: R.int(2, 8), L: 10 * R.int(3, 10), b: 10 * R.int(10, 40), m: 25 * R.int(2, 12), t: R.pick([1, 2, 3, 4]) }), p => {
-  const F = p.I * p.L / 100 * p.b / 1000, v = F / (p.m / 1000) * p.t;
-  return allSafe([F, v]) && same2(r2(r2(F) / (p.m / 1000) * p.t), r2(v)) && v < 90000; }, { I: 15, R: 4, L: 60, b: 250, m: 150, t: 2 }),
- build: ({ I, R, L, b, m, t }) => { const V = I * R, F = I * L / 100 * b / 1000, a = F / (m / 1000), v = a * t; return {
+ /* Supply V volts (printed; drawn as a whole-number current times R), resistance R, rod length L cm at right angles to a field of b mT, rod mass m g, pushed for t seconds from rest. I = V/R, F = ILB, a = F/m, v = a t. */
+ canonical: { V: 60, R: 4, L: 60, b: 250, m: 150, t: 2 },
+ draw: R => retry(R, R => { const I = R.int(5, 30), Rr = R.int(2, 8); return { V: I * Rr, R: Rr, L: 10 * R.int(3, 10), b: 10 * R.int(10, 40), m: 25 * R.int(2, 12), t: R.pick([1, 2, 3, 4]) }; }, p => {
+  const F = p.V / p.R * p.L / 100 * p.b / 1000, v = F / (p.m / 1000) * p.t;
+  return allSafe([F, v]) && same2(r2(r2(F) / (p.m / 1000) * p.t), r2(v)) && v < 90000; }, { V: 60, R: 4, L: 60, b: 250, m: 150, t: 2 }),
+ build: ({ V, R, L, b, m, t }) => { const I = V / R, F = I * L / 100 * b / 1000, a = F / (m / 1000), v = a * t; return {
   prompt: `A cargo rod in the Ore Sorter's launcher rests across two smooth horizontal rails, in a magnetic field of ${n(b)} mT that points straight up, at right angles to the rod and the rails. The rod is ${n(L)} cm long and has mass ${n(m)} g. A ${n(V)} V supply drives a current through the rod, and the circuit has a total resistance of ${n(R)} Ω. The rod starts from rest, and there is no friction. Ignore any emf that the motion itself induces, so the current stays constant, and take the rod to be at right angles to the field the whole time. Enter the current in amperes (A), then the size of the force on the rod in newtons (N), then the speed of the rod after ${n(t)} s in metres per second (m/s). Give the force and the speed to 2 decimal places and type numbers without commas.`,
   answer: [I, r2(F), r2(v)],
   hints: ['Ohm\'s law gives the current: I = V/R. The rod is at right angles to the field, so the force is F = ILB, with L in metres and B in tesla.', 'Newton\'s second law gives the acceleration, a = F/m, with the mass in kilograms. The force is steady, so the speed after a time t from rest is v = at.'],
@@ -267,7 +269,7 @@ mk({
   const I = p.i1 + p.i2 - p.i3, ln = MU0 * I * 1e6, B = 20 * I / p.r;
   return I >= 10 && allSafe([ln, B]) && same2(r2(r2(ln) / (TWO_PI * p.r / 100)), r2(B)) && !(p.i1 === 40 && p.i2 === 25 && p.i3 === 15 && p.r === 20); }, { i1: 40, i2: 25, i3: 15, r: 20 }),
  build: ({ i1, i2, i3, r }) => { const I = i1 + i2 - i3, ln = MU0 * I * 1e6, B = 20 * I / r, rm = r / 100; return {
-  prompt: `Three thin cables run side by side through one duct under the Ore Sorter's floor. Cables 1 and 2 carry ${n(i1)} A and ${n(i2)} A in one direction, and cable 3 carries ${n(i3)} A in the opposite direction. A circle of radius ${n(r)} cm is drawn on a plane at right angles to the duct, with the duct at its centre. The duct is so narrow that the field has the same size all the way round the circle and runs along it. Take μ₀ = 4π × 10⁻⁷ T·m/A and count a current in the opposite direction as negative. Enter the total current passing through the circle in amperes (A), then the line integral ∮B·dl round the circle in microtesla-metres (μT·m, 1 μT·m = 10⁻⁶ T·m), then the size of the field on the circle in microtesla (μT). Give the last two to 2 decimal places and type numbers without commas.`,
+  prompt: `Three thin cables run side by side through one duct under the Ore Sorter's floor. Cables 1 and 2 carry ${n(i1)} A and ${n(i2)} A in one direction, and cable 3 carries ${n(i3)} A in the opposite direction. A circle of radius ${n(r)} cm is drawn on a plane at right angles to the duct, with the duct at its centre. The duct is so narrow that the field has the same size all the way round the circle and runs along it. Take μ₀ = 4π × 10⁻⁷ T·m/A. Go round the circle in the sense your fingers curl when your right thumb points along the current in cables 1 and 2: then their current counts as positive and a current in the opposite direction as negative. Enter the total current passing through the circle in amperes (A), then the line integral ∮B·dl round the circle in microtesla-metres (μT·m, 1 μT·m = 10⁻⁶ T·m), then the size of the field on the circle in microtesla (μT). Give the last two to 2 decimal places and type numbers without commas.`,
   answer: [I, r2(ln), r2(B)],
   hints: ['Ampère\'s law: the line integral round a closed path is μ₀ times the total current through it. Add the currents with their signs: one direction positive, the other negative.', 'On the circle the field is along the path and the same size everywhere, so the line integral is B times the length of the circle, 2πr. Solve for B, with r in metres.'],
   solution: `The total current is ${n(i1)} + ${n(i2)} − ${n(i3)} = ${n(I)} A. By Ampère's law ∮B·dl = μ₀I = 4π × 10⁻⁷ × ${n(I)} T·m, which is ${is2(ln, 'μT·m')}. The field is along the circle and constant on it, so ∮B·dl = B × 2πr with r = ${n(rm)} m. Then B = ∮B·dl ÷ (2πr), which is ${is2(B, 'μT')}.`,
@@ -284,13 +286,14 @@ mk({
  labels: ['net field (mT)', 'along inner coil 1, along outer coil −1'], tolerance: 0.005,
  gl: [['inner coil field (mT)'], ['outer coil field (mT)'], ['net field (mT)']]
 }, {
- /* Inner coil: n1 turns per metre (a multiple of 100), length l1 cm, current h1/2 A. Outer coil: n2, l2, h2/2 A, longer than the inner one, so it surrounds it.
+ /* Inner coil: N1 turns along l1 cm (n1 = N1 ÷ l1 turns per metre, a multiple of 100), current I1 A (a multiple of 0.5). Outer coil: N2, l2, I2, longer than the inner one, so it surrounds it.
     B = μ₀ n I (in mT, 4π × 10⁻⁴ n I). If the currents circulate the same way the fields add; otherwise they subtract. dir is 1 when the net field is along the inner coil's own field. */
- canonical: { n1: 3000, l1: 20, h1: 6, n2: 1500, l2: 50, h2: 8, same: false },
- draw: R => retry(R, R => ({ n1: 100 * R.int(10, 50), l1: R.pick([10, 15, 20, 25]), h1: R.int(2, 16), n2: 100 * R.int(10, 50), l2: R.pick([40, 50, 60]), h2: R.int(2, 16), same: R.bool() }), p => {
-  const B1 = 4 * Math.PI * 1e-4 * p.n1 * p.h1 / 2, B2 = 4 * Math.PI * 1e-4 * p.n2 * p.h2 / 2, net = p.same ? B1 + B2 : B1 - B2;
-  return allSafe([B1, B2, net]) && Math.abs(net) >= 0.5 && same2(r2(p.same ? r2(B1) + r2(B2) : r2(B1) - r2(B2)), r2(net)) && !(p.n1 === 3000 && p.h1 === 6 && p.n2 === 1500 && p.h2 === 8 && !p.same); }, { n1: 3000, l1: 20, h1: 6, n2: 1500, l2: 50, h2: 8, same: false }),
- build: ({ n1, l1, h1, n2, l2, h2, same }) => { const N1 = n1 * l1 / 100, N2 = n2 * l2 / 100, I1 = h1 / 2, I2 = h2 / 2, B1 = 4 * Math.PI * 1e-4 * n1 * I1, B2 = 4 * Math.PI * 1e-4 * n2 * I2,
+ canonical: { N1: 600, l1: 20, I1: 3, N2: 750, l2: 50, I2: 4, same: false },
+ draw: R => retry(R, R => { const n1 = 100 * R.int(10, 50), l1 = R.pick([10, 15, 20, 25]), n2 = 100 * R.int(10, 50), l2 = R.pick([40, 50, 60]);
+   return { N1: n1 * l1 / 100, l1, I1: R.int(2, 16) / 2, N2: n2 * l2 / 100, l2, I2: R.int(2, 16) / 2, same: R.bool() }; }, p => {
+  const B1 = 4 * Math.PI * 1e-4 * (p.N1 * 100 / p.l1) * p.I1, B2 = 4 * Math.PI * 1e-4 * (p.N2 * 100 / p.l2) * p.I2, net = p.same ? B1 + B2 : B1 - B2;
+  return allSafe([B1, B2, net]) && Math.abs(net) >= 0.5 && same2(r2(p.same ? r2(B1) + r2(B2) : r2(B1) - r2(B2)), r2(net)) && !(p.N1 * 100 / p.l1 === 3000 && p.I1 === 3 && p.N2 * 100 / p.l2 === 1500 && p.I2 === 4 && !p.same); }, { N1: 600, l1: 20, I1: 3, N2: 750, l2: 50, I2: 4, same: false }),
+ build: ({ N1, l1, I1, N2, l2, I2, same }) => { const n1 = Math.round(N1 * 100 / l1), n2 = Math.round(N2 * 100 / l2), B1 = 4 * Math.PI * 1e-4 * n1 * I1, B2 = 4 * Math.PI * 1e-4 * n2 * I2,
   net = same ? B1 + B2 : B1 - B2, size = Math.abs(net), dir = net > 0 ? 1 : -1; return {
   prompt: `The Ore Sorter's coil gate has two long solenoids wound on the same axis. The inner coil has ${n(N1)} turns spread evenly along ${n(l1)} cm and carries ${n(I1)} A. It sits inside the outer coil, which has ${n(N2)} turns spread evenly along ${n(l2)} cm and carries ${n(I2)} A. The currents circulate ${same ? 'the same way' : 'in opposite senses'} round the axis. Take μ₀ = 4π × 10⁻⁷ T·m/A. Inside a long solenoid the field is B = μ₀nI, along the axis, and magnetic fields from two coils add as vectors: where the two fields point the same way they add, and where they point opposite ways the smaller is taken from the larger. Treat both coils as long, so the outer coil's field is uniform through the inner coil. Enter the size of the net field inside the inner coil in millitesla (mT, 1 mT = 10⁻³ T), then 1 if the net field points the way the inner coil's own field points, or −1 if it points the opposite way. Round the field to 2 decimal places and type numbers without commas.`,
   answer: [r2(size), dir],
@@ -309,13 +312,13 @@ mk({
  labels: ['coil field (mT)', 'cable field (mT)', 'total field (mT)'], tolerance: 0.005,
  gl: [['coil field (mT)'], ['cable field (mT)'], ['total field (mT)']]
 }, {
- /* Solenoid n turns per metre (a multiple of 100), current h/2 A; straight cable iw A at r cm from the axis, parallel to it.
+ /* Solenoid n turns per metre (a multiple of 100), current I A (a multiple of 0.5); straight cable iw A at r cm from the axis, parallel to it.
     Bs = 4π × 10⁻⁴ n I mT; Bw = 2 × 10⁻⁷ iw / (r/100) T = 0.02 iw / r mT; the two fields are at right angles, so B = √(Bs² + Bw²). */
- canonical: { n: 2500, h: 5, iw: 120, r: 6 },
- draw: R => retry(R, R => ({ n: 100 * R.int(10, 50), h: R.int(2, 16), iw: 10 * R.int(3, 30), r: R.int(3, 15) }), p => {
-  const Bs = 4 * Math.PI * 1e-4 * p.n * p.h / 2, Bw = 0.02 * p.iw / p.r, B = Math.hypot(Bs, Bw);
-  return allSafe([Bs, Bw, B]) && same2(r2(Math.hypot(r2(Bs), r2(Bw))), r2(B)) && Bw >= 0.1; }, { n: 2500, h: 5, iw: 120, r: 6 }),
- build: ({ n: nn, h, iw, r }) => { const I = h / 2, Bs = 4 * Math.PI * 1e-4 * nn * I, Bw = 0.02 * iw / r, B = Math.hypot(Bs, Bw); return {
+ canonical: { n: 2500, I: 2.5, iw: 120, r: 6 },
+ draw: R => retry(R, R => ({ n: 100 * R.int(10, 50), I: R.int(2, 16) / 2, iw: 10 * R.int(3, 30), r: R.int(3, 15) }), p => {
+  const Bs = 4 * Math.PI * 1e-4 * p.n * p.I, Bw = 0.02 * p.iw / p.r, B = Math.hypot(Bs, Bw);
+  return allSafe([Bs, Bw, B]) && same2(r2(Math.hypot(r2(Bs), r2(Bw))), r2(B)) && Bw >= 0.1 && r2(B) - r2(Bs) >= 0.02; }, { n: 2500, I: 2.5, iw: 120, r: 6 }),
+ build: ({ n: nn, I, iw, r }) => { const Bs = 4 * Math.PI * 1e-4 * nn * I, Bw = 0.02 * iw / r, B = Math.hypot(Bs, Bw); return {
   prompt: `The Ore Sorter's coil gate is a long solenoid with ${n(nn)} turns per metre, carrying ${n(I)} A. A long straight power cable carrying ${n(iw)} A runs outside the coil, parallel to its axis, with ${n(r)} cm between the cable and the axis. Take μ₀ = 4π × 10⁻⁷ T·m/A. The coil does not change the cable's field. On the axis, the coil's field runs along the axis and the cable's field is at right angles to it, so the two fields combine like the sides of a right-angled triangle: the size of the total is the square root of the sum of the squares. Enter the size of the coil's field on the axis, the size of the cable's field on the axis, and the size of the total field there, each in millitesla (mT, 1 mT = 10⁻³ T) to 2 decimal places. Work from unrounded values and type numbers without commas.`,
   answer: [r2(Bs), r2(Bw), r2(B)],
   hints: ['Inside a long solenoid B = μ₀nI, with n in turns per metre. A long straight cable makes B = μ₀I/(2πr) = 2 × 10⁻⁷ × I/r tesla at distance r, with r in metres.', 'The two fields are at right angles, so the total size is √(B₁² + B₂²). Convert tesla to millitesla at the end.'],
@@ -367,7 +370,7 @@ mk({
   const emf = p.N * p.w * p.h * p.b / (10000 * p.dt), I = emf / (p.Rc + p.Rs), Q = I * p.dt;
   return emf >= 1 && emf < 90000 && allSafe([emf, I, Q]) && same2(r2(r2(emf) / (p.Rc + p.Rs)), r2(I)) && same2(r2(r2(I) * p.dt), r2(Q)) && !(p.N === 10 && p.b === 50); }, { N: 120, w: 10, h: 6, b: 150, dt: 0.4, Rc: 3, Rs: 7 }),
  build: ({ N, w, h, b, dt, Rc, Rs }) => { const A = w * h / 1e4, dP = A * b, Rt = Rc + Rs, emf = N * dP / dt, I = emf / Rt, Q = I * dt; return {
-  prompt: `A coil sits on top of the test magnet in the Generator Station. It has ${n(N)} turns, each a rectangle ${n(w)} cm by ${n(h)} cm, and the magnet's field points up through it at right angles to the coil. When the magnet is switched off, the field falls steadily from ${n(b)} mT to zero in ${n(dt)} s. The coil has a resistance of ${n(Rc)} Ω and is joined in series with a ${n(Rs)} Ω resistor to make a closed circuit, and it is the only source of emf in that circuit. Enter the size of the induced emf in millivolts (mV), then the total charge that flows round the circuit during the ${n(dt)} s, in millicoulombs (mC, 1 mC = 10⁻³ C). Give each to 2 decimal places and type numbers without commas.`,
+  prompt: `A coil sits on top of the test magnet in the Generator Station. It has ${n(N)} turns, each a rectangle ${n(w)} cm by ${n(h)} cm, and the magnet's field points up through it at right angles to the coil. When the magnet is switched off, the field falls steadily from ${n(b)} mT to zero in ${n(dt)} s. The coil has a resistance of ${n(Rc)} Ω and is joined in series with ${aan(n(Rs))} ${n(Rs)} Ω resistor to make a closed circuit, and it is the only source of emf in that circuit. Enter the size of the induced emf in millivolts (mV), then the total charge that flows round the circuit during the ${n(dt)} s, in millicoulombs (mC, 1 mC = 10⁻³ C). Give each to 2 decimal places and type numbers without commas.`,
   answer: [r2(emf), r2(Q)],
   hints: ['The area of one turn is the length times the width, in square metres (1 m² = 10 000 cm²). The flux through one turn changes by A × ΔB, and Faraday\'s law gives an emf of size N × ΔΦ/Δt.', 'The circuit\'s total resistance is the coil plus the resistor in series, so the current is the emf divided by that total. Current is charge per second, so the charge that flows in a time Δt is the current times Δt (milliamperes times seconds gives millicoulombs).'],
   solution: `One turn has area ${n(w)} cm × ${n(h)} cm = ${n(A)} m². The flux through it falls by ΔΦ = ${n(A)} × ${n(b)} mT = ${n(dP)} mWb. Faraday's law gives an emf of size N × ΔΦ/Δt = ${n(N)} × ${n(dP)} ÷ ${n(dt)}, which is ${is2(emf, 'mV')}. The circuit's resistance is ${n(Rc)} + ${n(Rs)} = ${n(Rt)} Ω, so the current is I = emf/R, which is ${is2(I, 'mA')}. The charge that flows in ${n(dt)} s is Q = I × Δt, which is ${is2(Q, 'mC')}.`,

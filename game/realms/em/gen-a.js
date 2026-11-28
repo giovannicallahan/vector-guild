@@ -21,12 +21,12 @@ const piText = (num, den) => `${num === 1 ? '' : num}π/${den}`;
 const K = 'k = 8.99 × 10⁹ N·m²/C²', EPS = 'ε₀ = 8.85 × 10⁻¹² C²/(N·m²)';
 window.MISSION_GEN = window.MISSION_GEN || {};
 Object.assign(window.MISSION_GEN, {
- /* N extra electrons (a multiple of 5, so the charge N × 0.016 × 10⁻¹⁷ C has at most 2 decimals); m electrons removed.
+ /* c: the printed charge is −c × 10⁻¹⁷ C, that is N = c ÷ 0.016 extra electrons (N a multiple of 5, so the charge N × 0.016 × 10⁻¹⁷ C has at most 2 decimals); m electrons removed.
     m may exceed N, leaving the grain positive; m never equals N (a charge of 0 would hide the sign rule). */
  q01: {
-  canonical: { N: 300, m: 120 },
-  draw: R => pick(() => ({ N: 5 * R.int(12, 120), m: 5 * R.int(1, 160) }), p => p.m !== p.N && p.m <= p.N + 200 && p.N !== 50, { N: 300, m: 120 }),
-  build: ({ N, m }) => { const q = N * 0.016, left = N - m, nq = Math.round(-left * 1.6) / 100; return {
+  canonical: { c: 4.8, m: 120 },
+  draw: R => pick(() => ({ c: Math.round(80 * R.int(12, 120)) / 1000, m: 5 * R.int(1, 160) }), p => { const N = Math.round(p.c / 0.016); return p.m !== N && p.m <= N + 200 && N !== 50; }, { c: 4.8, m: 120 }),
+  build: ({ c, m }) => { const N = Math.round(c / 0.016), q = c, left = N - m, nq = Math.round(-left * 1.6) / 100; return {
    prompt: `A dust grain on a solar panel carries a net charge of −${n(q)} × 10⁻¹⁷ C (coulombs). Charge comes only in whole numbers of the elementary charge e = 1.60 × 10⁻¹⁹ C: each electron carries −e and each proton +e. Enter how many more electrons than protons the grain has. Mira’s brush then pulls ${n(m)} electrons off the grain. Enter the grain’s new charge as the number that multiplies 10⁻¹⁷ C (a negative number for a negative charge).`,
    answer: [N, nq],
    hints: ['The number of extra electrons is the size of the charge divided by e. Dividing 10⁻¹⁷ by 10⁻¹⁹ gives 10², which is 100.', 'Charge is conserved: each electron the brush takes away removes −e from the grain. Find how many extra electrons are left (negative if protons now outnumber electrons), then multiply that count by −e.'],
@@ -78,7 +78,7 @@ Object.assign(window.MISSION_GEN, {
     Ex = 8.99 q ÷ (d/10)² N/C; Fx = Q × Ex in μN, from the unrounded field. Both off rounding ties. */
  q04: {
   canonical: { q: 6, d: 3, Q: -2 },
-  draw: R => pick(() => ({ q: R.nz(-9, 9), d: R.int(1, 6), Q: R.nz(-5, 5) }), p => { const E = 899 * p.q / (p.d * p.d), F = p.Q * E; return !tie(E) && !tie(F) && !(p.q === 6 && p.d === 3) && !(p.q === -4 && p.d === 2); }, { q: 6, d: 3, Q: -2 }),
+  draw: R => pick(() => ({ q: R.nz(-9, 9), d: R.int(1, 6), Q: R.nz(-5, 5) }), p => { const E = 899 * p.q / (p.d * p.d), F = p.Q * E; return p.Q !== 1 && !tie(E) && !tie(F) && !(p.q === 6 && p.d === 3) && !(p.q === -4 && p.d === 2); }, { q: 6, d: 3, Q: -2 }),
   build: ({ q, d, Q }) => { const r = d / 10, E = 899 * q / (d * d), F = Q * E; return {
    prompt: `A charged sensor with charge q = ${n(q)} nC sits at the origin of the panel grid, where 1 nC (nanocoulomb) is 10⁻⁹ C. The point P is at x = ${n(r)} m on the x-axis. Use ${K}. Enter the x component of the electric field at P in newtons per coulomb (N/C), rounded to 2 decimal places: positive if it points towards +x. Then a test charge Q = ${n(Q)} μC is placed at P (1 μC = 10⁻⁶ C). Enter the x component of the force on it in micronewtons (μN, 10⁻⁶ N), using the unrounded field and rounding to 2 decimal places, without commas.`,
    answer: [r2(E), r2(F)],
@@ -141,11 +141,11 @@ Object.assign(window.MISSION_GEN, {
    ] }; }
  },
  /* Charges q1, q2 (nC) inside a closed surface and q3 outside; the flux (q1 + q2) ÷ ε₀ to the nearest whole number.
-    A second closed surface with flux 200m N·m²/C encloses 1.77m nC exactly. */
+    A second closed surface with printed flux P N·m²/C (a nonzero multiple of 200, so it encloses 1.77 × P ÷ 200 nC exactly). */
  q08: {
-  canonical: { q1: 4, q2: -1, q3: 6, m: 5 },
-  draw: R => pick(() => ({ q1: R.nz(-9, 9), q2: R.nz(-9, 9), q3: R.nz(-9, 9), m: R.nz(-12, 12) }), p => { const s = p.q1 + p.q2, F = s * 1000 / 8.85, f = Math.abs(F) % 1; return s !== 0 && Math.abs(f - 0.5) > 2e-3 && !(p.q1 === 4 && p.q2 === -1 && p.m === 5) && !(p.q1 === 7 && p.q2 === -2) && p.m !== 2; }, { q1: 4, q2: -1, q3: 6, m: 5 }),
-  build: ({ q1, q2, q3, m }) => { const s = q1 + q2, F = s * 1000 / 8.85, Fr = Math.round(F), P = 200 * m, Q = Math.round(177 * m) / 100; return {
+  canonical: { q1: 4, q2: -1, q3: 6, P: 1000 },
+  draw: R => pick(() => ({ q1: R.nz(-9, 9), q2: R.nz(-9, 9), q3: R.nz(-9, 9), P: 200 * R.nz(-20, 20) }), p => { const s = p.q1 + p.q2, F = s * 1000 / 8.85, f = Math.abs(F) % 1; return s !== 0 && Math.abs(f - 0.5) > 2e-3 && !(p.q1 === 4 && p.q2 === -1 && p.P === 1000) && !(p.q1 === 7 && p.q2 === -2) && p.P !== 400; }, { q1: 4, q2: -1, q3: 6, P: 1000 }),
+  build: ({ q1, q2, q3, P }) => { const s = q1 + q2, F = s * 1000 / 8.85, Fr = Math.round(F), Q = Math.round(177 * P / 200) / 100; return {
    prompt: `A closed test surface wraps one of the dome’s sensor racks. Inside it are charges of ${n(q1)} nC and ${n(q2)} nC; just outside it is a charge of ${n(q3)} nC (1 nC = 10⁻⁹ C). Use ${EPS}. Enter the net electric flux out of the closed surface in N·m²/C, rounded to the nearest whole number and without commas (negative if more flux goes in than out). A second closed surface, around a different rack, has a net outward flux of ${n(P)} N·m²/C. Enter the net charge inside it in nC, to 2 decimal places.`,
    answer: [Fr, Q],
    hints: ['Gauss’s law: the net flux out of a closed surface is the charge enclosed divided by ε₀. A charge outside sends as much flux in as out, so it adds nothing.', 'Run Gauss’s law backwards for the second surface: the enclosed charge is ε₀ times the flux.'],
@@ -153,7 +153,7 @@ Object.assign(window.MISSION_GEN, {
    guidance: [
     { prompt: 'What is the net charge enclosed by the first surface, in nC?', answer: [s], explanation: `${n(q1)} ${plus(q2).replace(/^([+−])/, '$1 ')} = ${n(s)} nC. The charge outside is not enclosed.` },
     { prompt: `Divide by ε₀: what is the net flux out of the first surface, in N·m²/C to the nearest whole number?`, answer: [Fr], explanation: `${n(s)} × 10⁻⁹ ÷ (8.85 × 10⁻¹²) ${eq(F)} ${n(F)}, which rounds to ${n(Fr)}.` },
-    { prompt: `For the second surface, multiply: ε₀ × ${n(P)} N·m²/C. What is the enclosed charge in nC?`, answer: [Q], explanation: `8.85 × 10⁻¹² × ${par(P)} = ${n(Q)} × 10⁻⁹ C, which is ${n(Q)} nC.` }
+    { prompt: `For the second surface, multiply: ε₀ × ${par(P)} N·m²/C. What is the enclosed charge in nC?`, answer: [Q], explanation: `8.85 × 10⁻¹² × ${par(P)} = ${n(Q)} × 10⁻⁹ C, which is ${n(Q)} nC.` }
    ] }; }
  },
  /* Two thin concentric spherical shells: radius R1 m with Q1 nC, radius R2 m with Q2 nC. The radial field

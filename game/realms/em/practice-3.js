@@ -154,11 +154,11 @@ mk({
  labels: ['potential energy (mJ)', 'speed far away (m/s)'], tolerance: 0.005,
  gl: [['potential energy (mJ)'], ['speed far away (m/s)']]
 }, {
- canonical: { q1: 3, q2: 4, i: 3, m: 5 },
- draw: R => tries(() => ({ q1: R.int(1, 9), q2: R.int(1, 9), i: R.int(0, 3), m: R.int(1, 9) }),
-  p => { const U = 8.99 * p.q1 * p.q2 / D12[p.i]; return p.q1 !== p.q2 && !tie2(Math.sqrt(2000 * U / p.m)) && !(p.q1 === 3 && p.q2 === 4 && p.i === 3 && p.m === 5); },
-  { q1: 3, q2: 4, i: 3, m: 5 }),
- build: ({ q1, q2, i, m }) => { const r = D12[i], U = rr(8.99 * q1 * q2 / r), v = rd2(Math.sqrt(2000 * 8.99 * q1 * q2 / r / m));
+ canonical: { q1: 3, q2: 4, r: 0.5, m: 5 },
+ draw: R => tries(() => ({ q1: R.int(1, 9), q2: R.int(1, 9), r: R.pick(D12), m: R.int(1, 9) }),
+  p => { const U = 8.99 * p.q1 * p.q2 / p.r; return p.q1 !== p.q2 && !tie2(Math.sqrt(2000 * U / p.m)) && !(p.q1 === 3 && p.q2 === 4 && p.r === 0.5 && p.m === 5); },
+  { q1: 3, q2: 4, r: 0.5, m: 5 }),
+ build: ({ q1, q2, r, m }) => { const U = rr(8.99 * q1 * q2 / r), v = rd2(Math.sqrt(2000 * 8.99 * q1 * q2 / r / m));
   return {
    prompt: `A dust grain of mass ${n(m)} mg (1 mg = 10⁻⁶ kg) carrying ${n(q1)} μC is held ${n(r)} m from a fixed clip carrying ${n(q2)} μC; both charges are positive. Use k = 8.99 × 10⁹ N·m²/C², and take the potential energy to be 0 when the charges are very far apart. The holder lets go, the clip does not move and nothing else acts on the grain, so it is pushed away. Enter the electric potential energy of the pair at the moment of release, in mJ (1 mJ = 0.001 J). Then enter the speed the grain reaches when it is very far away, in m/s to 2 decimal places (type it without commas).`,
    answer: [U, v],
@@ -271,7 +271,7 @@ mk({
 
 /* v14: potentials (kV) at the empty corner D and at the centre for three posts of q1, q2, q3 (μC) at A, B, C of a rectangle 0.3s by 0.4s. */
 const v14 = ({ s, q1, q2, q3 }) => ({ VD: 8.99 * (q1 / (0.4 * s) + q2 / (0.5 * s) + q3 / (0.3 * s)), VC: 8.99 * (q1 + q2 + q3) / (0.25 * s) });
-/* Three posts at the corners A, B, C of a w × h rectangle (w = 0.3s, h = 0.4s, diagonal 0.5s); the probe at the empty corner D, and the centre
+/* Three posts at the corners A, B, C of a w × h rectangle (params ab = w = 0.3s and bc = h = 0.4s, printed; diagonal 0.5s); the probe at the empty corner D, and the centre
    of the rectangle (half a diagonal, 0.25s, from each post). D is h from A, w from C and a diagonal from B. */
 mk({
  id: 'q14b', parent: 'q14', kind: 'setting', title: 'Corners of the solar field',
@@ -279,11 +279,11 @@ mk({
  labels: ['potential at corner D (kV)', 'potential at the centre (kV)'], tolerance: 0.005,
  gl: [['distance to B (m)'], ['potential at corner D (kV)'], ['potential at the centre (kV)']]
 }, {
- canonical: { s: 2, q1: 4, q2: -3, q3: 5 },
- draw: R => tries(() => ({ s: R.int(1, 3), q1: R.nz(-9, 9), q2: R.nz(-9, 9), q3: R.nz(-9, 9) }),
-  p => { const t = v14(p); return p.q1 + p.q2 + p.q3 !== 0 && !tie2(t.VD) && !tie2(t.VC); },
-  { s: 2, q1: 4, q2: -3, q3: 5 }),
- build: p => { const { s, q1, q2, q3 } = p, t = v14(p), w = 3 * s / 10, h = 4 * s / 10, dg = 5 * s / 10, hd = 25 * s / 100, VD = rd2(t.VD), VC = rd2(t.VC);
+ canonical: { ab: 0.6, bc: 0.8, q1: 4, q2: -3, q3: 5 },
+ draw: R => tries(() => { const s = R.int(1, 3); return { ab: 3 * s / 10, bc: 4 * s / 10, q1: R.nz(-9, 9), q2: R.nz(-9, 9), q3: R.nz(-9, 9) }; },
+  p => { const t = v14({ ...p, s: Math.round(p.ab * 10 / 3) }); return p.q1 + p.q2 + p.q3 !== 0 && !tie2(t.VD) && !tie2(t.VC); },
+  { ab: 0.6, bc: 0.8, q1: 4, q2: -3, q3: 5 }),
+ build: p => { const { q1, q2, q3 } = p, s = Math.round(p.ab * 10 / 3), t = v14({ ...p, s }), w = 3 * s / 10, h = 4 * s / 10, dg = 5 * s / 10, hd = 25 * s / 100, VD = rd2(t.VD), VC = rd2(t.VC);
   return {
    prompt: `Three charged posts mark corners of a rectangular solar field in the Accelerator Bay: ${n(q1)} μC at corner A, ${n(q2)} μC at corner B and ${n(q3)} μC at corner C, where A, B, C and D go round the rectangle in order. Side AB is ${n(w)} m long and side BC is ${n(h)} m long, and corner D is empty. Use k = 8.99 × 10⁹ N·m²/C², and take the potential to be 0 very far away. Enter the electric potential at corner D in kV, then the electric potential at the centre of the rectangle in kV, both to 2 decimal places (type them without commas).`,
    answer: [VD, VC],

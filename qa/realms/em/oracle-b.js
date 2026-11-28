@@ -21,9 +21,8 @@ Object.assign(window.ORACLE, {
   /* i and j are indices into the list of distances 0.1, 0.2, 0.25, 0.5 m (initial and final separation).
      U = k q1 q2 / r in J, shown in mJ; the work by the outside force is the change in U. */
   q12: p => {
-    const dist = [0.1, 0.2, 0.25, 0.5];
     const U = r => K * p.q1 * 1e-6 * p.q2 * 1e-6 / r * 1e3;
-    return [U(dist[p.i]), U(dist[p.j]) - U(dist[p.i])];
+    return [U(p.a), U(p.b) - U(p.a)];
   },
   /* z is the charge in units of e: z = 1 proton (1.67e-27 kg), z = 2 helium nucleus (6.64e-27 kg). */
   q13: p => {
@@ -51,7 +50,7 @@ Object.assign(window.ORACLE, {
   /* Speed is 40 k km/s (k a multiplier); Vp volts across a gap g mm. Energy balance: the proton stops after losing
      its KE (in eV) against a field E, so distance = KE(eV) ÷ E(V/m). */
   q17: p => {
-    const v = 40 * p.k * 1e3, KE = 0.5 * 1.67e-27 * v * v / E;
+    const v = p.v * 1e3, KE = 0.5 * 1.67e-27 * v * v / E;
     const field = p.Vp / (p.g * 1e-3);
     return [field / 1e3, KE, r2(KE / field * 1e3)];
   },

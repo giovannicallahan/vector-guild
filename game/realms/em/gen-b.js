@@ -2,6 +2,8 @@
    build(canonical) must reproduce the authored text in missions-b.js exactly. */
 (function(){
 'use strict';
+/* 'a' or 'an' before a number as it is read aloud (an 8, an 11, an 18, an 80, an 11000). */
+const aan = s => (/^8/.test(s) || /^1[18](\d{3})?$/.test(String(s).split('.')[0])) ? 'an' : 'a';
 const G = window.Gen, { n, plus, par } = G;
 /* Constants as the prompts print them. */
 const EPS = 8.85e-12, K = 8.99e9, QE = 1.6e-19, MP = 1.67e-27, MHE = 6.64e-27;
@@ -64,9 +66,9 @@ Object.assign(window.MISSION_GEN, {
  /* Charges q1, q2 in μC (signed); separations from D, never halved (then the work would equal U), so U = 8.99 q1q2 ÷ r mJ has at most 2 decimals. Not the worked
     example (2 μC and 6 μC at 0.3 m). */
  q12: {
-  canonical: { q1: 3, q2: -5, i: 3, j: 1 },
-  draw: R => tries(() => ({ q1: R.int(1, 9), q2: R.nz(-9, 9), i: R.int(0, 3), j: R.int(0, 3) }), p => p.i !== p.j && D[p.j] * 2 !== D[p.i] && Math.abs(p.q2) >= 2, { q1: 3, q2: -5, i: 3, j: 1 }),
-  build: ({ q1, q2, i, j }) => { const a = D[i], b = D[j], P = q1 * q2, U1 = 8.99 * P / a, U2 = 8.99 * P / b, W = U2 - U1, like = P > 0;
+  canonical: { q1: 3, q2: -5, a: 0.5, b: 0.2 },
+  draw: R => tries(() => ({ q1: R.int(1, 9), q2: R.nz(-9, 9), a: R.pick(D), b: R.pick(D) }), p => p.a !== p.b && p.b * 2 !== p.a && Math.abs(p.q2) >= 2, { q1: 3, q2: -5, a: 0.5, b: 0.2 }),
+  build: ({ q1, q2, a, b }) => { const P = q1 * q2, U1 = 8.99 * P / a, U2 = 8.99 * P / b, W = U2 - U1, like = P > 0;
    const kq = `8.99 × ${n(q1)} × ${par(q2)}`;
    return {
     prompt: `A dust grain carrying ${n(q1)} μC is held ${n(a)} m from a panel clip carrying ${n(q2)} μC. Use k = 8.99 × 10⁹ N·m²/C², and take the potential energy to be 0 when the charges are very far apart. Enter the electric potential energy of the pair, then the work an outside force must do to move the grain slowly until the two are ${n(b)} m apart. Both are in mJ (1 mJ = 0.001 J) and may be negative; type them without commas.`,
@@ -153,9 +155,9 @@ Object.assign(window.MISSION_GEN, {
  /* A proton enters at v0 = 40k km/s (so its kinetic energy is 8.35k² eV, exactly) through the low-potential plate and moves
     against a uniform field E = Vp ÷ g; it stops after s = KE ÷ E, inside the gap. s is not on a rounding tie. Not the worked example (120 km/s against 20 kV/m). */
  q17: {
-  canonical: { k: 5, Vp: 600, g: 8 },
-  draw: R => tries(() => ({ k: R.int(2, 10), Vp: 50 * R.int(2, 20), g: R.pick([4, 5, 8, 10]) }), p => 8.35 * p.k * p.k < p.Vp && !(p.k === 3 && p.Vp === 20 * p.g) && !tie2(8.35 * p.k * p.k * p.g / p.Vp), { k: 5, Vp: 600, g: 8 }),
-  build: ({ k, Vp, g }) => { const v0 = 40 * k, KE = 8.35 * k * k, E = Vp / g, s = rd2(KE / E);
+  canonical: { v: 200, Vp: 600, g: 8 },
+  draw: R => tries(() => ({ v: 40 * R.int(2, 10), Vp: 50 * R.int(2, 20), g: R.pick([4, 5, 8, 10]) }), p => { const k = p.v / 40; return 8.35 * k * k < p.Vp && !(k === 3 && p.Vp === 20 * p.g) && !tie2(8.35 * k * k * p.g / p.Vp); }, { v: 200, Vp: 600, g: 8 }),
+  build: ({ v: v0, Vp, g }) => { const k = v0 / 40, KE = 8.35 * k * k, E = Vp / g, s = rd2(KE / E);
    return {
     prompt: `In the ion gun a proton (mass 1.67 × 10⁻²⁷ kg, charge e = 1.60 × 10⁻¹⁹ C) passes through a hole in the negative plate at ${n(v0)} km/s, heading straight for the positive plate. The plates are ${n(g)} mm apart with a potential difference of ${n(Vp)} V, and the field between them is uniform. Enter the field strength in kV/m, then the proton’s kinetic energy at the hole in eV, then how far it gets past the hole before it stops, in mm to 2 decimal places.`,
     answer: [E, KE, s],
@@ -211,7 +213,7 @@ Object.assign(window.MISSION_GEN, {
   draw: R => tries(() => ({ c1: 10 * R.int(1, 50), c2: 10 * R.int(1, 50), V: 10 * R.int(1, 10), t: R.pick([2, 5, 10, 20, 25, 50]) }), p => !((p.c1 + p.c2) === 500 && p.V === 20) && (p.c1 + p.c2) * p.V * p.V / 2000 / p.t >= 0.1 && is2dp((p.c1 + p.c2) * p.V * p.V / 2000 / p.t), { c1: 220, c2: 330, V: 40, t: 5 }),
   build: ({ c1, c2, V, t }) => { const C = c1 + c2, Q = C * V / 1000, U = C * V * V / 2000, P = U / t;
    return {
-    prompt: `The night bank wires a ${n(c1)} μF capacitor and a ${n(c2)} μF capacitor in parallel and charges them to ${n(V)} V. Enter the total charge stored in mC, then the energy stored in mJ, then the average power in W if all that energy is released in ${n(t)} ms (type them without commas).`,
+    prompt: `The night bank wires ${aan(n(c1))} ${n(c1)} μF capacitor and ${aan(n(c2))} ${n(c2)} μF capacitor in parallel and charges them to ${n(V)} V. Enter the total charge stored in mC, then the energy stored in mJ, then the average power in W if all that energy is released in ${n(t)} ms (type them without commas).`,
     answer: [Q, U, P],
     hints: ['Capacitors in parallel add: C = C₁ + C₂. The charge is Q = CV, and 1 μF × 1 V = 1 μC.', 'The energy stored is U = ½CV², and 1 μF × (1 V)² = 1 μJ. Average power is energy divided by time, and 1 mJ ÷ 1 ms = 1 W.'],
     solution: `In parallel, C = ${n(c1)} + ${n(c2)} = ${n(C)} μF. Q = CV = ${n(C)} μF × ${n(V)} V = ${n(C * V)} μC, which is ${n(Q)} mC. U = ½CV² = ½ × ${n(C)} μF × ${n(V * V)} V² = ${n(C * V * V / 2)} μJ, which is ${n(U)} mJ. Released in ${n(t)} ms, the average power is ${n(U)} mJ ÷ ${n(t)} ms = ${n(P)} W.`,

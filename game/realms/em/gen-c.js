@@ -2,6 +2,8 @@
    build(canonical) must reproduce the authored text in missions-c.js exactly. */
 (function(){
 'use strict';
+/* 'a' or 'an' before a number as it is read aloud (an 8, an 11, an 18, an 80, an 11000). */
+const aan = s => (/^8/.test(s) || /^1[18](\d{3})?$/.test(String(s).split('.')[0])) ? 'an' : 'a';
 const G = window.Gen, { n, plus, par } = G;
 /* fits(x, d): x has at most d decimal places (float noise ignored). r2: x rounded to 2 decimal places. */
 const fits = (x, d) => { const s = x * Math.pow(10, d); return Math.abs(s - Math.round(s)) < 1e-7; };
@@ -73,7 +75,7 @@ Object.assign(window.MISSION_GEN, {
     return fits(inner, 2) && fits(Ceq, 2) && fits(Q, 2) && fits(U, 2) && U >= 0.05 && Q < 100000 && !same(p, { C1: 3, C2: 6, C3: 1, k: 3, V: 10, lay: 1 }); },
    { C1: 6, C2: 4, C3: 2, k: 4, V: 30, lay: 0 }),
   build: ({ C1, C2, C3, k, V, lay }) => { const D = k * C3, inner = lay ? C2 * D / (C2 + D) : C2 + D, Ceq = lay ? C1 + inner : C1 * inner / (C1 + inner), Q = Ceq * V, uJ = Ceq * V * V / 2, U = uJ / 1000; return {
-   prompt: `A capacitor bank for the night shift is wired like this: capacitors B (${n(C2)} μF) and C (${n(C3)} μF when empty) are ${lay ? 'in series with each other, and that pair is in parallel with' : 'side by side in parallel, and that pair is in series with'} capacitor A (${n(C1)} μF). Capacitor C is filled with a slab of dielectric constant κ = ${n(k)}. The whole bank is connected across a ${n(V)} V supply. Enter the total charge the supply puts on the bank in μC (type it without commas), then the total energy stored in the bank in mJ. Both are exact decimals.`,
+   prompt: `A capacitor bank for the night shift is wired like this: capacitors B (${n(C2)} μF) and C (${n(C3)} μF when empty) are ${lay ? 'in series with each other, and that pair is in parallel with' : 'side by side in parallel, and that pair is in series with'} capacitor A (${n(C1)} μF). Capacitor C is filled with a slab of dielectric constant κ = ${n(k)}. The whole bank is connected across ${aan(n(V))} ${n(V)} V supply. Enter the total charge the supply puts on the bank in μC (type it without commas), then the total energy stored in the bank in mJ. Both are exact decimals.`,
    answer: [Q, U],
    hints: ['First give capacitor C its new value, κ times the empty one. Then reduce the bank one step at a time: capacitors in parallel add, C = C₁ + C₂, and for capacitors in series the reciprocals add, 1 ÷ C = 1 ÷ C₁ + 1 ÷ C₂.', 'The supply sees one equivalent capacitor: the total charge is Q = CV and the total energy is U = ½CV², which is also QV ÷ 2.'],
    solution: `With the slab, C has κ × ${n(C3)} = ${n(k)} × ${n(C3)} = ${n(D)} μF. ${lay ? `B and C in series: ${n(C2)} × ${n(D)} ÷ (${n(C2)} + ${n(D)}) = ${n(inner)} μF. In parallel with A: ${n(C1)} + ${n(inner)} = ${n(Ceq)} μF.` : `B and C in parallel: ${n(C2)} + ${n(D)} = ${n(inner)} μF. In series with A: ${n(C1)} × ${n(inner)} ÷ (${n(C1)} + ${n(inner)}) = ${n(Ceq)} μF.`} The total charge is Q = CV = ${n(Ceq)} × ${n(V)} = ${n(Q)} μC, and the energy is U = ½CV² = ½ × ${n(Ceq)} × ${n(V * V)} = ${n(uJ)} μJ = ${n(U)} mJ.`,
@@ -96,7 +98,7 @@ Object.assign(window.MISSION_GEN, {
    p => { const A = Math.PI * p.d * p.d / 4, Rv = p.r * p.L / (100 * A); return roundable(A) && roundable(Rv) && Rv >= 0.1 && Rv < 100 && !same(p, { r: 2.65, L: 100, d: 1 }); },
    { r: 1.68, L: 250, d: 2 }),
   build: ({ r, L, d }) => { const name = METAL[r], rad = d / 2, A = Math.PI * rad * rad, Rv = r * L / (100 * A); return {
-   prompt: `A ${name} cable runs ${n(L)} m from the Cable Works to a dome. Its conductor is one solid round wire ${n(d)} mm across, and ${name} has resistivity ρ = ${n(r)} × 10⁻⁸ Ω·m. Enter the cross-sectional area of the wire in mm², then the resistance of the cable in ohms (Ω), both rounded to 2 decimal places. Work out the resistance from the unrounded area.`,
+   prompt: `${/^[aeiou]/.test(name) ? 'An' : 'A'} ${name} cable runs ${n(L)} m from the Cable Works to a dome. Its conductor is one solid round wire ${n(d)} mm across, and ${name} has resistivity ρ = ${n(r)} × 10⁻⁸ Ω·m. Enter the cross-sectional area of the wire in mm², then the resistance of the cable in ohms (Ω), both rounded to 2 decimal places. Work out the resistance from the unrounded area.`,
    answer: [r2(A), r2(Rv)],
    hints: ['The cross-section is a circle whose radius is half the diameter, so A = πr². To change mm² to m², multiply by 10⁻⁶.', 'Resistance grows with length and falls with area: R = ρL ÷ A, with ρ in Ω·m, L in m and A in m².'],
    solution: `The radius is ${n(d)} ÷ 2 = ${n(rad)} mm, so A = π × ${n(rad)}² ≈ ${n(A)} mm², which is ${f2(A)} mm² to 2 decimal places, or ${n(A)} × 10⁻⁶ m². Then R = ρL ÷ A = (${n(r)} × 10⁻⁸ × ${n(L)}) ÷ (${n(A)} × 10⁻⁶) ≈ ${n(Rv)} Ω, which rounds to ${f2((Rv))} Ω.`,
@@ -108,9 +110,9 @@ Object.assign(window.MISSION_GEN, {
  },
  /* A heater of R ohms across V = IR volts (a whole number up to 400). Not the worked example (24 V across 8 Ω). */
  q25: {
-  canonical: { I: 2.5, R: 48 },
-  draw: R => drawWith(() => ({ I: R.pick([0.5, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 8, 10]), R: R.int(2, 80) }), p => fits(p.I * p.R, 0) && p.I * p.R <= 400 && !(p.I === 3 && p.R === 8), { I: 2.5, R: 48 }),
-  build: ({ I, R }) => { const V = I * R, P = I * V; return {
+  canonical: { V: 120, R: 48 },
+  draw: R => drawWith(() => { const I = R.pick([0.5, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 8, 10]), Rr = R.int(2, 80); return { V: I * Rr, R: Rr }; }, p => fits(p.V, 0) && p.V <= 400 && !(p.V === 24 && p.R === 8), { V: 120, R: 48 }),
+  build: ({ V, R }) => { const I = V / R, P = I * V; return {
    prompt: `A heater panel in a dome has a resistance of ${n(R)} Ω and is connected across the dome’s ${n(V)} V supply. Enter the current through the panel in amperes, then the power it turns into heat in watts (type it without commas).`,
    answer: [I, P],
    hints: ['Ohm’s law: the current is the voltage divided by the resistance, I = V ÷ R.', 'Electrical power is current times voltage, P = IV. For a resistor it is also I²R and V² ÷ R.'],
@@ -159,11 +161,11 @@ Object.assign(window.MISSION_GEN, {
  /* Charging through R kΩ into C μF from emf E: τ = RC/1000 s, read at t = m·τ. V is rounded to 2 places, away from ties.
     Not the worked example (9 V, 100 kΩ, 100 μF, t = τ). */
  q28: {
-  canonical: { E: 12, R: 20, C: 250, m: 2 },
-  draw: R => drawWith(() => ({ E: R.pick([5, 6, 9, 10, 12, 15, 18, 20, 24, 48]), R: R.pick([10, 20, 25, 40, 50, 100, 200]), C: R.pick([100, 200, 250, 400, 500, 1000]), m: R.pick([0.5, 1, 1.5, 2, 2.5, 3, 4]) }),
-   p => { const tau = p.R * p.C / 1000, t = p.m * tau, V = p.E * (1 - Math.exp(-p.m)); return tau <= 100 && fits(t, 2) && roundable(V) && !same(p, { E: 9, R: 100, C: 100, m: 1 }); },
-   { E: 12, R: 20, C: 250, m: 2 }),
-  build: ({ E, R, C, m }) => { const tau = R * C / 1000, t = m * tau, V = E * (1 - Math.exp(-m)); return {
+  canonical: { E: 12, R: 20, C: 250, t: 10 },
+  draw: R => drawWith(() => { const Rr = R.pick([10, 20, 25, 40, 50, 100, 200]), C = R.pick([100, 200, 250, 400, 500, 1000]); return { E: R.pick([5, 6, 9, 10, 12, 15, 18, 20, 24, 48]), R: Rr, C, t: Math.round(R.pick([0.5, 1, 1.5, 2, 2.5, 3, 4]) * Rr * C) / 1000 }; },
+   p => { const tau = p.R * p.C / 1000, V = p.E * (1 - Math.exp(-p.t / tau)); return tau <= 100 && fits(p.t, 2) && roundable(V) && !same(p, { E: 9, R: 100, C: 100, t: 10 }); },
+   { E: 12, R: 20, C: 250, t: 10 }),
+  build: ({ E, R, C, t }) => { const tau = R * C / 1000, m = Math.round(t / tau * 1000) / 1000, V = E * (1 - Math.exp(-m)); return {
    prompt: `A capacitor of ${n(C)} μF, empty to begin with, is charged through a resistor of ${n(R)} kΩ from an ideal supply of emf ${n(E)} V. Enter the time constant of the circuit in seconds, then the voltage across the capacitor ${n(t)} s after the switch closes, in volts, rounded to 2 decimal places.`,
    answer: [tau, r2(V)],
    hints: ['The time constant is τ = RC with R in ohms and C in farads. A kilohm is 10³ Ω and a microfarad is 10⁻⁶ F, so kΩ × μF gives 10⁻³ s.', 'While it charges, the capacitor voltage is V = ε(1 − e^(−t/τ)). Here e ≈ 2.718 is the base of natural exponentials, not the charge of an electron.'],

@@ -22,7 +22,7 @@ Object.assign(window.ORACLE, {
   /* i = current (A), R ohms, l = length in half-metres, b = field in hundredths of a tesla, a = index into the angle
      list [π/6, π/4, π/3, 2π/3, 3π/4, 5π/6] (only a label index). Force = B I L sin θ; at right angles sin = 1. */
   q32: p => {
-    const volts = p.i * p.R, cur = volts / p.R;
+    const volts = p.V, cur = volts / p.R;
     const ang = [[1, 6], [1, 4], [1, 3], [2, 3], [3, 4], [5, 6]][p.a];
     const th = Math.PI * ang[0] / ang[1];
     const L = p.l / 2, B = p.b / 100;
@@ -37,16 +37,16 @@ Object.assign(window.ORACLE, {
   },
   /* nn = turns per metre (printed turns ÷ length), c = length in cm, h = current in half-amperes. B = μ0 n I. */
   q34: p => {
-    const I = p.h / 2;
-    const turns = p.nn * (p.c / 100);
-    const n = turns / (p.c / 100);
+    /* N turns along c cm, current I A. */
+    const I = p.I;
+    const n = p.N / (p.c / 100);
     return [n, rd(MU0 * n * I * 1e3, 2)];
   },
   /* N turns, a = area in hundredths of m², b1 b2 in mT, t = index into [0.1, 0.2, 0.25, 0.4, 0.5, 0.8, 1, 2] s.
      emf = N A |ΔB| / Δt; current = emf ÷ R. Field up and growing: the current makes a field down, so clockwise seen from
      above (1); field shrinking: anticlockwise (−1). */
   q35: p => {
-    const T = [0.1, 0.2, 0.25, 0.4, 0.5, 0.8, 1, 2][p.t];
+    const T = p.dt;
     const A = p.a / 100;
     const emf = p.N * A * Math.abs(p.b2 - p.b1) / T;   // mT·m²/s = mV
     return [rd(emf, 2), rd(emf / p.R, 2), p.b2 > p.b1 ? 1 : -1];
@@ -69,18 +69,18 @@ Object.assign(window.ORACLE, {
     }
     return [tau, rd(E, 2), rd(I, 2)];
   },
-  /* V0 peak volts, f = index into [50, 60, 100, 200, 400, 500, 1000] Hz, ind = true for an inductor (val in mH) and false
+  /* V0 peak volts, f the printed frequency in Hz, ind = true for an inductor (val in mH) and false
      for a capacitor (val in μF). rms = peak ÷ √2; reactance X = ωL or 1/(ωC); rms current = rms voltage ÷ X. */
   q38: p => {
-    const f = [50, 60, 100, 200, 400, 500, 1000][p.f], w = 2 * Math.PI * f;
+    const f = p.f, w = 2 * Math.PI * f;
     const vr = p.V0 / Math.sqrt(2);
     const X = p.ind ? w * p.val * 1e-3 : 1 / (w * p.val * 1e-6);
     return [rd(vr, 2), rd(X, 2), rd(vr / X, 2)];
   },
-  /* R ohms, L mH, C μF, f = index into [50, 60, 100, 200, 400, 500, 1000] Hz, V0 peak volts. Impedance from the series
+  /* R ohms, L mH, C μF, f the printed frequency in Hz, V0 peak volts. Impedance from the series
      resistance and net reactance; peak current V0 ÷ Z; resonance where the two reactances cancel (bisection). */
   q39: p => {
-    const f = [50, 60, 100, 200, 400, 500, 1000][p.f], w = 2 * Math.PI * f;
+    const f = p.f, w = 2 * Math.PI * f;
     const L = p.L * 1e-3, C = p.C * 1e-6;
     const X = w * L - 1 / (w * C);
     const Z = Math.sqrt(p.R * p.R + X * X);
@@ -88,10 +88,10 @@ Object.assign(window.ORACLE, {
     const f0 = bisect(net, 1e-3, 1e9);
     return [rd(Z, 2), rd(p.V0 / Z, 2), rd(f0, 2)];
   },
-  /* l = index into the inductance list [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10] μH, c pF, e = electric amplitude in
+  /* L inductance in μH, c pF, e = electric amplitude in
      tenths of V/m. Resonance where ωL = 1/(ωC) (bisection); λ = c ÷ f; B amplitude = E amplitude ÷ c. */
   q40: p => {
-    const L = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10][p.l] * 1e-6, C = p.c * 1e-12;
+    const L = p.L * 1e-6, C = p.c * 1e-12;
     const net = fr => 2 * Math.PI * fr * L - 1 / (2 * Math.PI * fr * C);
     const f = bisect(net, 1, 1e12);
     const c = 3.00e8;
