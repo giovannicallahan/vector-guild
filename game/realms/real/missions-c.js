@@ -23,8 +23,7 @@ const source = {
  s3_3: { title: 'Lebl, Basic Analysis — 3.3 Extreme and intermediate value theorems', url: 'https://www.jirka.org/ra/html/sec_minmaxint.html', description: 'The min–max (extreme value) theorem and Bolzano’s intermediate value theorem on [a, b], and locating a root by repeated halving.', verified: '2026-11-28' },
  s3_4: { title: 'Lebl, Basic Analysis — 3.4 Uniform continuity', url: 'https://www.jirka.org/ra/html/sec_unifcont.html', description: 'Uniform continuity, uniform continuity of continuous functions on closed bounded intervals, and Lipschitz continuous functions.', verified: '2026-11-28' },
  s4_1: { title: 'Lebl, Basic Analysis — 4.1 The derivative', url: 'https://www.jirka.org/ra/html/sec_der.html', description: 'The derivative as the limit of the difference quotient, and |x| as a function that is not differentiable at 0. The one-sided limits of the quotient are worked out in this mission.', verified: '2026-11-28' },
- s4_2: { title: 'Lebl, Basic Analysis — 4.2 Mean value theorem', url: 'https://www.jirka.org/ra/html/sec_mvt.html', description: 'Rolle’s theorem and the mean value theorem.', verified: '2026-11-28' },
- s4_2b: { title: 'Lebl, Basic Analysis — 4.2 Mean value theorem', url: 'https://www.jirka.org/ra/html/sec_mvt.html', description: 'The mean value theorem. The bound on a change from a bound on |f′| is worked out in this mission.', verified: '2026-11-28' },
+ s4_2: { title: 'Lebl, Basic Analysis — 4.2 Mean value theorem', url: 'https://www.jirka.org/ra/html/sec_mvt.html', description: 'Rolle’s theorem and the mean value theorem; Exercise 4.2.3 asks the reader to prove that a bounded derivative makes f Lipschitz. The bound on a change from a bound on |f′| is worked out in the missions that use it.', verified: '2026-11-28' },
  s4_3: { title: 'Lebl, Basic Analysis — 4.3 Taylor’s theorem', url: 'https://www.jirka.org/ra/html/sec_taylor.html', description: 'Taylor polynomials and Taylor’s theorem with the Lagrange form of the remainder. The bounds for eˣ, sin x and cos x are worked out in this mission.', verified: '2026-11-28' },
  s4_4: { title: 'Lebl, Basic Analysis — 4.4 Inverse function theorem', url: 'https://www.jirka.org/ra/html/sec_ift.html', description: 'For a strictly monotone f with f′(x₀) ≠ 0, the inverse is differentiable at f(x₀) with derivative 1 ÷ f′(x₀).', verified: '2026-11-28' },
  s5_1: { title: 'Lebl, Basic Analysis — 5.1 The Riemann integral', url: 'https://www.jirka.org/ra/html/sec_rint.html', description: 'Partitions, lower and upper sums from the infimum and supremum on each piece, refinement and Riemann integrability. The word mesh is defined in this mission, not in the section.', verified: '2026-11-28' }
@@ -256,7 +255,7 @@ window.QUESTS.push(
   solution: 'By the mean value theorem, f(7) − f(2) = f′(c) × (7 − 2) for some c between 2 and 7, so |f(7) − f(2)| ≤ 0.4 × 5 = 2 kilopascals. The readings f(t) = 35 + 0.4(t − 2) and f(t) = 35 − 0.4(t − 2) obey the drift limit and change by exactly 2, so no smaller bound is safe. At t = 7 the reading lies between 35 − 2 = 33 and 35 + 2 = 37.',
   xp: 150, prereqs: ['q25'],
   artifact: { name: 'Drift window', description: 'A start reading and the guaranteed band it can drift into.' },
-  sources: [source.s4_2b],
+  sources: [source.s4_2],
   teaching: {
    intuition: 'The mean value theorem turns a fact about rates into a fact about totals. For a differentiable f, f(b) − f(a) = f′(c)(b − a) for some c between a and b. We do not know c, but if we know that |f′(t)| ≤ M everywhere on the interval, then |f′(c)| ≤ M too, so |f(b) − f(a)| ≤ M(b − a). A gauge that can drift at most 0.5 kilopascals per hour cannot move more than 0.5 × 6 = 3 kilopascals in 6 hours, whatever it does in between. The bound is the best possible: a reading that drifts steadily at exactly M, f(t) = f(a) + M(t − a), changes by exactly M(b − a), and so does one that falls steadily at M. So the reading at b lies in the window from f(a) − M(b − a) to f(a) + M(b − a), and both ends of the window can happen.',
    steps: [
@@ -381,7 +380,7 @@ window.QUESTS.push(
   solution: 'By the mean value theorem, |f(8) − f(0)| = |f′(c)| × 8 ≤ 0.3 × 8 = 2.4 kilopascals, and a reading that drifts at exactly 0.3 per hour reaches it. The bound for degree n is below 0.001 exactly when (n + 1)! is bigger than 2ⁿ⁺¹ × 1000. For degree 8: 9! = 362880, which is not bigger than 512000. For degree 9: 10! = 3628800, which is bigger than 1024000. So the smallest degree is 9.',
   xp: 150, prereqs: ['q27', 'q28'],
   artifact: { name: 'Gauge Tower seal', description: 'A gauge certified for drift and for conversion.' },
-  sources: [source.s4_2b, source.s4_3],
+  sources: [source.s4_2, source.s4_3],
   teaching: {
    intuition: 'Both certificates in this chapter come from the same idea: a value we cannot know, the c in the mean value theorem or in Taylor’s theorem, is replaced by the worst case. For drift, f(b) − f(a) = f′(c)(b − a), and a bound |f′| ≤ M gives |f(b) − f(a)| ≤ M(b − a), which a steady drift at exactly M reaches. For conversion, the error of the Taylor polynomial of degree n is f⁽ⁿ⁺¹⁾(c) ÷ (n + 1)! × (x − x₀)ⁿ⁺¹. With every derivative at most M in size, the error is at most M|x − x₀|ⁿ⁺¹ ÷ (n + 1)!, and the smallest degree that pushes this below ε is found by trying degrees in turn.',
    steps: [

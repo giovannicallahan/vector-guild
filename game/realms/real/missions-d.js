@@ -26,7 +26,7 @@ const source = {
  s6_1: {"title":"Lebl, Basic Analysis — 6.1 Pointwise and uniform convergence","url":"https://www.jirka.org/ra/html/sec_puconv.html","description":"Pointwise convergence (N may depend on x), uniform convergence (one N for all x) and the uniform norm.","verified":"2026-11-28"},
  s6_2: {"title":"Lebl, Basic Analysis — 6.2 Interchange of limits","url":"https://www.jirka.org/ra/html/sec_liminter.html","description":"Uniform limits keep continuity and let a limit pass through an integral; power series converge uniformly on closed intervals inside the radius.","verified":"2026-11-28"},
  s11_2: {"title":"Lebl, Basic Analysis — 11.2 Swapping limits","url":"https://www.jirka.org/ra/html/sec_swaplim.html","description":"The Weierstrass M-test, and integrating a uniformly convergent series term by term.","verified":"2026-11-28"},
- s7_1: {"title":"Lebl, Basic Analysis — 7.1 Metric spaces","url":"https://www.jirka.org/ra/html/sec_metric.html","description":"The definition of a metric and a metric space, the euclidean metric, the complex numbers as the plane, and the discrete metric. The taxicab and maximum metrics and the open ball B(x, ρ) are not stated in this section; they are worked out in these missions.","verified":"2026-11-28"}
+ s7_1: {"title":"Lebl, Basic Analysis — 7.1 Metric spaces","url":"https://www.jirka.org/ra/html/sec_metric.html","description":"The definition of a metric and a metric space, the euclidean metric, the complex numbers as the plane, and the discrete metric. Exercise 7.1.6 asks the reader to show that the sum and the maximum of two metrics on a product are metrics; the taxicab and maximum metrics on the plane are not named. The open ball B(x, ρ) is defined in section 7.2, not here. Their use is worked out in these missions.","verified":"2026-11-28"}
 };
 window.QUESTS = window.QUESTS || [];
 window.QUESTS.push(
@@ -172,7 +172,7 @@ window.QUESTS.push(
    "The improper integral of c ÷ xᵖ from K to infinity is c ÷ ((p − 1) × Kᵖ⁻¹) when p > 1.",
    "For a decreasing positive f, the tail f(K) + f(K + 1) + … lies between the integral of f from K to infinity and f(K) plus that integral. Take K one past the terms you added."
   ],
-  solution: "The first 4 terms add to 1.178 (to 3 decimal places). The improper integral of 1 ÷ x³ from 5 to infinity is 1 ÷ (2 × 5²) = 0.02 (to 3 decimal places). The tail from n = 5 on is at least that integral and at most the term 1 ÷ 5³ = 0.008 plus it. So S ≥ 1.178 + 0.02 and S ≤ 1.178 + 0.008 + 0.02; with full precision the bounds are 1.198 and 1.206.",
+  solution: "The first 4 terms add to 1.178 (to 3 decimal places). The improper integral of 1 ÷ x³ from 5 to infinity is 1 ÷ (2 × 5²) = 0.02 (to 3 decimal places). The tail from n = 5 on is at least that integral and at most the term 1 ÷ 5³ = 0.008 plus it. Keeping all three pieces at full precision, S ≥ partial sum + integral and S ≤ partial sum + term + integral; rounding only at the end gives the bounds 1.198 and 1.206.",
   xp: 200, prereqs: ["q33","q15"],
   artifact: {"name":"Bracketed log","description":"An endless sum pinned between two numbers three decimals apart."},
   sources: [source.s5_5],
@@ -203,7 +203,7 @@ window.QUESTS.push(
    { prompt: "Add the first 4 terms. What is their sum, to 3 decimal places?", answer: [1.178], labels: ["partial sum"], explanation: "1 ÷ 1³ + 1 ÷ 2³ + 1 ÷ 3³ + 1 ÷ 4³ = 1.178 to 3 decimal places." },
    { prompt: "What is the improper integral of 1 ÷ x³ from 5 to infinity, to 3 decimal places?", answer: [0.02], labels: ["tail integral"], explanation: "It is 1 ÷ (2 × 5²) = 0.02 to 3 decimal places." },
    { prompt: "The tail from n = 5 on is at least that integral. What is the lower bound for S, to 3 decimal places?", answer: [1.198], labels: ["lower bound"], explanation: "Partial sum plus tail integral, with full precision, is 1.198 to 3 decimal places." },
-   { prompt: "The tail is at most the term 1 ÷ 5³ plus the same integral. What is the upper bound for S, to 3 decimal places?", answer: [1.206], labels: ["upper bound"], explanation: "Adding the term 0.008 to the lower bound's working gives 1.206 to 3 decimal places." }
+   { prompt: "The tail is at most the term 1 ÷ 5³ plus the same integral. What is the upper bound for S, to 3 decimal places?", answer: [1.206], labels: ["upper bound"], explanation: "Adding the term 1 ÷ 5³, at full precision, to the lower bound's working gives 1.206 to 3 decimal places." }
   ]
  },
  {
@@ -300,7 +300,7 @@ window.QUESTS.push(
   answer: [3,0.375,6], labels: ["sum of the Mₖ","uniform error bound","integral of g"], tolerance: 0.0005,
   hints: [
    "|cos| is never more than 1, so each term is at most Mₖ = c ÷ bᵏ in size for every x. The Mₖ form a geometric series.",
-   "Uniform convergence lets you integrate the sum term by term. The integral of cos(2πkx) from 0 to L is sin(2πkL) ÷ (2πk), which is 0 when L is a multiple of 1/2."
+   "Uniform convergence lets you integrate the sum term by term. An antiderivative of cos(2πkx) is sin(2πkx) ÷ (2πk): put in both end points and look at what the sine gives there, whatever k is."
   ],
   solution: "For every x, |3 cos(2πkx) ÷ 2ᵏ| ≤ Mₖ = 3 ÷ 2ᵏ. The Mₖ form a geometric series with first term 1.5 and ratio 1/2, so their sum is 1.5 ÷ (1 − 1/2) = 3. By the M-test the sum converges uniformly, and |g(x) − 4| ≤ 3 for every x. After the first 3 terms the rest is at most the tail of the Mₖ: 3 ÷ 2³ = 0.375, the same for every x. Because the partial sums converge uniformly, the integral of g is the sum of the integrals of its terms. The integral of cos(2πkx) from 0 to 1.5 is sin(2πk × 1.5) ÷ (2πk) = 0, since 2πk × 1.5 is a whole multiple of π. Only the constant is left: 4 × 1.5 = 6.",
   xp: 200, prereqs: ["q36","q15"],

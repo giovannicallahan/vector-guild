@@ -40,7 +40,7 @@ P['real'] = {
   /* q11–q20 (missions-b.js) */
   ['Cauchy sequence', 'q12', 'A sequence whose terms all end up close to each other: for every ε > 0 there is an N past which any two terms differ by less than ε.', 'xₙ = 1 ÷ n is Cauchy: from n = 100 on, any two terms differ by less than 0.01.'],
   ['partial sum', 'q13', 'The sum of the first N terms of a series; the series converges exactly when its partial sums converge.', 'For 1 + 1 ÷ 2 + 1 ÷ 4 + …, the partial sum s₃ is 1.75.'],
-  ['Cauchy criterion', 'q13', 'A series converges exactly when, far enough out, every stretch of consecutive terms adds up to less than any chosen ε.', 'Every stretch of Σ 1 ÷ 2ⁿ after the 10th term adds up to less than 0.001.'],
+  ['Cauchy criterion', 'q13', 'A series converges exactly when, far enough out, every stretch of consecutive terms adds up to a total whose size (absolute value) is less than any chosen ε.', 'Every stretch of Σ 1 ÷ 2ⁿ after the 10th term adds up to less than 0.001 in size.'],
   ['p-series', 'q14', 'A series Σ 1 ÷ nᵖ for a fixed power p; it converges when p > 1 and diverges when p ≤ 1.', 'Σ 1 ÷ n² is a p-series with p = 2, so it converges.'],
   ['absolute convergence', 'q14', 'A series converges absolutely when the series of the sizes of its terms, Σ |aₙ|, converges; then the series itself converges.', 'Σ (−1)ⁿ ÷ n² converges absolutely, because Σ 1 ÷ n² converges.'],
   ['conditional convergence', 'q14', 'A series converges conditionally when it converges but the series of the sizes of its terms diverges.', '1 − 1 ÷ 2 + 1 ÷ 3 − … converges, but 1 + 1 ÷ 2 + 1 ÷ 3 + … does not.'],
