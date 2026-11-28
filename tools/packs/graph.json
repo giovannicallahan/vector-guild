@@ -1,0 +1,225 @@
+{
+ "id": "graph",
+ "name": "Graph theory: networks",
+ "short": "Graph theory",
+ "description": "Vertices, edges, trees, routes, colourings, flows and counting networks, taught at the Kepler outpost.",
+ "about": "Graph theory realm (\"Graph theory: networks\"): vertices, edges, trees, routes, colourings, matchings, flows and exact counting, for an\nadult who has finished Foundations and Discrete mathematics. Same Kepler outpost, now linked up: the Map Room plans every tunnel, cable,\nroad and pipe between the domes, and Mira is still the mentor. The concept plan is docs/plans/GRAPH-PLAN.md.",
+ "registry": {
+  "part": "graph"
+ },
+ "achievements": {
+  "done": "Every dome connected",
+  "master": "No edge left uncounted"
+ },
+ "chapters": [
+  {
+   "name": "Points and links",
+   "blurb": "Vertices, edges, degrees, complete graphs, complements, isomorphism and walks.",
+   "tier": "Basic",
+   "size": 6,
+   "sector": {
+    "name": "Map Room",
+    "purpose": "draw every link between the domes"
+   },
+   "landmark": {
+    "name": "Survey table",
+    "glyph": "network"
+   }
+  },
+  {
+   "name": "Getting around",
+   "blurb": "Distance, components, Euler circuits and trails, and eulerising a road map.",
+   "tier": "Basic",
+   "size": 5,
+   "sector": {
+    "name": "Rover Depot",
+    "purpose": "drive every road without doubling back"
+   },
+   "landmark": {
+    "name": "Route marker",
+    "glyph": "flag-line"
+   }
+  },
+  {
+   "name": "Trees",
+   "blurb": "Trees, leaves, forests, spanning trees and Kruskal's algorithm.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Cable Yard",
+    "purpose": "connect every dome with the least cable"
+   },
+   "landmark": {
+    "name": "Cable spool",
+    "glyph": "coil-tower"
+   }
+  },
+  {
+   "name": "Routes and tours",
+   "blurb": "Shortest paths, Hamilton cycles, the travelling salesperson and Dirac's theorem.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Dispatch",
+    "purpose": "plan the shortest tour of the outlying stations"
+   },
+   "landmark": {
+    "name": "Dispatch tower",
+    "glyph": "relay-pylons"
+   }
+  },
+  {
+   "name": "Planarity and colouring",
+   "blurb": "Euler's formula, planar limits, polyhedra, bipartite graphs and colouring.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Circuit Shop",
+    "purpose": "lay out circuits whose wires never cross"
+   },
+   "landmark": {
+    "name": "Circuit board",
+    "glyph": "logic-gate"
+   }
+  },
+  {
+   "name": "Matching and flow",
+   "blurb": "Matchings, Hall's condition, directed paths, flows and cuts.",
+   "tier": "Advanced",
+   "size": 5,
+   "sector": {
+    "name": "Pumping Station",
+    "purpose": "push as much water as the pipes allow"
+   },
+   "landmark": {
+    "name": "Pump tower",
+    "glyph": "tank-farm"
+   }
+  },
+  {
+   "name": "Counting structures",
+   "blurb": "Labelled trees, Prüfer codes, cliques, triangles and Ramsey's guarantee.",
+   "tier": "Advanced",
+   "size": 6,
+   "sector": {
+    "name": "Archive",
+    "purpose": "count every network we could ever build"
+   },
+   "landmark": {
+    "name": "Archive vault",
+    "glyph": "archive-hall"
+   }
+  }
+ ],
+ "landmarkCost": 4,
+ "ranks": [
+  "MAP READER",
+  "ROAD SURVEYOR",
+  "CABLE LAYER",
+  "DISPATCHER",
+  "CIRCUIT DESIGNER",
+  "FLOW ENGINEER",
+  "NETWORK PLANNER",
+  "NETWORK ARCHITECT",
+  "MASTER OF NETWORKS"
+ ],
+ "source": {
+  "pattern": "OpenStax|Applied Combinatorics",
+  "label": "OpenStax and Keller and Trotter",
+  "book": "OpenStax Contemporary Mathematics, chapter 12; Keller and Trotter, Applied Combinatorics (KT sections at https://www.rellek.net/book/<page>.html)",
+  "url": "https://openstax.org/books/contemporary-mathematics/pages/<section-slug>",
+  "example": "OpenStax Contemporary Mathematics — 12.5 Euler Circuits"
+ },
+ "mentor": {
+  "name": "Mira",
+  "role": "field engineer",
+  "cardEyebrow": "MIRA / YOUR FIELD ENGINEER",
+  "opening": "I’m Mira. The domes are linked by a tangle of tunnels and cables, and we have to {purpose}. Your task is “{title}.” {brief} The idea we need: {topic}.",
+  "closing": "You already have everything this needs from Foundations and Discrete mathematics. I’ll work the first example with you, and the guided steps are there whenever you want them."
+ },
+ "copy": {
+  "sceneLabel": "KEPLER OUTPOST / MAP ROOM",
+  "homeEyebrow": "THE DOMES ARE LINKING UP",
+  "homeTitle": "Every dome needs a link.<br><em>Learn the shape of a network.</em>",
+  "firstVisit": "Welcome to the Map Room. The outpost is now a scatter of domes, and every tunnel, cable and road between them is a line on this table. We start by counting the links we already have.",
+  "allDone": "Every road, cable and pipe at the outpost is now planned on paper first. Topology opens next in the Survey Grid, where a network becomes a shape.",
+  "beginFirst": "Count the first links",
+  "missionNoun": "graph theory missions",
+  "chaptersNote": "Seven chapters. Learn every concept in a chapter to unlock a landmark for the outpost. Practice missions are optional.",
+  "skills": {
+   "eyebrow": "YOUR DEVELOPMENT",
+   "title": "The skill tree",
+   "text": "Follow the prerequisite branches from vertices and edges to trees and flows. Each mission you finish opens the ideas that are built on it."
+  },
+  "guideNoun": "graph theory topics",
+  "visual": {
+   "eyebrow": "TRY IT YOURSELF",
+   "title": "The concept bench",
+   "text": "Pick any mission, change its numbers and predict the answer before you check it. Nothing here affects your progress, and it all works offline."
+  }
+ },
+ "help": {
+  "eyebrow": "WELCOME TO THE MAP ROOM",
+  "title": "Draw the links before you count them.",
+  "intro": "Graph theory starts where Discrete mathematics ends: with the links between things. It teaches how to describe, route, colour and count networks exactly, without drawing every case. Every new word and symbol is explained before you are asked to use it, with a worked example first.",
+  "answers": "Answers are whole numbers, such as a count, a weight or a degree, never a route or a list of edges. Type them without commas or spaces (1250, not 1,250). A yes or no is typed as 1 or 0, and a dome is typed by its number."
+ },
+ "glossaryRequired": [
+  "vertex",
+  "edge",
+  "degree",
+  "path",
+  "connected",
+  "Euler circuit",
+  "tree",
+  "spanning tree",
+  "Hamilton cycle",
+  "planar",
+  "chromatic number",
+  "bipartite",
+  "matching",
+  "flow"
+ ],
+ "concepts": {
+  "q01": "Vertices, edges and neighbours [O12.1]",
+  "q02": "Degree and the handshake rule [O12.1, O12.2]",
+  "q03": "Complete graphs and cycles [O12.2]",
+  "q04": "Subgraphs and complements [O12.2, O12.3]",
+  "q05": "Isomorphism and invariants [O12.3]",
+  "q06": "Walks, trails and paths [O12.4]",
+  "q07": "Distance [O12.4]",
+  "q08": "Connected components [KT5.1]",
+  "q09": "Euler circuits [O12.5]",
+  "q10": "Euler trails [O12.6]",
+  "q11": "Chapter review: eulerising a road map [O12.5]",
+  "q12": "Trees [O12.10]",
+  "q13": "Forests and leaves [KT5.1, O12.10]",
+  "q14": "Spanning trees [O12.10]",
+  "q15": "Counting spanning trees [O12.10]",
+  "q16": "Minimum spanning trees: Kruskal's algorithm [O12.10, KT12.1]",
+  "q17": "Chapter review: the cable plan [O12.10, KT12.1]",
+  "q18": "Shortest weighted paths: Dijkstra's algorithm [KT12.3]",
+  "q19": "Hamilton cycles in complete graphs [O12.7]",
+  "q20": "Travelling salesperson: brute force [O12.9]",
+  "q21": "The nearest-neighbour method [O12.9]",
+  "q22": "Hamilton paths and Dirac's theorem [O12.8, KT5.3]",
+  "q23": "Chapter review: the dispatch plan [O12.7, O12.9]",
+  "q24": "Planar graphs and Euler's formula [KT5.5]",
+  "q25": "The edge limit for planar graphs [KT5.5]",
+  "q26": "Polyhedra from Euler's formula [KT5.5]",
+  "q27": "Bipartite graphs and odd cycles [KT5.4]",
+  "q28": "Colouring and the chromatic number [O12.4, KT5.4]",
+  "q29": "Chapter review: scheduling by colouring [KT5.4]",
+  "q30": "Matchings in bipartite graphs [KT14.2]",
+  "q31": "Hall's condition [KT14.2]",
+  "q32": "Directed graphs: counting routes [KT12.2]",
+  "q33": "Flows and cuts [KT13.2]",
+  "q34": "Maximum flow equals minimum cut [KT13.2]",
+  "q35": "Labelled trees: Cayley's formula [KT5.6]",
+  "q36": "Prüfer codes [KT5.6]",
+  "q37": "Cliques and independent sets [KT5.1, KT5.4]",
+  "q38": "Counting triangles and cliques [O12.2]",
+  "q39": "Ramsey's guarantee [KT11.2]",
+  "q40": "Realm review and bridge to Topology [KT5.5]"
+ }
+}

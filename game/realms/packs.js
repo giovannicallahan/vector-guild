@@ -52,5 +52,25 @@ window.VG_PACKS = {
   title: 'Discrete mathematics',
   styles: ['styles.css', 'update.css'],
   scripts: ['realms/disc/pack.js', 'realms/disc/missions-a.js', 'realms/disc/missions-b.js', 'realms/disc/missions-c.js', 'realms/disc/missions-d.js', 'gen-core.js', 'realms/disc/gen-a.js', 'realms/disc/gen-b.js', 'realms/disc/gen-c.js', 'realms/disc/gen-d.js', 'gameplay.js', 'realms/disc/experiments-a.js', 'realms/disc/experiments-b.js', 'realms/disc/experiments-c.js', 'realms/disc/experiments-d.js', 'realms/disc/variants-a.js', 'realms/disc/variants-b.js', 'realms/disc/variants-c.js', 'realms/disc/variants-d.js', 'realms/disc/practice-1.js', 'realms/disc/practice-2.js', 'realms/disc/practice-3.js', 'realms/disc/practice-4.js', 'realms/disc/practice-5.js', 'realms/disc/practice-6.js', 'realms/disc/practice-7.js', 'realms/disc/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/disc/glossary.js', 'glossary.js']
+ },
+ calc3: {
+  title: 'Calculus 3: many variables',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/calc3/pack.js', 'realms/calc3/missions-a.js', 'realms/calc3/missions-b.js', 'realms/calc3/missions-c.js', 'realms/calc3/missions-d.js', 'gen-core.js', 'realms/calc3/gen-a.js', 'realms/calc3/gen-b.js', 'realms/calc3/gen-c.js', 'realms/calc3/gen-d.js', 'gameplay.js', 'realms/calc3/experiments-a.js', 'realms/calc3/experiments-b.js', 'realms/calc3/experiments-c.js', 'realms/calc3/experiments-d.js', 'realms/calc3/variants-a.js', 'realms/calc3/variants-b.js', 'realms/calc3/variants-c.js', 'realms/calc3/variants-d.js', 'realms/calc3/practice-1.js', 'realms/calc3/practice-2.js', 'realms/calc3/practice-3.js', 'realms/calc3/practice-4.js', 'realms/calc3/practice-5.js', 'realms/calc3/practice-6.js', 'realms/calc3/practice-7.js', 'realms/calc3/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/calc3/glossary.js', 'glossary.js']
+ },
+ stats: {
+  title: 'Data and inference',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/stats/pack.js', 'realms/stats/missions-a.js', 'realms/stats/missions-b.js', 'realms/stats/missions-c.js', 'realms/stats/missions-d.js', 'gen-core.js', 'realms/stats/gen-a.js', 'realms/stats/gen-b.js', 'realms/stats/gen-c.js', 'realms/stats/gen-d.js', 'gameplay.js', 'realms/stats/experiments-a.js', 'realms/stats/experiments-b.js', 'realms/stats/experiments-c.js', 'realms/stats/experiments-d.js', 'realms/stats/variants-a.js', 'realms/stats/variants-b.js', 'realms/stats/variants-c.js', 'realms/stats/variants-d.js', 'realms/stats/practice-1.js', 'realms/stats/practice-2.js', 'realms/stats/practice-3.js', 'realms/stats/practice-4.js', 'realms/stats/practice-5.js', 'realms/stats/practice-6.js', 'realms/stats/practice-7.js', 'realms/stats/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/stats/glossary.js', 'glossary.js']
+ },
+ number: {
+  title: 'Number theory: the hidden life of whole numbers',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/number/pack.js', 'realms/number/missions-a.js', 'realms/number/missions-b.js', 'realms/number/missions-c.js', 'realms/number/missions-d.js', 'gen-core.js', 'realms/number/gen-a.js', 'realms/number/gen-b.js', 'realms/number/gen-c.js', 'realms/number/gen-d.js', 'gameplay.js', 'realms/number/experiments-a.js', 'realms/number/experiments-b.js', 'realms/number/experiments-c.js', 'realms/number/experiments-d.js', 'realms/number/variants-a.js', 'realms/number/variants-b.js', 'realms/number/variants-c.js', 'realms/number/variants-d.js', 'realms/number/practice-1.js', 'realms/number/practice-2.js', 'realms/number/practice-3.js', 'realms/number/practice-4.js', 'realms/number/practice-5.js', 'realms/number/practice-6.js', 'realms/number/practice-7.js', 'realms/number/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/number/glossary.js', 'glossary.js']
+ },
+ graph: {
+  title: 'Graph theory: networks',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/graph/pack.js', 'realms/graph/missions-a.js', 'realms/graph/missions-b.js', 'realms/graph/missions-c.js', 'realms/graph/missions-d.js', 'gen-core.js', 'realms/graph/gen-a.js', 'realms/graph/gen-b.js', 'realms/graph/gen-c.js', 'realms/graph/gen-d.js', 'gameplay.js', 'realms/graph/experiments-a.js', 'realms/graph/experiments-b.js', 'realms/graph/experiments-c.js', 'realms/graph/experiments-d.js', 'realms/graph/variants-a.js', 'realms/graph/variants-b.js', 'realms/graph/variants-c.js', 'realms/graph/variants-d.js', 'realms/graph/practice-1.js', 'realms/graph/practice-2.js', 'realms/graph/practice-3.js', 'realms/graph/practice-4.js', 'realms/graph/practice-5.js', 'realms/graph/practice-6.js', 'realms/graph/practice-7.js', 'realms/graph/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/graph/glossary.js', 'glossary.js']
  }
 };
