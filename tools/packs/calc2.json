@@ -1,0 +1,225 @@
+{
+ "id": "calc2",
+ "name": "Calculus 2: accumulation",
+ "short": "Calculus 2",
+ "description": "Accumulation, areas and volumes, integration techniques, infinite series and Taylor series, taught at the Kepler outpost.",
+ "about": "Calculus 2 realm (\"Calculus 2: accumulation\"): accumulation, areas, volumes, techniques of integration, infinite\nseries and Taylor series, for an adult who has finished Calculus 1 and nothing more. Same Kepler outpost, now building to\nlast, and Mira is still the mentor. The concept plan is docs/plans/CALC2-PLAN.md.",
+ "registry": {
+  "part": "calc2"
+ },
+ "achievements": {
+  "done": "Filled to the brim",
+  "master": "The sum of everything"
+ },
+ "chapters": [
+  {
+   "name": "Accumulation",
+   "blurb": "Totals from rates, and the substitution that undoes the chain rule.",
+   "tier": "Basic",
+   "size": 6,
+   "sector": {
+    "name": "Reservoir",
+    "purpose": "keep count of everything that flows in and out"
+   },
+   "landmark": {
+    "name": "Water Tower",
+    "glyph": "tank-farm"
+   }
+  },
+  {
+   "name": "Areas and solids",
+   "blurb": "Areas between curves and volumes built from slices.",
+   "tier": "Basic",
+   "size": 5,
+   "sector": {
+    "name": "Hull Foundry",
+    "purpose": "cut and shape the plates and tanks we build"
+   },
+   "landmark": {
+    "name": "Pressure Dome",
+    "glyph": "drafting-dome"
+   }
+  },
+  {
+   "name": "Length, work and balance",
+   "blurb": "Shells, lengths of curves, the work of a varying force and where a shape balances.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Cargo Crane",
+    "purpose": "lift, measure and balance heavy loads"
+   },
+   "landmark": {
+    "name": "Gantry Crane",
+    "glyph": "supply-crane"
+   }
+  },
+  {
+   "name": "Techniques of integration",
+   "blurb": "By parts, trigonometric tricks, partial fractions and good numerical estimates.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Computing Core",
+    "purpose": "turn hard integrals into ones we can do"
+   },
+   "landmark": {
+    "name": "Instrument Mast",
+    "glyph": "telescope"
+   }
+  },
+  {
+   "name": "Growth and the infinite",
+   "blurb": "Integrals over endless intervals, decay, and lists of numbers that settle down.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Deep Signal Array",
+    "purpose": "add up quantities that never end"
+   },
+   "landmark": {
+    "name": "Long-range Dish",
+    "glyph": "comms-dish"
+   }
+  },
+  {
+   "name": "Testing series",
+   "blurb": "Tests that decide whether a series converges, and how far off a partial sum is.",
+   "tier": "Advanced",
+   "size": 5,
+   "sector": {
+    "name": "Signal Lab",
+    "purpose": "know when an endless sum settles"
+   },
+   "landmark": {
+    "name": "Relay Tower",
+    "glyph": "spiral-tower"
+   }
+  },
+  {
+   "name": "Power series",
+   "blurb": "Taylor series, their errors, and a first look at paths given by two functions.",
+   "tier": "Advanced",
+   "size": 6,
+   "sector": {
+    "name": "Navigation Room",
+    "purpose": "replace hard functions with polynomials we can compute"
+   },
+   "landmark": {
+    "name": "Star Compass",
+    "glyph": "torus-ring"
+   }
+  }
+ ],
+ "landmarkCost": 4,
+ "ranks": [
+  "RESERVOIR HAND",
+  "TALLY KEEPER",
+  "PLATE CUTTER",
+  "CRANE OPERATOR",
+  "TOOLMAKER",
+  "SIGNAL WATCHER",
+  "SERIES TESTER",
+  "STAR NAVIGATOR",
+  "MASTER OF ACCUMULATION"
+ ],
+ "source": {
+  "pattern": "OpenStax",
+  "label": "OpenStax",
+  "book": "OpenStax Calculus Volume 2",
+  "url": "https://openstax.org/books/calculus-volume-2/pages/<section-slug>",
+  "example": "OpenStax Calculus Volume 2 — 3.1 Integration by Parts"
+ },
+ "mentor": {
+  "name": "Mira",
+  "role": "field engineer",
+  "cardEyebrow": "MIRA / YOUR FIELD ENGINEER",
+  "opening": "I’m Mira. Everything here is built to last now, and we have to {purpose}. Your task is “{title}.” {brief} The idea we need: {topic}.",
+  "closing": "You already have the derivatives and the first integrals from Calculus 1. I’ll go through the worked example with you, and the guided steps are there whenever you want them."
+ },
+ "copy": {
+  "sceneLabel": "KEPLER OUTPOST / BUILD YARD",
+  "homeEyebrow": "THE OUTPOST IS BUILDING TO LAST",
+  "homeTitle": "Everything here adds up.<br><em>Learn to measure the whole.</em>",
+  "firstVisit": "Welcome back. The reservoir is open, and now we have to know exactly how much flows in, how much the domes hold and how far the signals reach. We start with one tank and a rate you already know how to integrate.",
+  "allDone": "You did it. Every tank, crane and signal at the outpost is measured, and endless sums no longer scare you. Calculus 3 begins on the survey deck, where everything has three directions.",
+  "beginFirst": "Fill the first tank",
+  "missionNoun": "calculus 2 missions",
+  "chaptersNote": "Seven chapters. Learn every concept in a chapter to unlock a landmark for the outpost. Practice missions are optional.",
+  "skills": {
+   "eyebrow": "YOUR DEVELOPMENT",
+   "title": "The skill tree",
+   "text": "Follow the prerequisite branches from accumulation to infinite series. Each mission you finish opens the ideas built on it."
+  },
+  "guideNoun": "calculus 2 topics",
+  "visual": {
+   "eyebrow": "TRY IT YOURSELF",
+   "title": "The concept bench",
+   "text": "Pick any mission, change its numbers and predict the result before you check it. Nothing here affects your progress, and it all works offline."
+  }
+ },
+ "help": {
+  "eyebrow": "WELCOME BACK",
+  "title": "Accumulation, measured.",
+  "intro": "Calculus 2 starts where Calculus 1 ends, with the definite integral and the Fundamental Theorem. It then adds areas, volumes, work, techniques of integration, infinite sums and Taylor series. Every new word and symbol is explained before you are asked to use it, with a worked example first.",
+  "answers": "Angles are in radians throughout; a volume with π asks for k in k·π, and a convergence question asks for 1 or 0, then a number."
+ },
+ "glossaryRequired": [
+  "accumulation function",
+  "average value",
+  "substitution",
+  "solid of revolution",
+  "washer",
+  "cylindrical shell",
+  "arc length",
+  "work",
+  "centre of mass",
+  "integration by parts",
+  "partial fractions",
+  "improper integral",
+  "series",
+  "Taylor series"
+ ],
+ "concepts": {
+  "q01": "Net change from a rate [1.4]",
+  "q02": "Accumulation functions: the derivative of ∫ₐˣ f(t) dt [1.3]",
+  "q03": "Average value of a function on an interval [1.3]",
+  "q04": "Substitution, including changing the limits [1.5]",
+  "q05": "Integrals that give ln|x| and eˣ [1.6]",
+  "q06": "Integrals that give arctan and arcsin [1.7]",
+  "q07": "Area between two curves [2.1]",
+  "q08": "Curves that swap places; slicing along y [2.1]",
+  "q09": "Volume by slicing with known cross-sections [2.2]",
+  "q10": "Discs and washers [2.2]",
+  "q11": "Chapter review: areas and solids mixed [2.1, 2.2]",
+  "q12": "Cylindrical shells [2.3]",
+  "q13": "Arc length of a curve [2.4]",
+  "q14": "Work done by a varying force; springs [2.5]",
+  "q15": "Pumping water out of a tank [2.5]",
+  "q16": "Mass, moments and centre of mass [2.6]",
+  "q17": "Chapter review: shells, work and balance [2.3, 2.5]",
+  "q18": "Integration by parts [3.1]",
+  "q19": "Powers of sine and cosine [3.2]",
+  "q20": "Trigonometric substitution [3.3]",
+  "q21": "Partial fractions [3.4]",
+  "q22": "Trapezoidal and Simpson's rules [3.6]",
+  "q23": "Chapter review: choosing a technique [3.5]",
+  "q24": "Improper integrals over an endless interval [3.7]",
+  "q25": "Improper integrals where the integrand blows up [3.7]",
+  "q26": "Exponential growth and decay; half-life [2.8]",
+  "q27": "Sequences and their limits [5.1]",
+  "q28": "Geometric series [5.2]",
+  "q29": "Chapter review: the infinite so far [3.7, 5.1, 5.2]",
+  "q30": "Partial sums, telescoping series, the divergence test [5.2, 5.3]",
+  "q31": "The integral test and p-series [5.3]",
+  "q32": "Comparison and limit comparison tests [5.4]",
+  "q33": "Alternating series and the error bound [5.5]",
+  "q34": "Ratio and root tests [5.6]",
+  "q35": "Power series: radius and interval of convergence [6.1]",
+  "q36": "Taylor polynomials [6.3]",
+  "q37": "Maclaurin series of eˣ, sin x, cos x and 1/(1 − x) [6.3]",
+  "q38": "Taylor's remainder: how good is the estimate [6.3]",
+  "q39": "Integrating a series to estimate an integral [6.4]",
+  "q40": "Realm review and bridge to Calculus 3: a path given by x(t) and y(t) [7.1, 7.2]"
+ }
+}

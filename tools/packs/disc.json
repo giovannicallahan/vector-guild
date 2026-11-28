@@ -1,0 +1,225 @@
+{
+ "id": "disc",
+ "name": "Discrete mathematics",
+ "short": "Discrete maths",
+ "description": "Sets, functions, counting, sequences and recurrences, with a first look at remainders and networks, taught at the Kepler outpost.",
+ "about": "Discrete mathematics realm (\"Discrete mathematics\"): sets, functions, exact counting, sequences and recurrences, and a first look at remainders and networks, for an\nadult who has finished Foundations and nothing more. Same Kepler outpost, now with a Logistics Depot: crates, codes, crews and roads, and\nMira keeps the depot ledger. The concept plan is docs/plans/DISC-PLAN.md.",
+ "registry": {
+  "part": "disc"
+ },
+ "achievements": {
+  "done": "Every way counted",
+  "master": "The whole ledger"
+ },
+ "chapters": [
+  {
+   "name": "Sets and Venn diagrams",
+   "blurb": "Sets, subsets, union, intersection, complement, Venn diagrams and pairs.",
+   "tier": "Basic",
+   "size": 6,
+   "sector": {
+    "name": "Store Rooms",
+    "purpose": "know exactly what is in every bin"
+   },
+   "landmark": {
+    "name": "Bin racks",
+    "glyph": "lattice-frame"
+   }
+  },
+  {
+   "name": "Functions and counting principles",
+   "blurb": "Functions between finite sets, one-to-one and onto, and the two counting principles.",
+   "tier": "Basic",
+   "size": 5,
+   "sector": {
+    "name": "Labelling Bay",
+    "purpose": "give every crate a label and every code a meaning"
+   },
+   "landmark": {
+    "name": "Tag post",
+    "glyph": "obelisk"
+   }
+  },
+  {
+   "name": "Arrangements and selections",
+   "blurb": "Factorials, permutations, combinations, Pascal’s triangle and the binomial theorem.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Crew Office",
+    "purpose": "count every way to pick and order a crew"
+   },
+   "landmark": {
+    "name": "Roster board",
+    "glyph": "archive-hall"
+   }
+  },
+  {
+   "name": "Counting with conditions",
+   "blurb": "Counting the complement, stars and bars, inclusion–exclusion and derangements.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Packing Floor",
+    "purpose": "pack crates under every rule at once"
+   },
+   "landmark": {
+    "name": "Crate stack",
+    "glyph": "block-stack"
+   }
+  },
+  {
+   "name": "Sequences",
+   "blurb": "Closed and recursive formulas, arithmetic and geometric sequences, finite differences.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Stock Yard",
+    "purpose": "forecast stock that grows by a rule"
+   },
+   "landmark": {
+    "name": "Pipe stacks",
+    "glyph": "coil-tower"
+   }
+  },
+  {
+   "name": "Recurrences and generating functions",
+   "blurb": "Solving recurrences, counting tilings, generating functions and counting two ways.",
+   "tier": "Advanced",
+   "size": 5,
+   "sector": {
+    "name": "Tiling Works",
+    "purpose": "count patterns that are built one step at a time"
+   },
+   "landmark": {
+    "name": "Tiled arch",
+    "glyph": "arch-bridge"
+   }
+  },
+  {
+   "name": "First steps into numbers and networks",
+   "blurb": "Remainders and clock arithmetic, graphs, trees and Euler paths.",
+   "tier": "Advanced",
+   "size": 6,
+   "sector": {
+    "name": "Road Office",
+    "purpose": "number the codes and map the roads between the domes"
+   },
+   "landmark": {
+    "name": "Junction beacon",
+    "glyph": "lighthouse"
+   }
+  }
+ ],
+ "landmarkCost": 4,
+ "ranks": [
+  "OBSERVER",
+  "STOCK TAKER",
+  "LABELLER",
+  "ROSTER CLERK",
+  "PACKER",
+  "QUARTERMASTER",
+  "PATTERN MAKER",
+  "DEPOT CHIEF",
+  "MASTER OF COUNTING"
+ ],
+ "source": {
+  "pattern": "OpenStax|Levin",
+  "label": "Levin and OpenStax",
+  "book": "Oscar Levin, Discrete Mathematics: An Open Introduction (3rd edition); OpenStax Contemporary Mathematics, chapter 1 Sets",
+  "url": "https://discrete.openmathbooks.org/dmoi3/<page>.html",
+  "example": "Levin, Discrete Mathematics: An Open Introduction — 1.3 Combinations and Permutations"
+ },
+ "mentor": {
+  "name": "Mira",
+  "role": "field engineer",
+  "cardEyebrow": "MIRA / YOUR FIELD ENGINEER",
+  "opening": "I’m Mira. The depot is full, and we have to {purpose}. Your task is “{title}.” {brief} The idea we need: {topic}.",
+  "closing": "You already have everything this needs from Foundations. I’ll work the first example with you, and the guided steps are there whenever you want them."
+ },
+ "copy": {
+  "sceneLabel": "KEPLER OUTPOST / LOGISTICS DEPOT",
+  "homeEyebrow": "THE DEPOT IS FILLING UP",
+  "homeTitle": "Everything here can be counted.<br><em>Learn to count it cleverly.</em>",
+  "firstVisit": "Welcome back. The depot is overflowing with crates, codes, crews and roads, and nobody knows how many ways there are to arrange them. We begin by listing what is in one bin; everything you need you learned in Foundations.",
+  "allDone": "You did it. The depot ledger is complete, and every count in it is exact. Number theory and Graph theory each pick up a thread from the Road Office.",
+  "beginFirst": "Open the first bin",
+  "missionNoun": "discrete maths missions",
+  "chaptersNote": "Seven chapters. Learn every concept in a chapter to unlock a landmark for the depot. Practice missions are optional.",
+  "skills": {
+   "eyebrow": "YOUR DEVELOPMENT",
+   "title": "The skill tree",
+   "text": "Follow the prerequisite branches from sets to graphs. Each mission you finish opens the ideas that are built on it."
+  },
+  "guideNoun": "discrete maths topics",
+  "visual": {
+   "eyebrow": "TRY IT YOURSELF",
+   "title": "The concept bench",
+   "text": "Pick any mission, change its numbers and predict the count before you check it. Nothing here affects your progress, and it all works offline."
+  }
+ },
+ "help": {
+  "eyebrow": "WELCOME BACK",
+  "title": "Count it without listing it.",
+  "intro": "Discrete maths starts where Foundations ends: with sets, functions and simple counting. It teaches how to count arrangements, selections, sequences and networks exactly, without writing every case out. Every new word and symbol is explained before you are asked to use it, with a worked example first.",
+  "answers": "Answers are whole numbers, such as a count, a term or a degree, never a set or a list. Type them without commas or spaces (1250, not 1,250). A yes or no is typed as 1 or 0, and a choice is typed as the code shown in the prompt."
+ },
+ "glossaryRequired": [
+  "set",
+  "element",
+  "cardinality",
+  "subset",
+  "union",
+  "intersection",
+  "function",
+  "one-to-one",
+  "onto",
+  "permutation",
+  "combination",
+  "factorial",
+  "recurrence relation",
+  "graph"
+ ],
+ "concepts": {
+  "q01": "Sets, elements and cardinality [CM 1.1, Levin 0.3]",
+  "q02": "Subsets and the empty set [Levin 0.3]",
+  "q03": "Union and intersection [CM 1.4, Levin 0.3]",
+  "q04": "Complement, difference and |A ∪ B| = |A| + |B| − |A ∩ B| [CM 1.4, Levin 0.3]",
+  "q05": "Three-set Venn diagrams [CM 1.5]",
+  "q06": "Cartesian products [Levin 0.3]",
+  "q07": "Functions between finite sets: domain, codomain, image [Levin 0.4]",
+  "q08": "One-to-one and onto [Levin 0.4]",
+  "q09": "The additive principle [Levin 1.1]",
+  "q10": "The multiplicative principle [Levin 1.1]",
+  "q11": "Chapter review: labels and codes [Levin 0.4, 1.1]",
+  "q12": "Permutations and factorials [Levin 1.3]",
+  "q13": "Partial permutations P(n, k) [Levin 1.3]",
+  "q14": "Combinations C(n, k) = n! ÷ (k!(n − k)!) [Levin 1.3]",
+  "q15": "Pascal's triangle, bit strings and the 2ⁿ subsets [Levin 1.2]",
+  "q16": "The binomial theorem [Levin 1.2]",
+  "q17": "Chapter review: order or no order? [Levin 1.3]",
+  "q18": "Counting the complement: \"at least one\" [Levin 1.1, 1.3]",
+  "q19": "Stars and bars [Levin 1.5]",
+  "q20": "Inclusion–exclusion with three sets [Levin 1.6]",
+  "q21": "Counting onto functions [Levin 1.6]",
+  "q22": "Derangements [Levin 1.6]",
+  "q23": "Chapter review: packing under rules [Levin 1.5, 1.6]",
+  "q24": "Sequences: closed and recursive formulas [Levin 2.1]",
+  "q25": "Arithmetic sequences and their sums [Levin 2.2]",
+  "q26": "Geometric sequences and their sums [Levin 2.2]",
+  "q27": "Finite differences and polynomial fitting [Levin 2.3]",
+  "q28": "Recurrence relations and the Fibonacci numbers [Levin 2.1, 2.4]",
+  "q29": "Chapter review: forecasting stock [Levin 2.1–2.3]",
+  "q30": "Solving a recurrence by iteration [Levin 2.4]",
+  "q31": "The characteristic root technique [Levin 2.4]",
+  "q32": "Counting with recurrences: tilings and spaced-out bit strings [Levin 2.4]",
+  "q33": "Generating functions: reading off a coefficient [Levin 5.1]",
+  "q34": "Counting one thing two ways [Levin 1.4]",
+  "q35": "Divisibility, quotients and remainders [Levin 5.2]",
+  "q36": "Clock arithmetic: mod and congruence [Levin 5.2]",
+  "q37": "Graphs, degrees and the handshake lemma [Levin 4.1]",
+  "q38": "Trees: v − 1 edges [Levin 4.2]",
+  "q39": "Euler paths and circuits [Levin 4.5]",
+  "q40": "Realm review and bridge to Number theory and Graph theory [Levin 5.2, 4.5]"
+ }
+}
