@@ -52,7 +52,7 @@ test('daily.js loads where there is no document, as qa/harness.js loads it', () 
 
 test('one finished review pays 15 stardust once per day: not on reload, in a second tab, or when asked again', () => {
   const storage = new Map(), a = page(storage); a.S.load();
-  assert.deepEqual(plain(a.C.DAILY), { dust: 15, problems: 3, unlock: 3, milestones: [[3, 20], [7, 40], [14, 80], [30, 150]] });
+  assert.deepEqual(plain(a.C.DAILY), { dust: 15, problems: 3, unlock: 3, restEvery: 7, milestones: [[3, 20], [7, 40], [14, 80], [30, 150]] });
   const first = plain(a.C.onDailyDone(DAY0));
   assert.deepEqual(first, [{ type: 'daily', day: DAY0, streak: 1, dust: 15 }]);
   assert.equal(a.C.dust(), 15); assert.equal(a.C.earned(), 15);
@@ -112,19 +112,70 @@ test('the streak grows one day at a time, and its milestones at 3, 7, 14 and 30 
   assert.deepEqual(plain(S.meta().daily), { day: DAY0 + 30, streak: 31, best: 31, paid: [3, 7, 14, 30], seen: {} });
 });
 
-test('a missed day starts the streak again without taking anything away, and a milestone is never paid a second time', () => {
+test('one missed day is a rest day: the streak carries on over it, at most once in seven days', () => {
   const { C, S, L } = page(); S.load();
   for (let i = 0; i < 3; i++) C.onDailyDone(DAY0 + i);
   assert.equal(C.dust(), 3 * 15 + 20);
-  /* Two days later: day DAY0+3 was missed. */
-  const lapsed = L.status(S.meta().daily, DAY0 + 4, 10);
-  assert.equal(lapsed.state, 'ready'); assert.equal(lapsed.streak, 0); assert.equal(lapsed.lapsed, true); assert.equal(lapsed.best, 3);
-  assert.equal(C.dust(), 65, 'looking at the card changes nothing');
-  assert.deepEqual(plain(C.onDailyDone(DAY0 + 4)), [{ type: 'daily', day: DAY0 + 4, streak: 1, dust: 15 }]);
-  assert.equal(C.dust(), 80); assert.equal(S.meta().daily.best, 3, 'the best streak stands');
+  /* Day DAY0+3 is missed: on DAY0+4 the streak is resting, not lost. */
+  const rest = L.status(S.meta().daily, DAY0 + 4, 10);
+  assert.equal(rest.state, 'ready'); assert.equal(rest.streak, 3); assert.equal(rest.resting, true); assert.equal(rest.lapsed, false);
+  assert.equal(C.dust(), 65, 'looking at the card changes nothing'); assert.equal('rests' in S.meta().daily, false);
+  assert.deepEqual(plain(C.onDailyDone(DAY0 + 4)), [{ type: 'daily', day: DAY0 + 4, streak: 4, dust: 15 }]);
+  assert.deepEqual(plain(S.meta().daily.rests), [DAY0 + 3], 'the rest day is remembered');
+  assert.equal(L.status(S.meta().daily, DAY0 + 5, 10).resting, false, 'a normal next day is not a rest');
+  /* A second missed day within seven days of the first one is not forgiven. */
   C.onDailyDone(DAY0 + 5);
-  assert.deepEqual(plain(C.onDailyDone(DAY0 + 6)), [{ type: 'daily', day: DAY0 + 6, streak: 3, dust: 15 }], 'the 3-day bonus was already paid');
-  assert.deepEqual(plain(S.meta().daily.paid), [3]);
+  const again = L.status(S.meta().daily, DAY0 + 7, 10);
+  assert.equal(again.streak, 0); assert.equal(again.lapsed, true); assert.equal(again.resting, false); assert.equal(again.best, 5);
+  assert.deepEqual(plain(C.onDailyDone(DAY0 + 7)), [{ type: 'daily', day: DAY0 + 7, streak: 1, dust: 15 }]);
+  assert.equal(S.meta().daily.best, 5, 'the best streak stands');
+  /* Seven days after the first rest, a rest is free again: DAY0+10 is the missed day, 7 days after DAY0+3. */
+  C.onDailyDone(DAY0 + 8); C.onDailyDone(DAY0 + 9);
+  assert.equal(L.status(S.meta().daily, DAY0 + 11, 10).resting, true);
+  assert.equal(plain(C.onDailyDone(DAY0 + 11))[0].streak, 4);
+  assert.deepEqual(plain(S.meta().daily.rests), [DAY0 + 3, DAY0 + 10]);
+  /* Two missed days in a row start a new streak; nothing is taken away, and a milestone is never paid twice. */
+  const dust = C.dust();
+  assert.equal(L.status(S.meta().daily, DAY0 + 14, 10).lapsed, true);
+  C.onDailyDone(DAY0 + 14); C.onDailyDone(DAY0 + 15);
+  assert.deepEqual(plain(C.onDailyDone(DAY0 + 16)), [{ type: 'daily', day: DAY0 + 16, streak: 3, dust: 15 }], 'the 3-day bonus was already paid');
+  assert.equal(C.dust(), dust + 45); assert.deepEqual(plain(S.meta().daily.paid), [3]);
+});
+
+test('the rest rule in daily.js and in the collection agree', () => {
+  const { C, L } = page();
+  const rng = mulberry(11);
+  for (let i = 0; i < 400; i++) {
+    const last = DAY0 + Math.floor(rng() * 30), d = { day: last, streak: 1 + Math.floor(rng() * 9), rests: Array.from({ length: Math.floor(rng() * 3) }, () => last - Math.floor(rng() * 12)) };
+    const day = last + 1 + Math.floor(rng() * 3);
+    assert.deepEqual(plain(L.streakOn(d, day)), plain(C.streakOn(d, day)), JSON.stringify([d, day]));
+  }
+  assert.deepEqual(plain(L.streakOn(null, DAY0)), { streak: 1, rest: null });
+  /* The missed day is DAY0+1: a rest six days before it is too close, seven days before is fine. */
+  assert.deepEqual(plain(L.streakOn({ day: DAY0, streak: 4, rests: [DAY0 - 5] }, DAY0 + 2)), { streak: 1, rest: null }, 'a rest six days before');
+  assert.deepEqual(plain(L.streakOn({ day: DAY0, streak: 4, rests: [DAY0 - 5, 'x'] }, DAY0 + 2)), { streak: 1, rest: null });
+  assert.deepEqual(plain(L.streakOn({ day: DAY0, streak: 4, rests: [DAY0 - 6] }, DAY0 + 2)), { streak: 5, rest: DAY0 + 1 }, 'a rest seven days before');
+  assert.deepEqual(plain(L.streakOn({ day: DAY0, streak: 4 }, DAY0 + 3)), { streak: 1, rest: null }, 'two missed days');
+});
+
+test('days played this week: Monday to Sunday, from solves, drills, daily reviews and runs', () => {
+  const { C, S, L, D } = page(); S.load();
+  /* 2026-11-23 is a Monday. */
+  const mon = L.dayOf(at(2026, 11, 23));
+  const w = L.week([mon - 1, mon, mon + 2, mon + 5], null, mon + 2);
+  assert.deepEqual(plain(w.days.map(x => x.name.slice(0, 3))), ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
+  assert.deepEqual(plain(w.days.map(x => x.played)), [true, false, true, false, false, false, false], 'a later day never counts, nor last Sunday');
+  assert.equal(w.count, 2); assert.equal(w.days[2].today, true); assert.equal(w.days[3].later, true);
+  assert.equal(L.week([], { day: mon + 6 }, mon + 6).count, 1, 'an older save counts its last daily review');
+  assert.equal(L.week('junk', null, mon).count, 0);
+  for (let k = 0; k < 7; k++) assert.equal(L.week([], null, mon + k).days[0].day, mon, 'every day of the week starts on its Monday');
+  /* The collection records the days: a drill today, a daily review, and only the last 14 days are kept. */
+  D.setClock(() => at(2026, 11, 25));
+  C.onDrillDone(); assert.deepEqual(plain(S.meta().played), [mon + 2]);
+  C.onDrillDone(); assert.deepEqual(plain(S.meta().played), [mon + 2], 'once per day');
+  C.onDailyDone(mon + 3); assert.deepEqual(plain(S.meta().played), [mon + 2, mon + 3]);
+  const m = { played: [mon - 30, mon - 13, 'x', mon + 40] }; C.markPlayed(m, mon); assert.deepEqual(plain(m.played), [mon - 13, mon]);
+  D.setClock(null);
 });
 
 test('setting the device clock back never pays twice', () => {
@@ -343,9 +394,21 @@ test('the card: three problems answered in place, 15 stardust once, then done fo
   /* The next morning there is a new review, and the streak is still alive. */
   nowIs = at(2026, 11, 22, 7); p.D.refresh();
   assert.equal(byClass(p.host, 'vgd')[0].attrs['data-state'], 'ready'); assert.match(p.host.textContent, /Day streak: 1/); assert.equal(byClass(p.host, 'vgd-btn')[0].textContent, 'Start today’s review');
-  /* Three days on: the streak restarted, and the card says nothing was taken away. */
+  /* One missed day: the streak is resting, and the card says so without blame. */
+  nowIs = at(2026, 11, 23, 7); p.D.refresh();
+  assert.match(p.host.textContent, /Day streak: 1/); assert.match(p.host.textContent, /Yesterday was a rest day, and your streak of 1 day is still here\./);
+  /* Three days on: a new streak, and the card says nothing was taken away. */
   nowIs = at(2026, 11, 25, 7); p.D.refresh();
-  assert.match(p.host.textContent, /Day streak: 0 · best 1/); assert.match(p.host.textContent, /You missed a day, so your streak starts again today\. Nothing was taken away/);
+  assert.match(p.host.textContent, /Day streak: 0 · best 1/); assert.match(p.host.textContent, /Welcome back\. A new streak starts today\. Your stardust is safe/);
+  assert.doesNotMatch(p.host.textContent, /missed|lost|broke|fail/i, 'no blame');
+  assert.equal(byClass(p.host, 'vgd-dot').length, 0, 'the week dots are on the home page only');
+  /* The home card shows the week as seven dots, with the count in words. */
+  const home = realmPage(storage, () => nowIs); home.D.mount(home.host, { scope: 'home' });
+  /* Wednesday 25 November: the last review was on Saturday the 21st, last week. */
+  assert.equal(byClass(home.host, 'vgd-dot').length, 7); assert.match(home.host.textContent, /Days played this week: 0 of 7\. Any solved mission counts\./);
+  nowIs = at(2026, 11, 26, 7); home.D.refresh();
+  const m = home.S.meta(); m.played = [home.D.logic.dayOf(at(2026, 11, 23)), home.D.logic.dayOf(at(2026, 11, 25))]; home.S.putMeta(m); home.D.refresh();
+  assert.match(home.host.textContent, /Days played this week: 2 of 7$|Days played this week: 2 of 7[^.]/);
   /* The clock set back before the last review: no review, no payment. */
   nowIs = at(2026, 11, 19, 7); p.D.refresh();
   assert.equal(byClass(p.host, 'vgd')[0].attrs['data-state'], 'clock'); assert.equal(byClass(p.host, 'vgd-btn').length, 0); assert.equal(p.C.dust(), dustBefore + 15);

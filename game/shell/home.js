@@ -183,21 +183,30 @@ function makeCard(r){
   var icon=el('span','vgh-icon');icon.setAttribute('aria-hidden','true');icon.appendChild(glyph(r.node));c.appendChild(icon);
   c.appendChild(el('span','vgh-name',r.name));
   c.appendChild(el('span','vgh-line',shortLine(r)));
-  var status=el('span','vgh-status'),barHost=el('span','vgh-barhost');
-  c.appendChild(status);c.appendChild(barHost);
+  var status=el('span','vgh-status'),barHost=el('span','vgh-barhost'),mastery=el('span','vgh-mastery');mastery.hidden=true;
+  c.appendChild(status);c.appendChild(barHost);c.appendChild(mastery);
   li.appendChild(c);
-  S.cards[r.node]={node:r,el:c,icon:icon,status:status,barHost:barHost,ready:ready};
+  S.cards[r.node]={node:r,el:c,icon:icon,status:status,barHost:barHost,mastery:mastery,ready:ready};
   return li;
 }
 function updateCard(id){
-  var c=S.cards[id],m=S.models[id],text=cardStatus(m),p=nodeProgress(m),key=text+'|'+p.solved+'|'+p.total;
+  var c=S.cards[id],m=S.models[id],text=cardStatus(m),p=nodeProgress(m),medals=masteryText(c.node),key=text+'|'+p.solved+'|'+p.total+'|'+medals;
   if(c.key===key)return; /* unchanged: leave the bar alone so it does not fill in again on every refresh */
   c.key=key;
   c.status.textContent=text;
   c.el.classList.toggle('is-start',text==='Start here');
   c.barHost.textContent='';
   if(c.ready)c.barHost.appendChild(bar(p.solved,p.total));
+  c.mastery.textContent=medals?'Mastery: '+medals:'';c.mastery.hidden=!medals;
 }
+/* Visible mastery (mastery.js): bronze, silver and gold over the realm's ready parts, '' when nothing is learned. */
+function masteryText(r){
+  var M=root.VGMastery;if(!M||!r||!c0(r.parts))return '';
+  var t={gold:0,silver:0,bronze:0};
+  r.parts.forEach(function(p){if(!p||p.status!=='ready'||!p.id)return;var c=M.fromSlice(safeSlice(getSlice,p.id),M.perConcept(p));t.gold+=c.gold;t.silver+=c.silver;t.bronze+=c.bronze});
+  return M.countText(t);
+}
+function c0(a){return Array.isArray(a)&&a.length>0}
 function updateHero(){
   var t=continueTarget(S.realms,getSlice);
   S.cta.hidden=!t;S.ctaNote.hidden=!t;
@@ -412,6 +421,9 @@ function mount(container,opts){
   /* One slot for the daily review card (daily.js draws it and keeps it up to date; absent, the slot stays empty). */
   S.daily=el('div','vgh-daily');main.appendChild(S.daily);
   if(root.VGDaily&&typeof root.VGDaily.mount==='function'){try{root.VGDaily.mount(S.daily,{scope:'home',heading:'h2'})}catch(e){}}
+  /* The five-minute run (run.js) sits under it, the same way. */
+  S.run=el('div','vgh-run');main.appendChild(S.run);
+  if(root.VGRun&&typeof root.VGRun.mount==='function'){try{root.VGRun.mount(S.run,{heading:'h2'})}catch(e){}}
 
   var pick=el('section','vgh-pick'),h2=el('h2',null,'Choose a realm');h2.id='vgh-pick-title';pick.setAttribute('aria-labelledby','vgh-pick-title');
   pick.appendChild(h2);
@@ -464,6 +476,7 @@ function refresh(){
   Object.keys(S.cards).forEach(updateCard);
   updateHero();
   if(root.VGDaily&&typeof root.VGDaily.refresh==='function'){try{root.VGDaily.refresh()}catch(e){}}
+  if(root.VGRun&&typeof root.VGRun.refresh==='function'){try{root.VGRun.refresh()}catch(e){}}
   if(S.open){
     var inside=S.sheet.contains(document.activeElement);
     renderPanel();
