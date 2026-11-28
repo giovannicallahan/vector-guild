@@ -15,6 +15,7 @@
    window.VGDaily
      mount(host, opts)   draws the card into host. opts.scope: 'home' | 'realm'; opts.heading: 'h2' | 'h3'.
      refresh()           redraws the card from the save, unless a review is in progress.
+     refreshWeek()       redraws the home card's week row (the five-minute run calls it after saving a run).
      today()             the local calendar day as a whole number of days since 1970.
      setClock(fn)        tests: fn returns the Date to use as "now" (null puts the device clock back).
                          A page can also set window.VG_DAILY_NOW = () => Date before this script runs.
@@ -161,7 +162,7 @@
   }
   var Logic = { dayOf: dayOf, status: status, streakOn: streakOn, week: week, conceptId: conceptId, solvedIds: solvedIds, openError: openError, pool: pool, weight: weight, pick: pick,
     parseNumber: parseNumber, readNumber: readNumber, rewardLine: rewardLine, plural: plural };
-  var API = { logic: Logic, today: today, setClock: function (fn) { clockFn = typeof fn === 'function' ? fn : null; }, mount: function () {}, refresh: function () {} };
+  var API = { logic: Logic, today: today, setClock: function (fn) { clockFn = typeof fn === 'function' ? fn : null; }, mount: function () {}, refresh: function () {}, refreshWeek: function () {} };
   root.VGDaily = API;
   if (typeof document === 'undefined' || !document || typeof document.createElement !== 'function') return;
 
@@ -385,6 +386,15 @@
   }
 
   function refresh() { if (M && !M.session) drawIdle(); }
+  /* Another card on this page (the five-minute run) has just marked today as played: the week row is drawn again. The
+     whole card when no review is in progress, else only the row, so a review under way is left as it is. */
+  function refreshWeek() {
+    if (!M || M.scope !== 'home') return;
+    if (!M.session) { drawIdle(); return; }
+    var card = M.host.children && M.host.children[0], kids = card && card.children ? Array.prototype.slice.call(card.children) : [];
+    var old = kids.filter(function (k) { return String(k.className || '').split(' ').indexOf('vgd-week') >= 0; })[0];
+    if (old && typeof card.replaceChild === 'function') card.replaceChild(weekRow(), old);
+  }
   function mount(host, opts) {
     if (!host) return;
     opts = opts || {};
@@ -392,7 +402,7 @@
     host.classList.add('vgd-slot');
     drawIdle();
   }
-  API.mount = mount; API.refresh = refresh;
+  API.mount = mount; API.refresh = refresh; API.refreshWeek = refreshWeek;
   if (typeof root.addEventListener === 'function') {
     root.addEventListener('storage', function (e) { if (!e.key || /^vector-guild-save/.test(e.key)) refresh(); });
     root.addEventListener('pageshow', function (e) { if (e.persisted) refresh(); });

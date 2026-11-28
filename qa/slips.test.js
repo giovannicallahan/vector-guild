@@ -51,16 +51,24 @@ test('the sentences are plain, name the slip, and contain no digit', () => {
     assert.ok(!/try this one again/i.test(t), 'kinder than the old line');
   }
   assert.match(S.check([-7], [7])[0].text, /sign/);
-  assert.match(S.check([24], [12])[0].text, /twice/);
-  assert.match(S.check([6], [12])[0].text, /half/);
-  assert.match(S.check([120], [12])[0].text, /ten times too big/);
-  assert.match(S.check([1.2], [12])[0].text, /ten times too small/);
-  assert.match(S.check([1200], [12])[0].text, /hundred times too big/);
-  assert.match(S.check([4, 3], [3, 4])[0].text, /swapped/);
-  assert.match(S.check([5, 5], [2, 5])[0].text, /different box/);
+  assert.match(S.check([24], [12])[0].text, /counted twice or only half done/);
+  assert.equal(S.check([6], [12])[0].text, S.check([24], [12])[0].text, 'too big and too small read the same');
+  assert.match(S.check([120], [12])[0].text, /decimal point/);
+  assert.equal(S.check([1.2], [12])[0].text, S.check([120], [12])[0].text);
+  assert.match(S.check([1200], [12])[0].text, /decimal point/);
+  assert.match(S.check([4, 3], [3, 4])[0].text, /which box/);
+  assert.match(S.check([5, 5], [2, 5])[0].text, /which box/);
   assert.match(S.check([3.1], [3.14159], 0.001)[0].text, /rounding/);
-  assert.match(S.check([13], [12])[0].text, /one too many or one too few/);
-  assert.match(S.check([4], [0.25])[0].text, /upside down/);
+  assert.match(S.check([13], [12])[0].text, /count/);
+  assert.match(S.check([4], [0.25])[0].text, /which way up the fraction goes/);
+});
+
+test('no sentence says how the typed number relates to the answer, so none gives the answer away', () => {
+  const all = [S.GENERAL, ...Object.values(S.TEXT)];
+  for (const t of all) {
+    assert.ok(/^(Check|Not this one yet)/.test(t), 'names the kind of check: ' + t);
+    assert.doesNotMatch(t, /\b(is|looks|are) (twice|half|ten|a hundred)\b|times too|upside down|opposite|swapped|one away|size is right|sign is not|fits a different|what it should be/i, t);
+  }
 });
 
 test('right is right, a wanted 0 has no sign or size slip, and nothing fits gives the general line', () => {
@@ -121,7 +129,7 @@ test('the page shows the slip beside the field and in the feedback line, and kee
   p.qa.mission(q.id); p.el('#ready').onclick();
   p.qa.getMain().forEach((x, i) => x.value = String(i ? q.answer[i] : -Number(q.answer[0]))); p.el('#submit-answer').onclick();
   assert.equal(p.el('#answer-status-0').textContent, S.TEXT.sign, 'the field says what slipped');
-  assert.match(p.el('.feedback').textContent, /^Good start\. The size is right, but the sign is not\./, 'and so does the feedback line');
+  assert.ok(p.el('.feedback').textContent.startsWith('Good start. ' + S.TEXT.sign), 'and so does the feedback line');
   p.qa.getMain()[0].value = '0'; p.el('#submit-answer').onclick();
   assert.equal(p.el('#answer-status-0').textContent, S.GENERAL, 'nothing fits: the kinder general line');
   assert.match(p.el('.feedback').textContent, /break it down together/, 'the second miss still offers the guided steps');

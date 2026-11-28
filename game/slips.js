@@ -1,7 +1,8 @@
 /* Feedback that names the likely slip (2.8). A pure function over the numbers typed and the numbers wanted, so it
    works for every pack with no per-mission data. Kept free of the page so it can be tested directly (qa/slips.test.js).
    app.js calls it after a wrong check and shows each field's sentence next to that field; nothing here touches
-   the page or the save. A sentence never gives the answer: it says what kind of slip fits, not the number.
+   the page or the save. A sentence never gives the answer: it names the kind of check to make, never how the typed
+   number relates to the wanted one (twice, the opposite sign, upside down), since that would give the answer away.
 
    VGSlips.check(typed, wanted, tolerance) -> one entry per field:
      { ok: true }                                 the field is right
@@ -22,18 +23,18 @@
   'use strict';
   const GENERAL = 'Not this one yet. Have another look at this step.';
   const TEXT = {
-    swap: 'These two answers look swapped. Check which box each one goes in.',
-    box: 'That number fits a different box. Check which box it belongs in.',
-    sign: 'The size is right, but the sign is not. Check plus or minus.',
-    off1: 'Just one away. Check for one too many or one too few.',
-    flip: 'This looks like the fraction turned upside down. Check which number goes on top.',
-    scale10big: 'This is ten times too big. Check the decimal point.',
-    scale10small: 'This is ten times too small. Check the decimal point.',
-    scale100big: 'This is a hundred times too big. Check the decimal point, or a percentage.',
-    scale100small: 'This is a hundred times too small. Check the decimal point, or a percentage.',
-    double: 'This is twice what it should be. Check for a step done twice.',
-    half: 'This is half what it should be. Check for a step that was left out.',
-    round: 'Very close. Check the rounding: keep every digit until the last step, then round as the question asks.'
+    swap: 'Check which box each answer goes in.',
+    box: 'Check which box this number belongs in.',
+    sign: 'Check the sign: plus or minus.',
+    off1: 'Check the count: go through it again, one by one.',
+    flip: 'Check which way up the fraction goes.',
+    scale10big: 'Check where the decimal point sits.',
+    scale10small: 'Check where the decimal point sits.',
+    scale100big: 'Check where the decimal point sits, and how any percentage was written.',
+    scale100small: 'Check where the decimal point sits, and how any percentage was written.',
+    double: 'Check whether a step was counted twice or only half done.',
+    half: 'Check whether a step was counted twice or only half done.',
+    round: 'Check the rounding: keep every digit until the last step, then round as the question asks.'
   };
   const KIND = { scale10big: 'scale10', scale10small: 'scale10', scale100big: 'scale100', scale100small: 'scale100' };
   const num = x => typeof x === 'number' && Number.isFinite(x);

@@ -174,7 +174,16 @@ test('days played this week: Monday to Sunday, from solves, drills, daily review
   C.onDrillDone(); assert.deepEqual(plain(S.meta().played), [mon + 2]);
   C.onDrillDone(); assert.deepEqual(plain(S.meta().played), [mon + 2], 'once per day');
   C.onDailyDone(mon + 3); assert.deepEqual(plain(S.meta().played), [mon + 2, mon + 3]);
-  const m = { played: [mon - 30, mon - 13, 'x', mon + 40] }; C.markPlayed(m, mon); assert.deepEqual(plain(m.played), [mon - 13, mon]);
+  const m = { played: [mon - 30, mon - 13, 'x'] }; C.markPlayed(m, mon); assert.deepEqual(plain(m.played), [mon - 13, mon]);
+  /* A clock set back: Friday was played, then the date goes back to Thursday and a drill is done. Friday is kept, and the
+     week shows it again once the clock is back on Friday. The 14 days are counted from the newest day stored. */
+  const back = { played: [mon + 4] }; C.markPlayed(back, mon + 3); assert.deepEqual(plain(back.played), [mon + 3, mon + 4], 'a later day is kept');
+  assert.equal(L.week(back.played, null, mon + 3).count, 1, 'the week never shows a day after today');
+  assert.equal(L.week(back.played, null, mon + 3).days[4].played, false);
+  assert.equal(L.week(back.played, null, mon + 4).count, 2, 'and shows it again when that day comes');
+  const far = { played: [mon - 30, mon, mon + 40] }; C.markPlayed(far, mon + 1); assert.deepEqual(plain(far.played), [mon + 40], 'pruned against the newest day');
+  D.setClock(() => at(2026, 11, 28)); S.putMeta(Object.assign(S.meta(), { played: [mon + 5] }));
+  D.setClock(() => at(2026, 11, 27)); C.onDrillDone(); assert.deepEqual(plain(S.meta().played).slice(-2), [mon + 4, mon + 5], 'a drill on an earlier date keeps the later day');
   D.setClock(null);
 });
 

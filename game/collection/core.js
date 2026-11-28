@@ -143,7 +143,8 @@ window.VGCollection = (() => {
      opts.perks: true only when the call follows a solve the player has just made. Then the equipped figure's
      stardust perk applies, and its chapter perk applies to a chapter that one of the missions paid in this
      same call completes. Every other call (page load, import, reset) pays past work at the base rates, so a
-     figure equipped later never raises what earlier work is worth. */
+     figure equipped later never raises what earlier work is worth.
+     opts.played: true marks today as a day played even when nothing is paid (app.js: a passed chapter check). */
   function settle(realmCtx, opts) {
     if (!store()) return [];
     const rc = realmOf(realmCtx), m = read(), before = JSON.stringify(m), realms = slices(), events = [];
@@ -166,13 +167,19 @@ window.VGCollection = (() => {
     }
     events.push(...award(m, realms, rc));
     /* A solve made just now counts as a day played. */
-    if (isObject(opts) && opts.perks === true && events.some(e => e.type === 'solve')) {
+    const solves = events.filter(e => e.type === 'solve').length;
+    if (isObject(opts) && opts.perks === true && solves) {
       markPlayed(m);
-      /* Small surprises (finds.js): now and then a solve turns up a cosmetic find. It pays nothing. */
+      /* Small surprises (finds.js): now and then a solve turns up a cosmetic find. It pays nothing. The solves are
+         counted by finds.js itself (meta.finds.n), so resetting a realm never sets the count back; total (missions
+         solved now, in every realm) only starts that count for a save made before it existed. */
       const F = window.VGFinds, total = Object.entries(realms).reduce((n, [id, sl]) => n + (isObject(sl) && safeId(id) ? texts(sl.solved).length : 0), 0);
-      if (F && typeof F.onSolve === 'function') try { events.push(...F.onSolve(m, total)); } catch (e) { /* finds are optional */ }
+      if (F && typeof F.onSolve === 'function') try { events.push(...F.onSolve(m, total, solves)); } catch (e) { /* finds are optional */ }
     }
-    if (!events.length || !commit(m, before)) return [];
+    /* opts.played: the player has just done something that counts as a day played (a passed chapter check), whether or
+       not it paid anything. */
+    if (isObject(opts) && opts.played === true) markPlayed(m);
+    if ((!events.length && JSON.stringify(m) === before) || !commit(m, before)) return [];
     return events;
   }
   /* One review drill is done: counts it, pays it, checks the achievements. Call it once per drill. */
@@ -206,11 +213,14 @@ window.VGCollection = (() => {
     try { const D = window.VGDaily; if (D && typeof D.today === 'function') { const n = D.today(); if (Number.isInteger(n)) return n; } } catch (e) { /* fall through */ }
     const d = new Date(); return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
   }
+  /* Days later than `day` are kept (a device clock set back, or a run opened before midnight, must not erase them);
+     the 14-day window is counted back from the newest day recorded. The weekly dots never show a day after today. */
   function markPlayed(m, day) {
     if (!isObject(m)) return m;
-    const n = Number.isInteger(day) ? day : today(), list = Array.isArray(m.played) ? m.played.filter(x => Number.isInteger(x) && x > n - 14 && x <= n) : [];
-    if (!list.includes(n)) list.push(n);
-    m.played = [...new Set(list)].sort((a, b) => a - b);
+    const n = Number.isInteger(day) ? day : today(), all = (Array.isArray(m.played) ? m.played : []).filter(x => Number.isInteger(x) && x >= 0);
+    all.push(n);
+    const newest = Math.max(...all);
+    m.played = [...new Set(all.filter(x => x > newest - 14))].sort((a, b) => a - b);
     return m;
   }
   function onDailyDone(day) {
@@ -244,8 +254,14 @@ window.VGCollection = (() => {
      moment, the step runs without it rather than leaving the player waiting. The interface shows the reward from
      inside done, so it is only ever shown after the save holds it. */
   function finishDaily(day, done) {
+    withLock(() => { let events = []; try { events = onDailyDone(day); } catch (e) { events = []; } if (typeof done === 'function') done(events); });
+  }
+  /* Runs step() once, while this page holds the 'mathcosmos-save' Web Lock where the browser has one (the daily review
+     and the five-minute run both take it, so their read, check and write never interleave across tabs). Without locks
+     it runs straight away; if the lock does not come within a moment, it runs without it. step must be synchronous. */
+  function withLock(step) {
     let fired = false;
-    const run = () => { if (fired) return; fired = true; let events = []; try { events = onDailyDone(day); } catch (e) { events = []; } if (typeof done === 'function') done(events); };
+    const run = () => { if (fired) return; fired = true; try { step(); } catch (e) { /* the step reports its own result */ } };
     let locks = null; try { locks = window.navigator && window.navigator.locks; } catch (e) { locks = null; }
     if (!locks || typeof locks.request !== 'function' || typeof window.setTimeout !== 'function') { run(); return; }
     try {
@@ -374,7 +390,7 @@ window.VGCollection = (() => {
   const earned = () => read().earned;
   const state = () => read();
   const stored = () => lastStored;
-  return { RULES, RARITIES, PERKS, DAILY, streakOn, markPlayed, today, settle, onDrillDone, onDailyDone, finishDaily, summary, describe, pull, canPull, cost, odds, baseOdds, guarantees, rollRarity,
+  return { RULES, RARITIES, PERKS, DAILY, streakOn, markPlayed, today, settle, onDrillDone, onDailyDone, finishDaily, withLock, summary, describe, pull, canPull, cost, odds, baseOdds, guarantees, rollRarity,
     equip, equipped, perk, perkInfo, secondLookAvailable, useSecondLook, figures, owned, counts, figure, achievements, context: () => context(read(), slices(), realmOf()),
     dust, earned, state, stored, pageRealm };
 })();

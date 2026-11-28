@@ -74,11 +74,11 @@ function node(tag) {
 const all = (n, t, out = []) => { if (t(n)) out.push(n); n.children.forEach(c => all(c, t, out)); return out; };
 const byClass = (n, cls) => all(n, x => x.className.split(' ').includes(cls));
 const btn = (host, text) => byClass(host, 'vgd-btn').find(b => b.textContent === text);
-function pageWith(storage, clock) {
+function pageWith(storage, clock, extra = {}) {
   const ls = { getItem: k => storage.has(k) ? storage.get(k) : null, setItem: (k, v) => storage.set(k, String(v)), removeItem: k => storage.delete(k) };
   const toasts = [], body = node('body');
   const document = { createElement: node, createTextNode: t => { const n = node('#text'); n._text = String(t); return n; }, getElementById: () => null, addEventListener() {}, hidden: false, body };
-  const window = { localStorage: ls, VG_SEED: 1, VG_FIGURES: [], VG_PACK_ID: 'found', VG_DAILY_NOW: clock, addEventListener() {}, VGCollectionUI: { toast: t => { toasts.push(t); return true; } } };
+  const window = { localStorage: ls, VG_SEED: 1, VG_FIGURES: [], VG_PACK_ID: 'found', VG_DAILY_NOW: clock, addEventListener() {}, VGCollectionUI: { toast: t => { toasts.push(t); return true; } }, ...extra };
   const ctx = { window, document, Math, JSON, setTimeout };
   vm.runInNewContext(read('save-store.js'), ctx);
   for (const file of [...SHARED.before, ...PACKS.found.scripts, ...SHARED.after]) { if (file === 'collection/ui.js' || file === 'handson.js') continue; vm.runInNewContext(read(file), ctx); }
@@ -128,6 +128,53 @@ test('the card: a run finished in another tab first is not paid twice', () => {
   const a = pageWith(storage, clock), b = pageWith(storage, clock); a.C.settle(); const d0 = a.C.dust();
   const day = a.window.VGDaily.today();
   assert.equal(a.R._finish(day).length, 1); assert.equal(b.R._finish(day).length, 0); assert.equal(b.C.dust(), d0 + 10);
+});
+
+/* Plays a whole run with "Show me" on every problem. */
+function playRun(p) { (btn(p.host, 'Start a run') || btn(p.host, 'Another run')).click(); for (let i = 0; byClass(p.host, 'vgd-btn').some(b => b.textContent === 'Show me' && !b.hidden); i++) { btn(p.host, 'Show me').click(); (btn(p.host, 'Next problem') || btn(p.host, 'See how it went')).click(); } }
+
+test('a run finished after midnight is settled on the day it finishes, for the bonus and the day played', () => {
+  const storage = new Map([[V2, JSON.stringify({ v: 2, seed: 1, intro: true, realms: { found: slice(ids(8)) } })]]);
+  let nowIs = at(2026, 11, 23, 23); nowIs.setMinutes(59);
+  const p = pageWith(storage, () => nowIs); p.R.mount(p.host, { heading: 'h2' }); p.C.settle();
+  const mon = p.window.VGDaily.today(), d0 = p.C.dust();
+  btn(p.host, 'Start a run').click();
+  nowIs = at(2026, 11, 24, 0); nowIs.setMinutes(1);
+  for (let i = 0; i < 5; i++) { btn(p.host, 'Show me').click(); btn(p.host, i === 4 ? 'See how it went' : 'Next problem').click(); }
+  const tue = mon + 1, m = p.S.meta();
+  assert.equal(m.run.paid, tue, 'the bonus is Tuesday\'s'); assert.ok(m.played.includes(tue) && !m.played.includes(mon), 'Tuesday is the day played');
+  assert.equal(p.C.dust(), d0 + 10);
+  playRun(p); assert.equal(p.C.dust(), d0 + 10, 'a second run on Tuesday pays nothing more'); assert.equal(p.S.meta().run.runs, 2);
+});
+
+test('the run settles inside the save lock the daily review takes, and keeps a daily reward written before it', () => {
+  const storage = new Map([[V2, JSON.stringify({ v: 2, seed: 1, intro: true, realms: { found: slice(ids(8)) } })]]), clock = () => at(2026, 11, 26, 9);
+  const queue = [], names = [];
+  const locks = { request(name, cb) { names.push(name); return new Promise(res => queue.push(() => res(cb()))); } };
+  const a = pageWith(storage, clock, { navigator: { locks }, setTimeout: () => 0 }), b = pageWith(storage, clock);
+  a.R.mount(a.host, { heading: 'h2' }); a.C.settle(); const d0 = a.C.dust(), day = a.window.VGDaily.today();
+  btn(a.host, 'Start a run').click();
+  for (let i = 0; i < 5; i++) { btn(a.host, 'Show me').click(); btn(a.host, i === 4 ? 'See how it went' : 'Next problem').click(); }
+  assert.deepEqual(names, ['mathcosmos-save']); assert.equal(a.S.meta().run, undefined, 'nothing is read or written before the lock is held');
+  assert.doesNotMatch(a.host.textContent, /\+10 stardust/, 'and the reward is not shown yet');
+  /* Another tab finishes its daily review while this one waits for the lock. */
+  assert.equal(b.C.onDailyDone(day).length >= 1, true);
+  queue.shift()();
+  const m = a.S.meta();
+  assert.equal(m.daily.day, day, 'the daily review stays paid'); assert.equal(m.run.paid, day, 'and the run is paid too');
+  assert.equal(a.C.dust(), d0 + 15 + 10); assert.match(a.host.textContent, /\+10 stardust for today’s first run\./);
+  const src = read('collection/core.js'); assert.match(src, /function finishDaily\(day, done\) \{\s*withLock\(/, 'the daily review uses the same lock');
+});
+
+test('after a run is saved, the daily card on the same page shows today in its week row, also when no bonus is paid', () => {
+  const storage = new Map([[V2, JSON.stringify({ v: 2, seed: 1, intro: true, realms: { found: slice(ids(8)) } })]]);
+  const p = pageWith(storage, () => at(2026, 11, 26, 9)); p.C.settle();
+  const dailyHost = node('div'); p.window.VGDaily.mount(dailyHost, { scope: 'home', heading: 'h2' }); p.R.mount(p.host, { heading: 'h2' });
+  assert.match(dailyHost.textContent, /Days played this week: 0 of 7/);
+  /* Today's run bonus is already paid (in another tab, say), so this run pays nothing. */
+  const m = p.S.meta(); m.run = { paid: p.window.VGDaily.today(), runs: 1 }; p.S.putMeta(m);
+  playRun(p);
+  assert.doesNotMatch(p.host.textContent, /\+10 stardust/); assert.match(dailyHost.textContent, /Days played this week: 1 of 7/);
 });
 
 test('wiring: the home page loads run.js after daily.js and mounts it under the daily card; the realm pages do not', () => {

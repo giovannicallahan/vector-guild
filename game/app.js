@@ -137,7 +137,7 @@ function chip(){const el=$('#collection-chip'),c=coll();if(!el||!c)return;let dr
 function earned(events){const list=Array.isArray(events)?events:[];chip();if(list.length)try{collUI()?.toast?.(list)}catch(e){}return list}
 /* Pays what is not yet paid. perks is true only right after a solve made on this page: then the equipped figure's perk counts.
    On load, after an import or a reset, past work is paid at the base rates (docs/COLLECTION.md). */
-const settleDust=perks=>{let events=[];try{events=coll()?.settle(undefined,{perks:perks===true})||[]}catch(e){}return earned(events)};
+const settleDust=(perks,played)=>{let events=[];try{events=coll()?.settle(undefined,{perks:perks===true,played:played===true})||[]}catch(e){}return earned(events)};
 const drillDust=()=>{let events=[];try{events=coll()?.onDrillDone()||[]}catch(e){}return earned(events)};
 const dustIn=events=>events.reduce((n,e)=>n+(Number.isFinite(e?.dust)?e.dust:0),0);
 function stats(){$('#xp').textContent=state.xp;$('#level').textContent=level();$('#points').textContent=state.points;$('#side-rank').textContent=rank();$('#top-view').textContent=({campaign:'CAMPAIGN',skills:'SKILL TREE',workshop:'WORKSHOP',artifacts:'ARTIFACTS',guide:'FIELD GUIDE',visual:'VISUAL LAB'})[view];document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===view))}
@@ -202,9 +202,9 @@ function skipFinish(i,items,rows){const st=skipState(i);if(st!=='open'&&st!=='re
  if(!res.passed){state.skips={...(state.skips||{}),[i]:Skip.failRecord(skipRec(i),res.missed,Date.now())};save();skipResult(i,items,res,null);return res}
  const xp0=state.xp,sp0=state.points,oldRank=rank(),oldLevel=level(),fresh=c.ids.filter(id=>!state.solved.includes(id));
  /* The save is rebuilt from its list of solved missions, as it is on every load: that adds each mission's XP and skill point by the one
-    rule there is, and drops the record of the failed check. Stardust is then settled at the base rates, as for past work. */
+    rule there is, and drops the record of the failed check. Stardust is then settled at the base rates, as for past work, and today counts as a day played. */
  state=normalize({...state,solved:state.solved.concat(fresh)});
- save();const stardust=dustIn(settleDust(false));
+ save();const stardust=dustIn(settleDust(false,true));
  skipResult(i,items,res,{count:fresh.length,xp:state.xp-xp0,stardust,level:level()>oldLevel?level():0,rank:rank()!==oldRank?rank():''});stats();contracts?.update(content,state.solved);
  if(window.VGLife)try{VGLife.tick($('#xp'),xp0,state.xp);VGLife.tick($('#points'),sp0,state.points)}catch(e){}
  return res}

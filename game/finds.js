@@ -5,8 +5,8 @@
               so far, so the same save and the same solve always give the same answer (and tests can check it).
      never    on the first solve after the page opens (a session), and never on two solves in a row.
      list     each find comes once; when every find is found, there are no more.
-   State: meta.finds = { got: [findId], last: <solve number of the last find> } in the v2 save (optional; a save
-   without it has found nothing). collection/core.js calls onSolve from settle() after a solve made on the page; the
+   State: meta.finds = { got: [findId], last: <solve number of the last find>, n: <first-time solves counted> } in
+   the v2 save (optional; a save without it has found nothing; a save without n gets it at its next first-time solve, see counted). collection/core.js calls onSolve from settle() after a solve made on the page; the
    collection's Figures tab lists the finds (collection/ui.js calls drawInto).
    Classic script, no modules, no network. Safe to load where there is no document (qa/finds.test.js).
 
@@ -14,7 +14,7 @@
      LIST, CHANCE                  the finds and the chance per solve
      draw(seed, n)                 the seeded number in [0, 1) for solve number n
      decide(state, seed, n, first) the find id for solve number n, or null. state: meta.finds; first: first solve of the session
-     onSolve(m, n)                 applies a solve to the collection m (changes m.finds) and returns [event] or []
+     onSolve(m, total, k)          applies k first-time solves to the collection m (changes m.finds) and returns [event] or []
      owned(m)                      the finds in m, in list order, as LIST entries
      drawInto(box, m)              the "Finds" section of the collection's Figures tab */
 (function (root) {
@@ -59,19 +59,33 @@
     return left[Math.floor(draw(seed + 1, n) * left.length) % left.length].id;
   }
   var solvesThisSession = 0;
-  /* n: how many missions the player has solved in all, counting this one. Changes m.finds when something is found. */
-  function onSolve(m, n) {
+  /* The solve number after `k` more first-time solves: meta.finds.n counts them and only ever goes up, so resetting a
+     realm never sets it back. A save from before the count (no n) starts it from `total`, the missions solved now in
+     every realm counting these k (the number the draw used before), and never below the solve of the last find. */
+  function counted(state, total, k) {
+    var s = isObject(state) ? state : {};
+    if (Number.isInteger(s.n) && s.n >= 0) return s.n + k;
+    var last = Number.isInteger(s.last) && s.last >= 0 ? s.last : 0, t = Number.isInteger(total) ? total : 0;
+    return Math.max(t - k, last, 0) + k;
+  }
+  /* total: missions solved in all, counting this call's; k: first-time solves paid in this call (1 when left out).
+     Always stores the count (m.finds.n); adds the find to m.finds when something is found. */
+  function onSolve(m, total, k) {
     if (!isObject(m)) return [];
+    k = Number.isInteger(k) && k > 0 ? k : 1;
     var first = solvesThisSession === 0; solvesThisSession++;
     var seed = 0; try { var S = root.VGSave; seed = S && typeof S.seed === 'function' ? (S.seed() | 0) : 0; } catch (e) { seed = 0; }
-    var id = decide(m.finds, seed, n, first); if (!id) return [];
-    var s = tidy(m.finds), keep = isObject(m.finds) ? m.finds : {};
-    s.got.push(id); keep.got = s.got; keep.last = n; m.finds = keep;
+    var n = counted(m.finds, total, k), keep = isObject(m.finds) ? m.finds : {};
+    var id = decide(m.finds, seed, n, first);
+    keep.n = n; m.finds = keep;
+    if (!id) return [];
+    var s = tidy(keep);
+    s.got.push(id); keep.got = s.got; keep.last = n;
     var f = LIST.filter(function (x) { return x.id === id; })[0];
     return [{ type: 'find', id: id, kind: f.kind, name: f.name, dust: 0 }];
   }
   function owned(m) { var s = tidy(isObject(m) ? m.finds : null); return LIST.filter(function (f) { return s.got.indexOf(f.id) >= 0; }); }
-  var API = { LIST: LIST, CHANCE: CHANCE, draw: draw, decide: decide, onSolve: onSolve, owned: owned, drawInto: function () {},
+  var API = { LIST: LIST, CHANCE: CHANCE, draw: draw, decide: decide, counted: counted, onSolve: onSolve, owned: owned, drawInto: function () {},
     _newSession: function () { solvesThisSession = 0; } };
   root.VGFinds = API;
   if (typeof document === 'undefined' || !document || typeof document.createElement !== 'function') return;

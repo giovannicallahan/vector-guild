@@ -43,7 +43,7 @@ test('never on the first solve of a session, never two in a row, each find once,
   assert.equal(got.length, F.LIST.length, 'every find can turn up');
   assert.equal(F.decide(null, 99, 0, false), null); assert.equal(F.decide('junk', 99, NaN, false), null);
   /* A session: the first call never finds, whatever the draw. */
-  const m = {}; F._newSession(); assert.deepEqual(plain(F.onSolve(m, n)), []); assert.equal(m.finds, undefined);
+  const m = {}; F._newSession(); assert.deepEqual(plain(F.onSolve(m, n)), []); assert.deepEqual(plain(m.finds), { n }, 'only the count is stored');
 });
 
 test('the hook: a solve made on the page can turn up a find; it pays nothing and changes nothing else', () => {
@@ -67,6 +67,28 @@ test('the hook: a solve made on the page can turn up a find; it pays nothing and
   /* Without finds.js the collection works as before. */
   const r = page(new Map([[V2, JSON.stringify({ v: 2, seed: 1, realms: { found: slice(ids(3)) } })]]), false); r.S.load();
   assert.ok(Array.isArray(r.C.settle(undefined, { perks: true })));
+});
+
+test('the count of first-time solves only goes up: resetting a realm does not hold back new finds', () => {
+  const F = finds();
+  /* A save from before the count starts it from the missions solved now, and never below the last find. */
+  assert.equal(F.counted(undefined, 5, 1), 5); assert.equal(F.counted({ got: [], last: 9 }, 5, 1), 10); assert.equal(F.counted({ n: 40 }, 5, 2), 42);
+  assert.equal(F.counted({ n: 'x', last: -1 }, 0, 1), 1);
+  /* Find at solve 100, reset that realm, then solve new missions elsewhere: the count carries on from 100. */
+  const seed = 1; let start = 101; while (!(F.draw(seed, start + 2) < F.CHANCE)) start++;
+  const storage = new Map([[V2, JSON.stringify({ v: 2, seed, intro: true, realms: { found: slice(ids(start)) } })]]);
+  const p = page(storage); p.S.load(); p.C.settle();
+  const m0 = p.S.meta(); m0.finds = { got: ['vane'], last: start, n: start }; p.S.putMeta(m0);
+  p.S.reset('found'); p.C.settle();
+  assert.equal(p.S.meta().finds.n, start, 'a reset leaves the count alone');
+  const other = { solved: ['q01'], xp: 0, points: 0, tools: [], clean: [], revealed: [], landmarks: [], contracts: [], reviews: {}, errors: {}, rolls: {} };
+  p.S.putRealm('calc1', other); p.C.settle(undefined, { perks: true });
+  assert.equal(p.S.meta().finds.n, start + 1, 'a first-time solve in another realm counts on');
+  other.solved = ['q01', 'q02']; p.S.putRealm('calc1', other); const ev = plain(p.C.settle(undefined, { perks: true }));
+  assert.equal(p.S.meta().finds.n, start + 2);
+  assert.equal(ev.filter(e => e.type === 'find').length, 1, 'the draw for solve ' + (start + 2) + ' is used, not one for the two missions solved now');
+  /* Solving a reset realm's mission again pays nothing and so does not count. */
+  p.S.putRealm('found', slice(ids(1))); p.C.settle(undefined, { perks: true }); assert.equal(p.S.meta().finds.n, start + 2);
 });
 
 test('wiring: realm pages and the home page load finds.js, the Figures tab lists the finds, an old save is unchanged', () => {

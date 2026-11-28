@@ -75,17 +75,32 @@
   }
   function solvedAll() { var L = D().logic; return scope().reduce(function (n, p) { return n + L.solvedIds(p[1]).length; }, 0); }
   /* Pays once per day, as one step: the save is read again just before the write, and if another tab wrote in
-     between, the step starts again from the newer save. Returns the events actually stored ([] when none). */
-  function finishRun(day) {
-    var S = store(); if (!S) return [];
+     between, the step starts again from the newer save. day: the local day the run is settled on (today, read at the
+     moment the run ends, so a run started before midnight counts for the day it finishes). Returns the events actually
+     stored ([] when none). */
+  function settleNow(day) {
+    var S = store(); if (!S) return { ok: false, events: [] };
     for (var tries = 0; tries < 4; tries++) {
       var before = S.meta(), text = JSON.stringify(before), out = settle(before, day);
       try { var C = root.VGCollection; if (C && typeof C.markPlayed === 'function') C.markPlayed(out.meta, day); } catch (e) { /* the dots are optional */ }
       if (JSON.stringify(S.meta()) !== text) continue;
       var ok = false; try { ok = S.putMeta(out.meta) === true; } catch (e) { ok = false; }
-      return ok ? out.events : [];
+      return { ok: ok, events: ok ? out.events : [] };
     }
-    return [];
+    return { ok: false, events: [] };
+  }
+  function finishNow(day) { return settleNow(day).events; }
+  /* The same, inside the save lock the daily review takes (VGCollection.withLock: the 'mathcosmos-save' Web Lock where
+     the browser has one), so a run and a daily review, or two runs, finishing in two tabs at once cannot overwrite each
+     other's reward: the read, the check and the write all happen while the lock is held. done(events, stored) is
+     called once, after the write; stored is false when nothing could be saved. */
+  function finishRun(done) {
+    var C = root.VGCollection, step = function () {
+      var r = { ok: false, events: [] };
+      try { r = settleNow(D().today()); } catch (e) { r = { ok: false, events: [] }; }
+      done(r.events, r.ok);
+    };
+    if (C && typeof C.withLock === 'function') C.withLock(step); else step();
   }
   function realmName(id) {
     var name = id;
@@ -193,8 +208,13 @@
   }
   function end() {
     var s = M.session; if (!s || s.closing) return; s.closing = true; /* a second press does nothing */
-    var events = finishRun(s.day), sum = summary(s.results);
+    finishRun(function (events, stored) { if (M && M.session === s) ended(s, events, stored); });
+  }
+  function ended(s, events, stored) {
+    var sum = summary(s.results);
     M.session = null;
+    /* The daily card's week row on this page shows the day just played (a storage event only reaches other tabs). */
+    if (stored) { var DC = root.VGDaily; try { if (DC && typeof DC.refreshWeek === 'function') DC.refreshWeek(); } catch (e) { /* ignore */ } }
     var f = frame('done'), body = f.body, top = el('p', 'vgd-text', endLine(sum) || 'Run finished.');
     top.tabIndex = -1; body.appendChild(top);
     var paid = events.filter(function (e) { return e && e.type === 'run'; });
@@ -221,7 +241,7 @@
     host.classList.add('vgd-slot');
     drawIdle();
   }
-  API.mount = mount; API.refresh = refresh; API._finish = finishRun;
+  API.mount = mount; API.refresh = refresh; API._finish = finishNow;
   if (typeof root.addEventListener === 'function') {
     root.addEventListener('storage', function (e) { if (!e.key || /^vector-guild-save/.test(e.key)) refresh(); });
     root.addEventListener('pageshow', function (e) { if (e.persisted) refresh(); });

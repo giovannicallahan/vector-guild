@@ -19,7 +19,8 @@ Since 2.8 `meta` may also hold, each optional and absent in older saves (a save 
 - `played`: local day numbers (whole days since 1970) of the last 14 days with a solve, a drill, a daily review or a five-minute run (the "days played this week" dots, `game/daily.js`).
 - `daily.rests`: the missed days the day streak rested over (one rest day in any seven days, `game/collection/core.js` `streakOn`).
 - `run`: `{ paid, runs }`, the day of the last paid five-minute run and how many runs were finished (`game/run.js`).
-- `finds`: `{ got: [findId], last }`, the cosmetic finds and the solve number of the last one (`game/finds.js`).
+- `finds`: `{ got: [findId], last, n? }`, the cosmetic finds, the solve number of the last one, and `n`, a count of first-time solves made on a realm page that only goes up (resetting a realm does not lower it; the find draws use it). `n` is optional: a save without it loads unchanged and gets it at its next first-time solve, started from the missions solved then (and never below `last`) (`game/finds.js`).
+- `played` keeps days later than the one being marked (a device clock set back does not erase them); the 14 days are counted back from the newest day stored, and the weekly dots never show a day after today.
 Mastery (bronze, silver, gold, `game/mastery.js`) is worked out from `solved` and stores nothing.
 
 Rules
