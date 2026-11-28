@@ -162,7 +162,7 @@ Object.assign(window.MISSION_GEN, {
   canonical: { m: 13, a: 5 },
   draw: R => { for (let i = 0; i < 1000; i++) { const m = R.int(5, 25), us = unitsOf(m).filter(x => x !== 1), a = R.pick(us); if (us.length && powers(a, m).length >= 4 && !(m === 7 && a === 2)) return { m, a }; } return { m: 13, a: 5 }; },
   build: ({ m, a }) => { const ps = powers(a, m), o = ps.length, p2 = ps[1], p3 = ps[2];
-   const chain = ps.map((v, i) => i === 0 ? `${n(a)}¹ = ${n(a)}` : `${n(a)}${sup(i + 1)} = ${n(ps[i - 1])} × ${n(a)} = ${n(ps[i - 1] * a)}, which leaves ${n(v)}`).join('; '); return {
+   const chain = ps.map((v, i) => i === 0 ? `${n(a)}¹ = ${n(a)}` : i === 1 ? `${n(a)}² = ${n(a)} × ${n(a)} = ${n(a * a)}, which leaves ${n(v)}` : `${n(a)}${sup(i + 1)} leaves the same remainder as ${n(ps[i - 1])} × ${n(a)} = ${n(ps[i - 1] * a)}, which leaves ${n(v)}`).join('; '); return {
    prompt: `A beacon on the Beacon Tower stores a code from U(${n(m)}). On every beat its code is multiplied by ${n(a)}, mod ${n(m)}, so after k beats it has been multiplied by ${n(a)}${'ᵏ'} mod ${n(m)}. Enter ${n(a)}² mod ${n(m)} and ${n(a)}³ mod ${n(m)}. Then enter the order of ${n(a)} in U(${n(m)}): the smallest k, at least 1, with ${n(a)}${'ᵏ'} mod ${n(m)} = 1.`,
    answer: [p2, p3, o],
    hints: ['Make a table of powers. Each power is the one before it multiplied by the element, then reduced mod the modulus: you never need the full power.', 'Keep going until the table reaches 1. The number of the power where 1 first appears is the order.'],

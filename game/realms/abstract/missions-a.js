@@ -336,7 +336,7 @@ window.QUESTS.push(
    "Make a table of powers. Each power is the one before it multiplied by the element, then reduced mod the modulus: you never need the full power.",
    "Keep going until the table reaches 1. The number of the power where 1 first appears is the order."
   ],
-  solution: "Mod 13: 5¹ = 5; 5² = 5 × 5 = 25, which leaves 12; 5³ = 12 × 5 = 60, which leaves 8; 5⁴ = 8 × 5 = 40, which leaves 1. The first power to reach 1 is 5⁴, so the order of 5 in U(13) is 4.",
+  solution: "Mod 13: 5¹ = 5; 5² = 5 × 5 = 25, which leaves 12; 5³ leaves the same remainder as 12 × 5 = 60, which leaves 8; 5⁴ leaves the same remainder as 8 × 5 = 40, which leaves 1. The first power to reach 1 is 5⁴, so the order of 5 in U(13) is 4.",
   xp: 100, prereqs: ["q06","q07"],
   artifact: { name: "Table of powers", description: "A strip of paper with each power of the code written below the last." },
   sources: [source.s4_1],

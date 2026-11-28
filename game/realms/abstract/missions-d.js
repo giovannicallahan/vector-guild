@@ -156,7 +156,7 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: 'How many cycles does a turn of 2 steps make among 6 tiles, and so how many colourings does it leave unchanged?', answer: [9], labels: ['unchanged colourings'], explanation: 'It makes gcd(2, 6) = 2 cycles; each is one of 3 colours, so 3² = 9 colourings are unchanged.' },
+   { prompt: 'A turn of 2 steps splits the 6 tiles into cycles, and every tile in a cycle must have the same colour. How many colourings does the turn leave unchanged?', answer: [9], labels: ['unchanged colourings'], explanation: 'It makes gcd(2, 6) = 2 cycles; each is one of 3 colours, so 3² = 9 colourings are unchanged.' },
    { prompt: 'Add up the unchanged colourings over all 6 turns, from 0 steps (which changes nothing) to 5 steps. What is the total?', answer: [780], labels: ['total'], explanation: 'The counts are 729, 3, 9, 27, 9 and 3, one for each turn, and they add up to 780.' },
    { prompt: 'Divide the total by the number of turns. How many different designs are there?', answer: [130], labels: ['different designs'], explanation: '780 ÷ 6 = 130: Burnside’s theorem says the number of orbits, here the designs, is the average number of colourings a move leaves unchanged.' }
   ]
