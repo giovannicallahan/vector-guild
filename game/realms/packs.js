@@ -72,5 +72,25 @@ window.VG_PACKS = {
   title: 'Graph theory: networks',
   styles: ['styles.css', 'update.css'],
   scripts: ['realms/graph/pack.js', 'realms/graph/missions-a.js', 'realms/graph/missions-b.js', 'realms/graph/missions-c.js', 'realms/graph/missions-d.js', 'gen-core.js', 'realms/graph/gen-a.js', 'realms/graph/gen-b.js', 'realms/graph/gen-c.js', 'realms/graph/gen-d.js', 'gameplay.js', 'realms/graph/experiments-a.js', 'realms/graph/experiments-b.js', 'realms/graph/experiments-c.js', 'realms/graph/experiments-d.js', 'realms/graph/variants-a.js', 'realms/graph/variants-b.js', 'realms/graph/variants-c.js', 'realms/graph/variants-d.js', 'realms/graph/practice-1.js', 'realms/graph/practice-2.js', 'realms/graph/practice-3.js', 'realms/graph/practice-4.js', 'realms/graph/practice-5.js', 'realms/graph/practice-6.js', 'realms/graph/practice-7.js', 'realms/graph/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/graph/glossary.js', 'glossary.js']
+ },
+ abstract: {
+  title: 'Abstract algebra: patterns of moves',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/abstract/pack.js', 'realms/abstract/missions-a.js', 'realms/abstract/missions-b.js', 'realms/abstract/missions-c.js', 'realms/abstract/missions-d.js', 'gen-core.js', 'realms/abstract/gen-a.js', 'realms/abstract/gen-b.js', 'realms/abstract/gen-c.js', 'realms/abstract/gen-d.js', 'gameplay.js', 'realms/abstract/experiments-a.js', 'realms/abstract/experiments-b.js', 'realms/abstract/experiments-c.js', 'realms/abstract/experiments-d.js', 'realms/abstract/variants-a.js', 'realms/abstract/variants-b.js', 'realms/abstract/variants-c.js', 'realms/abstract/variants-d.js', 'realms/abstract/practice-1.js', 'realms/abstract/practice-2.js', 'realms/abstract/practice-3.js', 'realms/abstract/practice-4.js', 'realms/abstract/practice-5.js', 'realms/abstract/practice-6.js', 'realms/abstract/practice-7.js', 'realms/abstract/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/abstract/glossary.js', 'glossary.js']
+ },
+ ode: {
+  title: 'Differential equations',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/ode/pack.js', 'realms/ode/missions-a.js', 'realms/ode/missions-b.js', 'realms/ode/missions-c.js', 'realms/ode/missions-d.js', 'gen-core.js', 'realms/ode/gen-a.js', 'realms/ode/gen-b.js', 'realms/ode/gen-c.js', 'realms/ode/gen-d.js', 'gameplay.js', 'realms/ode/experiments-a.js', 'realms/ode/experiments-b.js', 'realms/ode/experiments-c.js', 'realms/ode/experiments-d.js', 'realms/ode/variants-a.js', 'realms/ode/variants-b.js', 'realms/ode/variants-c.js', 'realms/ode/variants-d.js', 'realms/ode/practice-1.js', 'realms/ode/practice-2.js', 'realms/ode/practice-3.js', 'realms/ode/practice-4.js', 'realms/ode/practice-5.js', 'realms/ode/practice-6.js', 'realms/ode/practice-7.js', 'realms/ode/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/ode/glossary.js', 'glossary.js']
+ },
+ real: {
+  title: 'Real analysis',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/real/pack.js', 'realms/real/missions-a.js', 'realms/real/missions-b.js', 'realms/real/missions-c.js', 'realms/real/missions-d.js', 'gen-core.js', 'realms/real/gen-a.js', 'realms/real/gen-b.js', 'realms/real/gen-c.js', 'realms/real/gen-d.js', 'gameplay.js', 'realms/real/experiments-a.js', 'realms/real/experiments-b.js', 'realms/real/experiments-c.js', 'realms/real/experiments-d.js', 'realms/real/variants-a.js', 'realms/real/variants-b.js', 'realms/real/variants-c.js', 'realms/real/variants-d.js', 'realms/real/practice-1.js', 'realms/real/practice-2.js', 'realms/real/practice-3.js', 'realms/real/practice-4.js', 'realms/real/practice-5.js', 'realms/real/practice-6.js', 'realms/real/practice-7.js', 'realms/real/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/real/glossary.js', 'glossary.js']
+ },
+ complex: {
+  title: 'Complex analysis: the plane of numbers',
+  styles: ['styles.css', 'update.css'],
+  scripts: ['realms/complex/pack.js', 'realms/complex/missions-a.js', 'realms/complex/missions-b.js', 'realms/complex/missions-c.js', 'realms/complex/missions-d.js', 'gen-core.js', 'realms/complex/gen-a.js', 'realms/complex/gen-b.js', 'realms/complex/gen-c.js', 'realms/complex/gen-d.js', 'gameplay.js', 'realms/complex/experiments-a.js', 'realms/complex/experiments-b.js', 'realms/complex/experiments-c.js', 'realms/complex/experiments-d.js', 'realms/complex/variants-a.js', 'realms/complex/variants-b.js', 'realms/complex/variants-c.js', 'realms/complex/variants-d.js', 'realms/complex/practice-1.js', 'realms/complex/practice-2.js', 'realms/complex/practice-3.js', 'realms/complex/practice-4.js', 'realms/complex/practice-5.js', 'realms/complex/practice-6.js', 'realms/complex/practice-7.js', 'realms/complex/practice-8.js', 'variants.js', 'concept-lab.js', 'chapters.js', 'skip.js', 'realms/complex/glossary.js', 'glossary.js']
  }
 };

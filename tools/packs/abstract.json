@@ -1,0 +1,225 @@
+{
+ "id": "abstract",
+ "name": "Abstract algebra: patterns of moves",
+ "short": "Abstract algebra",
+ "description": "Groups, rings and fields: the rules behind clocks, hatches, tiles and codes, taught at the Kepler outpost.",
+ "about": "Abstract algebra realm (\"Abstract algebra: patterns of moves\"): groups, subgroups, homomorphisms, group actions, rings and fields,\nfor an adult who has finished Foundations and Linear algebra. Same Kepler outpost, now the Vault Works, where the crew builds dials,\nhatches, floors and vault doors. In every one only the pattern of moves matters. Mira is still the mentor. The concept plan is\ndocs/plans/ABSTRACT-PLAN.md.",
+ "registry": {
+  "part": "abstract"
+ },
+ "achievements": {
+  "done": "Closed under composition",
+  "master": "Every pattern counted"
+ },
+ "chapters": [
+  {
+   "name": "Clock arithmetic and groups",
+   "blurb": "Adding and multiplying on a clock, operation tables, identities, inverses and the rules that make a group.",
+   "tier": "Basic",
+   "size": 6,
+   "sector": {
+    "name": "Lock Workshop",
+    "purpose": "build locks whose dials always come back round"
+   },
+   "landmark": {
+    "name": "Dial gate",
+    "glyph": "clock-tower"
+   }
+  },
+  {
+   "name": "Order and cycles",
+   "blurb": "How many steps an element takes to come home, cyclic groups and their generators.",
+   "tier": "Basic",
+   "size": 5,
+   "sector": {
+    "name": "Beacon Tower",
+    "purpose": "time every beacon to repeat on a fixed beat"
+   },
+   "landmark": {
+    "name": "Pulse beacon",
+    "glyph": "beacon"
+   }
+  },
+  {
+   "name": "Permutations and symmetry",
+   "blurb": "Rearrangements, cycles, even and odd moves, and the symmetries of a regular polygon.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Hatch Hall",
+    "purpose": "turn and flip every hatch without losing track"
+   },
+   "landmark": {
+    "name": "Hexagonal hatch",
+    "glyph": "lattice-frame"
+   }
+  },
+  {
+   "name": "Subgroups and cosets",
+   "blurb": "Groups inside groups, the cosets that tile a group, and Lagrange's theorem.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Sorting Depot",
+    "purpose": "split every stock of parts into equal, matching batches"
+   },
+   "landmark": {
+    "name": "Coset racks",
+    "glyph": "block-stack"
+   }
+  },
+  {
+   "name": "Maps between groups",
+   "blurb": "Homomorphisms, kernels and images, isomorphisms, products and quotient groups.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Relay Exchange",
+    "purpose": "pass patterns between systems without breaking them"
+   },
+   "landmark": {
+    "name": "Relay mast",
+    "glyph": "relay-pylons"
+   }
+  },
+  {
+   "name": "Groups in action",
+   "blurb": "Orbits and stabilisers, conjugacy classes, Burnside's counting and abelian groups.",
+   "tier": "Advanced",
+   "size": 5,
+   "sector": {
+    "name": "Tile Studio",
+    "purpose": "count every truly different design for the dome floors"
+   },
+   "landmark": {
+    "name": "Mosaic dome",
+    "glyph": "crystal-spire"
+   }
+  },
+  {
+   "name": "Rings and fields",
+   "blurb": "Two operations at once: rings, fields, polynomials, ideals and finite fields.",
+   "tier": "Advanced",
+   "size": 6,
+   "sector": {
+    "name": "Cipher Vault",
+    "purpose": "build a number system we can always divide in"
+   },
+   "landmark": {
+    "name": "Vault door",
+    "glyph": "arch-bridge"
+   }
+  }
+ ],
+ "landmarkCost": 4,
+ "ranks": [
+  "DIAL TURNER",
+  "LOCKSMITH",
+  "BEACON KEEPER",
+  "HATCH MASTER",
+  "BATCH SORTER",
+  "RELAY ENGINEER",
+  "TILE DESIGNER",
+  "STRUCTURE ANALYST",
+  "MASTER OF SYMMETRY"
+ ],
+ "source": {
+  "pattern": "^Judson, Abstract Algebra",
+  "label": "Judson, Abstract Algebra",
+  "book": "Thomas W. Judson, Abstract Algebra: Theory and Applications (LibreTexts)",
+  "url": "https://math.libretexts.org/Bookshelves/Abstract_and_Geometric_Algebra/Abstract_Algebra%3A_Theory_and_Applications_(Judson)/<NN>%3A_<Chapter>/<N.MM>%3A_<Section>",
+  "example": "Judson, Abstract Algebra: Theory and Applications (LibreTexts) — 4.1 Cyclic Subgroups"
+ },
+ "mentor": {
+  "name": "Mira",
+  "role": "field engineer",
+  "cardEyebrow": "MIRA / YOUR FIELD ENGINEER",
+  "opening": "I’m Mira. Every dial, hatch and floor tile in the Vault Works follows a few simple rules, and we have to {purpose}. Your task is “{title}.” {brief} The idea we need: {topic}.",
+  "closing": "You already have everything this needs from Foundations and Linear algebra. I’ll work the first example with you, and the guided steps are there whenever you want them."
+ },
+ "copy": {
+  "sceneLabel": "KEPLER OUTPOST / VAULT WORKS",
+  "homeEyebrow": "THE VAULT WORKS IS TURNING",
+  "homeTitle": "Every lock has a pattern.<br><em>Learn the rules behind it.</em>",
+  "firstVisit": "Welcome to the Vault Works. Every dial, hatch and floor tile here follows a few simple rules, and once you know them you can predict any combination of moves. We start with a dial that counts round like a clock.",
+  "allDone": "Every lock, hatch and vault here now runs on rules you can prove. Number theory opens next in the Signal Office, where these clocks become codes.",
+  "beginFirst": "Turn the first dial",
+  "missionNoun": "abstract algebra missions",
+  "chaptersNote": "Seven chapters. Learn every concept in a chapter to unlock a landmark for the outpost. Practice missions are optional.",
+  "skills": {
+   "eyebrow": "YOUR DEVELOPMENT",
+   "title": "The skill tree",
+   "text": "Follow the prerequisite branches from clock sums to fields. Each mission you finish opens the ideas that are built on it."
+  },
+  "guideNoun": "abstract algebra topics",
+  "visual": {
+   "eyebrow": "TRY IT YOURSELF",
+   "title": "The concept bench",
+   "text": "Pick any mission, change its numbers and predict the answer before you check it. Nothing here affects your progress, and it all works offline."
+  }
+ },
+ "help": {
+  "eyebrow": "WELCOME TO THE VAULT WORKS",
+  "title": "Look for the pattern of moves, not the parts.",
+  "intro": "Abstract algebra starts where Linear algebra ends: with a set of things, one or two ways to combine them, and a few simple rules. It teaches how to spot the same pattern in clocks, hatches, tiles and codes, and why one pattern can be a copy of another. Every new word and symbol is explained before you are asked to use it, with a worked example first.",
+  "answers": "Answers are numbers: a remainder from 0 to n − 1, a size, a count, an order, or a sign typed as 1 or -1. A permutation is never typed; you are asked where one symbol goes. A yes or no is typed as 1 or 0."
+ },
+ "glossaryRequired": [
+  "modular arithmetic",
+  "identity element",
+  "inverse",
+  "group",
+  "abelian",
+  "order",
+  "cyclic group",
+  "permutation",
+  "subgroup",
+  "coset",
+  "homomorphism",
+  "kernel",
+  "orbit",
+  "field"
+ ],
+ "concepts": {
+  "q01": "Adding on a clock: Z_n [3.1]",
+  "q02": "Multiplying on a clock [3.1]",
+  "q03": "Binary operations and operation tables [3.1, 3.2]",
+  "q04": "Identity and inverses [3.2]",
+  "q05": "The group rules [3.2]",
+  "q06": "Units and U(n) [3.2, 2.2]",
+  "q07": "Order of an element in Z_n [4.1]",
+  "q08": "Order of an element in U(n) [4.1]",
+  "q09": "Cyclic groups and generators [4.1]",
+  "q10": "Large powers through the order [4.1, 4.3]",
+  "q11": "Chapter review: orders and inverses mixed [4.1, 3.2]",
+  "q12": "Permutations and composition [5.1]",
+  "q13": "Cycle notation and the order of a permutation [5.1]",
+  "q14": "Transpositions, even and odd [5.1]",
+  "q15": "Counting S_n and A_n [5.1]",
+  "q16": "Dihedral groups: turning and flipping a polygon [5.2]",
+  "q17": "Chapter review: symmetry moves mixed [5.2, 5.1]",
+  "q18": "Subgroups of a cyclic group [3.3, 4.1]",
+  "q19": "Cosets [6.1]",
+  "q20": "Lagrange's theorem [6.2]",
+  "q21": "Euler's and Fermat's theorems [6.3]",
+  "q22": "Conjugates and normal subgroups [10.1]",
+  "q23": "Chapter review: subgroups, cosets and Lagrange [6.1, 6.2]",
+  "q24": "Homomorphisms [11.1]",
+  "q25": "Kernel and image [11.1]",
+  "q26": "Isomorphisms [9.1, 9.2]",
+  "q27": "Direct products [9.2]",
+  "q28": "Quotient groups [10.1]",
+  "q29": "Chapter review: the first isomorphism theorem [11.2]",
+  "q30": "Group actions and orbits [14.1]",
+  "q31": "Orbit–stabiliser theorem [14.1]",
+  "q32": "Conjugacy classes in S_n [14.2]",
+  "q33": "Burnside's counting theorem [14.3]",
+  "q34": "Finite abelian groups [13.1]",
+  "q35": "Rings and zero divisors [16.3]",
+  "q36": "Fields: dividing in Z_p [16.4]",
+  "q37": "Polynomials over Z_p [17.1, 17.2]",
+  "q38": "Ideals in the integers [16.5]",
+  "q39": "Irreducible polynomials [17.3]",
+  "q40": "Finite fields; realm review and bridge to Number theory [22.1]"
+ }
+}

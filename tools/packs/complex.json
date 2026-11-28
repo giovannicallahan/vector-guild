@@ -1,0 +1,211 @@
+{
+ "id": "complex",
+ "name": "Complex analysis: the plane of numbers",
+ "short": "Complex analysis",
+ "description": "Complex numbers, analytic functions, contour integrals, series and residues, taught at the Kepler outpost's Wave Station.",
+ "about": "Complex analysis realm (\"Complex analysis: the plane of numbers\"): complex numbers, analytic functions, contour integrals,\nCauchy's formulas, series and residues, for an adult who has finished Foundations, Calculus 1 and 2, Logic and proof, and\nReal analysis. Same Kepler outpost, now working in the plane of numbers, and Mira is still the mentor. Angles are in radians.\nThe concept plan is docs/plans/COMPLEX-PLAN.md.",
+ "registry": {"part": "complex"},
+ "achievements": {"done": "Once round the ring", "master": "Every residue found"},
+ "chapters": [
+  {
+   "name": "Complex numbers",
+   "blurb": "The number i, arithmetic, the complex plane, polar form, powers and roots.",
+   "tier": "Basic",
+   "size": 6,
+   "sector": {
+    "name": "Antenna Field",
+    "purpose": "describe every signal with one number"
+   },
+   "landmark": {
+    "name": "Antenna array",
+    "glyph": "comms-dish"
+   }
+  },
+  {
+   "name": "Exponentials and logarithms",
+   "blurb": "Functions as maps, the complex exponential, logarithms and powers.",
+   "tier": "Basic",
+   "size": 5,
+   "sector": {
+    "name": "Rotor Hall",
+    "purpose": "keep track of everything that turns"
+   },
+   "landmark": {
+    "name": "Rotor",
+    "glyph": "wind-turbine"
+   }
+  },
+  {
+   "name": "Analytic functions",
+   "blurb": "The complex derivative, Cauchy–Riemann, trigonometric functions and harmonic functions.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Flow Tank",
+    "purpose": "model smooth flow round the hull"
+   },
+   "landmark": {
+    "name": "Flow tank",
+    "glyph": "tank-farm"
+   }
+  },
+  {
+   "name": "Contour integrals",
+   "blurb": "Integrals along curves, antiderivatives, Cauchy's theorem and winding numbers.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Ring Road",
+    "purpose": "add up a field all the way round a loop"
+   },
+   "landmark": {
+    "name": "Ring road gate",
+    "glyph": "arch-bridge"
+   }
+  },
+  {
+   "name": "Cauchy's formula",
+   "blurb": "Cauchy's integral formula, derivatives, bounds, mean values and maximum modulus.",
+   "tier": "Intermediate",
+   "size": 6,
+   "sector": {
+    "name": "Field Lab",
+    "purpose": "read the inside of a region from its edge"
+   },
+   "landmark": {
+    "name": "Field coil",
+    "glyph": "coil-tower"
+   }
+  },
+  {
+   "name": "Series",
+   "blurb": "Geometric and power series, Taylor and Laurent series, poles.",
+   "tier": "Advanced",
+   "size": 5,
+   "sector": {
+    "name": "Signal Archive",
+    "purpose": "build any signal out of simple powers"
+   },
+   "landmark": {
+    "name": "Archive spire",
+    "glyph": "archive-hall"
+   }
+  },
+  {
+   "name": "Residues",
+   "blurb": "Residues, the residue theorem, real integrals and the argument principle.",
+   "tier": "Advanced",
+   "size": 6,
+   "sector": {
+    "name": "Control Room",
+    "purpose": "turn hard integrals into quick sums"
+   },
+   "landmark": {
+    "name": "Control tower",
+    "glyph": "launch-tower"
+   }
+  }
+ ],
+ "ranks": [
+  "SIGNAL READER",
+  "ROTOR HAND",
+  "FLOW MODELLER",
+  "RING RUNNER",
+  "FIELD ENGINEER",
+  "SERIES BUILDER",
+  "RESIDUE HUNTER",
+  "CONTOUR ANALYST",
+  "MASTER OF THE PLANE"
+ ],
+ "source": {
+  "pattern": "^Orloff",
+  "label": "Orloff",
+  "book": "Orloff, Complex Variables with Applications (MIT), on LibreTexts",
+  "url": "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/<NN>%3A_<Chapter>/<N.MM>%3A_<Section>",
+  "example": "Orloff, Complex Variables with Applications (LibreTexts) — 9.4 Residues"
+ },
+ "mentor": {
+  "name": "Mira",
+  "role": "field engineer",
+  "cardEyebrow": "MIRA / YOUR SIGNAL ENGINEER",
+  "opening": "I’m Mira. Nothing out here is a single line any more, and we have to {purpose}. Your task is “{title}.” {brief} The idea we need: {topic}.",
+  "closing": "You already have the derivatives and integrals from Calculus 1 and 2. I’ll go through the worked example with you, and the guided steps are there whenever you want them."
+ },
+ "copy": {
+  "sceneLabel": "KEPLER OUTPOST / WAVE STATION",
+  "homeEyebrow": "THE SIGNALS NOW HAVE TWO PARTS",
+  "homeTitle": "Every point is a number.<br><em>Learn to calculate in the plane.</em>",
+  "firstVisit": "Welcome to the Wave Station. Our antennas turn signals round and round, and the cleanest way to track a turn is with a number that has two parts. We start with the strange new number i.",
+  "allDone": "You can now turn any integral round a loop into a sum of residues. Waves opens next at the Antenna Field, where these turning numbers ride on every signal.",
+  "beginFirst": "Meet the number i",
+  "missionNoun": "complex analysis missions",
+  "chaptersNote": "Seven chapters. Learn every concept in a chapter to unlock a landmark for the outpost. Practice missions are optional.",
+  "skills": {"eyebrow": "YOUR DEVELOPMENT", "title": "The skill tree", "text": "Follow the prerequisite branches from the number i to the residue theorem. Each mission you finish opens the ideas that are built on it."},
+  "guideNoun": "complex analysis topics",
+  "visual": {"eyebrow": "TRY IT YOURSELF", "title": "The concept bench", "text": "Pick any mission, change its numbers and predict the result before you check it. Nothing here affects your progress, and it all works offline."}
+ },
+ "help": {
+  "eyebrow": "WELCOME BACK",
+  "title": "Every point is a number.",
+  "intro": "Complex analysis starts from the number i and the plane that holds every complex number. It then adds exponentials and logarithms, analytic functions, contour integrals, Cauchy's formulas, series and residues. Every new word and symbol is explained before you are asked to use it, with a worked example first.",
+  "answers": "A complex answer is typed as its real part and its imaginary part in two boxes; angles are in radians, and a count, an order or a winding number is a whole number."
+ },
+ "glossaryRequired": [
+  "complex number",
+  "imaginary part",
+  "modulus",
+  "argument",
+  "analytic",
+  "Cauchy–Riemann equations",
+  "harmonic",
+  "contour integral",
+  "winding number",
+  "Cauchy's integral formula",
+  "Laurent series",
+  "pole",
+  "residue",
+  "radius of convergence"
+ ],
+ "concepts": {
+  "q01": "The number i: adding and multiplying [1.3]",
+  "q02": "Conjugates and division [1.3]",
+  "q03": "Modulus and argument [1.4, 1.5]",
+  "q04": "Euler's formula and polar form [1.6]",
+  "q05": "Powers: de Moivre's formula [1.13, 1.6]",
+  "q06": "nth roots and roots of unity [1.6]",
+  "q07": "Functions as maps [1.8]",
+  "q08": "The complex exponential [1.7]",
+  "q09": "The complex logarithm [1.11]",
+  "q10": "Complex powers [1.11]",
+  "q11": "Chapter review: the rotor log [1.7, 1.11]",
+  "q12": "Limits and the complex derivative [2.3, 2.5]",
+  "q13": "Cauchy–Riemann equations [2.6]",
+  "q14": "Rules of differentiation [2.5]",
+  "q15": "Sine, cosine, sinh and cosh [2.8, 1.12]",
+  "q16": "Harmonic functions [6.2]",
+  "q17": "Chapter review: the flow tank [2.6, 6.2]",
+  "q18": "Contour integrals by parametrisation [4.2]",
+  "q19": "Antiderivatives and path independence [4.3]",
+  "q20": "Powers round a circle [4.5]",
+  "q21": "Cauchy's theorem [4.6]",
+  "q22": "Holes and winding numbers [4.7]",
+  "q23": "Chapter review: once round the ring road [4.5, 4.6]",
+  "q24": "Cauchy's integral formula [5.1]",
+  "q25": "The formula for derivatives [5.2]",
+  "q26": "Cauchy's inequality and Liouville's theorem [5.5]",
+  "q27": "Mean value property [6.5, 5.5]",
+  "q28": "Maximum modulus [5.5, 6.5]",
+  "q29": "Chapter review: reading the field coil [5.1, 5.2]",
+  "q30": "Geometric series in the plane [8.1]",
+  "q31": "Power series and radius of convergence [8.2]",
+  "q32": "Taylor coefficients [8.3]",
+  "q33": "Laurent series [8.7]",
+  "q34": "Poles and their order [8.9]",
+  "q35": "Residues at simple poles [9.4]",
+  "q36": "Residues at higher-order poles [9.4]",
+  "q37": "The residue theorem [9.5]",
+  "q38": "Real integrals along the whole line [10.1]",
+  "q39": "Trigonometric integrals [10.3]",
+  "q40": "Realm review and bridge to Waves [12.1]"
+ }
+}
