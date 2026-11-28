@@ -1,6 +1,7 @@
 /* Next up (2.8). On the realm page, instead of one continue button, a strip of up to three missions the player can
    start now: unsolved, with their prerequisites met. Where both kinds are open it mixes at least one learn mission and
-   one practice mission. The first is always the next step on the main path (the old continue button, id="begin").
+   one practice mission. The first is always the next step on the main path (the old continue button, id="begin"), and the strip stands where
+   that button stood, in Mira's card, so it is on the first screen of a phone.
    Kept free of the page so it can be tested directly (qa/next-up.test.js); app.js draws the strip.
 
    VGNextUp.pick(o) -> up to `o.limit` (3) missions, in the order shown
