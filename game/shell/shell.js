@@ -451,6 +451,12 @@ var SHAPES={
 };
 function defaultShape(c){return wire(new THREE.DodecahedronGeometry(1.2,0),c)}
 var nodes={},byNode={},edgeArr=[],centre=new THREE.Vector3();
+/* Where each realm sits on the star map. Every realm has its own height, so on a phone (a tall, narrow map) each
+   one has a row to itself, and they alternate left and right and in depth so no two sit on top of each other.
+   The order follows what builds on what: Foundations at the bottom, Topology at the top. A realm not listed
+   here keeps the place the registry gives it. */
+var SPOT={found:[0,-15,2],disc:[-12,-12,-1],stat:[10,-9,2],phys:[15,-6,4],alg:[-9,-3,-2],calc:[7,0,3],num:[-16,3,-4],logic:[-4,6,-2],diff:[14,9,2],anal:[4,12,0],topo:[-7,15,-4]};
+REALMS=REALMS.map(function(r){if(!SPOT[r.node])return r;var c={};for(var k in r)c[k]=r[k];c.pos=SPOT[r.node];return c});
 REALMS.forEach(function(r){byNode[r.node]=r;centre.add(new THREE.Vector3(r.pos[0],r.pos[1],r.pos[2]))});
 if(REALMS.length)centre.multiplyScalar(1/REALMS.length);
 REALMS.forEach(function(r){
@@ -559,7 +565,9 @@ function layoutMap(){
   var tr=topBar.getBoundingClientRect(),sr=stage.getBoundingClientRect();
   labelTop=Math.max(0,Math.min(H*0.4,tr.bottom-sr.top))+4;
   var portrait=phase==='map'&&W<H;
-  spreadY=portrait?Math.max(1,Math.min(2.3,(H-labelTop)/W)):1;
+  /* Stretch until the realms' rows fill the height: the lowest and the highest realm end up about 40px inside it. */
+  var yExt=0;REALMS.forEach(function(r){REALMS.forEach(function(q){yExt=Math.max(yExt,Math.abs(r.pos[1]-q.pos[1]))})});
+  spreadY=portrait?Math.max(1,Math.min(3.2,yExt?(H-labelTop-120)/(W*yExt/(2*mapRadius)):(H-labelTop)/W)):1;
   pivot.scale.set(1,spreadY,1);
   if(portrait)camera.setViewOffset(W,H,0,-Math.round(labelTop/2),W,H);else camera.clearViewOffset();
   REALMS.forEach(function(r){nodes[r.node].w=0});
@@ -639,8 +647,8 @@ function mapFrame(dt){
     if(v3.z>1){n.btn.style.opacity='0';n.btn.style.visibility='hidden';n.dy=null;return}
     n.btn.style.visibility='';
     if(!n.w){n.w=n.btn.offsetWidth||120;rowH=Math.ceil(((n.pill.offsetHeight||28)+44)/2)+1;
-      /* Phone: give every realm a wide row of its own so a thumb cannot land on a neighbour. */
-      if(W<H&&W<=650)rowH=Math.max(rowH,Math.min(60,Math.floor((H-12-labelTop)/Math.max(1,REALMS.length))))}
+      /* Phone: every realm has a row of its own (SPOT), a little taller than a touch target, so a label stays beside its shape. */
+      if(W<H&&W<=650)rowH=Math.max(rowH,Math.min(36,Math.floor((H-12-labelTop)/Math.max(1,REALMS.length))))}
     var x=(v3.x*0.5+0.5)*W,y=(-v3.y*0.5+0.5)*H+18,half=n.w/2;
     x=Math.max(half+4,Math.min(W-half-4,x));
     n.btn.style.opacity=(0.5+0.5*Math.max(0,Math.min(1,(depth+18)/30))).toFixed(2);
