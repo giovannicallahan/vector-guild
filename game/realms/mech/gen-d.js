@@ -149,7 +149,7 @@ Object.assign(window.MISSION_GEN, {
    solution: `The lever arm is r sin θ = ${n(r)} × sin(${ang}) ${eq(arm)} ${n(rd(arm))} m. The torque is τ = rF sin θ = ${n(r)} × ${n(F)} × sin(${ang}) ${eq(tau)} ${n(rd(tau))} N·m. Then α = τ ÷ I = τ ÷ ${n(I)} ${eq(al)} ${n(rd(al))} rad/s².`,
    guidance: [
     { prompt: `What is the lever arm r sin θ, the distance from the axle to the line of the pull, in metres to 2 decimal places?`, answer: [rd(arm)], explanation: `${n(r)} × sin(${ang}) ${eq(arm)} ${n(rd(arm))} m.` },
-    { prompt: `Multiply the lever arm by the force. What is the torque, in N·m to 2 decimal places?`, answer: [rd(tau)], explanation: `τ = ${n(r)} × ${n(F)} × sin(${ang}) ${eq(tau)} ${n(rd(tau))} N·m.` },
+    { prompt: `Multiply the unrounded lever arm, r sin θ (not the 2-decimal value), by the force. What is the torque, in N·m to 2 decimal places?`, answer: [rd(tau)], explanation: `τ = ${n(r)} × ${n(F)} × sin(${ang}) ${eq(tau)} ${n(rd(tau))} N·m.` },
     { prompt: `Divide the torque by the moment of inertia, ${n(I)} kg·m². What is the angular acceleration, in rad/s² to 2 decimal places?`, answer: [rd(al)], explanation: `α = τ ÷ I = τ ÷ ${n(I)} ${eq(al)} ${n(rd(al))} rad/s².` }
    ] }; }
  },

@@ -158,7 +158,7 @@ mk({
  build: ({ L, a }) => { const w = L / 1000, us = a * 1000, v = L / a; return {
   prompt: `A timing gate on the sled rail measures how long a marker flag takes to pass it. The flag is ${n(L)} millimetres (mm) wide, and the gate records the passing time as ${n(a)} × 10⁻³ s. Enter the passing time in microseconds (μs, typed without commas), then the sled’s speed in metres per second (m/s), found as the flag’s width in metres divided by the passing time in seconds.`,
   answer: [us, v],
-  hints: ['milli- (m) stands for 10⁻³ and micro- (μ) for 10⁻⁶. To write the width in metres, divide by 10⁻³ (mm → m); to write the time in microseconds, divide by 10⁻⁶ (s → μs).',
+  hints: ['milli- (m) stands for 10⁻³ and micro- (μ) for 10⁻⁶. To write the width in metres, multiply by 10⁻³ (mm → m); to write the time in microseconds, divide by 10⁻⁶ (s → μs).',
    'Speed = distance ÷ time, with the distance in metres and the time in seconds. Powers of ten divide by subtracting exponents.'],
   solution: `The width is ${n(L)} mm ÷ 1000 = ${n(w)} m. The time is ${n(a)} × 10⁻³ s ÷ 10⁻⁶ = ${n(a)} × 10³ = ${n(us)} μs. The speed is ${n(w)} m ÷ (${n(a)} × 10⁻³ s) = ${n(v)} m/s.`,
   guidance: [

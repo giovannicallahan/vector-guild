@@ -73,7 +73,7 @@ P['mech'] = {
   ['joule', 'q26', 'The SI unit of work and energy, written J: one newton acting through one metre.', '5 N pushing a box 2 m does 10 J.'],
   ['kinetic energy', 'q27', 'The energy a body has because it is moving, K = ½mv².', 'A 2 kg cart at 3 m/s has ½ × 2 × 9 = 9 J.'],
   ['work-energy theorem', 'q27', 'The rule that the net work done on a body equals the change in its kinetic energy.', 'If 50 J of net work is done on a cart with 20 J, it ends with 70 J.'],
-  ['power', 'q28', 'The rate of doing work, P = W ÷ t, or P = Fv for a force on a moving body.', '600 J of work done in 3 s is 200 W of power.', [], 'powers? of ten|to the power|power of'],
+  ['power', 'q28', 'The rate of doing work, P = W ÷ t; a force F at angle θ to a velocity v delivers P = Fv cos θ, which is Fv when the force points along the motion.', '600 J of work done in 3 s is 200 W of power.', [], 'powers? of ten|to the power|power of'],
   ['watt', 'q28', 'The SI unit of power, written W: one joule of work each second.', 'A 2 kW winch does 2000 J of work each second.', ['kilowatt']],
   ['potential energy', 'q30', 'Energy stored by where a body is, such as mgy for height or ½kx² for a squeezed spring.', 'A 10 kg box 2 m up has 10 × 9.8 × 2 = 196 J above the floor.'],
   ['spring constant', 'q30', 'The stiffness k of a spring: the force in newtons for each metre it is squeezed or stretched.', 'A spring with k = 500 N/m squeezed 0.1 m pushes back with 50 N.'],

@@ -39,7 +39,7 @@ window.QUESTS.push(
   prompt: "The survey rover’s dashboard shows its speed as 54 kilometres per hour (km/h). It keeps that speed for 4 minutes. Enter its speed in metres per second (m/s), then the driving time in seconds (s), then the distance it covers in metres (m), typed without commas.",
   answer: [15,240,3600], labels: ["speed (m/s)","time (s)","distance (m)"], tolerance: 0.01,
   hints: [
-   "A kilometre is 1000 metres and an hour is 3600 seconds. Multiply by the conversion factors (1000 m ÷ 1 km) and (1 h ÷ 3600 s), so that km and h cancel.",
+   "A kilometre is 1000 metres, and an hour is 60 minutes of 60 seconds each, which is 60 × 60 = 3600 seconds. Multiply by the conversion factors (1000 m ÷ 1 km) and (1 h ÷ 3600 s), so that km and h cancel.",
    "A minute is 60 seconds. At a steady speed the distance is the speed times the time, with the speed in m/s and the time in s."
   ],
   solution: "54 km/h × (1000 m ÷ 1 km) × (1 h ÷ 3600 s) = 54000 m ÷ 3600 s = 15 m/s. The time is 4 min × (60 s ÷ 1 min) = 240 s. The distance is 15 m/s × 240 s = 3600 m.",

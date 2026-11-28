@@ -35,7 +35,7 @@ Object.assign(window.MISSION_GEN, {
   build: ({ V, M }) => { const mh = V * 1000, ms = V / 3.6, s = 60 * M, d = ms * s; return {
    prompt: `The survey rover’s dashboard shows its speed as ${n(V)} kilometres per hour (km/h). It keeps that speed for ${n(M)} minutes. Enter its speed in metres per second (m/s), then the driving time in seconds (s), then the distance it covers in metres (m), typed without commas.`,
    answer: [ms, s, d],
-   hints: ['A kilometre is 1000 metres and an hour is 3600 seconds. Multiply by the conversion factors (1000 m ÷ 1 km) and (1 h ÷ 3600 s), so that km and h cancel.', 'A minute is 60 seconds. At a steady speed the distance is the speed times the time, with the speed in m/s and the time in s.'],
+   hints: ['A kilometre is 1000 metres, and an hour is 60 minutes of 60 seconds each, which is 60 × 60 = 3600 seconds. Multiply by the conversion factors (1000 m ÷ 1 km) and (1 h ÷ 3600 s), so that km and h cancel.', 'A minute is 60 seconds. At a steady speed the distance is the speed times the time, with the speed in m/s and the time in s.'],
    solution: `${n(V)} km/h × (1000 m ÷ 1 km) × (1 h ÷ 3600 s) = ${n(mh)} m ÷ 3600 s = ${n(ms)} m/s. The time is ${n(M)} min × (60 s ÷ 1 min) = ${n(s)} s. The distance is ${n(ms)} m/s × ${n(s)} s = ${n(d)} m.`,
    guidance: [
     { prompt: `How many metres are there in ${n(V)} kilometres?`, answer: [mh], explanation: `Each kilometre is 1000 metres, so ${n(V)} km × (1000 m ÷ 1 km) = ${n(mh)} m. The rover covers ${n(mh)} m every hour.` },

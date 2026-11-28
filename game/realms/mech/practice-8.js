@@ -138,7 +138,7 @@ mk({
   solution: `The lever arm is r sin θ = ${n(r)} × sin(${ang}) ${eq(arm)} ${n(rd(arm))} m. The torque is τ = rF sin θ = ${n(r)} × ${n(F)} × sin(${ang}) ${eq(tau)} ${n(rd(tau))} N·m. Then α = τ ÷ I = τ ÷ ${n(I)} ${eq(al)} ${n(rd(al))} rad/s².`,
   guidance: [
    { prompt: `The handle is ${n(r)} m from the hinge and θ = ${ang} radians. What is the lever arm r sin θ, in metres to 2 decimal places?`, answer: [rd(arm)], explanation: `${n(r)} × sin(${ang}) ${eq(arm)} ${n(rd(arm))} m.` },
-   { prompt: `The push is ${n(F)} N. Multiply the lever arm by the force. What is the torque, in N·m to 2 decimal places?`, answer: [rd(tau)], explanation: `τ = ${n(r)} × ${n(F)} × sin(${ang}) ${eq(tau)} ${n(rd(tau))} N·m.` },
+   { prompt: `The push is ${n(F)} N. Multiply the unrounded lever arm, r sin θ (not the 2-decimal value), by the force. What is the torque, in N·m to 2 decimal places?`, answer: [rd(tau)], explanation: `τ = ${n(r)} × ${n(F)} × sin(${ang}) ${eq(tau)} ${n(rd(tau))} N·m.` },
    { prompt: `The door’s moment of inertia is ${n(I)} kg·m². What is the angular acceleration τ ÷ I, in rad/s² to 2 decimal places?`, answer: [rd(al)], explanation: `α = τ ÷ ${n(I)} ${eq(al)} ${n(rd(al))} rad/s².` }
   ] }; }
 });

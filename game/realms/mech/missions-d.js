@@ -21,6 +21,7 @@
 const source = {
  s8_1: { title: "OpenStax University Physics Volume 1 — 8.1 Potential Energy of a System", url: "https://openstax.org/books/university-physics-volume-1/pages/8-1-potential-energy-of-a-system", description: "Gravitational potential energy near the surface, mgy, and the elastic potential energy of a spring, ½kx².", verified: '2026-11-28' },
  s8_3: { title: "OpenStax University Physics Volume 1 — 8.3 Conservation of Energy", url: "https://openstax.org/books/university-physics-volume-1/pages/8-3-conservation-of-energy", description: "Mechanical energy K + U stays constant unless non-conservative forces such as friction do work, which changes it by the amount of that work.", verified: '2026-11-28' },
+ s6_2: { title: "OpenStax University Physics Volume 1 — 6.2 Friction", url: "https://openstax.org/books/university-physics-volume-1/pages/6-2-friction", description: "Kinetic friction of size μk N, and on a level surface a normal force equal to the weight.", verified: '2026-11-28' },
  s9_1: { title: "OpenStax University Physics Volume 1 — 9.1 Linear Momentum", url: "https://openstax.org/books/university-physics-volume-1/pages/9-1-linear-momentum", description: "Momentum as mass times velocity, a vector with the direction of the velocity.", verified: '2026-11-28' },
  s9_2: { title: "OpenStax University Physics Volume 1 — 9.2 Impulse and Collisions", url: "https://openstax.org/books/university-physics-volume-1/pages/9-2-impulse-and-collisions", description: "Impulse as force times time, in N·s; the impulse equals the change in momentum, and average force is impulse divided by collision time.", verified: '2026-11-28' },
  s9_3: { title: "OpenStax University Physics Volume 1 — 9.3 Conservation of Linear Momentum", url: "https://openstax.org/books/university-physics-volume-1/pages/9-3-conservation-of-linear-momentum", description: "In a closed system with no net external force the total momentum does not change.", verified: '2026-11-28' },
@@ -51,7 +52,7 @@ window.QUESTS.push(
   solution: "At the top U = mgh = 30 × 9.8 × 4 = 1176 J and K = 0. At the bottom of the ramp all of it is kinetic: ½ × 30 × v² = 1176, so v = √(2 × 9.8 × 4) ≈ 8.85 m/s. On the strip friction does −μmgd = −0.2 × 30 × 9.8 × 3 = −176.4 J of work, leaving 1176 − 176.4 = 999.6 J of mechanical energy. At the greatest compression the sled is still, so ½ × 3000 × x² = 999.6, giving x = √(2 × 999.6 ÷ 3000) ≈ 0.82 m.",
   xp: 200, prereqs: ["q30","q27"],
   artifact: { name: "Buffer test card", description: "One sled’s energy, counted at the top, the bottom and the spring." },
-  sources: [source.s8_3, source.s8_1],
+  sources: [source.s8_3, source.s8_1, source.s6_2],
   teaching: {
    intuition: "Energy can change form without being lost. A sled at the top of a ramp has potential energy mgh because of its height. As it slides down a smooth ramp it loses height and gains speed, and the kinetic energy ½mv² it gains is exactly the potential energy it lost. The sum K + U is called the mechanical energy, and it stays the same while only conservative forces do work. A conservative force, such as gravity or a spring, stores the energy it takes and gives it back. Friction is different: it turns mechanical energy into heat, which does not come back. So with friction, the mechanical energy at the end is the energy at the start minus the size of the work friction did. A spring squeezed by a distance x stores ½kx², so energy left when the sled stops against a spring is all in the spring.",
    steps: [
@@ -335,7 +336,7 @@ window.QUESTS.push(
   },
   guidance: [
    { prompt: "What is the lever arm r sin θ, the distance from the axle to the line of the pull, in metres to 2 decimal places?", answer: [0.43], labels: ["lever arm (m)"], explanation: "0.5 × sin(π/3) ≈ 0.43 m." },
-   { prompt: "Multiply the lever arm by the force. What is the torque, in N·m to 2 decimal places?", answer: [34.64], labels: ["torque (N·m)"], explanation: "τ = 0.5 × 80 × sin(π/3) ≈ 34.64 N·m." },
+   { prompt: "Multiply the unrounded lever arm, r sin θ (not the 2-decimal value), by the force. What is the torque, in N·m to 2 decimal places?", answer: [34.64], labels: ["torque (N·m)"], explanation: "τ = 0.5 × 80 × sin(π/3) ≈ 34.64 N·m." },
    { prompt: "Divide the torque by the moment of inertia, 8 kg·m². What is the angular acceleration, in rad/s² to 2 decimal places?", answer: [4.33], labels: ["angular acceleration (rad/s²)"], explanation: "α = τ ÷ I = τ ÷ 8 ≈ 4.33 rad/s²." }
   ]
  },
