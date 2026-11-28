@@ -1,7 +1,10 @@
 /* Tap-to-define words (game/glossary.js).
    Run: node qa/glossary.test.js
-   Checks the data (window.VG_GLOSSARY) and the matching (VGGlossary.find) for every pack, without a page:
+   Checks the data (window.VG_GLOSSARY) and the matching (VGGlossary.find) for every pack in game/realms/packs.js
+   (qa/pack-list.js), without a page:
      - at least 40 terms per pack; every entry has a one-sentence meaning, an example and a learn mission that teaches it
+       (a pack added later, with its words in game/realms/<id>/glossary.js, needs the 40 once all its learn missions
+       are written, and its own `required` words always; until then a short list is a NOTE)
      - every term is really used in the pack's lesson, prompt, hint or solution text
      - matching takes whole words, the longest term first, each term once per block, and leaves a word alone where it has another sense
      - mission text is never changed, and the file is a classic script that needs no page to load
@@ -13,6 +16,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const root = path.join(__dirname, '..', 'game'), read = f => fs.readFileSync(path.join(root, f), 'utf8');
+const PACK_IDS = require('./pack-list.js').ids();
 const PAGE_ONLY = new Set(['lab3d.js', 'graph-lab.js', 'docking.js', 'handson.js', 'contracts.js', 'board.js', 'concept-lab.js', 'experiment-low.js', 'experiment-high.js', 'collection/ui.js']);
 
 function load(realm) {
@@ -29,14 +33,25 @@ function texts(q) {
 }
 
 let checks = 0;
-for (const realm of ['found', 'la', 'calc1']) {
-  const w = load(realm), G = w.VG_GLOSSARY, V = w.VGGlossary, pack = G[realm], keys = Object.keys(pack);
+const notes = [];
+for (const realm of PACK_IDS) {
+  const w = load(realm), G = w.VG_GLOSSARY, V = w.VGGlossary, pack = G[realm] || {}, keys = Object.keys(pack);
   const learn = new Map(w.QUESTS.filter(q => !q.parent).map(q => [q.id, q])), before = JSON.stringify(w.QUESTS);
   /* A pack that is still being written (Calculus 1) declares its learn missions in REALM.chapters before they exist:
      a word may be given to a declared mission, and must be used in the text once that mission is written. */
   const declared = new Set((w.REALM.chapters || []).flatMap(c => Array.from(c.ids)));
   assert.ok(V && typeof V.wrap === 'function' && typeof V.find === 'function' && typeof V.close === 'function', 'VGGlossary');
-  assert.ok(keys.length >= 40, `${realm}: ${keys.length} terms (needs 40)`);
+  /* A pack added after Calculus 1 ships its words in game/realms/<id>/glossary.js; the three 2.5 packs keep theirs in game/glossary.js. */
+  const own = (w.VG_GLOSSARY_PACKS || {})[realm];
+  if (['found', 'la', 'calc1'].includes(realm)) assert.ok(!own, realm + ': its words stay in game/glossary.js');
+  else {
+    assert.ok(own && Array.isArray(own.terms) && Array.isArray(own.required), `${realm}: game/realms/${realm}/glossary.js registers { required, terms } (docs/PACK-SPEC.md, "Glossary")`);
+    assert.ok(w.VG_PACKS[realm].scripts.indexOf(`realms/${realm}/glossary.js`) === w.VG_PACKS[realm].scripts.indexOf('glossary.js') - 1, `${realm}: its glossary loads just before game/glossary.js`);
+    assert.equal(own.terms.length, keys.length, `${realm}: one row per term, no term twice`);
+  }
+  const allWritten = (w.REALM.chapters || []).every(c => c.ids.every(id => learn.has(id)));
+  if (allWritten) assert.ok(keys.length >= 40, `${realm}: ${keys.length} terms (needs 40)`);
+  else if (keys.length < 40) notes.push(`${realm} has ${keys.length} glossary terms; it needs 40 once all its learn missions are written.`);
   const used = new Set();
   for (const q of w.QUESTS) for (const text of texts(q)) { let rest = text; for (;;) { const hit = V.find(rest, realm, new Set())[0]; if (!hit) break; used.add(hit.key); rest = rest.slice(hit.index + hit.text.length); } }
   for (const key of keys) {
@@ -67,11 +82,15 @@ for (const realm of ['found', 'la', 'calc1']) {
     assert.deepEqual(hit('Keep to the speed limit. The tangent of the angle is 1.'), [], 'everyday and trigonometric senses are left alone');
     assert.deepEqual(hit('The limit exists; the definite integral is an integral. Concave up, then L’Hôpital’s rule.'), ['limit@limit', 'definite integral@definite integral', 'integral@integral', 'concave@Concave up', 'l’hôpital’s rule@L’Hôpital’s rule']);
     for (const term of ['limit', 'derivative', 'tangent line', 'secant line', 'rate of change', 'continuous', 'asymptote', 'critical point', 'concave', 'antiderivative', 'integral', 'riemann sum']) assert.ok(pack[term], 'calc1 defines "' + term + '"');
-  } else {
+  } else if (realm === 'la') {
     assert.deepEqual(hit('The dot product of unit vectors; each vector has a norm.'), ['dot product@dot product', 'unit vector@unit vectors', 'vector@vector', 'norm@norm']);
     assert.deepEqual(hit('Use the inverse cosine, then the inverse of A.'), ['inverse@inverse'], 'the first "inverse" has another sense and is left alone');
     assert.deepEqual(hit('The pseudoinverse and off-diagonal entries; the first principal component.'), ['pseudoinverse@pseudoinverse'], 'no match inside a longer word or in another sense');
     assert.deepEqual(hit('Gram–Schmidt gives orthonormal eigenvectors.'), ['gram–schmidt@Gram–Schmidt', 'orthonormal@orthonormal', 'eigenvector@eigenvectors']);
+  } else {
+    /* Any later pack: the words it says it must define (its own `required` list), each found by its own spelling. */
+    for (const term of own.required) { assert.ok(pack[term.toLowerCase()], `${realm} defines "${term}" (required in game/realms/${realm}/glossary.js)`); assert.deepEqual(hit(pack[term.toLowerCase()].term), [term.toLowerCase() + '@' + pack[term.toLowerCase()].term], `${realm}: "${term}" is matched as written`); }
+    for (const key of keys) assert.ok(!/[A-Z]/.test(key), `${realm} "${key}": keyed in lower case`);
   }
   assert.equal(V.find('', realm).length, 0); assert.equal(V.find('no maths words here', 'nope').length, 0);
   assert.equal(V.wrap({ querySelectorAll: () => [] }, realm), 0, 'without a page, wrap does nothing');
@@ -126,9 +145,12 @@ for (const realm of ['found', 'la', 'calc1']) {
 }
 const src = read('glossary.js'), app = read('app.js'), packs = read('realms/packs.js'), css = read('update.css');
 assert.ok(!/\bfetch\(|\bimport\s|type="module"|innerHTML/.test(src), 'glossary.js: a classic script; the pop-up is built from text nodes, never from HTML strings');
-assert.equal((packs.match(/'glossary\.js'/g) || []).length, 3, 'every pack loads glossary.js');
+{ const w = { }; vm.runInNewContext(packs, { window: w }); assert.ok(PACK_IDS.length >= 3 && PACK_IDS.every(id => w.VG_PACKS[id].scripts[w.VG_PACKS[id].scripts.length - 1] === 'glossary.js'), 'every pack loads glossary.js, last'); }
 assert.ok((app.match(/gloss\(/g) || []).length >= 5 && /VGGlossary\?\.close\?\.\(\)\)return true/.test(app), 'app.js wraps lesson, prompt, hint and solution text, and Back closes a definition first');
 assert.ok(/button\.gloss\{[^}]*padding:15px 3px[^}]*text-decoration:underline dotted/.test(css) && /button\.gloss::after\{[^}]*width:max\(100%,44px\)/.test(css), 'the word has a dotted underline and a 44 px tap area');
 assert.ok(/prefers-reduced-motion:reduce\)\{\.gloss-pop\{animation:none\}\}/.test(css), 'the pop-up honours reduced motion');
 checks += 5;
+for (const note of notes) console.log('NOTE: ' + note);
+const later = PACK_IDS.filter(id => !['found', 'la', 'calc1'].includes(id));
+if (later.length) console.log(`and ${later.map(id => `${id} (${Object.keys(load(id).VG_GLOSSARY[id] || {}).length} terms)`).join(', ')}.`);
 console.log(`PASS: glossary, ${checks} checks: ${Object.keys(load('found').VG_GLOSSARY.found).length} Foundations terms, ${Object.keys(load('la').VG_GLOSSARY.la).length} linear algebra terms and ${Object.keys(load('calc1').VG_GLOSSARY.calc1).length} Calculus 1 terms, matching rules, unchanged mission text.`);

@@ -88,6 +88,9 @@ mission solved, practice included (160); linear algebra finished; missions solve
 realms; first drill; 10 drills; first pull; 5, 15 and 30 different figures; a legendary; a figure at
 5 stars; a figure equipped; every figure of one field; a landmark bought; every landmark of a realm.
 Rewards run from 15 to 150 stardust. Names are plain and friendly; no jargon.
+The two per realm (`<id>-done`, every concept learned, and `<id>-master`, every mission) are made from each ready
+registry part's `ach` entry (`game/realms/registry.js`), so a pack added by `tools/new-pack.js` brings its own pair
+(`docs/PACK-SPEC.md`); about 29 plus two per pack added after Calculus 1.
 
 ## Daily review (2.3)
 

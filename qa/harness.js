@@ -2,7 +2,8 @@
    Usage: node qa/harness.js                    linear algebra (pack "la"): the 1.4.1 checks, save 2.0 and practice missions
           node qa/harness.js --realm found      another pack: every generic per-mission check, with that pack's
           node qa/harness.js found              chapters, source rule and ranks, and a play-through of its first mission
-   Option: --complete  fail when a pack declares chapter missions that are not written yet (otherwise a note).
+   Option: --complete  fail when a pack declares chapter missions that are not written yet (otherwise a note; a pack
+                       just made by tools/new-pack.js, with no mission yet, passes on its configuration alone).
            --complete-practice  fail when a planned practice mission is not written yet (otherwise a note).
    Practice missions (docs/PACK-FORMAT.md, "Practice missions") are checked wherever a pack has them: schema, parent,
    kind, what they inherit, hints, prompts, unlocking, the straight-to-the-problem dialog and the drop-down menus.
@@ -78,7 +79,8 @@ for (const [name, file] of Object.entries(labFiles)) assert.equal(pack.scripts.i
 assert.ok(!pack.scripts.includes('app.js') && pack.scripts.indexOf('realms/' + realm + '/pack.js') === 0, 'the pack config loads first; realm.html adds app.js last');
 
 if (isLA) assert.ok(questCount >= 50, 'full campaign loaded');
-else assert.ok(questCount >= 1, 'the pack has at least one mission');
+/* Another pack may have no mission written yet (just made by tools/new-pack.js): its configuration, chapters and ranks
+   are checked below, and the play-throughs that need a mission wait for one (a NOTE at the end). */
 assert.equal(new Set(quests.map(q => q.id)).size, quests.length, 'mission IDs must be unique');
 assert.ok(quests.every(q => q.sources?.length && q.sources.every(s => /^https:\/\//.test(s.url) && s.title && s.verified)), 'every mission has attributed source links');
 assert.ok(quests.every(q => q.sources.some(s => REALM.sourceRule.publisherPattern.test(s.title))), `every mission has a per-lesson ${REALM.sourceRule.label} link`);
@@ -585,7 +587,7 @@ let missing = [], missingPractice = [], plannedPractice = [];
   if (!isLA || REALM.practice) assert.equal(ranks[ranks.length - 1].at, ids.length + plannedPractice.length, 'the top rank needs every declared mission, learn and practice');
   if (isLA) assert.equal(ids.length + plannedPractice.length, 272, 'linear algebra plans 68 learn + 204 practice missions');
 }
-if (!isLA) {
+if (!isLA && learn.length) {
   for (const name of ['Docking', 'Contracts', 'Board', 'HandsOn', 'VisualLab', 'Graph2D']) if (!pack.scripts.some(f => ({ Docking: 'docking.js', Contracts: 'contracts.js', Board: 'board.js', HandsOn: 'handson.js', VisualLab: 'lab3d.js', Graph2D: 'graph-lab.js' })[name] === f)) assert.equal(curriculumWindow[name], undefined, `${name} is not loaded`);
   const fill = (inputs, values) => { assert.equal(inputs.length, values.length); inputs.forEach((x, i) => x.value = String(values[i])); };
   const first = quests[0], play = boot();
@@ -770,9 +772,13 @@ if (!isLA) {
      has a next mission, and the checks that need chapter 2 wait for it. */
   const secondWritten = chapters[1].ids.length > 0;
   assert.deepEqual(wellFormed(laterHome, 'campaign').filter(t => t.open).map(t => t.key), secondWritten ? ['campaign:1'] : ['campaign:0']);
-  const c0 = chapters[0], count = laterHome.match(/data-dd="campaign:0".*?<span class="dd-count">(.*?)<\/span><span class="dd-bar/)[1];
+  const c0 = chapters[0];
+  /* Chapter 1's count and bar, once it has a mission. */
+  if (c0.ids.length) {
+  const count = laterHome.match(/data-dd="campaign:0".*?<span class="dd-count">(.*?)<\/span><span class="dd-bar/)[1];
   assert.ok(count.startsWith(`${c0.ids.length} / ${c0.ids.length} ${REALM.practice || practice.length ? 'learned' : 'complete'}${c0.practice.length ? ` · 0 / ${c0.practice.length} practice` : ''}`), `chapter 1 count reads "${count}"`);
   assert.match(laterHome, /data-dd="campaign:0".*?<span class="dd-bar dd-bar-learn" aria-hidden="true"><i style="width:100%"><\/i><\/span>/, 'a progress bar shows the learn share');
+  }
   for (const view of ['skills', 'guide', 'artifacts']) {
     const html = later.qa.show(view), list = wellFormed(html, view).filter(t => t.key.startsWith(view + ':'));
     if (view !== 'artifacts') assert.equal(list.length, chapters.length, `${view}: one drop-down per chapter`);
@@ -817,6 +823,8 @@ if (!isLA) {
      copy over a save that was replaced meanwhile: it reloads instead. Its own saves and other realms' saves
      do not reload it. */
   const KEY = 'vector-guild-save-v2', id = REALM.saveId || REALM.id, other = id === 'la' ? 'found' : 'la';
+  /* Needs two missions to restore; a pack with fewer written yet waits for them. */
+  if (quests.length >= 2) {
   const firstId = quests[0].id, secondId = quests[1].id;
   const tab = boot(new Map([[KEY, JSON.stringify({ v: 2, seed: 0, intro: true, realms: { [id]: { solved: [firstId], tools: [] } } })]]));
   assert.equal(typeof tab.fire, 'function');
@@ -841,9 +849,10 @@ if (!isLA) {
   const gen = quests.find(q => curriculumWindow.Gen?.has(q.id) && (q.prereqs || []).length === 0);
   if (gen) { own.qa.mission(gen.id); assert.equal(own.qa.current().prompt, curriculumWindow.Gen.instance(gen, id === 'la' ? 777 : 5, 0).prompt, 'and its missions are built from that seed'); }
   assert.equal(JSON.parse(own.storage.get(KEY)).seeds.la, 777, 'saving progress keeps the seed override');
+  }
 }
 
-if (!isLA) {
+if (!isLA && learn.length) {
   /* First solve of the first mission, with its answers typed the way a beginner might: thousands commas where they fit.
      No miss is logged, the first-try star is kept, and the celebration reads as a sentence (titles here are scenes,
      not parts: nothing is a "module" and nothing is "installed"). */
@@ -903,10 +912,12 @@ if (!isLA) {
   if (realm === 'found') assert.ok(plainNext >= 3, 'the plain next roll would have repeated the problem in the review cases');
   /* Through the page: reveal, reopen, and the problem on screen has changed; the save keeps one integer per mission. */
   const g = quests.find(q => Gen.has(q.id) && !(q.prereqs || []).length), ui = boot();
+  if (g) {
   ui.qa.setState({ seed: 4 }); ui.qa.mission(g.id); ui.el('#ready').onclick(); const shownPrompt = ui.qa.current().prompt;
   ui.el('#solution-btn').onclick(); assert.ok(ui.qa.roll(g.id) >= 1);
   ui.qa.mission(g.id); assert.notEqual(ui.qa.current().prompt, shownPrompt, 'reopening after a reveal gives a new problem');
   assert.ok(Number.isInteger(JSON.parse(ui.storage.get('vector-guild-save-v2')).realms[REALM.saveId || REALM.id].rolls[g.id]));
+  }
 }
 
 if (isLA) {
@@ -917,8 +928,9 @@ if (isLA) {
   console.log(`PASS: ${questCount}-mission teaching/guidance/schema/reachability audit (${learn.length} learn + ${practice.length} practice); chapters, variants, contract board, economy and ranks; 68 interactive experiments and 3D/2D formulas; sourced lessons; outpost mentor; guided help; rewards/payoff; old and new save persistence/unlocks; import normalization; practice missions and drop-down menus.`);
   console.log(`NOTE: offline imports cannot authenticate an entirely forged closed completion list (${forged.solved.length}/${questCount} accepted; XP recomputed).`);
 } else {
-  console.log(`PASS: ${REALM.name} (${realm}): ${questCount}-mission teaching/guidance/schema/reachability audit (${learn.length} learn + ${practice.length} practice); declared chapters, sectors, tiers and ranks; ${REALM.sourceRule.label} sources; experiments and variants; narration; first-mission play-through with its own save slice; practice missions and drop-down menus.`);
+  console.log(`PASS: ${REALM.name} (${realm}): ${questCount}-mission teaching/guidance/schema/reachability audit (${learn.length} learn + ${practice.length} practice); declared chapters, sectors, tiers and ranks; ${REALM.sourceRule.label} sources; experiments and variants; narration; ${learn.length ? 'first-mission play-through with its own save slice; ' : ''}practice missions and drop-down menus.`);
   if (missing.length) console.log(`NOTE: ${missing.length} of ${declared.flatMap(c => c.ids).length} declared missions are not written yet: ${missing.join(' ')}. Run with --complete to require them.`);
+  if (!learn.length) console.log('NOTE: no mission is written yet, so the play-throughs (first solve, saves, review drills, rerolls) wait for the first one.');
 }
 if (missingPractice.length) { const concepts = [...new Set(missingPractice.map(id => id.slice(0, 3)))]; console.log(`NOTE: ${missingPractice.length} of ${plannedPractice.length} planned practice missions are not written yet (${concepts.length} concepts: ${concepts[0]}${concepts.length > 1 ? '–' + concepts[concepts.length - 1] : ''}). Run with --complete-practice to require them.`); }
-module.exports = { boot, realm, REALM, quests, byId, chapters, curriculumWindow };
+module.exports = { boot, realm, REALM, quests, byId, chapters, curriculumWindow, missing, missingPractice };

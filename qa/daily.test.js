@@ -385,10 +385,12 @@ test('the card: the reward is shown only once the save holds it, and a second pr
   queue[0](); assert.equal(p.C.dust(), dust + 15); assert.equal(p.toasts.length, 1);
 });
 
-test('every solved Foundations and linear algebra concept gives a problem the check accepts', () => {
-  for (const realm of ['found', 'la']) {
+/* Every pack in game/realms/packs.js (qa/pack-list.js) once all its declared learn missions are written. */
+test('every solved concept of every written pack gives a problem the check accepts', () => {
+  for (const realm of require('./pack-list.js').ids()) {
     const window = { VG_SEED: 0 }, ctx = { window, Math, JSON };
     for (const file of PACKS[realm].scripts) { if (file === 'handson.js') continue; vm.runInNewContext(read(file), ctx); }
+    if (Array.isArray(window.REALM.chapters) && !window.REALM.chapters.every(c => c.ids.every(id => window.QUESTS.some(q => q.id === id)))) { console.log(`NOTE: ${realm} is left out until all its learn missions are written.`); continue; }
     vm.runInNewContext(SRC.daily, ctx);
     const L = window.VGDaily.logic, V = window.Variants, by = new Map(window.QUESTS.map(q => [q.id, q]));
     const lib = { has: id => V.has(id), quest: id => by.get(id) || null };

@@ -1,6 +1,6 @@
 /* The collection on the realm page (docs/COLLECTION.md): game/app.js with game/collection/core.js.
    Run: node qa/realm-collection.test.js
-   For each pack (linear algebra, Foundations) it plays app.js in Node through the page stand-in of qa/harness.js
+   For each pack whose learn missions are all written (qa/pack-list.js: la, found, calc1 and any pack added later) it plays app.js in Node through the page stand-in of qa/harness.js
    and checks what the realm page must guarantee:
      - a first solve pays 10 stardust, +5 with the first-try star, once; replaying and reloading pay nothing more
      - a 2.0 save (and a 1.4.1 save) with past solves is paid on its first load, once, and is otherwise unchanged
@@ -15,6 +15,7 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
+const { ids: packIds, written } = require('./pack-list.js'), PACK_IDS = packIds();
 const KEY = 'vector-guild-save-v2';
 const FIGURES = [
   { id: 'fx-look', name: 'Fixture look', rarity: 'common', field: 'Fixture', perk: 'secondlook' },
@@ -34,7 +35,9 @@ function harness(realm) {
 
 let checks = 0;
 function suite(realm) {
-  const H = harness(realm), { quests, chapters, REALM } = H, sid = REALM.saveId || REALM.id;
+  const H = harness(realm);
+  if (!written(H)) return false;
+  const { quests, chapters, REALM } = H, sid = REALM.saveId || REALM.id;
   const real = H.curriculumWindow.VG_ACHIEVEMENTS;
   const test = (name, fn) => { try { fn(); checks++; } catch (e) { e.message = `[${realm}] ${name}: ${e.message}`; throw e; } };
   const meta = (equipped, more = {}) => ({ v: 1, dust: 0, earned: 0, owned: equipped ? { [equipped]: 1 } : {}, equipped: equipped || null, ach: [], pulls: equipped ? 1 : 0, sinceRare: 0, sinceLegend: 0, paid: {}, drills: 0, looks: {}, ...more });
@@ -294,9 +297,13 @@ function suite(realm) {
     open(broken, first.id); wrong(broken); assert.match(right(broken), /Mission complete/, 'a failing collection never blocks a solve');
     assert.equal(broken.qa.getState().xp, first.xp);
   });
+  return true;
 }
 
-for (const realm of ['la', 'found', 'calc1']) suite(realm);
+/* Every pack in game/realms/packs.js (qa/pack-list.js). A pack whose learn missions are not all written yet is left
+   for later with a NOTE: these suites need whole chapters. */
+const covered = [], waiting = [];
+for (const realm of PACK_IDS) { if (suite(realm)) covered.push(realm); else waiting.push(realm); }
 
 /* Wiring that only the files can show. */
 const app = fs.readFileSync(path.resolve(__dirname, '../game/app.js'), 'utf8');
@@ -320,4 +327,5 @@ assert.match(app, /collUI\(\)\.chip\(el,\{label:'Stardust',name:'Collection'\}\)
 const css = fs.readFileSync(path.resolve(__dirname, '../game/update.css'), 'utf8');
 assert.match(css, /\.collection-chip\{[^}]*min-height:44px;min-width:44px/, 'the chip is a 44 px target');
 assert.match(css, /\.collection-chip\[hidden\]\{display:none\}/, 'and stays hidden until it is drawn');
-console.log(`realm collection: ${checks} checks passed for linear algebra and Foundations, plus wiring.`);
+for (const realm of waiting) console.log(`NOTE: ${realm} is left out until all its learn missions are written.`);
+console.log(`realm collection: ${checks} checks passed for ${covered.join(', ')}, plus wiring.`);

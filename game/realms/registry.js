@@ -5,20 +5,25 @@
              missions = every mission of the full pack, learn and practice (Foundations and Calculus 1: 40 learn +
              120 practice each; linear algebra: 68 learn + 204 practice).
              learn = the learn missions alone, one per concept, where a pack has practice missions as well.
-   A part with status 'ready' has a pack id; its scripts are listed in VG_PACKS (realms/packs.js). */
+             ach = the part's two achievements (game/collection/achievements.js): <id>-done "Learn every concept in
+             <short>." and <id>-master "Solve every mission in <short>, practice included."; done and master are their
+             names; doneReward is the stardust for <id>-done when it is not 150. Ids never change once shipped.
+   A part with status 'ready' has a pack id; its scripts are listed in VG_PACKS (realms/packs.js).
+   A new pack is added by tools/new-pack.js (docs/PACK-SPEC.md), which flips its part to ready; nobody edits this
+   file by hand for a pack. */
 window.VG_REALMS = [
  {node:'found',name:'Foundations',pos:[0,-1,2],color:'amber',needs:[],
   learn:'Numbers, equations, functions and graphs: the language every other realm speaks.',
   world:'Split a bill, read a chart in the news, work out how long a trip takes.',
-  parts:[{id:'found',name:'Foundations',status:'ready',missions:160,learn:40}]},
+  parts:[{id:'found',name:'Foundations',status:'ready',missions:160,learn:40,ach:{short:'Foundations',done:'Solid ground',master:'Bedrock',doneReward:120}}]},
  {node:'alg',name:'Algebra',pos:[-8,2,3],color:'cyan',needs:['found'],
   learn:'Vectors, matrices and the structures behind them.',
   world:'Steer a spacecraft, compress a photo, rank web pages.',
-  parts:[{id:'la',name:'Linear algebra',status:'ready',missions:272,learn:68},{id:'abstract',name:'Abstract algebra',status:'coming'}]},
+  parts:[{id:'la',name:'Linear algebra',status:'ready',missions:272,learn:68,ach:{short:'Linear algebra',done:'Master of arrows',master:'Full span'}},{id:'abstract',name:'Abstract algebra',status:'coming'}]},
  {node:'calc',name:'Calculus',pos:[7,1,4],color:'violet',needs:['found'],
   learn:'How things change and how change adds up, first along a line and then across surfaces.',
   world:'Find the fastest route, the dose that lasts, the shape that uses least material.',
-  parts:[{id:'calc1',name:'Calculus 1: change',status:'ready',missions:160,learn:40},{id:'calc2',name:'Calculus 2: accumulation',status:'coming'},{id:'calc3',name:'Calculus 3: many variables',status:'coming'}]},
+  parts:[{id:'calc1',name:'Calculus 1: change',status:'ready',missions:160,learn:40,ach:{short:'Calculus 1',done:'Rate of climb',master:'Area under the curve'}},{id:'calc2',name:'Calculus 2: accumulation',status:'coming'},{id:'calc3',name:'Calculus 3: many variables',status:'coming'}]},
  {node:'stat',name:'Statistics & probability',pos:[2,-7,-4],color:'cyan',needs:['found'],
   learn:'Reasoning under uncertainty: chance, evidence and what a sample can tell you.',
   world:'Judge a medical test, a poll, or whether a result is luck.',

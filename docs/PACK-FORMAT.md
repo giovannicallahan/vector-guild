@@ -476,3 +476,7 @@ node qa/harness.js --realm calc1 --complete --complete-practice   # at the end: 
 node qa/glossary.test.js                                          # glossary words are used where they are taught
 node tools/build-sw.js && node tools/build-sw.js --check          # the offline file list
 ```
+
+## 12. Adding a pack
+
+Every pack after Calculus 1 is made by `node tools/new-pack.js tools/packs/<id>.json` from one JSON spec: chapters, sectors, landmarks, ranks, source rule, mentor, page text and the names of its two achievements. It writes `pack.js` and every stub of §11's table (plus the pack's own `glossary.js`), adds the `VG_PACKS` entry and flips the registry part to ready; every check then covers the pack by itself, and unwritten missions are NOTEs. Authors edit only their stubs. The spec's schema, the steps, which shared files an author never edits, and a complete example (`tools/packs/calc1.example.json`, which reproduces Calculus 1's `pack.js`) are in `docs/PACK-SPEC.md`. Read "found" or "calc1" in §1–§11 as the new pack's id.

@@ -18,7 +18,11 @@ const shellSrc = fs.readFileSync(game + '/shell/shell.js', 'utf8');
 const shellCss = fs.readFileSync(game + '/shell/shell.css', 'utf8');
 const win = {};
 vm.runInNewContext(fs.readFileSync(game + '/realms/registry.js', 'utf8'), { window: win });
-const REALMS = JSON.parse(JSON.stringify(win.VG_REALMS || null)); /* copy into this realm so deepEqual sees plain arrays */
+/* The registry as the three 2.5 packs left it: a part added later by tools/new-pack.js shows as 'coming' here, so
+   the checks below keep pinning down found, la and calc1 however many packs are ready (qa/pack-list.js). Every
+   ready part of the real registry is checked in qa/new-pack.test.js. */
+assert.ok(Array.isArray(win.VG_REALMS) && win.VG_REALMS.length > 0, 'registry loads');
+const REALMS = require('./pack-list.js').baseRegistry(); /* plain data, so deepEqual sees plain arrays */
 assert.ok(Array.isArray(REALMS) && REALMS.length > 0, 'registry loads');
 const node = id => REALMS.find(r => r.node === id);
 const saveWith = slices => id => slices[id] || null;

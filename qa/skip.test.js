@@ -1,6 +1,6 @@
 /* The skip-ahead check (game/skip.js, drawn and applied by game/app.js).
    Run: node qa/skip.test.js
-   For each pack (linear algebra, Foundations) it plays app.js in Node through the page stand-in of qa/harness.js.
+   For each pack whose learn missions are all written (qa/pack-list.js: la, found, calc1 and any pack added later) it plays app.js in Node through the page stand-in of qa/harness.js.
    What it guarantees:
      - a chapter that is not complete offers the check; a chapter whose earlier chapters are not done does not yet
      - the check is one fresh problem from every learn mission of the chapter: new numbers, no hints, no guided steps
@@ -15,6 +15,7 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
+const { ids: packIds, written } = require('./pack-list.js'), PACK_IDS = packIds();
 const KEY = 'vector-guild-save-v2', DAY = 86400000;
 const plain = x => JSON.parse(JSON.stringify(x)); // out of the vm realm, so deepEqual compares values
 const same = (a, b, message) => assert.deepEqual(plain(a), plain(b), message);
@@ -28,7 +29,9 @@ function harness(realm) {
 
 let checks = 0;
 function suite(realm) {
-  const H = harness(realm), { quests, chapters, REALM } = H, sid = REALM.saveId || REALM.id, W = H.curriculumWindow, S = W.VGSkip;
+  const H = harness(realm);
+  if (!written(H)) return false;
+  const { quests, chapters, REALM } = H, sid = REALM.saveId || REALM.id, W = H.curriculumWindow, S = W.VGSkip;
   const test = (name, fn) => { try { fn(); checks++; } catch (e) { e.message = `[${realm}] ${name}: ${e.message}`; throw e; } };
   const save = slice => new Map([[KEY, JSON.stringify({ v: 2, seed: 0, intro: true, realms: slice ? { [sid]: slice } : {} })]]);
   const slice = p => JSON.parse(p.storage.get(KEY)).realms[sid];
@@ -222,11 +225,16 @@ function suite(realm) {
     const plainSave = page(save({ solved: one, tools: [] })), its = plainSave.skip.build(1); plainSave.skip.finish(1, its, wrongAt(its, [0]));
     same(slice(plainSave).solved, one); same(slice(plainSave).reviews, {});
   });
+  return true;
 }
 
-for (const realm of ['la', 'found', 'calc1']) suite(realm);
+/* Every pack in game/realms/packs.js (qa/pack-list.js). A pack whose learn missions are not all written yet is left
+   for later with a NOTE: these suites need whole chapters. */
+const covered = [], waiting = [];
+for (const realm of PACK_IDS) { if (suite(realm)) covered.push(realm); else waiting.push(realm); }
 const packs = fs.readFileSync(path.join(__dirname, '..', 'game', 'realms', 'packs.js'), 'utf8'), src = fs.readFileSync(path.join(__dirname, '..', 'game', 'skip.js'), 'utf8');
-assert.equal((packs.match(/'skip\.js'/g) || []).length, 3, 'every pack loads skip.js');
+{ const w = {}; require('node:vm').runInNewContext(packs, { window: w }); assert.ok(Object.keys(w.VG_PACKS).length >= 3 && Object.values(w.VG_PACKS).every(p => p.scripts.includes('skip.js')), 'every pack loads skip.js'); }
 assert.ok(!/\bfetch\(|\bimport\s|localStorage|document\./.test(src), 'skip.js is a classic script with no page or storage code');
 checks++;
-console.log(`PASS: skip-ahead check, ${checks} checks (linear algebra and Foundations): offer, fresh problems, pass, fail, retry, saves.`);
+for (const realm of waiting) console.log(`NOTE: ${realm} is left out until all its learn missions are written.`);
+console.log(`PASS: skip-ahead check, ${checks} checks (${covered.join(', ')}): offer, fresh problems, pass, fail, retry, saves.`);

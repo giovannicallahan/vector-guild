@@ -16,7 +16,8 @@ function lines(pack) {
   const out = {}; for (const q of window.QUESTS) if (!q.parent) out[q.id] = window.Outpost.narration(q); return out;
 }
 const stamp = text => crypto.createHash('sha1').update(text).digest('hex').slice(0, 10);
-const PACKS = ['found', 'la', 'calc1'];
+/* Every pack in game/realms/packs.js, registry order first (found, la, calc1, then packs added later): qa/pack-list.js. */
+const PACKS = require('../qa/pack-list.js').ids();
 /* A pack is recorded once game/voice/<pack>/manifest.json exists (tools/voice/render.py writes it). Until then the
    game uses the device voice for it, the pack is left out of game/voice/index.js, and --check reports it as a note,
    not a failure. Once the manifest exists, every learn mission of the pack needs its clip. */

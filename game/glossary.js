@@ -1,5 +1,7 @@
 /* Tap-to-define words. Two parts:
    1. window.VG_GLOSSARY = { <pack id>: { <term>: { term, means, example, taught, also, avoid } } }
+        (Foundations, linear algebra and Calculus 1 are below; a later pack's words come from its own
+        game/realms/<id>/glossary.js, merged at the end of this part)
         term     the word as it is shown at the top of the definition
         means    one plain sentence
         example  one tiny example
@@ -231,7 +233,13 @@
     for (const [term, taught, means, example, also, avoid] of rows) out[term.toLowerCase()] = { term, taught, means, example, also: also || [], ...(avoid ? { avoid } : {}) };
     return out;
   };
-  window.VG_GLOSSARY = { found: build(FOUND), la: build(LA), calc1: build(CALC1) };
+  /* Packs added after Calculus 1 ship their own words in game/realms/<id>/glossary.js, loaded just before this file:
+     window.VG_GLOSSARY_PACKS[<id>] = { required: [terms qa/glossary.test.js requires], terms: [rows as above] }
+     (docs/PACK-SPEC.md, "Glossary"). Their rows are merged here; a pack cannot replace the words of the three above. */
+  const glossary = { found: build(FOUND), la: build(LA), calc1: build(CALC1) };
+  const shipped = window.VG_GLOSSARY_PACKS || {};
+  for (const id of Object.keys(shipped)) if (!Object.prototype.hasOwnProperty.call(glossary, id) && shipped[id] && Array.isArray(shipped[id].terms)) glossary[id] = build(shipped[id].terms);
+  window.VG_GLOSSARY = glossary;
 
   /* ---------- matching (no page needed; qa/glossary.test.js uses it) ---------- */
   const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -244,6 +252,7 @@
     const forms = new Map();
     for (const [key, e] of Object.entries(pack)) for (const base of [e.term, ...e.also]) for (const w of [base, ...plural(base)]) if (!forms.has(w.toLowerCase())) forms.set(w.toLowerCase(), key);
     const words = [...forms.keys()].sort((a, b) => b.length - a.length);
+    if (!words.length) return null; // a pack whose glossary has no words yet: nothing to match
     const re = new RegExp('(?<![\\p{L}\\p{N}])(' + words.map(escapeRe).join('|') + ')(?![\\p{L}\\p{N}])', 'giu');
     const avoid = {}; for (const [key, e] of Object.entries(pack)) if (e.avoid) avoid[key] = new RegExp(e.avoid, 'i');
     return matchers[packId] = { pack, forms, re, avoid };

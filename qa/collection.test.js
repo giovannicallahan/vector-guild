@@ -38,6 +38,9 @@ const slice = (solved, clean = [], more = {}) => ({ solved, xp: 0, points: 0, to
 /* What a realm page hands to settle(): n missions cut into equal chapters. */
 function realmCtx(id, missions, chapters) { const all = ids(missions), size = Math.ceil(missions / chapters); return { id, missions, ids: all, chapters: Array.from({ length: chapters }, (_, i) => ({ index: i, name: 'Chapter ' + (i + 1), ids: all.slice(i * size, (i + 1) * size) })) }; }
 const LA = realmCtx('la', 68, 8), FOUND = realmCtx('found', 40, 7), CALC1 = realmCtx('calc1', 40, 7);
+/* Packs added after 2.5 (tools/new-pack.js): every ready registry part other than these three. Each has two
+   achievements from its registry entry, and is played to the end below like the three. */
+const LATER = require('./pack-list.js').readyParts().filter(p => !['la', 'found', 'calc1'].includes(p.id));
 const total = events => events.reduce((n, e) => n + e.dust, 0);
 const types = events => events.map(e => e.type === 'achievement' ? 'achievement:' + e.id : e.type);
 const give = (S, dust) => { const m = S.meta(); m.dust = dust; S.putMeta(m); };
@@ -50,7 +53,16 @@ const test = (name, fn) => { fn(); count++; console.log('ok   ' + name); };
 
 test('achievement list: about 30, unique ids, plain fields, rewards from 15 to 150', () => {
   const { A } = page();
-  assert.ok(A.length >= 26 && A.length <= 34, 'about 30: ' + A.length);
+  assert.ok(A.length - 2 * LATER.length >= 26 && A.length - 2 * LATER.length <= 34, 'about 30, and two for each pack added later: ' + A.length);
+  /* The per-realm pairs come from the registry (game/realms/registry.js, `ach`); the 2.5 ones are exactly as shipped. */
+  const pairs = A.filter(a => /-(done|master)$/.test(a.id)).map(a => [a.id, a.name, a.text, a.reward]);
+  eq(pairs.slice(0, 6), [['found-done', 'Solid ground', 'Learn every concept in Foundations.', 120], ['found-master', 'Bedrock', 'Solve every mission in Foundations, practice included.', 150],
+    ['la-done', 'Master of arrows', 'Learn every concept in Linear algebra.', 150], ['la-master', 'Full span', 'Solve every mission in Linear algebra, practice included.', 150],
+    ['calc1-done', 'Rate of climb', 'Learn every concept in Calculus 1.', 150], ['calc1-master', 'Area under the curve', 'Solve every mission in Calculus 1, practice included.', 150]]);
+  eq(A.slice(10, 18).map(a => a.id), ['chapter-3', 'found-done', 'found-master', 'la-done', 'la-master', 'calc1-done', 'calc1-master', LATER.length ? LATER[0].id + '-done' : 'two-realms'], 'in their 2.5 places, then the later packs in registry order');
+  assert.equal(A[18 + 2 * LATER.length - (LATER.length ? 1 : 0)].id, LATER.length ? 'two-realms' : 'drill-1');
+  eq(pairs.slice(6).map(p => p[0]), LATER.flatMap(p => [p.id + '-done', p.id + '-master']), 'one pair per later ready part');
+  for (const p of LATER) assert.ok(p.ach && A.find(a => a.id === p.id + '-done').name === p.ach.done && A.find(a => a.id === p.id + '-master').name === p.ach.master, p.id + ': names from the registry');
   assert.equal(new Set(A.map(a => a.id)).size, A.length);
   for (const a of A) {
     assert.match(a.id, /^[a-z0-9-]+$/); assert.ok(a.name && a.text, a.id);
@@ -354,7 +366,9 @@ test('every achievement is false on an empty save, can be reached, and is paid o
   S.putRealm('la', slice(everyMission(68), ids(20), { landmarks: [0, 1, 2, 3, 4, 5, 6, 7] }));
   S.putRealm('found', slice(everyMission(40), ids(8), { landmarks: [0, 1, 2, 3, 4, 5, 6] }));
   S.putRealm('calc1', slice(everyMission(40), ids(8), { landmarks: [0, 1, 2, 3, 4, 5, 6] }));
+  for (const p of LATER) { assert.equal(p.missions, 4 * p.learn, p.id + ': one learn and three practice missions per concept'); S.putRealm(p.id, slice(everyMission(p.learn), ids(8), { landmarks: [0, 1, 2, 3, 4, 5, 6] })); }
   const seen = [...C.settle(LA), ...C.settle(FOUND), ...C.settle(CALC1)];
+  for (const p of LATER) seen.push(...C.settle(realmCtx(p.id, p.learn, 7)));
   for (let i = 0; i < 25; i++) seen.push(...C.onDrillDone());
   give(S, 1000000);
   const rng = mulberry(7); let pulls = 0;

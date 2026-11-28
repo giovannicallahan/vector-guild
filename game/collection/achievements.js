@@ -10,7 +10,8 @@
      figures, copiesMax, legendary, equipped distinct figures owned, highest copy count, owns a legendary, has one equipped
      fieldBest {have, need}, fieldDone       the field closest to complete, and whether one is complete
    test(ctx) says whether it is earned. progress(ctx) -> {have, need} exists where there is something to count.
-   An achievement is paid once: its id is stored in meta.ach. Ids must never change once shipped. */
+   An achievement is paid once: its id is stored in meta.ach. Ids must never change once shipped.
+   Needs game/realms/registry.js loaded first (every page loads it before this file) for the per-realm pairs. */
 window.VG_ACHIEVEMENTS = (() => {
   'use strict';
   /* An achievement that is earned when a count reaches a goal. */
@@ -21,6 +22,19 @@ window.VG_ACHIEVEMENTS = (() => {
   const once = (id, name, text, reward, test) => ({ id, name, text, reward, test: ctx => !!test(ctx) });
   const finished = (ctx, id) => !!(ctx.realms[id] && ctx.realms[id].finished);
   const complete = (ctx, id) => !!(ctx.realms[id] && ctx.realms[id].complete);
+  const text = v => typeof v === 'string' && v.trim() !== '';
+  function packs() {
+    const out = [], seen = new Set();
+    for (const node of Array.isArray(window.VG_REALMS) ? window.VG_REALMS : []) for (const p of (node && Array.isArray(node.parts) ? node.parts : [])) {
+      const a = p && p.ach;
+      if (!p || p.status !== 'ready' || !text(p.id) || seen.has(p.id) || !a || !text(a.short) || !text(a.done) || !text(a.master)) continue;
+      seen.add(p.id);
+      const id = p.id, reward = Number.isInteger(a.doneReward) ? a.doneReward : 150;
+      out.push(once(id + '-done', a.done, 'Learn every concept in ' + a.short + '.', reward, c => complete(c, id)),
+        once(id + '-master', a.master, 'Solve every mission in ' + a.short + ', practice included.', 150, c => finished(c, id)));
+    }
+    return out;
+  }
   return [
     once('solve-1', 'First light', 'Solve your first mission.', 15, c => c.solved >= 1),
     reach('solve-5', 'Finding your feet', 'Solve 5 missions.', 20, 5, c => c.solved),
@@ -33,15 +47,12 @@ window.VG_ACHIEVEMENTS = (() => {
     reach('star-25', 'A sky of stars', 'Earn 25 first-try stars.', 80, 25, c => c.stars),
     once('chapter-1', 'Chapter closed', 'Finish a chapter.', 25, c => c.chapters >= 1),
     reach('chapter-3', 'Three chapters', 'Finish 3 chapters.', 50, 3, c => c.chapters),
-    /* Foundations has 40 concepts and 120 optional practice missions. "Solid ground" keeps its 2.1 meaning: the 40 learn missions. */
-    once('found-done', 'Solid ground', 'Learn every concept in Foundations.', 120, c => complete(c, 'found')),
-    once('found-master', 'Bedrock', 'Solve every mission in Foundations, practice included.', 150, c => finished(c, 'found')),
-    /* Linear algebra has 68 concepts and 204 optional practice missions. "Master of arrows" keeps its 2.1 meaning: the 68 learn missions. */
-    once('la-done', 'Master of arrows', 'Learn every concept in Linear algebra.', 150, c => complete(c, 'la')),
-    once('la-master', 'Full span', 'Solve every mission in Linear algebra, practice included.', 150, c => finished(c, 'la')),
-    /* Calculus 1 has 40 concepts and 120 optional practice missions, counted like Foundations. */
-    once('calc1-done', 'Rate of climb', 'Learn every concept in Calculus 1.', 150, c => complete(c, 'calc1')),
-    once('calc1-master', 'Area under the curve', 'Solve every mission in Calculus 1, practice included.', 150, c => finished(c, 'calc1')),
+    /* Two per playable realm part, in registry order (found, la, calc1, then every pack added later): "<id>-done"
+       for every concept learned (the learn missions) and "<id>-master" for every mission, practice included. Names
+       come from the part's `ach` in game/realms/registry.js (tools/new-pack.js writes it from the pack's spec):
+       { short, done, master, doneReward? }. Foundations' "Solid ground" and linear algebra's "Master of arrows" keep
+       their 2.1 meaning, the learn missions; "Bedrock" and "Full span" need every mission. */
+    ...packs(),
     reach('two-realms', 'Explorer', 'Solve a mission in two realms.', 30, 2, c => c.realmsWithSolves),
     once('drill-1', 'Warm-up', 'Finish a review drill.', 15, c => c.drills >= 1),
     reach('drill-10', 'Keeping it fresh', 'Finish 10 review drills.', 40, 10, c => c.drills),

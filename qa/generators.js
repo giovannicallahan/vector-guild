@@ -5,9 +5,10 @@
    The pack's scripts come from game/realms/packs.js. Oracles: qa/realms/<id>/oracle-*.js; the 68 linear algebra
    learn missions keep theirs in qa/oracle-a.js ... oracle-d.js. A mission without a generator or an oracle fails.
    Practice missions (q01b ..., docs/PACK-FORMAT.md "Practice missions") are missions like any other here: each
-   needs its own generator and its own oracle (qa/realms/found/oracle-p1.js ... oracle-p8.js,
-   qa/realms/la/oracle-p1.js ... oracle-p14.js, qa/realms/calc1/oracle-p1.js ... oracle-p8.js).
-   Packs other than la and found also run the shared content checks in qa/pack-checks.js.
+   needs its own generator and its own oracle (qa/realms/<id>/oracle-p1.js ... for every pack; linear algebra has
+   oracle-p1.js ... oracle-p14.js).
+   Every pack after Foundations (calc1 and every pack tools/new-pack.js adds) also runs the shared content checks in
+   qa/pack-checks.js. A pack with no mission written yet passes with "No missions were checked."
    Exit code 0 only if every checked mission passes. */
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -36,7 +37,8 @@ const oracleDirs = realm === 'la' ? [[__dirname, /^oracle-[a-z]\.js$/], [oracleD
 for (const [dir, name] of oracleDirs) if (fs.existsSync(dir)) for (const file of fs.readdirSync(dir).filter(f => name.test(f)).sort()) load(path.join(dir, file));
 /* Shared content checks (qa/pack-checks.js) for every pack added after Foundations. Linear algebra keeps its 1.4.1
    checks; Foundations has the same rules in its own qa/realms/found/oracle-pack-checks.js. A failure throws. */
-if (!['la', 'found'].includes(realm)) load(path.join(__dirname, 'pack-checks.js'));
+const LEGACY = ['la', 'found']; // the only packs without the shared checks
+if (!LEGACY.includes(realm)) load(path.join(__dirname, 'pack-checks.js'));
 
 const { Gen, MISSION_GEN, ORACLE, QUESTS } = window;
 const bad = /NaN|undefined|Infinity|[=(,:·]\s*null\b|\[object|[+−]\s*-|(?<![A-Za-z])-\d|\d\.\d{5,}|[+−]\s*[+−]\d|\(\s*\)/;
