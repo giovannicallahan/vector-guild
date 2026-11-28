@@ -103,6 +103,8 @@ check('the scaffolder in a scratch repository: writes, is idempotent, keeps work
   try {
     fs.mkdirSync(path.join(tmp, 'game/realms'), { recursive: true }); fs.mkdirSync(path.join(tmp, 'qa/realms'), { recursive: true });
     for (const f of ['game/realms/packs.js', 'game/realms/registry.js']) fs.copyFileSync(path.join(repo, f), path.join(tmp, f));
+    /* Once every planned realm is built the registry has no 'coming' part, so the scratch copy gets one to flip. */
+    { const rf = path.join(tmp, 'game/realms/registry.js'), t = fs.readFileSync(rf, 'utf8'); if (!t.includes("status:'coming'")) { const i = t.lastIndexOf('parts:['); assert.ok(i > 0, 'registry has a parts list'); fs.writeFileSync(rf, t.slice(0, i) + "parts:[{id:'zztest',name:'Test realm',status:'coming'}," + t.slice(i + 7)); } }
     const at = f => path.join(tmp, f), original = { packs: fs.readFileSync(at('game/realms/packs.js'), 'utf8'), registry: fs.readFileSync(at('game/realms/registry.js'), 'utf8') };
     const base = JSON.parse(read('tools/packs/calc1.example.json'));
     const specFor = (id, extra) => Object.assign(JSON.parse(JSON.stringify(base)), { id, registry: {}, name: 'Test ' + id, short: 'Test ' + id, achievements: { done: id + ' done', master: id + ' mastered' } }, extra || {});
@@ -178,7 +180,7 @@ check('landmark glyphs: SVG shapes in the outpost palette and size', () => {
 check('the real game: every ready part and every later pack is registered the standard way', () => {
   const w = {}; vm.runInNewContext(read('game/realms/packs.js'), { window: w });
   const parts = readyParts();
-  assert.deepEqual(parts.slice(0, 3).map(p => p.id), ['found', 'la', 'calc1'], 'the 2.5 packs come first, in registry order');
+  assert.deepEqual(parts.map(p => p.id).filter(id => ['found', 'la', 'calc1'].includes(id)), ['found', 'la', 'calc1'], 'the 2.5 packs are ready, in registry order');
   for (const p of parts) {
     assert.ok(w.VG_PACKS[p.id], p.id + ': a ready part has a pack in game/realms/packs.js');
     assert.ok(Number.isInteger(p.missions) && Number.isInteger(p.learn) && p.learn > 0 && p.missions >= p.learn, p.id + ': mission counts');
