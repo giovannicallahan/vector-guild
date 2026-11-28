@@ -1,6 +1,6 @@
 # MathCosmos for Android
 
-**Current: version 2.8.0, 1,872 missions in eleven realms** — Linear algebra 272 (68 concepts, each with one learn and three practice missions), and 160 each for Foundations, Calculus 1, Calculus 2, Calculus 3, Probability, Data and inference, Logic and proof, Discrete mathematics, Number theory, and Graph theory. Sections further down describe each version in turn; "68 missions" there means versions up to 1.4.1.
+**Current: version 2.9.0, 2,512 missions in fifteen realms** — Linear algebra 272 (68 concepts, each with one learn and three practice missions), and 160 each for Foundations, Calculus 1, Calculus 2, Calculus 3, Probability, Data and inference, Logic and proof, Discrete mathematics, Number theory, Graph theory, Abstract algebra, Differential equations, Real analysis, and Complex analysis. Sections further down describe each version in turn; "68 missions" there means versions up to 1.4.1.
 
 Offline Android WebView app. Game files live in `game/` and are copied into the APK on each build. JavaScript progress is stored on the device; Save & settings includes JSON backup import and export using Android's file picker.
 
@@ -99,6 +99,15 @@ Checks: the 2.2 commands, plus `node qa/harness.js --complete --complete-practic
 - Every mission has a generator and an independent oracle (`qa/realms/calc1/`); shared content rules moved to `qa/pack-checks.js`.
 - 75 calculus terms in the tap-to-define glossary; two new achievements; Mira's 40 calculus briefings are recorded.
 - MathCosmos now has 592 missions in three realms.
+
+## Version 2.9.0
+
+- Four new realms, each with 40 learn missions and 120 practice missions: Abstract algebra (patterns of moves), Differential equations, Real analysis, Complex analysis (the plane of numbers).
+- Every new mission draws fresh numbers each time and is checked against an independently written answer checker.
+- Every cited textbook page was re-opened and matched to its mission. Each realm was reviewed by an outside model (Codex) and its confirmed findings fixed. Antigravity was not used for this release.
+- Mira's 160 new briefings are recorded.
+- Achievements for the first three realms keep their places in the list when a new realm joins their galaxy.
+- MathCosmos now has 2,512 missions in fifteen realms.
 
 ## Version 2.8.0
 
