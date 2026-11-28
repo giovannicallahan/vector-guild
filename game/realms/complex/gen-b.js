@@ -217,7 +217,7 @@ Object.assign(window.MISSION_GEN, {
   build: P => { const { k } = P, C = q19calc(P), e = SUP[k + 1], zk = 'z' + SUP[k]; return {
    prompt: `A cable on the ring road runs along a winding route from a = ${cz(C.A)} to b = ${cz(C.B)}. Enter the real part, then the imaginary part, of ∫ ${zk} dz along the route.`,
    answer: [C.I[0], C.I[1]],
-   hints: ['zⁿ has the antiderivative zⁿ⁺¹ ÷ (n + 1), because the derivative of that is zⁿ. With an antiderivative F, the integral is F(end) − F(start), whatever route joins them.', 'Work out the powers of the two end points one multiplication at a time, using i² = −1.'],
+   hints: ['For n = 0, 1, 2, …, zⁿ has the antiderivative zⁿ⁺¹ ÷ (n + 1) at every point of the plane, because the derivative of that is zⁿ. With an antiderivative F that works at every point of a region holding the routes, the integral is F(end) − F(start), whatever route joins them.', 'Work out the powers of the two end points one multiplication at a time, using i² = −1.'],
    solution: `An antiderivative of ${zk} is F(z) = z${e} ÷ ${n(k + 1)}, so the route does not matter: the integral is F(b) − F(a) = (b${e} − a${e}) ÷ ${n(k + 1)}. b${e} = ${cz(C.Bp)} and a${e} = ${cz(C.Ap)}, so b${e} − a${e} = ${cz(C.D)}. Dividing by ${n(k + 1)} gives ${cz(C.I)}.`,
    guidance: [
     { prompt: `b${e} = ${cz(C.Bp)} and a${e} = ${cz(C.Ap)}. What is the real part of b${e} − a${e}?`, answer: [C.D[0]], explanation: `${n(C.Bp[0])} − ${par(C.Ap[0])} = ${n(C.D[0])}.` },
