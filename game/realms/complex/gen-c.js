@@ -59,23 +59,23 @@ const CLAIMS = [ /* q26: s is only an index into these claims; each is [text, 1 
 
 window.MISSION_GEN = window.MISSION_GEN || {};
 Object.assign(window.MISSION_GEN, {
- /* q21: ∮ dz ÷ (z − a) round |z| = R (2 inside, 0 outside), and ∮ z² ÷ (z − b) dz with b real and outside (0). */
+ /* q21: ∮ C ÷ (z − a) dz round |z| = R (2C inside, 0 outside), and ∮ z² ÷ (z − b) dz with b real and outside (0). */
  q21: {
-  canonical: { p: 1, q: 2, R: 3, b: -5 },
+  canonical: { p: 1, q: 2, R: 3, b: -5, C: 3 },
   /* a is never on the circle (|a|² and R² at least 2 apart); about half the draws put a inside. Never the worked example's points. */
   draw: R => { const inside = R.bool(); return retry(() => { const r = R.int(2, 6), p = R.int(-6, 6), q = R.nz(-6, 6);
-    return { p, q, R: r, b: (R.bool() ? 1 : -1) * (r + R.int(1, 4)) }; },
-   x => fits(x, inside) && !(x.p === 1 && x.q === 2 && x.R === 3) && !(x.p === 1 && (x.q === 3 || x.q === -1)), { p: 1, q: 2, R: 3, b: -5 }); },
-  build: ({ p, q, R, b }) => { const A = cx(p, q), d2 = p * p + q * q, R2 = R * R, inside = d2 < R2, k = inside ? 2 : 0; return {
-   prompt: `The ring road follows the circle |z| = ${n(R)}, driven once anticlockwise. A field source sits at the point a = ${A}, and the field it makes along the road is 1 ÷ ${zp(p, q)}. Enter k in ∮ dz ÷ ${zp(p, q)} = kπi round the road. A second field, z² ÷ ${zp(b)}, is analytic everywhere except at z = ${n(b)}: enter k in ∮ z² ÷ ${zp(b)} dz = kπi round the same road.`,
+    return { p, q, R: r, b: (R.bool() ? 1 : -1) * (r + R.int(1, 4)), C: R.pick([-1, 1]) * R.int(2, 6) }; },
+   x => fits(x, inside) && !(x.p === 1 && x.q === 2 && x.R === 3) && !(x.p === 1 && (x.q === 3 || x.q === -1)), { p: 1, q: 2, R: 3, b: -5, C: 3 }); },
+  build: ({ p, q, R, b, C }) => { const A = cx(p, q), d2 = p * p + q * q, R2 = R * R, inside = d2 < R2, k = inside ? 2 * C : 0, F = `${n(C)} ÷ ${zp(p, q)}`; return {
+   prompt: `The ring road follows the circle |z| = ${n(R)}, driven once anticlockwise. A field source sits at the point a = ${A}, and the field it makes along the road is ${F}. Enter k in ∮ ${F} dz = kπi round the road. A second field, z² ÷ ${zp(b)}, is analytic everywhere except at z = ${n(b)}: enter k in ∮ z² ÷ ${zp(b)} dz = kπi round the same road.`,
    answer: [k, 0],
    hints: ['A point a is inside the circle |z| = R when its distance from 0 is less than R, that is when (Re a)² + (Im a)² < R². Compare the squares, so no square root is needed.',
-    'Cauchy’s theorem: if a function is analytic at every point on and inside the loop, its integral round the loop is 0. If the one bad point of 1 ÷ (z − a) is inside, shrink the loop to a small circle centred on a, which does not change the integral; round that circle the integral is 2πi.'],
-   solution: `|a|² = ${par(p)}² + ${par(q)}² = ${n(d2)} and R² = ${n(R2)}. ${inside ? `${n(d2)} is less than ${n(R2)}, so a is inside the road. 1 ÷ ${zp(p, q)} is analytic everywhere except at a, so the road can be shrunk to a small circle round a without changing the integral, and that circle gives 2πi: k = 2.` : `${n(d2)} is more than ${n(R2)}, so a is outside the road. 1 ÷ ${zp(p, q)} is analytic at every point on and inside the road, so by Cauchy’s theorem the integral is 0: k = 0.`} The only bad point of z² ÷ ${zp(b)} is z = ${n(b)}, at distance ${n(Math.abs(b))} from 0, more than ${n(R)}, so it is outside the road. That function is analytic on and inside the road, so by Cauchy’s theorem its integral is 0: k = 0.`,
+    'Cauchy’s theorem: if a function is analytic at every point on and inside the loop, its integral round the loop is 0. If the one bad point of 1 ÷ (z − a) is inside, shrink the loop to a small circle centred on a, which does not change the integral; round that circle ∮ dz ÷ (z − a) is 2πi. A number on top multiplies the whole integral.'],
+   solution: `|a|² = ${par(p)}² + ${par(q)}² = ${n(d2)} and R² = ${n(R2)}. ${inside ? `${n(d2)} is less than ${n(R2)}, so a is inside the road. ${F} is analytic everywhere except at a, so the road can be shrunk to a small circle round a without changing the integral. Round that circle ∮ dz ÷ ${zp(p, q)} = 2πi, and the ${n(C)} on top multiplies it: ${n(C)} × 2πi = ${n(k)}πi, so k = ${n(k)}.` : `${n(d2)} is more than ${n(R2)}, so a is outside the road. ${F} is analytic at every point on and inside the road, so by Cauchy’s theorem the integral is 0: k = 0.`} The only bad point of z² ÷ ${zp(b)} is z = ${n(b)}, at distance ${n(Math.abs(b))} from 0, more than ${n(R)}, so it is outside the road. That function is analytic on and inside the road, so by Cauchy’s theorem its integral is 0: k = 0.`,
    guidance: [
     { prompt: `How far is a = ${A} from 0, squared? Work out |a|² = (Re a)² + (Im a)².`, answer: [d2], explanation: `|a|² = ${par(p)}² + ${par(q)}² = ${n(d2)}.` },
     { prompt: `The road has radius ${n(R)}, so R² = ${n(R2)}. Is a inside the road? Enter 1 for inside, 0 for outside.`, answer: [inside ? 1 : 0], explanation: `${n(d2)} is ${inside ? 'less' : 'more'} than ${n(R2)}, so a is ${inside ? 'inside' : 'outside'} the road.` },
-    { prompt: `What is k in ∮ dz ÷ ${zp(p, q)} = kπi?`, answer: [k], explanation: inside ? 'The bad point is inside, so the road can be shrunk to a small circle round a, which gives 2πi: k = 2.' : 'The function is analytic on and inside the road, so Cauchy’s theorem gives 0: k = 0.' },
+    { prompt: `What is k in ∮ ${F} dz = kπi?`, answer: [k], explanation: inside ? `The bad point is inside, so the road can be shrunk to a small circle round a, where ∮ dz ÷ ${zp(p, q)} = 2πi. Times ${n(C)} that is ${n(k)}πi: k = ${n(k)}.` : 'The function is analytic on and inside the road, so Cauchy’s theorem gives 0: k = 0.' },
     { prompt: `z² ÷ ${zp(b)} fails to be analytic only at z = ${n(b)}, which is ${n(Math.abs(b))} from 0. What is k for its integral round the road?`, answer: [0], explanation: `${n(Math.abs(b))} is more than the radius ${n(R)}, so the bad point is outside and Cauchy’s theorem gives 0.` }
    ] }; }
  },

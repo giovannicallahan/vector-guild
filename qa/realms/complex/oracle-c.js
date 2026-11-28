@@ -25,9 +25,9 @@
   const round6 = x => Math.round(x * 1e6) / 1e6 + 0;
 
   Object.assign(window.ORACLE, {
-    /* Both k values by integrating numerically once round |z| = R: 1 ÷ (z − (p + qi)) and z² ÷ (z − b). */
+    /* Both k values by integrating numerically once round |z| = R: C ÷ (z − (p + qi)) and z² ÷ (z − b). */
     q21: p => [
-      kOfLoop((x, y) => div(1, 0, x - p.p, y - p.q), 0, 0, p.R, 1),
+      kOfLoop((x, y) => div(p.C, 0, x - p.p, y - p.q), 0, 0, p.R, 1),
       kOfLoop((x, y) => { const s = mul(x, y, x, y); return div(s[0], s[1], x - p.b, y); }, 0, 0, p.R, 1),
     ],
     /* The cart's winding number by adding up the turning of the arrow from a to the cart (unwrapped angle) over the

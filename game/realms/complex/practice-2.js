@@ -212,7 +212,7 @@ mk({
 mk({
  id: 'q08b', parent: 'q08', kind: 'setting', title: 'The phase meter',
  brief: 'The rotor hall phase meter shows a signal as a size and an angle, and the crew needs both and the imaginary part.',
- labels: ['|e^z|', 'Im e^z', 'phase'], tolerance: 0.005,
+ labels: ['|e^z|', 'phase', 'Im e^z'], tolerance: 0.005,
  gl: [['|e^z|'], ['phase'], ['Im e^z']]
 }, {
  /* y = Kπ ÷ 4 with K from −30 to 30, shown as the phase Kp π ÷ 4 in (−π, π], with Kp from −3 to 4. Kp is not 0 or 4 (sin would be 0) and K ≠ Kp. */

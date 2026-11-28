@@ -121,9 +121,9 @@ mk({
  brief: 'A sealed drum can only be read by a gauge round its rim, and the lab needs the slope inside and the smallest ceiling that fits the reading.',
  labels: ['size of the derivative', 'smallest ceiling M'], tolerance: 0.01, gl: [['size of the derivative'], ['smallest ceiling M']]
 }, {
- /* The gauge reads kπi = 2πi f⁽ʲ⁾(a) ÷ j!, so |f⁽ʲ⁾(a)| = |k| j! ÷ 2, and the least M with |f⁽ʲ⁾(a)| ≤ j! M ÷ Rʲ is |k| Rʲ ÷ 2 (k even, so whole). */
+ /* The gauge reads kπi = 2πi f⁽ʲ⁾(a) ÷ j!, so |f⁽ʲ⁾(a)| = |k| j! ÷ 2, and the least M with |f⁽ʲ⁾(a)| ≤ j! M ÷ Rʲ is |k| Rʲ ÷ 2. k is any non-zero whole number, so M can end in .5 (j! is even, so |f⁽ʲ⁾(a)| is whole). */
  canonical: { j: 2, a: -1, R: 3, k: -6 },
- draw: R => ({ j: R.int(2, 3), a: R.int(-3, 3), R: R.int(2, 4), k: 2 * R.nz(-6, 6) }),
+ draw: R => ({ j: R.int(2, 3), a: R.int(-3, 3), R: R.int(2, 4), k: R.nz(-12, 12) }),
  build: ({ j, a, R, k }) => { const val = k * fact(j) / 2, av = Math.abs(val), Rj = Math.pow(R, j), M = Math.abs(k) / 2 * Rj, fj = `${der(j)}(${n(a)})`; return {
   prompt: `A sealed drum hides a signal f that is analytic on and inside the circle ${circ(a, R)}. A gauge that goes once anticlockwise round that circle reads ∮ f(z) ÷ ${zp(a)}${SUP[j + 1]} dz = ${kpi(k)}. The formula for derivatives says that this integral equals 2πi ${fj} ÷ ${n(j)}!. Enter |${fj}|, then the smallest ceiling M for |f(z)| on the circle that Cauchy’s inequality |${fj}| ≤ ${n(j)}! M ÷ ${n(R)}${SUP[j]} allows.`,
   answer: [av, M],
@@ -168,11 +168,13 @@ mk({
  brief: 'A heat plate’s model has lost one constant, but a gauge on a thermal ring still knows the plate’s average.',
  labels: ['E', 'u at the point on the ring'], tolerance: 0.01, gl: [['known part at the centre'], ['E'], ['u at the point on the ring']]
 }, {
- /* u = A(x² − y²) + Bxy + Cx + Dy + E with E unknown (not 0); the gauge average V = u(p, q) = known(p, q) + E; the point (p + r, q) is on the ring. */
- canonical: { A: 2, B: -1, C: 3, D: 1, E: -4, p: -1, q: 2, r: 2 },
- draw: R => ({ A: R.pick([-2, -1, 1, 2]), B: R.int(-3, 3), C: R.int(-4, 4), D: R.int(-4, 4), E: R.nz(-9, 9), p: R.int(-3, 3), q: R.int(-3, 3), r: R.int(1, 4) }),
- build: ({ A, B, C, D, E, p, q, r }) => { const known = (x, y) => [A * x * x, -A * y * y, B * x * y, C * x, D * y], K = (x, y) => known(x, y).reduce((s, v) => s + v, 0),
-  S = K(p, q), V = S + E, xe = p + r, ue = K(xe, q) + E; return {
+ /* u = A(x² − y²) + Bxy + Cx + Dy + E with E unknown; V is the gauge average printed in the prompt. E = V − known(p, q), never 0 and at most 9 in size;
+    the point (p + r, q) is on the ring. */
+ canonical: { A: 2, B: -1, C: 3, D: 1, V: -9, p: -1, q: 2, r: 2 },
+ draw: R => tries(() => ({ A: R.pick([-2, -1, 1, 2]), B: R.int(-3, 3), C: R.int(-4, 4), D: R.int(-4, 4), V: R.int(-20, 20), p: R.int(-3, 3), q: R.int(-3, 3), r: R.int(1, 4) }),
+  x => { const E = x.V - (x.A * (x.p * x.p - x.q * x.q) + x.B * x.p * x.q + x.C * x.p + x.D * x.q); return E !== 0 && Math.abs(E) <= 9; }, { A: 2, B: -1, C: 3, D: 1, V: -9, p: -1, q: 2, r: 2 }),
+ build: ({ A, B, C, D, V, p, q, r }) => { const known = (x, y) => [A * x * x, -A * y * y, B * x * y, C * x, D * y], K = (x, y) => known(x, y).reduce((s, v) => s + v, 0),
+  S = K(p, q), E = V - S, xe = p + r, ue = K(xe, q) + E; return {
   prompt: `A heat plate in the hull workshop has the temperature model u(x, y) = ${terms([[A, 'x²'], [-A, 'y²'], [B, 'xy'], [C, 'x'], [D, 'y'], [1, 'E']])}, which is harmonic over the whole plate. E is a constant that the workshop has lost. A thermal ring is the circle of radius ${n(r)} centred at (${n(p)}, ${n(q)}), and its gauge reports that the average of u round the ring is ${n(V)}. Enter E, then the value of u at the point (${n(xe)}, ${n(q)}) on the ring.`,
   answer: [E, ue],
   hints: ['The plate is harmonic, so by the mean value property the average round the ring equals u at the centre of the ring. Put the centre into u and set the result equal to the gauge reading: one equation with E in it.',
@@ -306,11 +308,12 @@ mk({
  brief: 'One constant of the coil’s model was lost, but a gauge reading from its winding still fixes it, and then the other readings follow.',
  labels: ['p', 'k for (z − a)²', 'bound'], tolerance: 0.01, gl: [['p'], ['k for (z − a)²'], ['bound']]
 }, {
- /* f = z² + pz + e with p unknown; gauge K = 2f(a), a ≠ 0 inside |z| = R. f(a) = K ÷ 2 gives p = (K ÷ 2 − a² − e) ÷ a. Second reading 2f′(a) = 2(2a + p). Then Cauchy's bound m! M ÷ ρᵐ for g on |z − 1| = ρ. */
- canonical: { p: 3, e: -2, a: 2, R: 4, m: 2, rho: 2, M: 20 },
- draw: R => tries(() => { const m = R.int(1, 2), rho = R.int(2, 4), a = R.nz(-3, 3); return { p: R.nz(-6, 6), e: R.nz(-5, 5), a, R: Math.abs(a) + R.int(1, 3), m, rho, M: boundM(rho, m, 6, 300, (x, y) => R.int(x, y)) }; },
-  p => p.M > 0 && 2 * (p.a * p.a + p.p * p.a + p.e) !== 0 && 2 * p.a + p.p !== 0, { p: 3, e: -2, a: 2, R: 4, m: 2, rho: 2, M: 20 }),
- build: ({ p, e, a, R, m, rho, M }) => { const fa = a * a + p * a + e, K = 2 * fa, d1 = 2 * a + p, k2 = 2 * d1, rm = Math.pow(rho, m), bound = fact(m) * M / rm; return {
+ /* f = z² + pz + e with p unknown; K is the gauge reading printed in the prompt, K = 2f(a), a ≠ 0 inside |z| = R. The draw picks a whole p from −6 to 6
+    (not 0) and stores only K; build recovers p = (K ÷ 2 − a² − e) ÷ a. Second reading 2f′(a) = 2(2a + p). Then Cauchy's bound m! M ÷ ρᵐ for g on |z − 1| = ρ. */
+ canonical: { K: 16, e: -2, a: 2, R: 4, m: 2, rho: 2, M: 20 },
+ draw: R => tries(() => { const m = R.int(1, 2), rho = R.int(2, 4), a = R.nz(-3, 3), p = R.nz(-6, 6), e = R.nz(-5, 5); return { K: 2 * (a * a + p * a + e), e, a, R: Math.abs(a) + R.int(1, 3), m, rho, M: boundM(rho, m, 6, 300, (x, y) => R.int(x, y)) }; },
+  x => { const p = (x.K / 2 - x.a * x.a - x.e) / x.a; return x.M > 0 && x.K !== 0 && 2 * x.a + p !== 0; }, { K: 16, e: -2, a: 2, R: 4, m: 2, rho: 2, M: 20 }),
+ build: ({ K, e, a, R, m, rho, M }) => { const fa = K / 2, p = (fa - a * a - e) / a, d1 = 2 * a + p, k2 = 2 * d1, rm = Math.pow(rho, m), bound = fact(m) * M / rm; return {
   prompt: `The field coil is the circle |z| = ${n(R)}, driven once anticlockwise, and its model is f(z) = z² + pz ${e < 0 ? '−' : '+'} ${n(Math.abs(e))}, where p is a constant the crew have lost. A gauge reading on the winding shows ∮ f(z) ÷ ${zp(a)} dz = ${kpi(K)}. Enter p, then k in ∮ f(z) ÷ ${zp(a)}² dz = kπi for the same f. A second signal g is analytic on and inside the circle |z − 1| = ${n(rho)}, with |g(z)| ≤ ${n(M)} on that circle: enter the largest value Cauchy’s inequality allows for |${der(m, 'g')}(1)|.`,
   answer: [p, k2, bound],
   hints: ['The point a is inside the circle, so Cauchy’s integral formula gives ∮ f(z) ÷ (z − a) dz = 2πi f(a). Set that equal to the gauge reading to find f(a), then put a into f and solve for p.',

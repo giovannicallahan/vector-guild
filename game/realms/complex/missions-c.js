@@ -34,13 +34,13 @@ window.QUESTS.push(
   id: "q21", title: "The source the ring road misses", topic: "Cauchy’s theorem", tier: "Intermediate", sector: "Ring Road",
   brief: "Field sources sit all over the plain, and the road crew wants to know which ones the ring road actually feels.",
   lesson: "Round a closed curve, a function that is analytic on and inside it integrates to 0; so ∮ dz ÷ (z − a) is 2πi when a is inside the loop and 0 when it is outside.",
-  prompt: "The ring road follows the circle |z| = 3, driven once anticlockwise. A field source sits at the point a = 1 + 2i, and the field it makes along the road is 1 ÷ (z − (1 + 2i)). Enter k in ∮ dz ÷ (z − (1 + 2i)) = kπi round the road. A second field, z² ÷ (z + 5), is analytic everywhere except at z = −5: enter k in ∮ z² ÷ (z + 5) dz = kπi round the same road.",
-  answer: [2,0], labels: ["k for 1 ÷ (z − a)","k for z² ÷ (z − b)"], tolerance: 0.01,
+  prompt: "The ring road follows the circle |z| = 3, driven once anticlockwise. A field source sits at the point a = 1 + 2i, and the field it makes along the road is 3 ÷ (z − (1 + 2i)). Enter k in ∮ 3 ÷ (z − (1 + 2i)) dz = kπi round the road. A second field, z² ÷ (z + 5), is analytic everywhere except at z = −5: enter k in ∮ z² ÷ (z + 5) dz = kπi round the same road.",
+  answer: [6,0], labels: ["k for the source field", "k for z² ÷ (z − b)"], tolerance: 0.01,
   hints: [
    "A point a is inside the circle |z| = R when its distance from 0 is less than R, that is when (Re a)² + (Im a)² < R². Compare the squares, so no square root is needed.",
-   "Cauchy’s theorem: if a function is analytic at every point on and inside the loop, its integral round the loop is 0. If the one bad point of 1 ÷ (z − a) is inside, shrink the loop to a small circle centred on a, which does not change the integral; round that circle the integral is 2πi."
+   "Cauchy’s theorem: if a function is analytic at every point on and inside the loop, its integral round the loop is 0. If the one bad point of 1 ÷ (z − a) is inside, shrink the loop to a small circle centred on a, which does not change the integral; round that circle ∮ dz ÷ (z − a) is 2πi. A number on top multiplies the whole integral."
   ],
-  solution: "|a|² = 1² + 2² = 5 and R² = 9. 5 is less than 9, so a is inside the road. 1 ÷ (z − (1 + 2i)) is analytic everywhere except at a, so the road can be shrunk to a small circle round a without changing the integral, and that circle gives 2πi: k = 2. The only bad point of z² ÷ (z + 5) is z = −5, at distance 5 from 0, more than 3, so it is outside the road. That function is analytic on and inside the road, so by Cauchy’s theorem its integral is 0: k = 0.",
+  solution: "|a|² = 1² + 2² = 5 and R² = 9. 5 is less than 9, so a is inside the road. 3 ÷ (z − (1 + 2i)) is analytic everywhere except at a, so the road can be shrunk to a small circle round a without changing the integral. Round that circle ∮ dz ÷ (z − (1 + 2i)) = 2πi, and the 3 on top multiplies it: 3 × 2πi = 6πi, so k = 6. The only bad point of z² ÷ (z + 5) is z = −5, at distance 5 from 0, more than 3, so it is outside the road. That function is analytic on and inside the road, so by Cauchy’s theorem its integral is 0: k = 0.",
   xp: 150, prereqs: ["q20","q13"],
   artifact: {"name":"Ring road survey","description":"A map of the field sources, each marked inside or outside the road."},
   sources: [source.s4_6],
@@ -69,7 +69,7 @@ window.QUESTS.push(
   guidance: [
    { prompt: "How far is a = 1 + 2i from 0, squared? Work out |a|² = (Re a)² + (Im a)².", answer: [5], labels: ["|a|²"], explanation: "|a|² = 1² + 2² = 5." },
    { prompt: "The road has radius 3, so R² = 9. Is a inside the road? Enter 1 for inside, 0 for outside.", answer: [1], labels: ["inside (1) or outside (0)"], explanation: "5 is less than 9, so a is inside the road." },
-   { prompt: "What is k in ∮ dz ÷ (z − (1 + 2i)) = kπi?", answer: [2], labels: ["k for 1 ÷ (z − a)"], explanation: "The bad point is inside, so the road can be shrunk to a small circle round a, which gives 2πi: k = 2." },
+   { prompt: "What is k in ∮ 3 ÷ (z − (1 + 2i)) dz = kπi?", answer: [6], labels: ["k for the source field"], explanation: "The bad point is inside, so the road can be shrunk to a small circle round a, where ∮ dz ÷ (z − (1 + 2i)) = 2πi. Times 3 that is 6πi: k = 6." },
    { prompt: "z² ÷ (z + 5) fails to be analytic only at z = −5, which is 5 from 0. What is k for its integral round the road?", answer: [0], labels: ["k for z² ÷ (z − b)"], explanation: "5 is more than the radius 3, so the bad point is outside and Cauchy’s theorem gives 0." }
   ]
  },

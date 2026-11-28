@@ -49,7 +49,8 @@ Object.assign(window.ORACLE, {
     return [v[0], v[1]];
   },
   /* z^p = w with |w| = rho^p and w at angle dir × 90° (dir is a quarter-turn index: 0 positive real, 1 on i, 2 negative
-     real, 3 on −i). Roots sit at angles (dir·π/2 + 2πk) ÷ p; take the smallest angle in (0, 2π] and its real part. */
+     real, 3 on −i). Roots sit at angles (dir·π/2 + 2πk) ÷ p; sort them, read the gap between the first two neighbours,
+     and take the smallest angle in (0, 2π] and its real part. */
   q06: p => {
     const roots = [];
     for (let k = 0; k < p.p; k++) {
@@ -58,8 +59,8 @@ Object.assign(window.ORACLE, {
       while (t > 2 * Math.PI + 1e-9) t -= 2 * Math.PI;
       roots.push(t);
     }
-    const t0 = Math.min(...roots);
-    return [roots.length, p.rho, r2(p.rho * Math.cos(t0))];
+    const sorted = roots.slice().sort((x, y) => x - y), t0 = sorted[0];
+    return [r2(sorted[1] - sorted[0]), p.rho, r2(p.rho * Math.cos(t0))];
   },
   /* f(z) = z² + c, c = p + qi. Square z = x + yi as a product, add c, read parts. */
   q07: p => {
@@ -85,17 +86,18 @@ Object.assign(window.ORACLE, {
   },
   /* i^(c i) = e^(c i · Log i) with Log i = iπ/2. (s·i·dir)^(h/2) = e^((h/2)(ln s + i dir π/2)): dir is ±1, the sign of the
      imaginary number; h is twice the exponent. v = e + f i is not zero, so v^(1/m) has the values e^((Log v + 2πik)/m);
-     count the distinct ones over k = 0 … 3m. */
+     compute them for k = 0 … 3m and read their modulus (the oracle checks they all share it). */
   q10: p => {
     const first = cexp(cmul([p.c, 0], cmul([0, 1], [0, Math.PI / 2])));
     const a = p.h / 2, second = cexp([a * Math.log(p.s), a * p.dir * Math.PI / 2]);
     const logv = [Math.log(Math.hypot(p.e, p.f)), argBySearch(p.e, p.f)];
-    const seen = [];
+    const mods = [];
     for (let k = 0; k <= 3 * p.m; k++) {
       const w = cexp([logv[0] / p.m, (logv[1] + 2 * Math.PI * k) / p.m]);
-      if (!seen.some(s => Math.hypot(s[0] - w[0], s[1] - w[1]) < 1e-6)) seen.push(w);
+      mods.push(Math.hypot(w[0], w[1]));
     }
-    return [r2(first[0]), r2(second[0]), seen.length];
+    const shared = mods.every(x => Math.abs(x - mods[0]) < 1e-9) ? mods[0] : NaN;
+    return [r2(first[0]), r2(second[0]), r2(shared)];
   },
 });
 })();

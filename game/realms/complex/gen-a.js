@@ -130,13 +130,13 @@ Object.assign(window.MISSION_GEN, {
   draw: R => pick(R, () => ({ p: R.int(2, 6), rho: R.int(1, 3), dir: R.int(0, 3) }), x => !(x.p === 4 && x.rho === 1 && x.dir === 0) && !(x.p === 3 && x.rho === 2 && x.dir === 2), { p: 3, rho: 2, dir: 2 }),
   build: ({ p, rho, dir }) => { const W = Math.pow(rho, p), h = [0, 1, 2, -1][dir], w = [cx(W, 0), cx(0, W), cx(-W, 0), cx(0, -W)][dir];
    const nums = []; for (let k = 0; k < p; k++) nums.push(h + 4 * k); const best = Math.min(...nums.filter(v => v > 0));
-   const list = nums.map(v => piT(v, 2 * p)).join(', '), ang = best * Math.PI / (2 * p), re = rho * Math.cos(ang), name = rootName(p); return {
-   prompt: `The antenna array needs every signal z with z${sup(p)} = w, where w = ${w}: these are the ${name} of w. Enter how many ${name} w has, their common modulus, and the real part of the one with the smallest positive argument, to 2 decimal places.`,
-   answer: [p, rho, r2(re)],
-   hints: ['A non-zero number w has exactly n different nth roots. If |w| = R, every one of them has modulus r, the positive real number with rⁿ = R.', 'If Arg w = φ, the roots have the arguments (φ + 2πk) ÷ n for k = 0, 1, …, n − 1, spaced equally round a circle. Pick the smallest of them that is greater than 0.'],
-   solution: `w = ${w} has modulus ${n(W)} and argument φ = ${piT(h, 2)}. It has ${n(p)} ${name}, all with modulus ${n(rho)}, because ${n(rho)}${sup(p)} = ${n(W)}. Their arguments are (φ + 2πk) ÷ ${n(p)} for k = 0 to ${n(p - 1)}: ${list}. The smallest positive one is ${piT(best, 2 * p)}, so that root has real part ${n(rho)} × cos(${piT(best, 2 * p)}) ${rd(re)}.`,
+   const list = nums.map(v => piT(v, 2 * p)).join(', '), ang = best * Math.PI / (2 * p), re = rho * Math.cos(ang), name = rootName(p), gap = 2 * Math.PI / p; return {
+   prompt: `The antenna array needs every signal z with z${sup(p)} = w, where w = ${w}: these are the ${name} of w. Enter the angle in radians between two neighbouring roots, then their common modulus, then the real part of the root with the smallest positive argument. Give the angle and the real part to 2 decimal places.`,
+   answer: [r2(gap), rho, r2(re)],
+   hints: ['A non-zero number w has exactly n different nth roots, spaced equally round a circle centred at 0. If |w| = R, every one of them has modulus r, the positive real number with rⁿ = R.', 'If Arg w = φ, the roots have the arguments (φ + 2πk) ÷ n for k = 0, 1, …, n − 1, spaced equally round a circle. Pick the smallest of them that is greater than 0.'],
+   solution: `w = ${w} has modulus ${n(W)} and argument φ = ${piT(h, 2)}. It has ${n(p)} ${name}, all with modulus ${n(rho)}, because ${n(rho)}${sup(p)} = ${n(W)}. They split a full turn into ${n(p)} equal steps, so neighbouring roots are ${piT(2, p)} apart: ${piT(2, p)} ${rd(gap)}. Their arguments are (φ + 2πk) ÷ ${n(p)} for k = 0 to ${n(p - 1)}: ${list}. The smallest positive one is ${piT(best, 2 * p)}, so that root has real part ${n(rho)} × cos(${piT(best, 2 * p)}) ${rd(re)}.`,
    guidance: [
-    { prompt: `How many different ${name} does the non-zero number w = ${w} have?`, answer: [p], explanation: `Every non-zero number has exactly n different nth roots, so w has ${n(p)} ${name}.` },
+    { prompt: `The non-zero number w = ${w} has ${n(p)} different ${name}, spaced equally round a circle. What angle, in radians, separates two neighbouring roots, to 2 decimal places?`, answer: [r2(gap)], explanation: `The ${n(p)} roots split a full turn of 2π into ${n(p)} equal steps, so neighbouring roots are ${piT(2, p)} apart: ${piT(2, p)} ${rd(gap)}.` },
     { prompt: `|w| = ${n(W)}. Which positive real number r has r${sup(p)} = ${n(W)}?`, answer: [rho], explanation: `${n(rho)}${sup(p)} = ${n(W)}, so every root has modulus ${n(rho)}.` },
     { prompt: `The arguments of the roots are ${list}. Take the smallest one greater than 0. What is the real part of that root, to 2 decimal places?`, answer: [r2(re)], explanation: `The smallest positive argument is ${piT(best, 2 * p)}, so the real part is ${n(rho)} × cos(${piT(best, 2 * p)}) ${rd(re)}.` }
    ] }; }
@@ -191,23 +191,24 @@ Object.assign(window.MISSION_GEN, {
     { prompt: `z lies ${w.place}. What is the imaginary part of Log z, which is Arg z, to 2 decimal places?`, answer: [r2(w.arg)], explanation: `arctan(${n(Math.abs(b))} ÷ ${n(Math.abs(a))}) ≈ ${n(w.ref)}, and ${w.rule}, so Arg z ${rd(w.arg)}.` }
    ] }; }
  },
- /* i^(ci) = e^(−cπ ÷ 2); z = s·i or −s·i (dir 1 or −1) raised to a = h ÷ 2 with h odd; m values of v^(1 ÷ m) for v = e + fi.
+ /* i^(ci) = e^(−cπ ÷ 2); z = s·i or −s·i (dir 1 or −1) raised to a = h ÷ 2 with h odd; and the modulus |v|^(1 ÷ m) shared by every value of v^(1 ÷ m), v = e + fi.
     Not the worked example ((−1)^i and (9i)^0.5). */
  q10: {
   canonical: { c: 1, s: 4, dir: 1, h: 3, m: 3, e: -8, f: 0 },
   draw: R => pick(R, () => ({ c: R.pick([-2, -1, -0.5, 0.5, 1]), s: R.int(2, 5), dir: sgn(R), h: R.pick([1, 3, 5]), m: R.int(2, 6), e: R.nz(-9, 9), f: R.nz(-9, 9) }),
-   p => { const v = Math.exp(-p.c * Math.PI / 2), re = Math.pow(p.s, p.h / 2) * Math.cos(p.h * p.dir * Math.PI / 4); return !(p.c === 1 && p.s === 4 && p.dir === 1 && p.h === 3) && !nearTie(v) && !nearTie(re); },
+   p => { const v = Math.exp(-p.c * Math.PI / 2), re = Math.pow(p.s, p.h / 2) * Math.cos(p.h * p.dir * Math.PI / 4); return !(p.c === 1 && p.s === 4 && p.dir === 1 && p.h === 3) && !nearTie(v) && !nearTie(re) && !nearTie(Math.pow(p.e * p.e + p.f * p.f, 1 / (2 * p.m))); },
    { c: 1, s: 4, dir: 1, h: 3, m: 3, e: -8, f: 0 }),
   build: ({ c, s, dir, h, m, e, f }) => { const a = h / 2, pw = c === 1 ? 'i^i' : c === -1 ? 'i^(−i)' : `i^(${n(c)}i)`, val = Math.exp(-c * Math.PI / 2),
-   z = cx(0, dir * s), A = piT(dir, 2), Ap = dir < 0 ? `(${A})` : A, kl = m <= 4 ? Array.from({ length: m }, (_, k) => n(k)).join(', ') : `0, 1, …, ${n(m - 1)}`, ang = piT(h * dir, 4), size = Math.pow(s, a), re = size * Math.cos(h * dir * Math.PI / 4); return {
-   prompt: `The rotor hall works with complex powers, z^a = e^(a log z), whose principal value uses Log z. Enter the principal value of ${pw}, which is a real number, to 2 decimal places; then the real part of the principal value of (${z})^${n(a)}, to 2 decimal places; then how many different values v^(1 ÷ ${n(m)}) has for v = ${cx(e, f)}, counting every branch of the logarithm.`,
-   answer: [r2(val), r2(re), m],
-   hints: ['Log i = iπ ÷ 2, because |i| = 1 and Arg i = π ÷ 2. Then i to a power bi is e^(bi × iπ ÷ 2), and i × i = −1 makes the exponent real.', 'For a real power a, the principal value is z^a = |z|^a e^(ia Arg z), so its real part is |z|^a cos(a Arg z). The other branches add 2πki to Log z; with a = 1 ÷ m they turn the value by 2πk ÷ m.'],
-   solution: `Log i = iπ ÷ 2, so ${pw} = e^(${c === 1 ? '' : c === -1 ? '−' : n(c)}i × iπ ÷ 2) = e^(${piT(-2 * c, 4)}) ${rd(val)}. For z = ${z}, |z| = ${n(s)} and Arg z = ${A}, so the principal value is z^${n(a)} = ${n(s)}^${n(a)} e^(i × ${n(a)} × ${Ap}), with angle ${ang}. Its real part is ${n(s)}^${n(a)} × cos(${ang}) ${rd(re)}. Each branch of the logarithm adds 2πki to Log v, which turns v^(1 ÷ ${n(m)}) by 2πk ÷ ${n(m)}; k = ${kl} give ${n(m)} different values, and then they repeat.`,
+   z = cx(0, dir * s), A = piT(dir, 2), Ap = dir < 0 ? `(${A})` : A, kl = m <= 4 ? Array.from({ length: m }, (_, k) => n(k)).join(', ') : `0, 1, …, ${n(m - 1)}`, ang = piT(h * dir, 4), size = Math.pow(s, a), re = size * Math.cos(h * dir * Math.PI / 4),
+    S = e * e + f * f, md = Math.pow(S, 1 / (2 * m)), mt = f === 0 ? `|v| = ${n(Math.abs(e))}, so every value has modulus ${n(Math.abs(e))}^(1 ÷ ${n(m)}) ${rd(md)}` : `|v|² = ${par(e)}² + ${par(f)}² = ${n(S)}, so |v| = √${n(S)} and every value has modulus (√${n(S)})^(1 ÷ ${n(m)}) = ${n(S)}^(1 ÷ ${n(2 * m)}) ${rd(md)}`; return {
+   prompt: `The rotor hall works with complex powers, z^a = e^(a log z), whose principal value uses Log z. Enter the principal value of ${pw}, which is a real number, to 2 decimal places; then the real part of the principal value of (${z})^${n(a)}, to 2 decimal places; then the modulus that all the values of v^(1 ÷ ${n(m)}) share, for v = ${cx(e, f)} and every branch of the logarithm, to 2 decimal places.`,
+   answer: [r2(val), r2(re), r2(md)],
+   hints: ['Log i = iπ ÷ 2, because |i| = 1 and Arg i = π ÷ 2. Then i to a power bi is e^(bi × iπ ÷ 2), and i × i = −1 makes the exponent real.', 'For a real power a, the principal value is z^a = |z|^a e^(ia Arg z), so its real part is |z|^a cos(a Arg z). The other branches add 2πki to Log z; with a = 1 ÷ m they turn the value by 2πk ÷ m and leave its modulus, |z|^(1 ÷ m), unchanged.'],
+   solution: `Log i = iπ ÷ 2, so ${pw} = e^(${c === 1 ? '' : c === -1 ? '−' : n(c)}i × iπ ÷ 2) = e^(${piT(-2 * c, 4)}) ${rd(val)}. For z = ${z}, |z| = ${n(s)} and Arg z = ${A}, so the principal value is z^${n(a)} = ${n(s)}^${n(a)} e^(i × ${n(a)} × ${Ap}), with angle ${ang}. Its real part is ${n(s)}^${n(a)} × cos(${ang}) ${rd(re)}. Each branch of the logarithm adds 2πki to Log v, which turns v^(1 ÷ ${n(m)}) by 2πk ÷ ${n(m)} but does not change its modulus, |v|^(1 ÷ ${n(m)}). ${mt}.`,
    guidance: [
     { prompt: `Log i = iπ ÷ 2, so ${pw} = e^(${c === 1 ? '' : c === -1 ? '−' : n(c)}i × iπ ÷ 2). What is it, to 2 decimal places?`, answer: [r2(val)], explanation: `i × i = −1, so the exponent is ${piT(-2 * c, 4)} and ${pw} = e^(${piT(-2 * c, 4)}) ${rd(val)}.` },
     { prompt: `For z = ${z}, |z| = ${n(s)} and Arg z = ${A}. The real part of z^${n(a)} is |z|^${n(a)} cos(${n(a)} Arg z). What is it, to 2 decimal places?`, answer: [r2(re)], explanation: `${n(a)} × ${Ap} = ${ang}, so the real part is ${n(s)}^${n(a)} × cos(${ang}) ${rd(re)}.` },
-    { prompt: `Each branch of the logarithm adds 2πki to Log v, which turns v^(1 ÷ ${n(m)}) by 2πk ÷ ${n(m)}. How many different values does v^(1 ÷ ${n(m)}) take?`, answer: [m], explanation: `k = ${kl} give ${n(m)} different turns; k = ${n(m)} is a whole turn and repeats the first value.` }
+    { prompt: `Each branch of the logarithm adds 2πki to Log v, which turns v^(1 ÷ ${n(m)}) by 2πk ÷ ${n(m)} but keeps its modulus |v|^(1 ÷ ${n(m)}). For v = ${cx(e, f)}, what is that modulus, to 2 decimal places?`, answer: [r2(md)], explanation: `${mt}. The branches k = ${kl} turn the value but keep that modulus.` }
    ] }; }
  },
 });

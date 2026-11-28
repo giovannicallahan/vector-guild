@@ -38,10 +38,11 @@ Object.assign(window.ORACLE, {
   q27b: p => { const u = (x, y) => p.A * (x * x * x - 3 * x * y * y) + p.B * (3 * x * x * y - y * y * y) + p.C * x + p.D * y + p.E;
     let s = 0; const N = 720; for (let j = 0; j < N; j++) { const t = 2 * Math.PI * j / N; s += u(p.p + p.r * Math.cos(t), p.q + p.r * Math.sin(t)); }
     return [r6(u(p.p, p.q + p.r)), r6(s / N)]; },
-  /* q27c: u = A x² − A y² + B xy + C x + D y + E. The gauge average is the ring average of u with the true E; E is then found again as (gauge average) − (ring average of u without E). */
+  /* q27c: u = A x² − A y² + B xy + C x + D y + E, and the prompt prints the gauge average V. The ring average of u is (ring average of the part without E) + E,
+     found numerically round the ring, so E = V − that average; then u at the ring point (p + r, q). */
   q27c: p => { const u0 = (x, y) => p.A * (x * x - y * y) + p.B * x * y + p.C * x + p.D * y;
     const avg = f => { let s = 0; const N = 720; for (let j = 0; j < N; j++) { const t = 2 * Math.PI * j / N; s += f(p.p + p.r * Math.cos(t), p.q + p.r * Math.sin(t)); } return s / N; };
-    const gauge = avg((x, y) => u0(x, y) + p.E), E = gauge - avg(u0);
+    const E = p.V - avg(u0);
     return [r6(E), r6(u0(p.p + p.r, p.q) + E)]; },
   /* q27d: f = al z² + be z + ga, ring centre a = p + qi, radius r: average f round the ring numerically; u at the point a + r is Re f(a + r). */
   q27d: p => { const f = z => poly([p.al, p.be, p.ga], z), a = [p.p, p.q];
@@ -57,9 +58,10 @@ Object.assign(window.ORACLE, {
   q28d: p => { const f = z => cadd(cpow(z, p.e), [p.c, 0]); const M = maxOnDisc(f, p.R); return [r6(M), r6(cauchy(p.e, M, p.R)), fact(p.e)]; },
   /* q29b: f = al z³ + be z² + ga z + de; the two contour integrals by the trapezium rule round |z − c| = R about the point a; then the bound m! M ÷ rho^m. */
   q29b: p => { const f = z => poly([p.al, p.be, p.ga, p.de], z); return [contourK(f, p.a, 1, p.c, p.R), contourK(f, p.a, 3, p.c, p.R), cauchy(p.m, p.M, p.rho)]; },
-  /* q29c: f = z² + p z + e. The gauge is ∮ f ÷ (z − a) dz with the true p; p is then solved from (gauge ÷ πi) = 2 f(a), and the next integral is found numerically with that p. */
+  /* q29c: f = z² + p z + e, and the prompt prints the gauge reading K (∮ f ÷ (z − a) dz = Kπi). The integral is linear in p, so integrate numerically
+     with p = 0 and p = 1 and solve the straight line for the p that gives K; the next integral is then found numerically with that p. */
   q29c: p => { const mk = pp => z => poly([1, pp, p.e], z);
-    const G = contourK(mk(p.p), p.a, 1, 0, p.R), pp = (G / 2 - p.a * p.a - p.e) / p.a;
+    const G0 = contourK(mk(0), p.a, 1, 0, p.R), G1 = contourK(mk(1), p.a, 1, 0, p.R), pp = (p.K - G0) / (G1 - G0);
     return [r6(pp), contourK(mk(pp), p.a, 2, 0, p.R), cauchy(p.m, p.M, p.rho)]; },
   /* q29d: the cable winds w times, so each integral is w times the one-turn integral; f = al z³ + be z² + ga z + de; the point a lies inside |z − c| = R. Bound j! M ÷ rho^j. */
   q29d: p => { const f = z => poly([p.al, p.be, p.ga, p.de], z);

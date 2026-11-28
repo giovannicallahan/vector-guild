@@ -56,6 +56,8 @@ const ab = x => n(Math.abs(x));
 /* 'once', 'twice', '3 times'; turns(m) with a direction: 'twice anticlockwise', 'once clockwise'. */
 const times = m => m === 1 ? 'once' : m === 2 ? 'twice' : `${n(m)} times`;
 const turns = m => times(Math.abs(m)) + (m > 0 ? ' anticlockwise' : ' clockwise');
+/* A count with its noun: pl(1, 'turn') is '1 turn', pl(3, 'turn') is '3 turns'. */
+const pl = (k, one, more = one + 's') => `${n(k)} ${k === 1 ? one : more}`;
 /* The point p + qi, squared distance from the real centre c, and whether it is inside |z − c| = r with |d² − r²| at least 2 (never on the circle). */
 const d2c = (p, q, c) => (p - c) * (p - c) + q * q;
 const fitsC = (p, q, c, r, inside) => { const d = d2c(p, q, c), r2 = r * r; return (d < r2) === inside && Math.abs(d - r2) >= 2; };
@@ -177,9 +179,9 @@ mk({
   answer: [w, k],
   hints: ['The winding number counts net turns: the anticlockwise turns count +1 each and the clockwise turns −1 each, so first add them with their signs. A point outside the circle is never turned round.',
    'Take the terms one at a time. A term C ÷ (z − a) with a inside gives 2πi × C × (winding number), and a term with a outside gives zero. Add the numbers C of the relays that are inside before you multiply.'],
-  solution: `The path makes ${n(m1)} anticlockwise turns and ${n(m2)} clockwise turns, so the winding number round a point inside is ${n(m1)} − ${n(m2)} = ${n(w)}. For relay A, |a|² = ${par(p)}² + ${par(q)}² = ${n(d2)}, ${inA ? 'less' : 'more'} than R² = ${n(R2)}, so it is ${side(inA)}. Relay B is ${n(Math.abs(b))} from 0, ${inB ? 'less' : 'more'} than ${n(R)}, so it is ${side(inB)}. The multipliers inside add up to ${parts.length === 2 ? `${n(CA)} + ${par(CB)} = ${n(S)}` : n(S)}. The integral is 2πi × ${par(S)} × ${par(w)} = ${kpi(k)}, so k = ${n(k)}.`,
+  solution: `The path makes ${pl(m1, 'anticlockwise turn')} and ${pl(m2, 'clockwise turn')}, so the winding number round a point inside is ${n(m1)} − ${n(m2)} = ${n(w)}. For relay A, |a|² = ${par(p)}² + ${par(q)}² = ${n(d2)}, ${inA ? 'less' : 'more'} than R² = ${n(R2)}, so it is ${side(inA)}. Relay B is ${n(Math.abs(b))} from 0, ${inB ? 'less' : 'more'} than ${n(R)}, so it is ${side(inB)}. The multipliers inside add up to ${parts.length === 2 ? `${n(CA)} + ${par(CB)} = ${n(S)}` : n(S)}. The integral is 2πi × ${par(S)} × ${par(w)} = ${kpi(k)}, so k = ${n(k)}.`,
   guidance: [
-   { prompt: `The path makes ${n(m1)} anticlockwise turns, each +1, and ${n(m2)} clockwise turns, each −1. What is the winding number round a point inside the circle?`, answer: [w], explanation: `${n(m1)} − ${n(m2)} = ${n(w)}.` },
+   { prompt: `The path makes ${pl(m1, 'anticlockwise turn')}, each +1, and ${pl(m2, 'clockwise turn')}, each −1. What is the winding number round a point inside the circle?`, answer: [w], explanation: `${n(m1)} − ${n(m2)} = ${n(w)}.` },
    { prompt: `Which relays are inside the circle? Relay A has |a|² = ${n(d2)} against R² = ${n(R2)}, and relay B is ${n(Math.abs(b))} from 0 against R = ${n(R)}. Add the multipliers (the numbers on top) of the relays that are inside.`, answer: [S], explanation: `Relay A is ${side(inA)} and relay B is ${side(inB)}, so the sum is ${parts.length === 2 ? `${n(CA)} + ${par(CB)} = ${n(S)}` : n(S)}.` },
    { prompt: `The integral is 2πi × (sum of the multipliers inside) × (winding number). What is k?`, answer: [k], explanation: `2πi × ${par(S)} × ${par(w)} = ${kpi(k)}, so k = ${n(k)}.` }
   ] }; }
@@ -261,7 +263,7 @@ mk({
   guidance: [
    { prompt: `How far is the transmitter at a = ${n(a)} from the centre ${n(c)} of the loop? The loop has radius ${n(r)}.`, answer: [dist], explanation: `|${n(a)} − ${par(c)}| = ${n(dist)}, ${inside ? 'less' : 'more'} than ${n(r)}, so the transmitter is ${inside ? 'inside' : 'outside'}.` },
    { prompt: `The sensor terms are centred on the centre of the loop, so only the power −1 counts. What is k for ${n(A)} ÷ ${zp(c)} + ${n(B)} ÷ ${zp(c)}²?`, answer: [kS], explanation: `The ${zp(c)}⁻² term gives 0. ${n(A)} ÷ ${zp(c)} gives 2πi × ${par(A)} = ${kpi(kS)}, so k = ${n(kS)}.` },
-   { prompt: `Now add the stray transmitter, which gives ${inside ? '2πi times its number on top' : '0'} because it is ${inside ? 'inside' : 'outside'}. What is k for the total?`, answer: [K], explanation: inside ? `${n(kS)} + 2 × ${par(C)} = ${n(K)}, so k = ${n(K)}.` : `${n(kS)} + 0 = ${n(K)}, so k = ${n(K)}.` }
+   { prompt: `Now add the stray transmitter. Its term gives 2πi times its number on top if a is inside the loop, and 0 if a is outside. What is k for the total?`, answer: [K], explanation: inside ? `${n(kS)} + 2 × ${par(C)} = ${n(K)}, so k = ${n(K)}.` : `${n(kS)} + 0 = ${n(K)}, so k = ${n(K)}.` }
   ] }; }
 });
 

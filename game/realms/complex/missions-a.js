@@ -248,13 +248,13 @@ window.QUESTS.push(
   id: "q06", title: "Every way to make the signal", topic: "nth roots and roots of unity", tier: 'Basic', sector: "Antenna Field",
   brief: "The array must find every signal that, multiplied by itself a set number of times, gives the target reading.",
   lesson: "A non-zero number w has exactly n nth roots, all with the same modulus and spaced equally round a circle; the nth roots of 1 are the roots of unity.",
-  prompt: "The antenna array needs every signal z with z³ = w, where w = −8: these are the cube roots of w. Enter how many cube roots w has, their common modulus, and the real part of the one with the smallest positive argument, to 2 decimal places.",
-  answer: [3,2,1], labels: ["number of roots", "modulus", "real part"], tolerance: 0.005,
+  prompt: "The antenna array needs every signal z with z³ = w, where w = −8: these are the cube roots of w. Enter the angle in radians between two neighbouring roots, then their common modulus, then the real part of the root with the smallest positive argument. Give the angle and the real part to 2 decimal places.",
+  answer: [2.09,2,1], labels: ["angle between neighbours", "modulus", "real part"], tolerance: 0.005,
   hints: [
-   "A non-zero number w has exactly n different nth roots. If |w| = R, every one of them has modulus r, the positive real number with rⁿ = R.",
+   "A non-zero number w has exactly n different nth roots, spaced equally round a circle centred at 0. If |w| = R, every one of them has modulus r, the positive real number with rⁿ = R.",
    "If Arg w = φ, the roots have the arguments (φ + 2πk) ÷ n for k = 0, 1, …, n − 1, spaced equally round a circle. Pick the smallest of them that is greater than 0."
   ],
-  solution: "w = −8 has modulus 8 and argument φ = π. It has 3 cube roots, all with modulus 2, because 2³ = 8. Their arguments are (φ + 2πk) ÷ 3 for k = 0 to 2: π ÷ 3, π, 5π ÷ 3. The smallest positive one is π ÷ 3, so that root has real part 2 × cos(π ÷ 3) = 1.",
+  solution: "w = −8 has modulus 8 and argument φ = π. It has 3 cube roots, all with modulus 2, because 2³ = 8. They split a full turn into 3 equal steps, so neighbouring roots are 2π ÷ 3 apart: 2π ÷ 3 ≈ 2.0944, which is 2.09 to 2 decimal places. Their arguments are (φ + 2πk) ÷ 3 for k = 0 to 2: π ÷ 3, π, 5π ÷ 3. The smallest positive one is π ÷ 3, so that root has real part 2 × cos(π ÷ 3) = 1.",
   xp: 100, prereqs: ["q05"],
   sources: [source.s1_6],
   teaching: {
@@ -281,7 +281,7 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: "How many different cube roots does the non-zero number w = −8 have?", answer: [3], labels: ["number of roots"], explanation: "Every non-zero number has exactly n different nth roots, so w has 3 cube roots." },
+   { prompt: "The non-zero number w = −8 has 3 different cube roots, spaced equally round a circle. What angle, in radians, separates two neighbouring roots, to 2 decimal places?", answer: [2.09], labels: ["angle between neighbours"], explanation: "The 3 roots split a full turn of 2π into 3 equal steps, so neighbouring roots are 2π ÷ 3 apart: 2π ÷ 3 ≈ 2.0944, which is 2.09 to 2 decimal places." },
    { prompt: "|w| = 8. Which positive real number r has r³ = 8?", answer: [2], labels: ["modulus"], explanation: "2³ = 8, so every root has modulus 2." },
    { prompt: "The arguments of the roots are π ÷ 3, π, 5π ÷ 3. Take the smallest one greater than 0. What is the real part of that root, to 2 decimal places?", answer: [1], labels: ["real part"], explanation: "The smallest positive argument is π ÷ 3, so the real part is 2 × cos(π ÷ 3) = 1." }
   ]
@@ -411,15 +411,15 @@ window.QUESTS.push(
  },
  {
   id: "q10", title: "Powers that turn", topic: "Complex powers", tier: 'Basic', sector: "Rotor Hall",
-  brief: "The rotor hall sets some stages to complex powers, and the crew needs their principal values and how many values a root can take.",
+  brief: "The rotor hall sets some stages to complex powers, and the crew needs their principal values and the size that every value of a root shares.",
   lesson: "A complex power is z^a = e^(a log z); its principal value uses Log z, and because log z has many values, z^a can have many too.",
-  prompt: "The rotor hall works with complex powers, z^a = e^(a log z), whose principal value uses Log z. Enter the principal value of i^i, which is a real number, to 2 decimal places; then the real part of the principal value of (4i)^1.5, to 2 decimal places; then how many different values v^(1 ÷ 3) has for v = −8, counting every branch of the logarithm.",
-  answer: [0.21,-5.66,3], labels: ["principal value", "real part", "number of values"], tolerance: 0.005,
+  prompt: "The rotor hall works with complex powers, z^a = e^(a log z), whose principal value uses Log z. Enter the principal value of i^i, which is a real number, to 2 decimal places; then the real part of the principal value of (4i)^1.5, to 2 decimal places; then the modulus that all the values of v^(1 ÷ 3) share, for v = −8 and every branch of the logarithm, to 2 decimal places.",
+  answer: [0.21,-5.66,2], labels: ["principal value", "real part", "modulus of the values"], tolerance: 0.005,
   hints: [
    "Log i = iπ ÷ 2, because |i| = 1 and Arg i = π ÷ 2. Then i to a power bi is e^(bi × iπ ÷ 2), and i × i = −1 makes the exponent real.",
-   "For a real power a, the principal value is z^a = |z|^a e^(ia Arg z), so its real part is |z|^a cos(a Arg z). The other branches add 2πki to Log z; with a = 1 ÷ m they turn the value by 2πk ÷ m."
+   "For a real power a, the principal value is z^a = |z|^a e^(ia Arg z), so its real part is |z|^a cos(a Arg z). The other branches add 2πki to Log z; with a = 1 ÷ m they turn the value by 2πk ÷ m and leave its modulus, |z|^(1 ÷ m), unchanged."
   ],
-  solution: "Log i = iπ ÷ 2, so i^i = e^(i × iπ ÷ 2) = e^(−π ÷ 2) ≈ 0.2079, which is 0.21 to 2 decimal places. For z = 4i, |z| = 4 and Arg z = π ÷ 2, so the principal value is z^1.5 = 4^1.5 e^(i × 1.5 × π ÷ 2), with angle 3π ÷ 4. Its real part is 4^1.5 × cos(3π ÷ 4) ≈ −5.6569, which is −5.66 to 2 decimal places. Each branch of the logarithm adds 2πki to Log v, which turns v^(1 ÷ 3) by 2πk ÷ 3; k = 0, 1, 2 give 3 different values, and then they repeat.",
+  solution: "Log i = iπ ÷ 2, so i^i = e^(i × iπ ÷ 2) = e^(−π ÷ 2) ≈ 0.2079, which is 0.21 to 2 decimal places. For z = 4i, |z| = 4 and Arg z = π ÷ 2, so the principal value is z^1.5 = 4^1.5 e^(i × 1.5 × π ÷ 2), with angle 3π ÷ 4. Its real part is 4^1.5 × cos(3π ÷ 4) ≈ −5.6569, which is −5.66 to 2 decimal places. Each branch of the logarithm adds 2πki to Log v, which turns v^(1 ÷ 3) by 2πk ÷ 3 but does not change its modulus, |v|^(1 ÷ 3). |v| = 8, so every value has modulus 8^(1 ÷ 3) = 2.",
   xp: 100, prereqs: ["q09"],
   sources: [source.s1_11],
   teaching: {
@@ -448,7 +448,7 @@ window.QUESTS.push(
   guidance: [
    { prompt: "Log i = iπ ÷ 2, so i^i = e^(i × iπ ÷ 2). What is it, to 2 decimal places?", answer: [0.21], labels: ["principal value"], explanation: "i × i = −1, so the exponent is −π ÷ 2 and i^i = e^(−π ÷ 2) ≈ 0.2079, which is 0.21 to 2 decimal places." },
    { prompt: "For z = 4i, |z| = 4 and Arg z = π ÷ 2. The real part of z^1.5 is |z|^1.5 cos(1.5 Arg z). What is it, to 2 decimal places?", answer: [-5.66], labels: ["real part"], explanation: "1.5 × π ÷ 2 = 3π ÷ 4, so the real part is 4^1.5 × cos(3π ÷ 4) ≈ −5.6569, which is −5.66 to 2 decimal places." },
-   { prompt: "Each branch of the logarithm adds 2πki to Log v, which turns v^(1 ÷ 3) by 2πk ÷ 3. How many different values does v^(1 ÷ 3) take?", answer: [3], labels: ["number of values"], explanation: "k = 0, 1, 2 give 3 different turns; k = 3 is a whole turn and repeats the first value." }
+   { prompt: "Each branch of the logarithm adds 2πki to Log v, which turns v^(1 ÷ 3) by 2πk ÷ 3 but keeps its modulus |v|^(1 ÷ 3). For v = −8, what is that modulus, to 2 decimal places?", answer: [2], labels: ["modulus of the values"], explanation: "|v| = 8, so every value has modulus 8^(1 ÷ 3) = 2. The branches k = 0, 1, 2 turn the value but keep that modulus." }
   ]
  }
 );
