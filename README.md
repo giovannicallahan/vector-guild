@@ -1,6 +1,6 @@
 # MathCosmos for Android
 
-**Current: version 2.7.0, 1,872 missions in eleven realms** — Linear algebra 272 (68 concepts, each with one learn and three practice missions), and 160 each for Foundations, Calculus 1, Calculus 2, Calculus 3, Probability, Data and inference, Logic and proof, Discrete mathematics, Number theory, and Graph theory. Sections further down describe each version in turn; "68 missions" there means versions up to 1.4.1.
+**Current: version 2.8.0, 1,872 missions in eleven realms** — Linear algebra 272 (68 concepts, each with one learn and three practice missions), and 160 each for Foundations, Calculus 1, Calculus 2, Calculus 3, Probability, Data and inference, Logic and proof, Discrete mathematics, Number theory, and Graph theory. Sections further down describe each version in turn; "68 missions" there means versions up to 1.4.1.
 
 Offline Android WebView app. Game files live in `game/` and are copied into the APK on each build. JavaScript progress is stored on the device; Save & settings includes JSON backup import and export using Android's file picker.
 
@@ -99,6 +99,20 @@ Checks: the 2.2 commands, plus `node qa/harness.js --complete --complete-practic
 - Every mission has a generator and an independent oracle (`qa/realms/calc1/`); shared content rules moved to `qa/pack-checks.js`.
 - 75 calculus terms in the tap-to-define glossary; two new achievements; Mira's 40 calculus briefings are recorded.
 - MathCosmos now has 592 missions in three realms.
+
+## Version 2.8.0
+
+Eight changes to how the game keeps you going. No missions were added or changed.
+
+- Try it first: a learn mission lets you choose to read the lesson or go straight to the problem. After a miss, the lesson opens next to the problem.
+- Slip feedback: a wrong answer names the kind of check to make (the sign, the decimal point, which box, a step counted twice), without giving the answer away.
+- Next up: Mira's card lists up to three missions that are open now, mixing new concepts and practice.
+- Sector scenes: finishing a sector's learn missions plays a short scene about what you learned and what comes next. Each can be replayed.
+- Mastery: each concept shows bronze (learn mission solved), silver (two practice missions) or gold (all practice).
+- Five-minute run: three to five quick problems mixed from every realm you have played. The first run each day pays 10 stardust.
+- Forgiving streak: one rest day in any seven does not break the streak. The home page shows the days played this week.
+- Finds: now and then a solve turns up a small cosmetic find for the collection.
+- Reviewed by an outside model (Codex); its seven confirmed findings are fixed. Antigravity was unavailable for this release.
 
 ## Version 2.7.0
 

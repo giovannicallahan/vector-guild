@@ -143,7 +143,8 @@ window.VGCollection = (() => {
      opts.perks: true only when the call follows a solve the player has just made. Then the equipped figure's
      stardust perk applies, and its chapter perk applies to a chapter that one of the missions paid in this
      same call completes. Every other call (page load, import, reset) pays past work at the base rates, so a
-     figure equipped later never raises what earlier work is worth. */
+     figure equipped later never raises what earlier work is worth.
+     opts.played: true marks today as a day played even when nothing is paid (app.js: a passed chapter check). */
   function settle(realmCtx, opts) {
     if (!store()) return [];
     const rc = realmOf(realmCtx), m = read(), before = JSON.stringify(m), realms = slices(), events = [];
@@ -165,22 +166,63 @@ window.VGCollection = (() => {
       }
     }
     events.push(...award(m, realms, rc));
-    if (!events.length || !commit(m, before)) return [];
+    /* A solve made just now counts as a day played. */
+    const solves = events.filter(e => e.type === 'solve').length;
+    if (isObject(opts) && opts.perks === true && solves) {
+      markPlayed(m);
+      /* Small surprises (finds.js): now and then a solve turns up a cosmetic find. It pays nothing. The solves are
+         counted by finds.js itself (meta.finds.n), so resetting a realm never sets the count back; total (missions
+         solved now, in every realm) only starts that count for a save made before it existed. */
+      const F = window.VGFinds, total = Object.entries(realms).reduce((n, [id, sl]) => n + (isObject(sl) && safeId(id) ? texts(sl.solved).length : 0), 0);
+      if (F && typeof F.onSolve === 'function') try { events.push(...F.onSolve(m, total, solves)); } catch (e) { /* finds are optional */ }
+    }
+    /* opts.played: the player has just done something that counts as a day played (a passed chapter check), whether or
+       not it paid anything. */
+    if (isObject(opts) && opts.played === true) markPlayed(m);
+    if ((!events.length && JSON.stringify(m) === before) || !commit(m, before)) return [];
     return events;
   }
   /* One review drill is done: counts it, pays it, checks the achievements. Call it once per drill. */
   function onDrillDone() {
     if (!store()) return [];
     const m = read(), before = JSON.stringify(m), dust = RULES.drill * (perkOf(figure(m.equipped)) === 'drill' ? RULES.perkDrill : 1);
-    m.drills++; m.dust += dust; m.earned += dust;
+    m.drills++; m.dust += dust; m.earned += dust; markPlayed(m);
     const events = [{ type: 'drill', dust }, ...award(m, slices(), realmOf())];
     return commit(m, before) ? events : [];
   }
   /* The daily review of one local calendar day is finished (game/daily.js; docs/COLLECTION.md, "Daily review").
      day: whole days since 1970 in local time. Pays DAILY.dust once per day and counts the day streak; a streak
      milestone pays once ever. A day that is not later than the last paid day pays nothing, so a reload, a second
-     tab, or a device clock set back never pays twice. A missed day starts the streak again at 1; nothing is taken. */
-  const DAILY = Object.freeze({ dust: 15, problems: 3, unlock: 3, milestones: Object.freeze([[3, 20], [7, 40], [14, 80], [30, 150]].map(Object.freeze)) });
+     tab, or a device clock set back never pays twice. Since 2.8 one missed day is a rest day: the streak carries on
+     over it, at most once in any seven days (the missed days used so far are in daily.rests). Two missed days, or a
+     second rest within seven days, start the streak again at 1; nothing is taken. */
+  const DAILY = Object.freeze({ dust: 15, problems: 3, unlock: 3, restEvery: 7, milestones: Object.freeze([[3, 20], [7, 40], [14, 80], [30, 150]].map(Object.freeze)) });
+  /* The streak if the review of `day` is finished now: { streak, rest } where rest is the missed day the streak rests
+     over, or null. The same rule as VGDaily.logic.streakOn (qa/daily.test.js checks that they agree). */
+  function streakOn(d, day) {
+    const last = isObject(d) && Number.isInteger(d.day) ? d.day : null, kept = last !== null && Number.isInteger(d.streak) && d.streak > 0 ? d.streak : 1;
+    if (last === null) return { streak: 1, rest: null };
+    if (day === last + 1) return { streak: kept + 1, rest: null };
+    const rests = Array.isArray(d.rests) ? d.rests.filter(Number.isInteger) : [], missed = last + 1;
+    if (day === last + 2 && rests.every(r => r !== missed && (r > missed || missed - r >= DAILY.restEvery))) return { streak: kept + 1, rest: missed };
+    return { streak: 1, rest: null };
+  }
+  /* Days the player did something that counts (a solve, a drill, a daily review, a five-minute run), for the
+     "days played this week" dots: meta.played, the last 14 local calendar days at most. Changes m only. */
+  function today() {
+    try { const D = window.VGDaily; if (D && typeof D.today === 'function') { const n = D.today(); if (Number.isInteger(n)) return n; } } catch (e) { /* fall through */ }
+    const d = new Date(); return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+  }
+  /* Days later than `day` are kept (a device clock set back, or a run opened before midnight, must not erase them);
+     the 14-day window is counted back from the newest day recorded. The weekly dots never show a day after today. */
+  function markPlayed(m, day) {
+    if (!isObject(m)) return m;
+    const n = Number.isInteger(day) ? day : today(), all = (Array.isArray(m.played) ? m.played : []).filter(x => Number.isInteger(x) && x >= 0);
+    all.push(n);
+    const newest = Math.max(...all);
+    m.played = [...new Set(all.filter(x => x > newest - 14))].sort((a, b) => a - b);
+    return m;
+  }
   function onDailyDone(day) {
     if (!store() || !Number.isInteger(day) || day < 0) return [];
     /* Another tab may write the save between this call's read and its write. So the save is read once more just
@@ -194,7 +236,9 @@ window.VGCollection = (() => {
   function dailyOnce(day) {
     const m = read(), before = JSON.stringify(m), d = isObject(m.daily) ? m.daily : (m.daily = { day: null, streak: 0, best: 0, paid: [], seen: {} });
     if (Number.isInteger(d.day) && day <= d.day) return [];
-    const streak = Number.isInteger(d.day) && day === d.day + 1 ? (Number.isInteger(d.streak) && d.streak > 0 ? d.streak : 1) + 1 : 1;
+    const on = streakOn(d, day), streak = on.streak;
+    if (on.rest !== null) d.rests = [...(Array.isArray(d.rests) ? d.rests.filter(r => Number.isInteger(r) && r > day - 60) : []), on.rest];
+    markPlayed(m, day);
     const paid = Array.isArray(d.paid) ? d.paid : [], events = [{ type: 'daily', day, streak, dust: DAILY.dust }];
     for (const [days, dust] of DAILY.milestones) if (streak >= days && !paid.includes(days)) { paid.push(days); events.push({ type: 'streak', days, dust }); }
     Object.assign(d, { day, streak, best: Math.max(Number.isInteger(d.best) ? d.best : 0, streak), paid }); delete d.at;
@@ -210,8 +254,14 @@ window.VGCollection = (() => {
      moment, the step runs without it rather than leaving the player waiting. The interface shows the reward from
      inside done, so it is only ever shown after the save holds it. */
   function finishDaily(day, done) {
+    withLock(() => { let events = []; try { events = onDailyDone(day); } catch (e) { events = []; } if (typeof done === 'function') done(events); });
+  }
+  /* Runs step() once, while this page holds the 'mathcosmos-save' Web Lock where the browser has one (the daily review
+     and the five-minute run both take it, so their read, check and write never interleave across tabs). Without locks
+     it runs straight away; if the lock does not come within a moment, it runs without it. step must be synchronous. */
+  function withLock(step) {
     let fired = false;
-    const run = () => { if (fired) return; fired = true; let events = []; try { events = onDailyDone(day); } catch (e) { events = []; } if (typeof done === 'function') done(events); };
+    const run = () => { if (fired) return; fired = true; try { step(); } catch (e) { /* the step reports its own result */ } };
     let locks = null; try { locks = window.navigator && window.navigator.locks; } catch (e) { locks = null; }
     if (!locks || typeof locks.request !== 'function' || typeof window.setTimeout !== 'function') { run(); return; }
     try {
@@ -222,9 +272,10 @@ window.VGCollection = (() => {
   }
   /* Totals of a list of events, for a toast. */
   function summary(events) {
-    const s = { dust: 0, solves: 0, stars: 0, chapters: 0, drills: 0, achievements: [] };
+    const s = { dust: 0, solves: 0, stars: 0, chapters: 0, drills: 0, achievements: [], finds: [] };
     for (const e of Array.isArray(events) ? events : []) {
       if (!isObject(e)) continue; s.dust += Number.isFinite(e.dust) ? e.dust : 0;
+      if (e.type === 'find' && isText(e.name)) s.finds.push(e.name);
       if (e.type === 'solve') s.solves++; else if (e.type === 'star') s.stars++; else if (e.type === 'chapter') s.chapters++; else if (e.type === 'drill') s.drills++; else if (e.type === 'achievement') s.achievements.push(e);
     }
     return s;
@@ -232,9 +283,10 @@ window.VGCollection = (() => {
   /* One short plain sentence for a list of events, or '' when nothing was earned. */
   function describe(events) {
     const s = summary(events), n = (k, one, many) => k ? [k === 1 ? one : k + ' ' + many] : [];
-    if (!s.dust && !s.achievements.length) return '';
+    if (!s.dust && !s.achievements.length) return s.finds.length ? 'You found something: ' + s.finds.join(', ') + '. See Finds in your collection.' : '';
     const parts = [...n(s.solves, 'mission solved', 'missions solved'), ...n(s.stars, 'first-try star', 'first-try stars'), ...n(s.chapters, 'chapter finished', 'chapters finished'), ...n(s.drills, 'drill done', 'drills done'),
-      ...(s.achievements.length === 1 ? ['achievement: ' + s.achievements[0].name] : s.achievements.length ? [s.achievements.length + ' achievements'] : [])];
+      ...(s.achievements.length === 1 ? ['achievement: ' + s.achievements[0].name] : s.achievements.length ? [s.achievements.length + ' achievements'] : []),
+      ...s.finds.map(name => 'found: ' + name)];
     return '+' + s.dust + ' stardust' + (parts.length ? ' · ' + parts.join(', ') : '');
   }
 
@@ -338,7 +390,7 @@ window.VGCollection = (() => {
   const earned = () => read().earned;
   const state = () => read();
   const stored = () => lastStored;
-  return { RULES, RARITIES, PERKS, DAILY, settle, onDrillDone, onDailyDone, finishDaily, summary, describe, pull, canPull, cost, odds, baseOdds, guarantees, rollRarity,
+  return { RULES, RARITIES, PERKS, DAILY, streakOn, markPlayed, today, settle, onDrillDone, onDailyDone, finishDaily, withLock, summary, describe, pull, canPull, cost, odds, baseOdds, guarantees, rollRarity,
     equip, equipped, perk, perkInfo, secondLookAvailable, useSecondLook, figures, owned, counts, figure, achievements, context: () => context(read(), slices(), realmOf()),
     dust, earned, state, stored, pageRealm };
 })();
