@@ -1,6 +1,6 @@
 # MathCosmos for Android
 
-**Current: version 2.5.3, 592 missions in three realms** — Linear algebra 272 (68 concepts, each with one learn and three practice missions), Foundations 160, Calculus 1 160. Sections further down describe each version in turn; "68 missions" there means versions up to 1.4.1.
+**Current: version 2.5.4, 592 missions in three realms** — Linear algebra 272 (68 concepts, each with one learn and three practice missions), Foundations 160, Calculus 1 160. Sections further down describe each version in turn; "68 missions" there means versions up to 1.4.1.
 
 Offline Android WebView app. Game files live in `game/` and are copied into the APK on each build. JavaScript progress is stored on the device; Save & settings includes JSON backup import and export using Android's file picker.
 
@@ -99,6 +99,12 @@ Checks: the 2.2 commands, plus `node qa/harness.js --complete --complete-practic
 - Every mission has a generator and an independent oracle (`qa/realms/calc1/`); shared content rules moved to `qa/pack-checks.js`.
 - 75 calculus terms in the tap-to-define glossary; two new achievements; Mira's 40 calculus briefings are recorded.
 - MathCosmos now has 592 missions in three realms.
+
+## Version 2.5.4
+
+- The home page has a "3D star map" button: every realm as a shape in space, picked by tapping it. "Home" (or Back) returns.
+- The wormhole intro plays once each time the app is opened, instead of once ever. "Skip intro" is still there.
+- Phones: a concept's three practice missions sit on one line as B, C, D buttons, so an open chapter is about half as long.
 
 ## Version 2.5.3
 
