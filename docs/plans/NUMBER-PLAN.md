@@ -80,7 +80,7 @@ New words and symbols, each taught in the mission that first uses it: divisor, m
 24. q24 Wilson's theorem [R3.5] — after q20 — Asked: (p − 1)! mod p, (p − 2)! mod p and (p − 3)! mod p; varies prime p ≤ 101.
 25. q25 The Möbius function [R4.3] — after q04 — Asked: μ(n) typed −1, 0 or 1, and the sum of μ(d) over the divisors of n; varies n.
 26. q26 Perfect numbers and Mersenne primes [R4.4] — after q10 — Asked: σ(n) − 2n (0 for perfect) and the perfect number 2^(p−1)(2^p − 1) for p = 2, 3, 5, 7 (answer said "without commas"); varies.
-27. q27 The order of a mod n [R5.1] — after q19, q21 — Asked: the smallest k with aᵏ ≡ 1 (mod n); varies n ≤ 50, a.
+27. q27 The order of a mod n [R5.1] — after q19, q21, q22 — Asked: the smallest k with aᵏ ≡ 1 (mod n); varies n ≤ 50, a.
 28. q28 Primitive roots [R5.1, R5.2] — after q27 — Asked: 1 or 0 for "g is a primitive root mod p" and the number of primitive roots φ(p − 1); varies prime p ≤ 61, g.
 29. q29 Chapter review: the index of a number [R5.1] — after q28 — Asked: k with gᵏ ≡ b (mod p) for a primitive root g, p ≤ 23; varies p, b.
 30. q30 Quadratic residues [R5.4] — after q13 — Asked: the number of solutions of x² ≡ a (mod p) and the smallest one; varies prime p, a.
