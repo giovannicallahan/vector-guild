@@ -35,3 +35,13 @@ Your file: `qa/realms/<id>/oracle-p<N>.js`. Sample: `qa/realms/calc1/oracle-p1.j
 ## E. Repair author (one pack)
 
 You get a list of failures and disagreements. Fix the generator or mission at fault in the pack's own files, never the oracle to match a wrong generator, and never a shared file. Finish with `node qa/harness.js --realm <id> --complete --complete-practice`, `node qa/generators.js --realm <id> --strict --draws 1000` and `node qa/glossary.test.js` all passing, and paste their last lines.
+
+## Lessons from wave 1 (every author and repairer: these were the reviewers' most common findings)
+- State every assumption the answer relies on (independence, "the pattern continues", "exactly these items", which range an angle lies in, a ≥ b before subtracting). If a careful reader could defend a second answer, the prompt is wrong.
+- A mission may be reached with only its listed prerequisites: do not use a word, symbol or rule another mission teaches unless that mission is a prerequisite; otherwise state it in a sentence. A practice mission unlocks from its parent alone, even when it has `uses`.
+- A source must cover the topic: open the page and find the idea on it before citing it. A matching section title is not enough.
+- Say how to round, and never make the expected answer depend on rounding an intermediate value; filter draws where early rounding changes the last digit, and draws that land exactly on a rounding tie.
+- Hints state the rule, never the draw's numbers or answer. Guided-step labels must name what that step asks for.
+- Generated text: no "1 crates", "1n", "+ −4", "= 2.49, which rounds to 2.49"; answers of 1000 or more need "without commas" in the prompt.
+- Each generator should give 30 or more distinct prompts in 300 draws, never draw its own worked example (or, for practice, its parent's), and never reject its own draws.
+- Oracles compute from the stated maths (tables, search, numerical methods); a parameter that is only an index into a list of texts gets a one-line comment saying so.
