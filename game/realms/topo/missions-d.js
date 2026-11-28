@@ -684,7 +684,7 @@ window.QUESTS.push(
   "sector": "Orbit Ring",
   "brief": "Every independent loop in a cable loom needs its own current sensor, so the electricians want the count for each new loom.",
   "lesson": "A connected graph with V vertices and E edges has E − V + 1 = 1 − χ independent loops.",
-  "prompt": "A cable loom on the Orbit Ring is a rectangular grid of cable 3 cells wide and 2 cells tall: every cell is a square edged by cable, and there is a junction at every corner of every cell. Treat it as a graph: junctions are vertices and the cables between them are edges. Enter the number of vertices V, then the number of edges E, then the number of independent loops.",
+  "prompt": "A cable loom on the Orbit Ring is a rectangular grid of cable 3 cells wide and 2 cells tall: every cell is a square edged by cable, and there is a junction at every corner of every cell. Treat it as a graph: junctions are vertices and the cables between them are edges. Enter the number of vertices V, then the number of edges E, then the number of independent loops: the fewest loops from which every loop in the graph can be built by joining them.",
   "answer": [
    12,
    17,
@@ -774,7 +774,7 @@ window.QUESTS.push(
   "sector": "Orbit Ring",
   "brief": "A thermostat keeps resetting its own set point, and the crew wants the one setting that it leaves unchanged.",
   "lesson": "A continuous f that takes [a, b] into itself has a fixed point, f(x) = x: g(x) = f(x) − x changes sign, so halving finds it.",
-  "prompt": "A thermostat on the Orbit Ring resets its set point x (between 0 and 5) to f(x) = (x² + 11) ÷ 10 after each cycle. This f is continuous and takes [0, 5] into itself. A fixed point is an x with f(x) = x. Let g(x) = f(x) − x. Enter g(0), then g(5), then the fixed point of f in [0, 5] to 2 decimal places, found by halving the interval where g changes sign (or by solving f(x) = x exactly).",
+  "prompt": "A thermostat on the Orbit Ring resets its set point x (between 0 and 5) to f(x) = (x² + 11) ÷ 10 after each cycle. This f is continuous, takes [0, 5] into itself and has exactly one fixed point there. A fixed point is an x with f(x) = x. Let g(x) = f(x) − x. Enter g(0), then g(5), then the fixed point of f in [0, 5] to 2 decimal places, found by halving the interval where g changes sign (or by solving f(x) = x exactly).",
   "answer": [
    1.1,
    -1.4,

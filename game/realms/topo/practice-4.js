@@ -349,7 +349,7 @@ mk({
   const ends = i => w[i][1] > 0 ? [i, (i + 1) % 4] : [(i + 1) % 4, i];
   const desc = w.map((e, i) => { const [t, h] = ends(i); return `the ${SQ_SIDES[i]} edge has letter ${L(e)} and an arrow from the ${SQ_CORNERS[t]} corner to the ${SQ_CORNERS[h]} corner`; }).join('; ');
   return {
-   prompt: `An airlock seal is cut from one square of fabric. Its corners are the top-left, top-right, bottom-right and bottom-left corners, and each edge is marked with a letter and an arrow: ${desc}. The crew sews together each pair of edges that carry the same letter, arrow on arrow: tail to tail and head to head. An edge whose letter appears only once stays unsewn. Enter how many distinct points the 4 corners become, then how many distinct edges are left.`,
+   prompt: `An airlock seal is cut from one square of fabric. Its corners are the top-left, top-right, bottom-right and bottom-left corners, and each edge is marked with a letter and an arrow: ${desc}. The crew sews together each pair of edges that carry the same letter, arrow on arrow: tail to tail and head to head. An edge whose letter appears only once stays unsewn. Two edges sewn together count as one edge. Enter how many distinct points the 4 corners become, then how many distinct edges are left.`,
    answer: [g.V, g.E],
    hints: [
     'For each letter that appears twice, write down which corner is the tail of each of its two arrows and which is the head. Sewing joins the two tails and joins the two heads.',
@@ -413,7 +413,7 @@ mk({
  build: ({ w }) => {
   const N = w.length, g = glue(w, false), word = w.map(e => lab(e)).join(' ');
   return {
-   prompt: `A hull section is cut as a flat ${n(N)}-sided panel. Its corners are numbered 1 to ${n(N)} clockwise, and edge i runs between corner i and corner i + 1 (edge ${n(N)} runs between corner ${n(N)} and corner 1). Reading the edges in order, edge 1 first, the labels are ${word}. A letter alone means that edge’s arrow points clockwise, from corner i to corner i + 1 (from corner ${n(N)} to corner 1 for the last edge); a letter with ⁻¹ means it points the other way. The Fabric Bay sews together each pair of edges that share a letter, arrow on arrow, and leaves an edge whose letter appears only once unsewn. Enter how many distinct points the ${n(N)} corners become, then how many distinct edges are left.`,
+   prompt: `A hull section is cut as a flat ${n(N)}-sided panel. Its corners are numbered 1 to ${n(N)} clockwise, and edge i runs between corner i and corner i + 1 (edge ${n(N)} runs between corner ${n(N)} and corner 1). Reading the edges in order, edge 1 first, the labels are ${word}. A letter alone means that edge’s arrow points clockwise, from corner i to corner i + 1 (from corner ${n(N)} to corner 1 for the last edge); a letter with ⁻¹ means it points the other way. The Fabric Bay sews together each pair of edges that share a letter, arrow on arrow, and leaves an edge whose letter appears only once unsewn. Two edges sewn together count as one edge. Enter how many distinct points the ${n(N)} corners become, then how many distinct edges are left.`,
    answer: [g.V, g.E],
    hints: [
     'Sewing two edges arrow on arrow joins the tail of one to the tail of the other and the head to the head. Write down which two corners each letter joins at its tails and at its heads.',
@@ -489,7 +489,7 @@ mk({
  build: ({ d, y, m, t, c }) => {
   const total = d + 2 * y + m + 3 * t, cost = total * c;
   return {
-   prompt: `The Fabric Bay rack holds flat panels that still have to be edged: ${pl(d, 'disc')}, ${pl(y, 'cylinder')}, ${pl(m, 'Möbius strip')} and ${pl(t, 'pair of trousers', 'pairs of trousers')}. Every boundary circle of every panel needs one edging strip, and each strip costs ${n(c)} credits. Enter the total number of boundary circles on the rack, then how many of the panels are not orientable, then the total cost of the edging strips in credits.`,
+   prompt: `The Fabric Bay rack holds flat panels that still have to be edged: ${pl(d, 'disc')}, ${pl(y, 'cylinder')}, ${pl(m, 'Möbius strip')} and ${pl(t, 'pair of trousers', 'pairs of trousers')} (a pair of trousers is a disc with two smaller discs cut out of it). A boundary circle is a loop of edge where a panel stops. Every boundary circle of every panel needs one edging strip, and each strip costs ${n(c)} credits. Enter the total number of boundary circles on the rack, then how many of the panels are not orientable, then the total cost of the edging strips in credits.`,
    answer: [total, m, cost],
    hints: [
     'Each kind of panel has its own number of boundary circles. Multiply it by how many panels of that kind there are, and add the four results.',
@@ -559,7 +559,7 @@ mk({
  canonical: { kind: 'antiprism', a: 5, b: 0 },
  draw: R => {
   for (let i = 0; i < 1000; i++) {
-   const kind = R.pick(['bipyramid', 'antiprism', 'torus']), p = kind === 'torus' ? { kind, a: R.int(2, 8), b: R.int(2, 8) } : { kind, a: R.int(3, 9), b: 0 };
+   const kind = R.pick(['bipyramid', 'antiprism', 'torus']), p = kind === 'torus' ? { kind, a: R.int(3, 8), b: R.int(3, 8) } : { kind, a: R.int(3, 9), b: 0 };
    if (!same(p, { kind: 'antiprism', a: 5, b: 0 }) && !same(p, { kind: 'torus', a: 3, b: 4 })) return p;
   }
   return { kind: 'antiprism', a: 5, b: 0 };
@@ -645,7 +645,7 @@ mk({
  build: ({ a, b, k }) => {
   const V = a * b, E = 2 * a * b, F = a * b - k, chi = V - E + F;
   return {
-   prompt: `The habitat ring is clad with a flat sheet of tiles, ${n(a)} tiles across and ${n(b)} tiles down. The sheet is sewn left edge to right edge and top edge to bottom edge, so it becomes a torus and the tile edges are a cell division of the torus. The crew then cuts ${pl(k, 'hatch', 'hatches')}, each by removing one whole tile${k === 1 ? '' : '; the tiles removed are far enough apart that no two share an edge or a corner'}. Removing a tile leaves its edges and corners in place. Count V − E + F using only the tiles that are left as faces. Enter the number of faces F left, then the Euler characteristic V − E + F, then the number of boundary circles of the hull.`,
+   prompt: `The habitat ring is clad with a flat sheet of tiles, ${n(a)} tiles across and ${n(b)} tiles down. The sheet is sewn left edge to right edge and top edge to bottom edge, so it becomes a torus and the tile edges are a cell division of the torus. The crew then cuts ${pl(k, 'hatch', 'hatches')}, each by removing one whole tile${k === 1 ? '' : '; the tiles removed are far enough apart that no two share an edge or a corner'}. Removing a tile leaves its edges and corners in place. Count V − E + F using only the tiles that are left as faces. Enter the number of faces F left, then the Euler characteristic V − E + F, then the number of boundary circles of the hull (a boundary circle is a closed loop of edge where the surface stops).`,
    answer: [F, chi, k],
    hints: [
     'Start with the whole torus: sewing merges the last column and the last row of points and edges with the first, so count V and E once each. Removing a tile changes only F.',

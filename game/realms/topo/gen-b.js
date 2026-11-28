@@ -287,11 +287,11 @@ Object.assign(window.MISSION_GEN, {
      'Look at the strokes that run into the snipped point. Each one is cut off there, but strokes that are still joined some other way, round a loop, stay in the same piece.',
      'An end point is a tip where a stroke stops and nothing carries on. Corners and the points where strokes meet are not end points.'
     ],
-    solution: `${pl(deg, 'stroke runs', 'strokes run')} into ${pt[0]}. With that point removed, ${cut}. The whole letter ${L} has ${shapeTxt(L)}, so it had ${pl(s.ends, 'end point')} before the snip.`,
+    solution: `${pl(deg, 'stroke runs', 'strokes run')} into ${pt[0]}. With that point removed, ${cut}. Counting the tips where a stroke stops, the whole letter ${L} had ${pl(s.ends, 'end point')} before the snip.`,
     guidance: [
      { prompt: `How many strokes run into ${pt[0]}? (A point in the middle of a stroke has 2: one on each side.)`, answer: [deg], explanation: `${pl(deg, 'stroke runs', 'strokes run')} into that point. Each is cut off there, but some may still be joined further away.` },
      { prompt: `After the snip, how many pieces is the cable in?`, answer: [pieces], explanation: `With ${pt[0]} removed, ${cut}.` },
-     { prompt: `How many end points does the whole letter ${L} have?`, answer: [s.ends], explanation: `The letter ${L} has ${shapeTxt(L)}.` }
+     { prompt: `How many end points does the whole letter ${L} have?`, answer: [s.ends], explanation: `Counting the tips where a stroke stops, the letter ${L} has ${pl(s.ends, 'end point')}.` }
     ] };
   }
  },
@@ -313,7 +313,7 @@ Object.assign(window.MISSION_GEN, {
     prompt: `A cable label spells ${w} in the lab’s stencil font, which is drawn in thin strokes: ${descs}. Enter how many of the letters of ${w} are homeomorphic to the letter ${T}. Count a letter each time it appears.`,
     answer: [count],
     hints: [
-     'Stretching and bending never change the number of end points, the number of branch points (where three or more strokes meet) with how many strokes meet at each, or the number of holes. A corner is not a branch point.',
+     'Stretching and bending never change the number of end points, the number of branch points (where three or more strokes meet) with how many strokes meet at each, or the number of holes (gaps closed off all round by a loop of strokes, like the inside of O). A corner is not a branch point.',
      'Work out those numbers for the target letter first, then for each letter of the word. For the letters of this font, two letters with the same end points, branch points and holes are homeomorphic, and two that differ in any of them are not.'
     ],
     solution: `${T} has ${shapeTxt(T)}. In ${w}: ${per}. So ${matchTxt}, and the count is ${n(count)}.`,
@@ -430,7 +430,7 @@ Object.assign(window.MISSION_GEN, {
   build: ({ w }) => {
    const word = w.map(lab).join(' '), g = glue(w), pairs = w.length - g.E;
    return {
-    prompt: `A square hull panel has its 4 edges labelled with arrows. Read clockwise from the top-left corner (the top edge, then the right, the bottom and the left), the labels are ${word}. A letter alone means that edge’s arrow points clockwise round the square; a letter with ⁻¹ means it points anticlockwise. The Fabric Bay sews together each pair of edges that share a letter, arrow on arrow, and leaves an edge whose letter appears only once unsewn. Enter how many distinct points the 4 corners become, then how many distinct edges are left.`,
+    prompt: `A square hull panel has its 4 edges labelled with arrows. Read clockwise from the top-left corner (the top edge, then the right, the bottom and the left), the labels are ${word}. A letter alone means that edge’s arrow points clockwise round the square; a letter with ⁻¹ means it points anticlockwise. The Fabric Bay sews together each pair of edges that share a letter, arrow on arrow, and leaves an edge whose letter appears only once unsewn. Two edges sewn together count as one edge. Enter how many distinct points the 4 corners become, then how many distinct edges are left.`,
     answer: [g.V, g.E],
     hints: [
      'Sewing two edges arrow on arrow joins the tail of one arrow to the tail of the other, and the head to the head. Write down which corners each sewing joins.',
@@ -472,13 +472,13 @@ Object.assign(window.MISSION_GEN, {
   }
  },
  /* A prism or pyramid frame (a-sided, 3–9, never the cube of the worked example) or an a × b grid panel left flat, sewn
-    into a cylinder or sewn into a torus (a, b from 2 to 8). */
+    into a cylinder or sewn into a torus (a, b from 2 to 8, but at least 3 in each direction that is sewn, so no two edges join the same two corners). */
  q20: {
   canonical: { kind: 'torus', a: 3, b: 4 },
   draw: R => {
    for (let i = 0; i < 1000; i++) {
     const kind = R.pick(['prism', 'pyramid', 'torus', 'flat', 'cyl']), grid = !['prism', 'pyramid'].includes(kind);
-    const p = grid ? { kind, a: R.int(2, 8), b: R.int(2, 8) } : { kind, a: R.int(3, 9), b: 0 };
+    const p = grid ? { kind, a: R.int(kind === 'flat' ? 2 : 3, 8), b: R.int(kind === 'torus' ? 3 : 2, 8) } : { kind, a: R.int(3, 9), b: 0 };
     if (!(kind === 'prism' && p.a === 4) && !same(p, { kind: 'torus', a: 3, b: 4 })) return p;
    }
    return { kind: 'torus', a: 3, b: 4 };

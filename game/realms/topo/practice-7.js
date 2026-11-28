@@ -105,11 +105,13 @@ mk({
  labels: ['angle excess (rad)', 'N in k = 1 ÷ N', 'radius (m)'], tolerance: 0.005,
  gl: [['angle excess (rad)'], ['N in k = 1 ÷ N'], ['radius (m)']]
 }, {
- canonical: { s: 6, a: 5, b: 5, c: 4 },
- draw: R => tries(() => { const e = R.int(1, 8), a = R.int(1, 11), b = R.int(1, 11), s = R.int(4, 15); return { s, a, b, c: 12 + e - a - b }; },
+ /* The printed numbers are the params: the angles aπ ÷ 12, bπ ÷ 12, cπ ÷ 12 and the area Am·π. A radius s (4 to 15, not 5) is drawn
+    first so that 12·Am ÷ (a + b + c − 12) is the perfect square s². */
+ canonical: { Am: 6, a: 5, b: 5, c: 4 },
+ draw: R => { const p = tries(() => { const e = R.int(1, 8), a = R.int(1, 11), b = R.int(1, 11), s = R.int(4, 15); return { s, a, b, c: 12 + e - a - b }; },
   p => { const e = p.a + p.b + p.c - 12; return sphTri(p.a, p.b, p.c) && p.s !== 5 && (e * p.s * p.s) % 12 === 0 && e * p.s * p.s / 12 >= 2 && !nearTie(e * Math.PI / 12); },
-  { s: 6, a: 5, b: 5, c: 4 }),
- build: ({ s, a, b, c }) => { const s2 = s * s, e = a + b + c - 12, m = e * s2 / 12, ex = e * Math.PI / 12, mp = m === 1 ? 'π' : `${n(m)}π`,
+  { s: 6, a: 5, b: 5, c: 4 }); return { Am: (p.a + p.b + p.c - 12) * p.s * p.s / 12, a: p.a, b: p.b, c: p.c }; },
+ build: ({ Am, a, b, c }) => { const e = a + b + c - 12, m = Am, s2 = 12 * m / e, s = Math.round(Math.sqrt(s2)), ex = e * Math.PI / 12, mp = m === 1 ? 'π' : `${n(m)}π`,
   ang = `${piFrac(a, 12)}, ${piFrac(b, 12)} and ${piFrac(c, 12)}`; return {
   prompt: `A triangle pegged out on a spherical dome, with sides along great circles, has corner angles ${ang} radians and an area of ${mp} square metres. The dome’s radius was never written down. Enter the triangle’s angle excess in radians, to 2 decimal places. Then the dome’s curvature is k = 1 ÷ N for a whole number N: enter N. Then enter the dome’s radius in metres, using k = 1 ÷ s² for a sphere of radius s.`,
   answer: [r2(ex), s2, s],
@@ -131,9 +133,11 @@ mk({
  labels: ['χ', 'curvature k', 'twin shell area ÷ π'], tolerance: 0.005,
  gl: [['χ'], ['curvature k'], ['twin shell area ÷ π']]
 }, {
- canonical: { g1: 4, m: 2, g2: 6 },
- draw: R => tries(() => ({ g1: R.int(2, 9), m: R.pick([1, 2, 4, 5]), g2: R.int(2, 9) }), p => p.g1 !== p.g2 && !(p.g1 === 2 && p.m === 1), { g1: 4, m: 2, g2: 6 }),
- build: ({ g1, m, g2 }) => { const chi1 = 2 - 2 * g1, P = -2 * chi1 * m, k = -1 / m, chi2 = 2 - 2 * g2, A2 = -2 * chi2 * m; return {
+ /* The printed area P·π is the param; it is drawn as (4g1 − 4)·m with m one of 1, 2, 4, 5, so k = 2χ ÷ P = −1 ÷ m is a short exact decimal. */
+ canonical: { g1: 4, P: 24, g2: 6 },
+ draw: R => { const p = tries(() => ({ g1: R.int(2, 9), m: R.pick([1, 2, 4, 5]), g2: R.int(2, 9) }), p => p.g1 !== p.g2 && !(p.g1 === 2 && p.m === 1), { g1: 4, m: 2, g2: 6 });
+  return { g1: p.g1, P: (4 * p.g1 - 4) * p.m, g2: p.g2 }; },
+ build: ({ g1, P, g2 }) => { const chi1 = 2 - 2 * g1, m = P / (-2 * chi1), k = -1 / m, chi2 = 2 - 2 * g2, A2 = -2 * chi2 * m; return {
   prompt: `The Observatory’s cryostat shell is a closed surface of genus ${n(g1)} with the same curvature k at every point, and its area is ${n(P)}π square metres. Enter its Euler characteristic χ, then its curvature k as a decimal. A twin shell of genus ${n(g2)} is built with the same curvature k: enter the twin’s area divided by π.`,
   answer: [chi1, k, A2],
   hints: ['An orientable surface of genus g has Euler characteristic χ = 2 − 2g. Gauss–Bonnet says kA = 2πχ.', 'Turn Gauss–Bonnet round to find the curvature: k = 2πχ ÷ A. The π in the area cancels. Then use A = 2πχ ÷ k for the twin.'],
@@ -250,10 +254,13 @@ mk({
  gl: [['χ of A # B'], ['sign of k for A # B'], ['χ of A # B # C'], ['area ÷ π of A # B # C']]
 }, {
  canonical: { o1: 0, h1: 1, o2: 1, h2: 0, o3: 0, h3: 5 },
- draw: R => tries(() => { const want = R.pick([1, 0, -1, -1]), a = R.pick(SECTS), b = R.pick(SECTS), c = R.pick(SECTS);
-   return { want, o1: a[0], h1: a[1], o2: b[0], h2: b[1], o3: c[0], h3: c[1] }; },
-  p => { const ab = chiOf(p.o1, p.h1) + chiOf(p.o2, p.h2) - 2; return sgnOf(ab) === p.want && ab + chiOf(p.o3, p.h3) - 2 < 0; },
-  { o1: 0, h1: 1, o2: 1, h2: 0, o3: 0, h3: 5 }),
+ /* The sign of k for A # B is chosen first (positive, zero or negative, negative twice as often), then sections are drawn until
+    A # B has that sign, so the sign box is not the same in nearly every draw. */
+ draw: R => { const want = R.pick([1, 0, -1, -1]);
+  return tries(() => { const a = R.pick(SECTS), b = R.pick(SECTS), c = R.pick(SECTS);
+   return { o1: a[0], h1: a[1], o2: b[0], h2: b[1], o3: c[0], h3: c[1] }; },
+  p => { const ab = chiOf(p.o1, p.h1) + chiOf(p.o2, p.h2) - 2; return sgnOf(ab) === want && ab + chiOf(p.o3, p.h3) - 2 < 0 && !(p.o1 === 0 && p.h1 === 1 && p.o2 === 1 && p.h2 === 0 && p.o3 === 0 && p.h3 === 5); },
+  { o1: 0, h1: 1, o2: 1, h2: 0, o3: 0, h3: 5 }); },
  build: ({ o1, h1, o2, h2, o3, h3 }) => { const c1 = chiOf(o1, h1), c2 = chiOf(o2, h2), c3 = chiOf(o3, h3), ab = c1 + c2 - 2, sg = sgnOf(ab), tot = ab + c3 - 2, A = -2 * tot; return {
   prompt: `Three hull sections are sewn into one closed hull by connected sums. Section A is ${surfName(o1, h1)}, section B is ${surfName(o2, h2)} and section C is ${surfName(o3, h3)}. First A and B are joined to make A # B, and then C is joined to that to make A # B # C. Each join follows χ(X # Y) = χ(X) + χ(Y) − 2. Enter χ of A # B, then the sign of the constant curvature k that A # B can carry (1 for positive, 0 for zero, −1 for negative). Then enter χ of A # B # C, and its area divided by π when it is given k = −1.`,
   answer: [ab, sg, tot, A],
@@ -276,9 +283,11 @@ mk({
  labels: ['genus g', 'sides', 'N (angle π ÷ N)'], tolerance: 0.01,
  gl: [['sides'], ['genus g'], ['N (angle π ÷ N)']]
 }, {
- canonical: { g: 5, m: 3 },
- draw: R => tries(() => ({ g: R.int(2, 9), m: R.int(1, 6) }), p => !(p.g === 2 && p.m === 1) && !(p.g === 5 && p.m === 3), { g: 4, m: 5 }),
- build: ({ g, m }) => { const sides = 4 * g, P = (4 * g - 4) * m, N = 2 * g; return {
+ /* The printed area P·π and curvature −1 ÷ m are the params; P is drawn as (4g − 4)·m for a genus g of 2 to 9. */
+ canonical: { P: 48, m: 3 },
+ draw: R => { const p = tries(() => ({ g: R.int(2, 9), m: R.int(1, 6) }), p => !(p.g === 2 && p.m === 1) && !(p.g === 5 && p.m === 3), { g: 4, m: 5 });
+  return { P: (4 * p.g - 4) * p.m, m: p.m }; },
+ build: ({ P, m }) => { const g = P / (4 * m) + 1, sides = 4 * g, N = 2 * g; return {
   prompt: `A paper pattern for a closed orientable hull shows one regular polygon. Its gluing word has 4 letters for each unit of genus and sends all the corners to one point. The polygon is drawn with constant curvature k = ${kTxt(m)}, and its area is ${n(P)}π square metres. The genus is not written on it. Enter the genus, then the number of sides of the polygon, then N where each corner angle is π ÷ N.`,
   answer: [g, sides, N],
   hints: ['All the corners meet at one point, so the equal corner angles add up to 2π. For a polygon with n sides, kA = (angle sum) − (n − 2)π.', 'Put in angle sum 2π, the curvature and the area, and solve for n. The word has 4 letters for each unit of genus, so the sides are 4 times the genus.'],

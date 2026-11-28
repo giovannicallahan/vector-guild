@@ -37,19 +37,18 @@ Object.assign(window.ORACLE, {
     let n = 0; while (n * area < whole - 1e-6) n++;
     return [rd(ex, 2), rd(area, 2), n];
   },
-  /* Angles a, b, c in twelfths of pi, sphere radius s. The printed area is the excess times s^2 (in units of pi it is
-     (a+b+c-12) s^2 / 12); N = area / excess, radius = sqrt N found by search. */
+  /* Angles a, b, c in twelfths of pi and the printed area Am pi. k = excess / area = 1 / N, so N = area / excess;
+     radius = sqrt N found by search. */
   q31d: p => {
-    const ex = (p.a + p.b + p.c - 12) * PI / 12, areaOverPi = (p.a + p.b + p.c - 12) * p.s * p.s / 12;
+    const ex = (p.a + p.b + p.c - 12) * PI / 12, areaOverPi = p.Am;
     const N = Math.round(areaOverPi * PI / ex);
     let r = 1; while (r * r < N) r++;
     return [rd(ex, 2), N, r];
   },
-  /* Genus g1, k = -1/m: Gauss-Bonnet kA = 2 pi chi gives A / pi = 2 chi / k for the first shell; the twin shell has genus g2. */
+  /* Genus g1 and printed area P pi: Gauss-Bonnet kA = 2 pi chi gives k = 2 chi / P; the twin shell has genus g2 and the same k. */
   q32b: p => {
-    const chi1 = 2 - 2 * p.g1, k = -1 / p.m, chi2 = 2 - 2 * p.g2;
-    const a1 = 2 * chi1 / k;
-    const kBack = 2 * chi1 / a1;
+    const chi1 = 2 - 2 * p.g1, chi2 = 2 - 2 * p.g2;
+    const kBack = 2 * chi1 / p.P;
     return [chi1, kBack, 2 * chi2 / kBack];
   },
   /* Genus g, k = -1/m, r litres a square metre. */
@@ -83,10 +82,10 @@ Object.assign(window.ORACLE, {
     const c2 = cA + cB - 2, c3 = c2 + cC - 2;
     return [c2, Math.sign(c2), c3, -2 * c3];
   },
-  /* k = -1/m. The printed area is the Gauss-Bonnet area of the genus-g surface, A / pi = 2 m (2g - 2). Recover the polygon
+  /* k = -1/m and the printed area P pi. Recover the polygon
      by search over n: with all n corners at one point the angle is 2 pi / n, so the area is m ((n - 2) pi - 2 pi) = m (n - 4) pi. */
   q34b: p => {
-    const aOverPi = 2 * p.m * (2 * p.g - 2);
+    const aOverPi = p.P;
     let n = 4; while (p.m * (n - 4) < aOverPi) n += 4;
     return [n / 4, n, n / 2];
   },

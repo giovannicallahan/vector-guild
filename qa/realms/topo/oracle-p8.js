@@ -75,8 +75,7 @@ Object.assign(window.ORACLE, {
     const A = cross(p.a), B = cross(p.b);
     return [wind(A), wind(B), wind(join(A, A, back(B)))];
   },
-  /* a, b, c = the three factors (the sign gives the direction); k = the whole number of times the test loop goes round, an
-     index of nothing else: the printed image winding number is k times the degree. The degree is found by lifting the image of a
+  /* a, b, c = the three factors (the sign gives the direction); M = the printed winding number of the image loop. The degree is found by lifting the image of a
      fine ring of M equally spaced angles (step by step, the shortest way round); the preimages of angle 0 are counted
      over the same ring. */
   q37b: p => {
@@ -88,7 +87,7 @@ Object.assign(window.ORACLE, {
       lift += d;
       if (comb(j) === 0) zeros++;
     }
-    const deg = lift / M, printed = deg * p.k;
+    const deg = lift / M, printed = p.M;
     let w = null; for (let t = -1000; t <= 1000; t++) if (deg * t === printed) w = t;
     return [deg, zeros, w];
   },

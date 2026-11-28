@@ -143,12 +143,12 @@ mk({
  gl: [['degree'], ['points sent to angle 0'], ['winding of the test loop']]
 }, {
  /* Three stages θ ↦ aθ, bθ, cθ, each factor from ±1 to ±4, with the combined degree at least 2 in size, so the points count is
-    never 1. The test loop's winding number k is not 0; the image winding number M = n × k is printed. The signs vary, so the
+    never 1. The printed image winding number M is the param: it is drawn as n × k for a test-loop winding k (not 0). The signs vary, so the
     degree and the points count differ in about half the draws. Not the q37 worked example (two stages 3 and −2). */
- canonical: { a: 2, b: -3, c: 2, k: -2 },
- draw: R => tries(() => ({ a: R.pick([-4, -3, -2, -1, 1, 2, 3, 4]), b: R.pick([-4, -3, -2, -1, 1, 2, 3, 4]), c: R.pick([-4, -3, -2, -1, 1, 2, 3, 4]), k: R.nz(-4, 4) }),
-  p => Math.abs(p.a * p.b * p.c) >= 2, { a: 2, b: -3, c: 2, k: -2 }),
- build: ({ a, b, c, k }) => { const d = a * b * c, M = d * k; return {
+ canonical: { a: 2, b: -3, c: 2, M: 24 },
+ draw: R => { const p = tries(() => ({ a: R.pick([-4, -3, -2, -1, 1, 2, 3, 4]), b: R.pick([-4, -3, -2, -1, 1, 2, 3, 4]), c: R.pick([-4, -3, -2, -1, 1, 2, 3, 4]), k: R.nz(-4, 4) }),
+  p => Math.abs(p.a * p.b * p.c) >= 2, { a: 2, b: -3, c: 2, k: -2 }); return { a: p.a, b: p.b, c: p.c, M: p.a * p.b * p.c * p.k }; },
+ build: ({ a, b, c, M }) => { const d = a * b * c, k = M / d; return {
   prompt: `A coolant valve on the Orbit Ring is turned through three gear stages in a row, and its handle moves round a circular dial at angle θ. The first stage is the map f: ${mapText(a)}, the second is g: ${mapText(b)} and the third is h: ${mapText(c)}, each applied to the angle the stage before it gives (a negative factor means that stage turns the other way). The combined map takes θ to h(g(f(θ))). Enter the degree of the combined map, then how many points of the dial it sends to the single point at angle 0. A test loop goes round the dial a whole number of times, and its image under the combined map has winding number ${n(M)}. Enter the winding number of the test loop.`,
   answer: [d, Math.abs(d), k],
   hints: ['A map θ ↦ nθ has degree n. Doing one map after another multiplies the degrees, so multiply the three factors.', 'A map of degree n (not 0) sends exactly |n| points to each point. A loop with winding number k goes to a loop with winding number n × k, so to undo it divide the image winding number by the degree.'],
@@ -237,7 +237,7 @@ mk({
  canonical: { nm: 0, kind: 3, x: 5 },
  draw: R => { const kind = R.int(0, 3); return { nm: R.int(0, 2), kind, x: kind === 0 || kind === 1 ? R.int(3, 12) : kind === 2 ? R.int(2, 9) : R.int(3, 10) }; },
  build: ({ nm, kind, x }) => { const { V, E } = frameVE({ kind, x }), L = E - V + 1, [cv, ce] = frameCount({ kind, x }); return {
-  prompt: `A ${FRAME_NAMES[nm]} in the hull of the Orbit Ring is ${frameText({ kind, x })}. Treat it as a graph: junctions are vertices and the cables between them are edges. Enter the number of vertices V, then the number of edges E, then the number of independent loops.`,
+  prompt: `A ${FRAME_NAMES[nm]} in the hull of the Orbit Ring is ${frameText({ kind, x })}. Treat it as a graph: junctions are vertices and the cables between them are edges. Enter the number of vertices V, then the number of edges E, then the number of independent loops: the fewest loops from which every loop in the graph can be built by joining them.`,
   answer: [V, E, L],
   hints: ['Count the junctions part by part, then count each kind of cable once.', 'A spanning tree of a connected graph uses V − 1 edges and has no loop. Each further edge closes one new independent loop, so there are E − V + 1 of them.'],
   solution: `${cv} ${ce} The number of independent loops is E − V + 1 = ${n(E)} − ${n(V)} + 1 = ${n(L)}.`,
@@ -281,7 +281,7 @@ mk({
  canonical: { s: 6, w: 4, h: 3, j: 2 },
  draw: R => ({ s: R.int(3, 9), w: R.int(2, 5), h: R.int(2, 5), j: R.int(1, 3) }),
  build: ({ s, w, h, j }) => { const V1 = s + 1, E1 = 2 * s, V2 = (w + 1) * (h + 1), E2 = w * (h + 1) + h * (w + 1), V = V1 + V2, E = E1 + E2 + j, chi = V - E, L = E - V + 1; return {
-  prompt: `Two looms on the Orbit Ring are joined into one network. The first is a wheel: a central hub joined by ${n(s)} straight spokes to ${n(s)} junctions on a rim, with each rim junction joined by a rim cable to the next one round the rim. The second is a rectangular grid of cable ${n(w)} cells wide and ${n(h)} cells tall, with a junction at every corner of every cell. Then ${n(j)} ${j === 1 ? 'connecting cable joins' : 'connecting cables each join'} a junction of the wheel to a junction of the grid, and there are no other junctions. Treat the network as a graph. Enter the number of vertices V, the number of edges E, the Euler characteristic χ = V − E of the graph, then the number of independent loops.`,
+  prompt: `Two looms on the Orbit Ring are joined into one network. The first is a wheel: a central hub joined by ${n(s)} straight spokes to ${n(s)} junctions on a rim, with each rim junction joined by a rim cable to the next one round the rim. The second is a rectangular grid of cable ${n(w)} cells wide and ${n(h)} cells tall, with a junction at every corner of every cell. Then ${n(j)} ${j === 1 ? 'connecting cable joins' : 'connecting cables each join'} a junction of the wheel to a junction of the grid, and there are no other junctions. Treat the network as a graph. Enter the number of vertices V, the number of edges E, the Euler characteristic χ = V − E of the graph, then the number of independent loops: the fewest loops from which every loop in the graph can be built by joining them.`,
   answer: [V, E, chi, L],
   hints: ['Count the junctions and the cables of the wheel and of the grid separately, then add the connecting cables. A cable between the two looms is not counted twice.', 'The Euler characteristic of a graph is V − E. A connected graph has E − V + 1 = 1 − χ independent loops.'],
   solution: `The wheel has ${n(s)} + 1 = ${n(V1)} junctions and 2 × ${n(s)} = ${n(E1)} cables. The grid has ${n(h + 1)} rows of ${n(w + 1)} junctions, so ${n(V2)} junctions, and ${n(h + 1)} × ${n(w)} + ${n(w + 1)} × ${n(h)} = ${n(E2)} cables. So V = ${n(V1)} + ${n(V2)} = ${n(V)} and E = ${n(E1)} + ${n(E2)} + ${n(j)} = ${n(E)}. Then χ = V − E = ${n(chi)}, and the network is in one piece, so it has 1 − χ = ${n(L)} independent loops.`,

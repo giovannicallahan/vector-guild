@@ -144,7 +144,7 @@ Object.assign(window.MISSION_GEN, {
   canonical: { k: 3, j: 7 },
   draw: R => { for (let i = 0; i < 1000; i++) { const p = { k: R.int(1, 12), j: R.int(1, 12) }; if (p.k !== p.j && !(p.k === 4 && p.j === 5)) return p; } return { k: 3, j: 7 }; },
   build: ({ k, j }) => { const x = 2 - k, c = 2 - j; return {
-   prompt: `A cross-cap is a projective plane (χ = 1) with a small round hole cut in it. Sewing a cross-cap into a round hole in a sphere is the same as a connected sum with a projective plane, and the hull “sphere with k cross-caps” has k of them sewn in. Use χ(A # B) = χ(A) + χ(B) − 2 and χ = 2 for the sphere. Enter the Euler characteristic of the sphere with ${pl(k, 'cross-cap', 'cross-caps')}, then the number of cross-caps of the sphere with cross-caps whose Euler characteristic is ${n(c)}.`,
+   prompt: `A cross-cap is a projective plane (χ = 1) with a small round hole cut in it. Sewing a cross-cap into a round hole in a sphere is the same as a connected sum with a projective plane, and the hull “sphere with k cross-caps” has k of them sewn in. Use χ(A # B) = χ(A) + χ(B) − 2 and χ = 2 for the sphere. Enter the Euler characteristic of the sphere with ${pl(k, 'cross-cap', 'cross-caps')}, then the number of cross-caps a sphere needs for its Euler characteristic to be ${n(c)}.`,
    answer: [x, j],
    hints: ['Each connected sum with a projective plane changes χ by 1 − 2 = −1. Starting from the sphere’s 2, a sphere with k cross-caps has χ = 2 − k.', 'Run the rule backwards: k = 2 − χ.'],
    solution: `Each cross-cap lowers χ by 1, starting from the sphere’s 2, so χ = 2 − k. With ${pl(k, 'cross-cap', 'cross-caps')}: χ = 2 − ${n(k)} = ${n(x)}. For χ = ${n(c)}: k = 2 − ${G.par(c)} = ${n(j)}.`,

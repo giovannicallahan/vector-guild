@@ -80,16 +80,16 @@ mk({
  labels: ['cross-caps on model A', 'χ of model B'], tolerance: 0.01,
  gl: [['cross-caps'], ['χ']]
 }, {
- /* Two different cross-cap counts, 1 to 14: j for model A (its χ = 2 − j is printed) and k for model B. Never the parent's worked example
-    (4 cross-caps and χ = −3) nor its canonical pair (3 and 7). */
- canonical: { j: 8, k: 6 },
- draw: R => { for (let i = 0; i < 1000; i++) { const p = { j: R.int(1, 14), k: R.int(1, 14) };
-   if (p.j !== p.k && !(p.k === 4 || p.j === 5) && !(p.k === 3 && p.j === 7)) return p; } return { j: 8, k: 6 }; },
- build: ({ j, k }) => { const c = 2 - j, x = 2 - k; return {
+ /* cA is the printed label χ of model A (−12 to 1, so 1 to 14 cross-caps) and k the cross-caps of model B (1 to 14), with
+    different cross-cap counts. Never the parent's worked example (4 cross-caps and χ = −3) nor its canonical pair (3 and 7). */
+ canonical: { cA: -6, k: 6 },
+ draw: R => { for (let i = 0; i < 1000; i++) { const p = { cA: R.int(-12, 1), k: R.int(1, 14) }, j = 2 - p.cA;
+   if (j !== p.k && !(p.k === 4 || j === 5) && !(p.k === 3 && j === 7)) return p; } return { cA: -6, k: 6 }; },
+ build: ({ cA, k }) => { const c = cA, j = 2 - cA, x = 2 - k; return {
   prompt: `The glass cases in the Hull Gallery hold models made from a sphere by sewing cross-caps into round holes. A cross-cap is a projective plane (χ = 1) with a small round hole cut in it, so sewing one in is a connected sum with a projective plane. Use χ(A # B) = χ(A) + χ(B) − 2 and χ = 2 for the sphere. The label of model A shows its Euler characteristic, ${n(c)}, but not how many cross-caps it has. Model B has ${pl(k, 'cross-cap', 'cross-caps')} and no label yet. Enter the number of cross-caps on model A, then the Euler characteristic of model B.`,
   answer: [j, x],
   hints: ['Each cross-cap is a connected sum with a projective plane, which changes χ by 1 − 2 = −1. So a sphere with k cross-caps has χ = 2 − k.', 'To find the count from a label, run the rule backwards: k = 2 − χ.'],
-  solution: `Each cross-cap lowers χ by 1, starting from the sphere’s 2, so χ = 2 − k. Model A: k = 2 − ${par(c)} = ${n(j)} cross-caps. Model B: χ = 2 − ${n(k)} = ${n(x)}.`,
+  solution: `Each cross-cap lowers χ by 1, starting from the sphere’s 2, so χ = 2 − k. Model A: k = 2 − ${par(c)} = ${pl(j, 'cross-cap', 'cross-caps')}. Model B: χ = 2 − ${n(k)} = ${n(x)}.`,
   guidance: [
    { prompt: `Model A has χ = ${n(c)}. A sphere with k cross-caps has χ = 2 − k, so solve 2 − k = ${n(c)}. How many cross-caps does model A have?`, answer: [j], explanation: `k = 2 − ${par(c)} = ${n(j)}.` },
    { prompt: `Each cross-cap lowers χ by 1, from the sphere’s 2. What is χ of model B, with ${pl(k, 'cross-cap', 'cross-caps')}?`, answer: [x], explanation: `2 − ${n(k)} = ${n(x)}.` }
@@ -102,15 +102,15 @@ mk({
  labels: ['cross-caps now', 'cross-caps to add', 'thread (m)'], tolerance: 0.01,
  gl: [['cross-caps now'], ['cross-caps to add'], ['thread (m)']]
 }, {
- /* Start with k0 ≥ 1 cross-caps (χ0 = 2 − k0 printed), add a more (target χ1 = χ0 − a printed), r metres of thread each. Not the parent's examples. */
- canonical: { k0: 6, a: 3, r: 8 },
- draw: R => { for (let i = 0; i < 1000; i++) { const p = { k0: R.int(1, 9), a: R.int(2, 9), r: R.int(3, 9) };
-   if (!(p.k0 === 3 && p.a === 4) && p.k0 !== 4) return p; } return { k0: 6, a: 3, r: 8 }; },
- build: ({ k0, a, r }) => { const x0 = 2 - k0, x1 = x0 - a, thread = a * r; return {
+ /* The printed labels: χ now x0 (−7 to 1, so k0 = 2 − x0 ≥ 1 cross-caps) and the target χ x1 (2 to 9 lower), r metres of thread each. Not the parent's examples. */
+ canonical: { x0: -4, x1: -7, r: 8 },
+ draw: R => { for (let i = 0; i < 1000; i++) { const x0 = R.int(-7, 1), p = { x0, x1: x0 - R.int(2, 9), r: R.int(3, 9) };
+   if (!(p.x0 === -1 && p.x1 === -5) && p.x0 !== -2) return p; } return { x0: -4, x1: -7, r: 8 }; },
+ build: ({ x0, x1, r }) => { const k0 = 2 - x0, a = x0 - x1, thread = a * r; return {
   prompt: `The pressure hull is a sphere with cross-caps sewn in. A cross-cap is a projective plane (χ = 1) with a small round hole cut in it, sewing one in is a connected sum with a projective plane, and χ(A # B) = χ(A) + χ(B) − 2, with χ = 2 for the sphere. The hull’s label reads χ = ${n(x0)}. The refit must end with a label of χ = ${n(x1)}, and every extra cross-cap sewn in takes ${n(r)} metres of seam thread. Enter the number of cross-caps the hull has now, then the number of cross-caps that must be sewn in, then the total metres of thread.`,
   answer: [k0, a, thread],
   hints: ['Each cross-cap is a connected sum with a projective plane, which changes χ by 1 − 2 = −1. So a sphere with k cross-caps has χ = 2 − k, and k = 2 − χ.', 'The number to sew in is the difference between the two cross-cap counts, or the drop in χ, since each cross-cap lowers χ by 1. The thread is that number times the thread for one.'],
-  solution: `Each cross-cap lowers χ by 1, starting from the sphere’s 2, so k = 2 − χ. Now: k = 2 − ${par(x0)} = ${n(k0)} cross-caps. At the end: k = 2 − ${par(x1)} = ${n(k0 + a)} cross-caps, so ${n(k0 + a)} − ${n(k0)} = ${n(a)} must be sewn in. The thread is ${n(a)} × ${n(r)} = ${n(thread)} metres.`,
+  solution: `Each cross-cap lowers χ by 1, starting from the sphere’s 2, so k = 2 − χ. Now: k = 2 − ${par(x0)} = ${pl(k0, 'cross-cap', 'cross-caps')}. At the end: k = 2 − ${par(x1)} = ${n(k0 + a)} cross-caps, so ${n(k0 + a)} − ${n(k0)} = ${n(a)} must be sewn in. The thread is ${n(a)} × ${n(r)} = ${n(thread)} metres.`,
   guidance: [
    { prompt: `The label reads χ = ${n(x0)}, and a sphere with k cross-caps has χ = 2 − k. How many cross-caps does the hull have now?`, answer: [k0], explanation: `k = 2 − ${par(x0)} = ${n(k0)}.` },
    { prompt: `The finished hull must have χ = ${n(x1)}, which is ${n(k0 + a)} cross-caps. The hull has ${n(k0)} now. How many cross-caps must be sewn in?`, answer: [a], explanation: `${n(k0 + a)} − ${n(k0)} = ${n(a)}. Each one lowers χ by 1, and χ must fall from ${n(x0)} to ${n(x1)}.` },
@@ -170,12 +170,13 @@ mk({
  labels: ['cross-caps of the standard surface', 'projective planes in the sum', 'χ after joining more'], tolerance: 0.01,
  gl: [['cross-caps k'], ['projective planes'], ['χ']]
 }, {
- /* t tori (1 to 6), p ≥ 1 projective planes (1 to 7) whose count is hidden (χ = 2 − 2t − p is printed), and m more joined on (1 to 4). Not the worked example (1 torus, 1 plane). */
- canonical: { t: 3, p: 2, m: 2 },
- draw: R => { for (let i = 0; i < 1000; i++) { const q = { t: R.int(1, 6), p: R.int(1, 7), m: R.int(1, 4) };
-   if (!(q.t === 1 && q.p === 1)) return q; } return { t: 3, p: 2, m: 2 }; },
- build: ({ t, p, m }) => { const x = 2 - 2 * t - p, k = 2 - x, y = x - m; return {
-  prompt: `A catalogue card says a hull is the connected sum of ${pl(t, 'torus', 'tori')} and some projective planes, but a smudge hides how many. It also says the hull is not orientable and its Euler characteristic is ${n(x)}. Use χ(A # B) = χ(A) + χ(B) − 2, with χ = 2 for the sphere, 0 for the torus and 1 for the projective plane. A surface that is not orientable is the sphere with 2 − χ cross-caps. Enter the number of cross-caps of the standard surface the hull is, then the number of projective planes in the sum, then the Euler characteristic of the hull after ${pl(m, 'more projective plane is', 'more projective planes are')} joined on.`,
+ /* t tori (1 to 6), the printed χ = x of the hull (from −5 − 2t to 1 − 2t, so the hidden count p = 2 − 2t − x is 1 to 7),
+    and m more joined on (1 to 4). Not the worked example (1 torus, 1 plane). */
+ canonical: { t: 3, x: -6, m: 2 },
+ draw: R => { for (let i = 0; i < 1000; i++) { const t = R.int(1, 6), q = { t, x: R.int(-5 - 2 * t, 1 - 2 * t), m: R.int(1, 4) };
+   if (!(q.t === 1 && q.x === -1)) return q; } return { t: 3, x: -6, m: 2 }; },
+ build: ({ t, x, m }) => { const p = 2 - 2 * t - x, k = 2 - x, y = x - m; return {
+  prompt: `A catalogue card says a hull is the connected sum of ${pl(t, 'torus', 'tori')} and one or more projective planes, but a smudge hides how many. It also says the hull is not orientable and its Euler characteristic is ${n(x)}. Use χ(A # B) = χ(A) + χ(B) − 2, with χ = 2 for the sphere, 0 for the torus and 1 for the projective plane. A surface that is not orientable is the sphere with 2 − χ cross-caps. Enter the number of cross-caps of the standard surface the hull is, then the number of projective planes in the sum, then the Euler characteristic of the hull after ${pl(m, 'more projective plane is', 'more projective planes are')} joined on.`,
   answer: [k, p, y],
   hints: ['A surface that is not orientable is the sphere with 2 − χ cross-caps. Each torus in the sum is worth two cross-caps and each projective plane one.', 'Take the tori’s cross-caps away from the total to find the projective planes. Each projective plane joined on lowers χ by 1.'],
   solution: `The hull is not orientable, so it is the sphere with 2 − ${par(x)} = ${n(k)} cross-caps. The ${pl(t, 'torus', 'tori')} count${t === 1 ? 's' : ''} for 2 × ${n(t)} = ${n(2 * t)} of them, so there are ${n(k)} − ${n(2 * t)} = ${n(p)} projective planes. Joining on ${pl(m, 'more projective plane', 'more projective planes')} lowers χ by ${n(m)}: ${n(x)} − ${n(m)} = ${n(y)}.`,

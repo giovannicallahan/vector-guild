@@ -126,7 +126,7 @@ window.QUESTS.push(
    'Look at the strokes that run into the snipped point. Each one is cut off there, but strokes that are still joined some other way, round a loop, stay in the same piece.',
    'An end point is a tip where a stroke stops and nothing carries on. Corners and the points where strokes meet are not end points.'
   ],
-  solution: '4 strokes run into the point where the bowl and the leg meet the stem. With that point removed, the cable falls into 3 pieces, so it is a cut point. The whole letter R has 2 end points, 1 branch point (4 strokes meet there) and 1 hole, so it had 2 end points before the snip.',
+  solution: '4 strokes run into the point where the bowl and the leg meet the stem. With that point removed, the cable falls into 3 pieces, so it is a cut point. Counting the tips where a stroke stops, the whole letter R had 2 end points before the snip.',
   xp: 150, prereqs: ['q12'],
   artifact: { name: 'Snip chart', description: 'Every stencil letter with the snips that break it marked in red.' },
   sources: [source.wConn],
@@ -155,7 +155,7 @@ window.QUESTS.push(
   guidance: [
    { prompt: 'How many strokes run into the point where the bowl and the leg meet the stem? (A point in the middle of a stroke has 2: one on each side.)', answer: [4], labels: ['strokes at the snip'], explanation: '4 strokes run into that point. Each is cut off there, but some may still be joined further away.' },
    { prompt: 'After the snip, how many pieces is the cable in?', answer: [3], labels: ['pieces after the snip'], explanation: 'With the point where the bowl and the leg meet the stem removed, the cable falls into 3 pieces, so it is a cut point.' },
-   { prompt: 'How many end points does the whole letter R have?', answer: [2], labels: ['end points'], explanation: 'The letter R has 2 end points, 1 branch point (4 strokes meet there) and 1 hole.' }
+   { prompt: 'How many end points does the whole letter R have?', answer: [2], labels: ['end points'], explanation: 'Counting the tips where a stroke stops, the letter R has 2 end points.' }
   ]
  },
  {
@@ -165,7 +165,7 @@ window.QUESTS.push(
   prompt: 'A cable label spells RELAY in the lab’s stencil font, which is drawn in thin strokes: R is a straight stem with a curved bowl from the top of the stem back to its middle, and a straight leg going down to the right from the point where the bowl meets the middle of the stem; E is a straight stem with three straight arms going right, from its top, its middle and its bottom; L is a straight stem with a straight foot going right from its bottom; A is two straight strokes meeting at the apex, joined by a crossbar part of the way down, with both strokes going on below the bar as feet; Y is two straight arms that meet at one point, with a straight stem going down from that point; T is a straight crossbar with a straight stem hanging down from its midpoint. Enter how many of the letters of RELAY are homeomorphic to the letter T. Count a letter each time it appears.',
   answer: [2], labels: ['letters homeomorphic to the target'], tolerance: 0.01,
   hints: [
-   'Stretching and bending never change the number of end points, the number of branch points (where three or more strokes meet) with how many strokes meet at each, or the number of holes. A corner is not a branch point.',
+   'Stretching and bending never change the number of end points, the number of branch points (where three or more strokes meet) with how many strokes meet at each, or the number of holes (gaps closed off all round by a loop of strokes, like the inside of O). A corner is not a branch point.',
    'Work out those numbers for the target letter first, then for each letter of the word. For the letters of this font, two letters with the same end points, branch points and holes are homeomorphic, and two that differ in any of them are not.'
   ],
   solution: 'T has 3 end points, 1 branch point (3 strokes meet there) and 0 holes. In RELAY: R has 2 end points, 1 branch point (4 strokes meet there) and 1 hole; E has 3 end points, 1 branch point (3 strokes meet there) and 0 holes; L has 2 end points, no branch points and 0 holes; A has 2 end points, 2 branch points (3 strokes meet at each) and 1 hole; Y has 3 end points, 1 branch point (3 strokes meet there) and 0 holes. So the letters that match are E and Y, and the count is 2.',
@@ -333,7 +333,7 @@ window.QUESTS.push(
   id: 'q18', title: 'Sewing the first panel', topic: 'Gluing: quotient spaces', tier: 'Intermediate', sector: 'Fabric Bay',
   brief: 'The Fabric Bay makes closed hulls by sewing the edges of flat panels together, and the cutters need to know what each sewing pattern makes of the corners.',
   lesson: 'Gluing makes a quotient space: points that are sewn together become one point, and a gluing word on a square says which edges meet and which way round.',
-  prompt: 'A square hull panel has its 4 edges labelled with arrows. Read clockwise from the top-left corner (the top edge, then the right, the bottom and the left), the labels are a b a⁻¹ b⁻¹. A letter alone means that edge’s arrow points clockwise round the square; a letter with ⁻¹ means it points anticlockwise. The Fabric Bay sews together each pair of edges that share a letter, arrow on arrow, and leaves an edge whose letter appears only once unsewn. Enter how many distinct points the 4 corners become, then how many distinct edges are left.',
+  prompt: 'A square hull panel has its 4 edges labelled with arrows. Read clockwise from the top-left corner (the top edge, then the right, the bottom and the left), the labels are a b a⁻¹ b⁻¹. A letter alone means that edge’s arrow points clockwise round the square; a letter with ⁻¹ means it points anticlockwise. The Fabric Bay sews together each pair of edges that share a letter, arrow on arrow, and leaves an edge whose letter appears only once unsewn. Two edges sewn together count as one edge. Enter how many distinct points the 4 corners become, then how many distinct edges are left.',
   answer: [1, 2], labels: ['corner points', 'edges left'], tolerance: 0.01,
   hints: [
    'Sewing two edges arrow on arrow joins the tail of one arrow to the tail of the other, and the head to the head. Write down which corners each sewing joins.',

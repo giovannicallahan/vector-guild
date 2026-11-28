@@ -40,11 +40,11 @@ const panelChi = w => vertexClasses(w) - new Set(w.map(x => x.L)).size + 1;
 /* Genus if orientable, cross-caps if not, found by searching on χ. */
 const thirdOf = (chi, ori) => ori ? genusFor(chi) : crossFor(chi);
 Object.assign(window.ORACLE, {
-  /* j and k are counts: j is printed only through the label χ = 2 − j of model A (found by search); k cross-caps on B. */
-  q26b: p => [crossFor(crossChi(p.j)), crossChi(p.k)],
-  /* k0 is the hull's cross-caps now (printed as χ), a more are sewn in (end χ printed), r metres per cross-cap. */
+  /* cA is the printed label χ of model A (cross-caps found by search); k cross-caps on B. */
+  q26b: p => [crossFor(p.cA), crossChi(p.k)],
+  /* x0 is the printed χ now, x1 the printed target χ (cross-caps of each found by search), r metres per cross-cap. */
   q26c: p => {
-    const now = crossFor(crossChi(p.k0)), end = crossFor(crossChi(p.k0 + p.a));
+    const now = crossFor(p.x0), end = crossFor(p.x1);
     return [now, end - now, (end - now) * p.r];
   },
   /* a, b are cross-caps on A and B, c is χ of C; join A with B, then C. Result is not orientable. */
@@ -59,12 +59,10 @@ Object.assign(window.ORACLE, {
     for (let i = 0; i < p.c; i++) x = csum(x, PLANE);
     return [x, crossFor(x)];
   },
-  /* t tori and p projective planes; the card prints χ of that sum (found by building it), and the number of
-     planes is then recovered from the printed χ by searching, then m more planes are joined. */
+  /* t tori and the printed χ = x of the sum; the number of planes is recovered by joining planes on to the t tori
+     until χ reaches x, then m more planes are joined. */
   q27c: p => {
-    let x = SPHERE;
-    for (let i = 0; i < p.t; i++) x = csum(x, TORUS);
-    for (let i = 0; i < p.p; i++) x = csum(x, PLANE);
+    const x = p.x;
     let q = 0, y = SPHERE; for (let i = 0; i < p.t; i++) y = csum(y, TORUS);
     while (y > x) { y = csum(y, PLANE); q++; }
     let z = x; for (let i = 0; i < p.m; i++) z = csum(z, PLANE);
