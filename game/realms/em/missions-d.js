@@ -29,7 +29,7 @@ const source = {
  s13_2: { title: "OpenStax University Physics Volume 2 — 13.2 Lenz's Law", url: "https://openstax.org/books/university-physics-volume-2/pages/13-2-lenzs-law", description: "Lenz's law: the induced emf drives a current that opposes the change in magnetic flux that causes it.", verified: '2026-11-28' },
  s13_3: { title: "OpenStax University Physics Volume 2 — 13.3 Motional Emf", url: "https://openstax.org/books/university-physics-volume-2/pages/13-3-motional-emf", description: "The emf Blv of a rod moving on rails through a field, and the emf of a rotating coil, with peak NBAω.", verified: '2026-11-28' },
  s13_6: { title: "OpenStax University Physics Volume 2 — 13.6 Electric Generators and Back Emf", url: "https://openstax.org/books/university-physics-volume-2/pages/13-6-electric-generators-and-back-emf", description: "Generators: a coil turning in a field gives ε = NBAω sin ωt with peak NBAω, and f = ω/2π.", verified: '2026-11-28' },
- s14_2: { title: "OpenStax University Physics Volume 2 — 14.2 Self-Inductance and Inductors", url: "https://openstax.org/books/university-physics-volume-2/pages/14-2-self-inductance-and-inductors", description: "Self-inductance L, the induced emf ε = −L dI/dt, and inductance in henries.", verified: '2026-11-28' },
+ s14_2: { title: "OpenStax University Physics Volume 2 — 14.2 Self-Inductance and Inductors", url: "https://openstax.org/books/university-physics-volume-2/pages/14-2-self-inductance-and-inductors", description: "Self-inductance L and the induced emf ε = −L dI/dt. The page writes inductances in henries (H) but does not define the unit; q37 states that 1 H gives 1 V when the current changes by 1 A each second.", verified: '2026-11-28' },
  s14_3: { title: "OpenStax University Physics Volume 2 — 14.3 Energy in a Magnetic Field", url: "https://openstax.org/books/university-physics-volume-2/pages/14-3-energy-in-a-magnetic-field", description: "The energy stored in an inductor, U = ½LI², and the energy density of a magnetic field.", verified: '2026-11-28' },
  s14_4: { title: "OpenStax University Physics Volume 2 — 14.4 RL Circuits", url: "https://openstax.org/books/university-physics-volume-2/pages/14-4-rl-circuits", description: "The growing current I(t) = (ε/R)(1 − e^(−t/τ)) in an RL circuit, with time constant τ = L/R.", verified: '2026-11-28' },
  s15_1: { title: "OpenStax University Physics Volume 2 — 15.1 AC Sources", url: "https://openstax.org/books/university-physics-volume-2/pages/15-1-ac-sources", description: "Alternating voltage v = V₀ sin ωt with peak V₀ and angular frequency ω.", verified: '2026-11-28' },
@@ -258,18 +258,18 @@ window.QUESTS.push(
   id: 'q36', title: "Checking the wind generator", topic: "Motional emf and the generator, peak emf NBAω", tier: 'Advanced', sector: 'Generator Station',
   brief: "Before the wind generator goes on line, we test the emf of a sliding rod and work out the generator's peak voltage.",
   lesson: "A rod of length l moving at speed v across a field B has a motional emf Blv; a coil of N turns of area A spinning at ω in a field B gives an emf NBAω sin ωt, with peak NBAω.",
-  prompt: "Two checks on the wind generator. First, a test rod 1.2 m long slides along two metal rails at a steady 5 m/s. A uniform magnetic field of 0.4 T is at right angles to the rod, the rails and its motion. Second, the generator's coil has 200 turns, each of area 0.05 m², and spins at 40 rad/s in a uniform field of 0.3 T, about an axis at right angles to the field. Enter the motional emf across the rod in volts (V), then the peak emf of the generator in volts, each to 2 decimal places. Type numbers without commas.",
+  prompt: "Two checks on the wind generator. First, a test rod 1.2 m long lies across two metal rails, at right angles to them, and slides along them at a steady 5 m/s. A uniform magnetic field of 0.4 T is at right angles to the rod, the rails and its motion. Second, the generator's coil has 200 turns, each of area 0.05 m², and spins at 40 rad/s in a uniform field of 0.3 T, about an axis at right angles to the field. Enter the motional emf across the rod in volts (V), then the peak emf of the generator in volts, each to 2 decimal places. Type numbers without commas.",
   answer: [2.4,120], labels: ["rod emf (V)","peak emf (V)"], tolerance: 0.005,
   hints: [
    "Each second the rod sweeps out an area of l × v, so the flux of the circuit it closes changes at the rate Blv. By Faraday's law that rate is the emf.",
-   "A coil of N turns of area A spinning at angular speed ω in a field B has flux BA cos ωt through each turn. Its rate of change gives the emf NBAω sin ωt, whose peak is NBAω."
+   "A coil of N turns of area A spinning at angular speed ω in a field B has flux BA cos ωt through each turn, timing t from a moment when the field points straight through the coil. Its rate of change gives the emf NBAω sin ωt, whose peak is NBAω."
   ],
   solution: "The rod sweeps out 1.2 × 5 = 6 m² each second, so the flux changes at the rate Blv = 0.4 × 6 = 2.4 V. The generator's emf is NBAω sin ωt, so its peak is NBAω = 200 × 0.3 × 0.05 × 40 = 120 V.",
   xp: 200, prereqs: ["q35"],
   artifact: { name: "Generator test rig", description: "A sliding rod and a spinning coil that turn motion into volts." },
   sources: [source.s13_3, source.s13_6],
   teaching: {
-   intuition: "Faraday's law needs the flux to change, but the field does not have to change: the area can. Picture a metal rod of length l lying across two rails, with a field B at right angles to the rails, the rod and its motion. The rod and rails form a loop. When the rod slides at speed v, the loop grows by an area lv every second, so its flux grows at the rate Blv. By Faraday's law that is the emf: ε = Blv, called motional emf because motion makes it. A generator does the same job by turning. A coil of N turns, each of area A, spins at angular speed ω (radians per second) in a field B, about an axis at right angles to the field. The angle between the field and the coil's face changes as ωt, so the flux through each turn is BA cos ωt. Its rate of change gives the emf ε = NBAω sin ωt, which swings up and down like a sine wave. Since sin ωt is never more than 1, the peak emf is NBAω. The coil goes round ω/(2π) times a second; this is its frequency f, measured in hertz (Hz), so ω = 2πf.",
+   intuition: "Faraday's law needs the flux to change, but the field does not have to change: the area can. Picture a metal rod of length l lying across two rails, at right angles to them, with a field B at right angles to the rails, the rod and its motion. The rod and rails form a loop. When the rod slides at speed v, the loop grows by an area lv every second, so its flux grows at the rate Blv. By Faraday's law that is the emf: ε = Blv, called motional emf because motion makes it. A generator does the same job by turning. A coil of N turns, each of area A, spins at angular speed ω (radians per second) in a field B, about an axis at right angles to the field. Measure the angle θ between the field and the coil's normal, the line at right angles to its face (as for electric flux). The flux through one turn is BA cos θ: all of BA when the field points straight through the coil (θ = 0), and 0 when the field lies along the coil's face (θ = π/2). Start the clock at a moment when the field points straight through the coil; then θ = ωt, so the flux through each turn is BA cos ωt. Its rate of change gives the emf ε = NBAω sin ωt, which swings up and down like a sine wave. Since sin ωt is never more than 1, the peak emf is NBAω. The coil goes round ω/(2π) times a second; this is its frequency f, measured in hertz (Hz), so ω = 2πf.",
    steps: [
     "For a sliding rod, find the area it sweeps out each second: l × v.",
     "Multiply by the field: the motional emf is Blv.",
@@ -277,7 +277,7 @@ window.QUESTS.push(
     "Its peak, where sin ωt = 1, is NBAω."
    ],
    example: {
-    prompt: "A 0.5 m rod slides at 10 m/s across a 0.2 T field. A generator coil of 100 turns, each 0.02 m², spins at 50 rad/s in a 0.5 T field. Find both emfs.",
+    prompt: "A 0.5 m rod lies across two rails, at right angles to them, and slides along them at 10 m/s, in a 0.2 T field at right angles to the rod, the rails and its motion. A generator coil of 100 turns, each 0.02 m², spins at 50 rad/s in a 0.5 T field, about an axis at right angles to the field. Find both emfs.",
     steps: [
      "The rod sweeps 0.5 × 10 = 5 m² a second, so ε = 0.2 × 5 = 1 V.",
      "The peak emf is NBAω = 100 × 0.5 × 0.02 × 50 = 50 V."
@@ -407,12 +407,12 @@ window.QUESTS.push(
     "The resonant frequency is f₀ = 1/(2π√(LC)), with L in henries and C in farads."
    ],
    example: {
-    prompt: "A series circuit has R = 30 Ω, L = 50 mH and C = 50 μF. On one supply X_L = 80 Ω and X_C = 40 Ω. Find Z there, and the resonant frequency.",
+    prompt: "A series circuit has R = 30 Ω, L = 50 mH and C = 50 μF. On a supply of angular frequency ω = 500 rad/s, X_L = ωL = 500 × 0.05 = 25 Ω and X_C = 1/(ωC) = 1 ÷ (500 × 50 × 10⁻⁶) = 40 Ω. Find Z there, to 2 decimal places, and the resonant frequency.",
     steps: [
-     "Z = √(30² + (80 − 40)²) = √(900 + 1600) = √2500 = 50 Ω.",
+     "Z = √(30² + (25 − 40)²) = √(900 + 225) = √1125 ≈ 33.54 Ω.",
      "√(LC) = √(0.05 × 50 × 10⁻⁶) ≈ 1.581 × 10⁻³ s, so f₀ = 1 ÷ (2π × 1.581 × 10⁻³) ≈ 100.66 Hz."
     ],
-    answer: "Z = 50 Ω and f₀ ≈ 100.66 Hz."
+    answer: "Z ≈ 33.54 Ω and f₀ ≈ 100.66 Hz."
    },
    pitfalls: [
     "Adding R, X_L and X_C straight together instead of using the right-angle rule.",

@@ -87,7 +87,7 @@ P['em'] = {
   ['Faraday\'s law', 'q35', 'The rule that a changing magnetic flux through a loop induces an emf equal to its rate of change, ε = −N dΦ/dt for N turns.', 'Flux falling by 2 mWb in 0.5 s through 50 turns gives 200 mV.', ['Faraday’s law']],
   ['Lenz\'s law', 'q35', 'The rule that an induced current flows so that its own field opposes the change in flux that caused it.', 'Growing upward flux drives a current whose field points down.', ['Lenz’s law']],
   ['induction', 'q35', 'Making an emf, and so a current, in a circuit by changing the magnetic flux through it.', 'Moving a magnet into a coil drives a current by induction.', ['electromagnetic induction']],
-  ['motional emf', 'q36', 'The emf Blv across a conductor of length l moving at speed v through a magnetic field B.', 'A 1 m rod at 5 m/s in 0.4 T has a motional emf of 2 V.', []],
+  ['motional emf', 'q36', 'The emf Blv across a conductor of length l moving at speed v through a magnetic field B, when the conductor, its motion and the field are at right angles to each other.', 'A 1 m rod at 5 m/s in 0.4 T has a motional emf of 2 V.', []],
   ['generator', 'q36', 'A machine that spins a coil in a magnetic field to turn motion into an emf, NBAω sin ωt.', 'A wind turbine drives the outpost\'s generator.', []],
   ['inductance', 'q37', 'How strongly a coil opposes a change in its own current: the self-induced emf is −L dI/dt.', 'A 0.2 H coil whose current rises at 10 A/s has an emf of 2 V.', []],
   ['henry', 'q37', 'The unit of inductance, H: 1 H gives 1 V when the current changes by 1 A each second.', 'A 200 mH coil has an inductance of 0.2 henries.', ['henries']],

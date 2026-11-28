@@ -104,11 +104,11 @@ window.QUESTS.push(
  {
   id: 'q13', title: "Charging up the ion gun", topic: "Potential difference, the volt and the electron-volt", tier: 'Intermediate', sector: 'Accelerator Bay',
   brief: "The ion gun fires charged nuclei at the ore samples, and the crew sets the energy of each shot by choosing a voltage.",
-  lesson: "A charge q that moves through a potential difference ΔV gains kinetic energy qΔV; one elementary charge through one volt gains one electron-volt.",
+  lesson: "A charge q that moves through a potential difference ΔV = V_end − V_start changes its potential energy by qΔV and its kinetic energy by −qΔV; one elementary charge through one volt gains one electron-volt.",
   prompt: "The ion gun releases a helium nucleus (charge 2e, mass 6.64 × 10⁻²⁷ kg) from rest and accelerates it through a potential difference of 1500 V, from high potential to low potential. Use e = 1.60 × 10⁻¹⁹ C. Enter the kinetic energy it gains in eV, then the same energy as the number that multiplies 10⁻¹⁷ J, then its final speed in km/s to 2 decimal places (type the answers without commas).",
   answer: [3000,48,380.23], labels: ["energy (eV)","energy (× 10⁻¹⁷ J)","speed (km/s)"], tolerance: 0.005,
   hints: [
-   "A charge q that falls through a potential difference ΔV gains kinetic energy qΔV. In electron-volts this is just the number of elementary charges times the number of volts.",
+   "Write ΔV = V_end − V_start. The kinetic energy changes by −qΔV, so a charge q that falls from high to low potential through a drop of size |ΔV| gains kinetic energy q|ΔV|. In electron-volts this is just the number of elementary charges times the number of volts.",
    "Turn eV into joules with 1 eV = 1.60 × 10⁻¹⁹ J, then set ½mv² equal to that energy and solve for v. Divide metres per second by 1000 to get km/s."
   ],
   solution: "The nucleus carries two elementary charges, so it gains 2 × 1500 = 3000 eV. In joules that is 3000 × 1.60 × 10⁻¹⁹ = 48 × 10⁻¹⁷ J. From ½mv² = 48 × 10⁻¹⁷ J, v = √(2 × 48 × 10⁻¹⁷ ÷ (6.64 × 10⁻²⁷)) m/s, which is 380.23 km/s to 2 decimal places.",
@@ -116,7 +116,7 @@ window.QUESTS.push(
   artifact: { name: "Ion gun dial", description: "A voltage dial marked in electron-volts for each kind of nucleus." },
   sources: [source.s7_2],
   teaching: {
-   intuition: "Potential energy depends on the charge you bring, so it is handy to divide it out. The electric potential at a place is the potential energy per coulomb a charge would have there, V = U ÷ q. Its unit is the volt: 1 V = 1 joule per coulomb. What matters for motion is the potential difference ΔV between two places: a charge q that moves between them changes its potential energy by qΔV. A positive charge let go at high potential runs to low potential and turns that energy into motion. Atomic energies in joules are tiny, so we also use the electron-volt: 1 eV is the energy one elementary charge gains through 1 V, which is 1.60 × 10⁻¹⁹ J. A charge of 2e through 1000 V gains 2000 eV.",
+   intuition: "Potential energy depends on the charge you bring, so it is handy to divide it out. The electric potential at a place is the potential energy per coulomb a charge would have there, V = U ÷ q. Its unit is the volt: 1 V = 1 joule per coulomb. What matters for motion is the potential difference between where a charge starts and where it ends, ΔV = V_end − V_start. A charge q that moves between them changes its potential energy by ΔU = qΔV, and if only the electric force acts, its kinetic energy changes by the opposite amount, ΔK = −qΔV. A positive charge let go at high potential runs to low potential: ΔV is negative, so ΔU is negative and ΔK = −qΔV is positive. So a charge q that falls through a drop of size |ΔV| gains kinetic energy q|ΔV|. Atomic energies in joules are tiny, so we also use the electron-volt: 1 eV is the energy one elementary charge gains through 1 V, which is 1.60 × 10⁻¹⁹ J. A charge of 2e through 1000 V gains 2000 eV.",
    steps: [
     "Count the elementary charges the particle carries: a proton has 1, a helium nucleus has 2.",
     "Energy gained in eV = (number of elementary charges) × (potential difference in volts).",

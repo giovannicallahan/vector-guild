@@ -211,11 +211,11 @@ mk({
   return {
    prompt: `The electron gun of the ore scanner releases electrons (charge e, mass 9.11 × 10⁻³¹ kg) from rest and accelerates them through a potential difference between the cathode and the anode. The scanner needs the electrons to leave at a speed of ${n(v)} km/s. Use e = 1.60 × 10⁻¹⁹ C and ignore relativity. Enter the kinetic energy each electron must gain, as the number that multiplies 10⁻¹⁷ J, then the size of the potential difference needed, in V. Both are to 2 decimal places; type them without commas.`,
    answer: [E17, V],
-   hints: ['Turn km/s into m/s (multiply by 1000), then the kinetic energy gained from rest is ½mv² in joules. Write it as a number times 10⁻¹⁷ J.', 'A charge e falling through a potential difference ΔV gains eΔV, so ΔV = energy ÷ e. Use the unrounded energy in joules and e = 1.60 × 10⁻¹⁹ C.'],
-   solution: `The speed is ${n(v * 1000)} m/s, so the electron gains ½mv² = ½ × 9.11 × 10⁻³¹ × (${n(v * 1000)})², which is ${n(E17)} × 10⁻¹⁷ J to 2 decimal places. A charge e gains eΔV, so ΔV = energy ÷ e = ${n(rr(K0 / 1e-17))} × 10⁻¹⁷ ÷ (1.60 × 10⁻¹⁹) V, which is ${n(V)} V to 2 decimal places.`,
+   hints: ['Turn km/s into m/s (multiply by 1000), then the kinetic energy gained from rest is ½mv² in joules. Write it as a number times 10⁻¹⁷ J.', 'A charge e falling through a potential difference of size |ΔV| gains kinetic energy e|ΔV|, so |ΔV| = energy ÷ e. Use the unrounded energy in joules and e = 1.60 × 10⁻¹⁹ C.'],
+   solution: `The speed is ${n(v * 1000)} m/s, so the electron gains ½mv² = ½ × 9.11 × 10⁻³¹ × (${n(v * 1000)})², which is ${n(E17)} × 10⁻¹⁷ J to 2 decimal places. A charge e gains e|ΔV|, so |ΔV| = energy ÷ e = ${n(rr(K0 / 1e-17))} × 10⁻¹⁷ ÷ (1.60 × 10⁻¹⁹) V, which is ${n(V)} V to 2 decimal places.`,
    guidance: [
     { prompt: `With v = ${n(v * 1000)} m/s and m = 9.11 × 10⁻³¹ kg, work out ½mv². What number multiplies 10⁻¹⁷ J, to 2 decimal places?`, answer: [E17], explanation: `½ × 9.11 × 10⁻³¹ × (${n(v * 1000)})² = ${n(E17)} × 10⁻¹⁷ J to 2 decimal places.` },
-    { prompt: `The energy gained is eΔV. Use the unrounded energy and e = 1.60 × 10⁻¹⁹ C. What is ΔV, in V to 2 decimal places?`, answer: [V], explanation: `ΔV = energy ÷ e = ${n(rr(K0 / 1e-17))} × 10⁻¹⁷ ÷ (1.60 × 10⁻¹⁹) = ${n(V)} V to 2 decimal places.` }
+    { prompt: `The energy gained is e|ΔV|. Use the unrounded energy and e = 1.60 × 10⁻¹⁹ C. What is the size of the potential difference |ΔV|, in V to 2 decimal places?`, answer: [V], explanation: `|ΔV| = energy ÷ e = ${n(rr(K0 / 1e-17))} × 10⁻¹⁷ ÷ (1.60 × 10⁻¹⁹) = ${n(V)} V to 2 decimal places.` }
    ] }; }
 });
 
@@ -236,7 +236,7 @@ mk({
   return {
    prompt: `In the Accelerator Bay a ${who} is released from rest and accelerated through ${n(V1)} V, from high potential to low potential. It then enters a retarding stage, where it climbs through a potential rise of ${n(V2)} V (from low potential to high potential) before it reaches the target. Use e = 1.60 × 10⁻¹⁹ C. Enter the kinetic energy it has after the first stage in eV, then its kinetic energy at the target in eV, then its speed at the target in km/s to 2 decimal places (type the answers without commas).`,
    answer: [E1, E2, v],
-   hints: ['A charge that falls through a potential difference ΔV gains kinetic energy qΔV, and one that climbs through a potential rise loses qΔV. In electron-volts this is the number of elementary charges times the number of volts.', 'The energy at the target is the energy after the first stage minus the energy lost in the retarding stage. Then turn eV into joules (1 eV = 1.60 × 10⁻¹⁹ J), set ½mv² equal to it and solve for v; divide m/s by 1000 for km/s.'],
+   hints: ['A charge q that falls through a potential drop of size |ΔV| gains kinetic energy q|ΔV|, and one that climbs through a potential rise of size |ΔV| loses q|ΔV|. In electron-volts this is the number of elementary charges times the number of volts.', 'The energy at the target is the energy after the first stage minus the energy lost in the retarding stage. Then turn eV into joules (1 eV = 1.60 × 10⁻¹⁹ J), set ½mv² equal to it and solve for v; divide m/s by 1000 for km/s.'],
    solution: `The ${z === 1 ? 'proton' : 'nucleus'} carries ${z === 1 ? 'one elementary charge' : 'two elementary charges'}, so the first stage gives it ${n(z)} × ${n(V1)} = ${n(E1)} eV. The retarding stage takes away ${n(z)} × ${n(V2)} = ${n(z * V2)} eV, leaving ${n(E1)} − ${n(z * V2)} = ${n(E2)} eV at the target. In joules that is ${n(E2)} × 1.60 × 10⁻¹⁹ = ${n(rr(J))} × 10⁻¹⁷ J, so v = √(2 × ${n(rr(J))} × 10⁻¹⁷ ÷ (${ms})) m/s, which is ${n(v)} km/s to 2 decimal places.`,
    guidance: [
     { prompt: `The ${z === 1 ? 'charge is e' : 'charge is 2e'} and the first stage is ${n(V1)} V downhill. How much kinetic energy does it have after it, in eV?`, answer: [E1], explanation: `${n(z)} × ${n(V1)} = ${n(E1)} eV.` },
@@ -259,7 +259,7 @@ mk({
   return {
    prompt: `A proton is accelerated from rest through ${n(V)} MV (1 MV = 10⁶ V) and fired head-on at a fixed nucleus of charge ${n(Z)}e in the target of the Accelerator Bay. The nucleus does not move and nothing but the electric force acts. Far from the nucleus the potential energy of the pair is 0, and at the closest approach the proton stops for an instant, so all its kinetic energy has become electric potential energy. Use k = 8.99 × 10⁹ N·m²/C², e = 1.60 × 10⁻¹⁹ C and ignore relativity. Enter the kinetic energy the proton gains, as the number that multiplies 10⁻¹³ J. Then enter the closest approach distance in femtometres (1 fm = 10⁻¹⁵ m). Both are to 2 decimal places.`,
    answer: [E13, dr],
-   hints: ['One elementary charge through a potential difference of ΔV gains eΔV, which is ΔV electron-volts. Turn that into joules with 1 eV = 1.60 × 10⁻¹⁹ J.', 'At the closest approach the potential energy of the pair is U = kq₁q₂ ÷ r with q₁ = e and q₂ = Ze. Set U equal to the kinetic energy and solve for r, which is in metres until you divide by 10⁻¹⁵.'],
+   hints: ['One elementary charge that falls through a potential difference of size |ΔV| gains kinetic energy e|ΔV|, which is |ΔV| electron-volts. Turn that into joules with 1 eV = 1.60 × 10⁻¹⁹ J.', 'At the closest approach the potential energy of the pair is U = kq₁q₂ ÷ r with q₁ = e and q₂ = Ze. Set U equal to the kinetic energy and solve for r, which is in metres until you divide by 10⁻¹⁵.'],
    solution: `The proton gains ${n(V)} × 10⁶ eV, and in joules that is ${n(V)} × 10⁶ × 1.60 × 10⁻¹⁹ = ${n(E13)} × 10⁻¹³ J. At the closest approach U = k × e × ${n(Z)}e ÷ r equals that energy, so r = 8.99 × 10⁹ × 1.60 × 10⁻¹⁹ × ${n(Z)} × 1.60 × 10⁻¹⁹ ÷ (${n(E13)} × 10⁻¹³) m, which is ${n(dr)} fm to 2 decimal places.`,
    guidance: [
     { prompt: `The proton has charge e and falls through ${n(V)} MV. How much energy does it gain? Give the number that multiplies 10⁻¹³ J, to 2 decimal places.`, answer: [E13], explanation: `${n(V)} × 10⁶ eV × 1.60 × 10⁻¹⁹ J per eV = ${n(E13)} × 10⁻¹³ J.` },
@@ -297,13 +297,17 @@ mk({
 });
 
 /* Two fixed posts: qa at x = 0 and qb at x = D (cm, a multiple of 10). The grain (qt μC, m mg) is released at xa and slides to xb, both strictly
-   between the posts (multiples of 10 cm). The draw keeps V(xa) above V(xb) and every V between them at or below V(xa), so the grain really does reach xb.
+   between the posts (multiples of 10 cm). The draw keeps V(xa) above V(xb), every V after the start strictly below V(xa), and the force at the
+   release point pointing towards xb (field E_x = 8.99(qa ÷ x² − qb ÷ (d − x)²) kV/m, at least 1 kV/m that way), so the grain starts to move
+   (a grain released where the two pulls cancel would stay put) and really does reach xb.
    v = √(2000·qt·ΔV ÷ m) m/s with ΔV in kV, qt in μC and m in mg. */
 const v14c = ({ qa, qb, D }, x) => 8.99 * (qa / x + qb / (D / 100 - x));
+const e14c = ({ qa, qb, D }, x) => 8.99 * (qa / (x * x) - qb / ((D / 100 - x) ** 2));
 const ok14c = p => {
  const xa = p.xa / 100, xb = p.xb / 100, VA = v14c(p, xa), VB = v14c(p, xb), dV = VA - VB;
  if (dV < 5) return false;
- for (let i = 0; i <= 100; i++) if (v14c(p, xa + (xb - xa) * i / 100) > VA + 1e-9) return false;
+ if (e14c(p, xa) * Math.sign(xb - xa) < 1) return false;
+ for (let i = 1; i <= 100; i++) if (v14c(p, xa + (xb - xa) * i / 100) >= VA - 1e-6) return false;
  const v = Math.sqrt(2000 * p.qt * dV / p.m);
  return !tie2(VA) && !tie2(VB) && !tie2(v) && v < 20000;
 };
@@ -423,12 +427,12 @@ mk({
   return {
    prompt: `Along the proton guide of the Accelerator Bay the potential is V(x) = ${Vx} volts, where x is the position in metres. A proton (charge e, mass 1.67 × 10⁻²⁷ kg) is released from rest at x = ${n(x1)} m and runs along the guide to x = ${n(x2)} m, with only the electric force acting on it. Use e = 1.60 × 10⁻¹⁹ C. Enter the x-component of the electric field at the release point, in V/m (it may be negative). Then enter the speed of the proton at x = ${n(x2)} m, in km/s to 2 decimal places (type it without commas).`,
    answer: [E, v],
-   hints: ['The field is minus the rate of change of the potential with position, E_x = −dV/dx: differentiate V(x) term by term and put in the release position.', 'A charge e that moves through a potential drop ΔV = V(start) − V(end) gains kinetic energy eΔV. Set ½mv² equal to it in joules and solve for v; divide m/s by 1000 for km/s.'],
+   hints: ['The field is minus the rate of change of the potential with position, E_x = −dV/dx: differentiate V(x) term by term and put in the release position.', 'A charge e that moves from V(start) to V(end) gains kinetic energy e × (V(start) − V(end)). Set ½mv² equal to it in joules and solve for v; divide m/s by 1000 for km/s.'],
    solution: `Differentiating, dV/dx = ${dVx}, so at x = ${n(x1)} it is ${n(3 * a)} × ${n(x1 * x1)} ${cst(b)} = ${n(-E)} V/m, and E_x = −dV/dx = ${n(E)} V/m. The potential at x = ${n(x1)} m is ${n(V1)} V and at x = ${n(x2)} m it is ${n(V2)} V, so the drop is ${n(V1)} − ${par(V2)} = ${n(dV)} V. The proton gains ${n(dV)} eV, which is ${n(rr(dV * 0.016))} × 10⁻¹⁷ J, so v = √(2 × ${n(rr(dV * 0.016))} × 10⁻¹⁷ ÷ (1.67 × 10⁻²⁷)) m/s, which is ${n(v)} km/s to 2 decimal places.`,
    guidance: [
     { prompt: `Differentiate V(x) and put in x = ${n(x1)}, then change the sign. What is E_x at the release point, in V/m?`, answer: [E], explanation: `dV/dx = ${dVx}, which is ${n(-E)} V/m at x = ${n(x1)}, so E_x = ${n(E)} V/m.` },
     { prompt: `Put x = ${n(x1)} and then x = ${n(x2)} into V(x). What is the potential drop V(start) − V(end), in V?`, answer: [dV], explanation: `${n(V1)} − ${par(V2)} = ${n(dV)} V.` },
-    { prompt: `The proton gains eΔV, which is ${n(dV)} eV, so ½mv² = ${n(rr(dV * 0.016))} × 10⁻¹⁷ J with m = 1.67 × 10⁻²⁷ kg. What is v, in km/s to 2 decimal places?`, answer: [v], explanation: `v = √(2 × ${n(rr(dV * 0.016))} × 10⁻¹⁷ ÷ (1.67 × 10⁻²⁷)) m/s, which is ${n(v)} km/s to 2 decimal places.` }
+    { prompt: `The proton gains e × (V(start) − V(end)), which is ${n(dV)} eV, so ½mv² = ${n(rr(dV * 0.016))} × 10⁻¹⁷ J with m = 1.67 × 10⁻²⁷ kg. What is v, in km/s to 2 decimal places?`, answer: [v], explanation: `v = √(2 × ${n(rr(dV * 0.016))} × 10⁻¹⁷ ÷ (1.67 × 10⁻²⁷)) m/s, which is ${n(v)} km/s to 2 decimal places.` }
    ] }; }
 });
 

@@ -13,7 +13,7 @@ Object.assign(window.VARIANT_SETUP, {
  q06: t => `A dipole has charges of ±${t + 11} nC, 0.02 m apart, in a uniform 50 kN/C field, at θ = π/2 radians between p and the field.`,
  q07: t => `A flat 2 m² panel sits in a uniform field of ${100 * (t + 11)} N/C, at π/3 radians to the panel’s normal.`,
  q08: t => `A closed surface encloses a net charge of ${window.Gen.n(t)} nC. Use ε₀ = 8.85 × 10⁻¹² C²/(N·m²).`,
- q09: t => `Two thin concentric shells: radius 1 m with 10 nC, and radius 3 m with ${window.Gen.n(5 * t)} nC. Use k = 8.99 × 10⁹ N·m²/C².`,
+ q09: t => `Two thin concentric shells: radius 1 m with 10 nC, and radius 3 m with ${window.Gen.n(5 * t)} nC, each spread evenly. Use k = 8.99 × 10⁹ N·m²/C².`,
  q10: t => `A large flat sheet carries σ = ${20 * (t + 11)} nC/m² spread evenly. Use ε₀ = 8.85 × 10⁻¹² C²/(N·m²).`,
 });
 Object.assign(window.VARIANT_POOL, {
