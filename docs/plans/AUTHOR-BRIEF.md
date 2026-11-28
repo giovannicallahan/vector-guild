@@ -58,6 +58,19 @@ You get a list of failures and disagreements. Fix the generator or mission at fa
 - A source row may credit a section only with what that section states. Anything else is "worked out in this mission". Never invent a citation.
 - A guided step asks one thing and has one answer box. An applied (c) mission has two or three guided steps.
 
+## Lessons from wave 3 (every author and repairer)
+
+- Every number the prompt prints must be a parameter (or computed from parameters by a rule the prompt states). An oracle that has to rebuild a printed number from a hidden answer or from an index into your private table is circular and checks nothing.
+- No answer box, and no guided step, may have the same answer in every draw (an identity that is always 1, a count that is always 8!, a code that is always 1). Two boxes that agree in most draws need draws where they differ.
+- Keep the authored (canonical) numbers off rounding ties and off search ties (n = 118 against 119). Filter drawn ties too.
+- Text written for one case must not be printed in another: a step that says "because it is inside" when the point is outside, a hint that names the logistic model in a cooling draw, "weaker brine" when it is stronger. Make the sentence depend on the draw or make it true for all of them.
+- A decimal answer that is not short needs its rounding stated in the prompt ("to 3 decimal places"), or the draws restricted.
+- A solution line must be a true statement: write "leaves the same remainder as", not "=", for remainders; keep bounds exact until the last step and then round.
+- When a prompt says "divide by A and then by B", say whether B divides the original or the quotient.
+- A lesson that uses a word or rule must define it there or name the mission that did (left and right cosets, lcm, "group").
+- Scratch files go in your own folder under the scratchpad. Never run or edit another agent's script.
+- This repo may be a worktree whose folder is not named `vector-guild`: use the path your prompt gives.
+
 ## Working rules for every agent (wave 2 on)
 - Edit only the file or files your task names. Do not commit. Temporary files go in your own uniquely named subfolder of the session scratchpad given in your task, never `/tmp`.
 - Other authors are writing other files of the same pack at the same time. A failure, NOTE or hang caused by a half-written file of theirs is not yours: re-run later, and judge your work by the lines for your own ids.
