@@ -45,3 +45,10 @@ You get a list of failures and disagreements. Fix the generator or mission at fa
 - Generated text: no "1 crates", "1n", "+ −4", "= 2.49, which rounds to 2.49"; answers of 1000 or more need "without commas" in the prompt.
 - Each generator should give 30 or more distinct prompts in 300 draws, never draw its own worked example (or, for practice, its parent's), and never reject its own draws.
 - Oracles compute from the stated maths (tables, search, numerical methods); a parameter that is only an index into a list of texts gets a one-line comment saying so.
+
+## Working rules for every agent (wave 2 on)
+- Edit only the file or files your task names. Do not commit. Temporary files go in your own uniquely named subfolder of the session scratchpad given in your task, never `/tmp`.
+- Other authors are writing other files of the same pack at the same time. A failure, NOTE or hang caused by a half-written file of theirs is not yours: re-run later, and judge your work by the lines for your own ids.
+- Practice authors: pattern file `game/realms/calc2/practice-N.js` (local `mk(meta, gen)` helper so authored text is `build(canonical)`); read the parent learn missions and generators first; report anything wrong you notice in them.
+- Oracle writers: work from the prompt text (`node qa/show-mission.js <id> --realm <id> --draw N`) by a different method from build(); if a generator looks wrong, report it, never bend the oracle; report any prompt whose wording does not match its expected answer.
+- Final report: short. Ids written, the last line of each check, and a list of findings.
