@@ -228,6 +228,9 @@
     setTimeout(rec.done, 12000);
   }
 
+  /* The five-minute run (run.js) loads problem models the same way: lib(realmId, cb) calls cb(lib or null). */
+  API.lib = sandbox;
+
   /* ---------- the card ---------- */
   var M = null;   /* { host, scope, heading, session } */
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
