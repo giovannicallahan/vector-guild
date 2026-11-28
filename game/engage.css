@@ -1,0 +1,48 @@
+/* 2.8 mission and realm flow: Try it first (try-first.js), the Next up strip (next-up.js) and the sector scene (sector-scene.js).
+   Loaded by realm.html after the pack's stylesheets and before life.css. */
+
+/* Try it first / Learn it first */
+.start-choice{border:1px solid var(--line);background:#142123;padding:16px 18px;margin:18px 0}
+.start-choice p{margin:0 0 10px}
+.start-choice-buttons{display:flex;flex-wrap:wrap;gap:10px}
+.start-choice-buttons button{margin:0;min-height:44px}
+.start-choice .start-choice-note{margin:10px 0 0;font-size:13px;color:var(--muted)}
+/* After a miss in try-first mode the lesson is open; on a wide screen the dialog widens and the lesson sits beside the problem. */
+@media(min-width:1000px){
+ dialog:has(#mission-stage.try-beside){width:min(1180px,calc(100% - 30px))}
+ #mission-stage.try-beside{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+ #mission-stage.try-beside>.lesson-review,#mission-stage.try-beside>.mission-panel{margin:20px 0 0}
+ #mission-stage.try-beside>.lesson-review{position:sticky;top:0;max-height:80vh;overflow:auto}
+ #mission-stage.try-beside>:not(.lesson-review):not(.mission-panel){grid-column:1/-1}
+}
+
+/* Next up: up to three missions to start now, on the campaign page */
+.next-up{margin:12px 0 10px}
+.mentor-card .next-up .eyebrow{margin:0}
+.mentor-card .next-up .next-up-note{font-size:13px;line-height:1.4}
+.next-up-note{margin:6px 0 10px;color:var(--muted);font-size:14px}
+.next-up-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.next-up-item{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;height:100%;min-height:44px;margin:0;padding:14px 40px 14px 16px;text-align:left;border:1px solid var(--line);background:#142123;color:var(--ivory);cursor:pointer;font:inherit}
+.next-up-item:hover,.next-up-item:focus-visible{border-color:var(--cyan)}
+.next-up-item:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.next-up-item.is-main{border-color:var(--lime);background:#1d2c22}
+.next-up-item .nu-kind{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--cyan)}
+.next-up-item.is-main .nu-kind{color:var(--lime)}
+.next-up-item .nu-title{font-weight:700;font-size:15px;line-height:1.3}
+.next-up-item .nu-meta{font-size:12px;color:var(--muted);line-height:1.35}
+.next-up-item .nu-go{position:absolute;right:14px;top:14px;color:var(--lime)}
+@media(max-width:650px){.next-up-list{grid-template-columns:1fr}}
+
+/* Sector payoff: Mira's scene when a sector comes online, and the replay row on the campaign page */
+.sector-scene{border:1px solid var(--line);border-left:3px solid var(--lime);background:#142123;padding:16px 18px;margin:16px 0;animation:sector-scene-in .5s ease-out}
+.sector-scene h2,.sector-scene h3{margin:6px 0 10px;font-size:22px;line-height:1.25}
+.sector-scene .sector-scene-mira{font-size:16px;line-height:1.5}
+.sector-scene-topics{margin:6px 0 12px;padding-left:20px}
+.sector-scene-topics li{margin:3px 0}
+.sector-scene .sector-scene-next{color:var(--cyan)}
+.sector-scene svg{max-width:100%;height:auto}
+@keyframes sector-scene-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.sector-scene{animation:none}}
+.sector-scenes{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0}
+.sector-scenes .eyebrow{flex-basis:100%}
+.sector-scenes .sector-replay{margin:0;min-height:44px}

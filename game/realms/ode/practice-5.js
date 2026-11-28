@@ -49,6 +49,8 @@ const res21 = (m, [p, j, h], A) => { const c = 2 * j * m, k = (p * p + 2 * j * j
  return { p, c, k, D, F, w2, km: k / m, cc: c * c / (2 * m * m), u: k - m * w2, cw: c * p }; };
 /* The line of working shared by the three q21 missions: the peak frequency and the largest amplitude. */
 const peak21 = (m, r, A) => `The slope of (k − mu)² + c²u is −2m(k − mu) + c², which is zero at u = k/m − c²/(2m²) = ${n(r.km)} − ${n(r.cc)} = ${n(r.w2)}. So ω = √${n(r.w2)} = ${n(r.p)} rad/s. There k − mω² = ${n(r.k)} − ${n(m * r.w2)} = ${n(r.u)} and cω = ${n(r.c)} × ${n(r.p)} = ${n(r.cw)}, so the root is √(${n(r.u * r.u)} + ${n(r.cw * r.cw)}) = √${n(r.D * r.D)} = ${n(r.D)}. The largest amplitude is ${n(r.F)} ÷ ${n(r.D)} = ${n(A)} m.`;
+/* The physical numbers of a q21 draw (damping c, stiffness k, push F), added to the parameters so the oracle works from them. */
+const phys21 = (p, list) => { const r = res21(p.m, list[p.i], p.A); return { ...p, c: r.c, k: r.k, F: r.F }; };
 const HINT21 = ['Only the quantity under the square root changes with ω, and the amplitude is largest where that quantity is smallest. Write u = ω² and find where (k − mu)² + c²u has slope zero.', 'That slope is −2m(k − mu) + c², so the best u is k/m − c²/(2m²). Take the positive square root for ω, then put it back into C(ω). This works only when c² < 2mk.'];
 
 /* Pump on a bracket: m, mass; pair index; A, the largest amplitude. Not the parent's m = 2, p = 4, A = 0.2. */
@@ -59,9 +61,9 @@ mk({
  labels: ['practical resonance frequency (rad/s)', 'largest amplitude (m)'], tolerance: 0.01,
  gl: [['ω²'], ['practical resonance frequency (rad/s)'], ['root at the peak'], ['largest amplitude (m)']]
 }, {
- canonical: { m: 3, i: 0, A: 0.3 },
- draw: R => tryDraw(() => ({ m: R.int(1, 5), i: R.int(0, P21B.length - 1), A: R.pick([0.1, 0.2, 0.3, 0.4, 0.5]) }),
-  p => !(p.m === 2 && p.i === 4 && p.A === 0.2), { m: 3, i: 0, A: 0.3 }),
+ canonical: phys21({ m: 3, i: 0, A: 0.3 }, P21B),
+ draw: R => phys21(tryDraw(() => ({ m: R.int(1, 5), i: R.int(0, P21B.length - 1), A: R.pick([0.1, 0.2, 0.3, 0.4, 0.5]) }),
+  p => !(p.m === 2 && p.i === 4 && p.A === 0.2), { m: 3, i: 0, A: 0.3 }), P21B),
  build: ({ m, i, A }) => { const r = res21(m, P21B[i], A); return {
   prompt: `A coolant pump sits on a spring bracket in the Engine Room. The pump has mass ${n(m)} kg, the bracket has damping ${n(r.c)} N·s/m and stiffness ${n(r.k)} N/m, and the pump pushes the bracket with a force of ${n(r.F)} cos(ωt) newtons, where the angular frequency ω (in rad/s) is set by the pump's speed. The steady swing has amplitude C(ω) = F₀ ÷ √((k − mω²)² + (cω)²) metres, where F₀ = ${n(r.F)} N is the size of the push, m the mass, c the damping and k the stiffness. Enter the pump speed ω that shakes the bracket most (the practical resonance frequency), then the largest amplitude in metres.`,
   answer: [r.p, A],
@@ -77,14 +79,16 @@ mk({
 
 /* Generator mount with a safe limit L: L = 1.25 × the peak (safe, code 1) or 0.8 × the peak (not safe, code 0). */
 const P21C = [[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10], [12, 5, 13]];
+/* q21c parameters with the physical numbers and the printed limit L. */
+const lim21 = p => ({ ...phys21(p, P21C), L: G.tidy(p.A * (p.ok ? 1.25 : 0.8)) });
 mk({
  id: 'q21c', parent: 'q21', kind: 'applied', title: 'The generator mount limit',
  brief: 'A generator on a rubber mount can run at any governor setting, and the housing has a swing it must never exceed.',
  labels: ['practical resonance frequency (rad/s)', 'largest amplitude (m)', 'safe (1 yes, 0 no)'], tolerance: 0.01,
  gl: [['practical resonance frequency (rad/s)'], ['largest amplitude (m)'], ['safe (1 yes, 0 no)']]
 }, {
- canonical: { m: 4, i: 2, A: 0.4, ok: false },
- draw: R => ({ m: R.int(1, 4), i: R.int(0, P21C.length - 1), A: R.pick([0.1, 0.2, 0.3, 0.4, 0.5]), ok: R.bool() }),
+ canonical: lim21({ m: 4, i: 2, A: 0.4, ok: false }),
+ draw: R => lim21({ m: R.int(1, 4), i: R.int(0, P21C.length - 1), A: R.pick([0.1, 0.2, 0.3, 0.4, 0.5]), ok: R.bool() }),
  build: ({ m, i, A, ok }) => { const r = res21(m, P21C[i], A), L = G.tidy(A * (ok ? 1.25 : 0.8)), code = ok ? 1 : 0; return {
   prompt: `A generator on a rubber mount in the Engine Room has mass ${n(m)} kg, mount damping ${n(r.c)} N·s/m and stiffness ${n(r.k)} N/m. Its governor can set any angular frequency ω (in rad/s), and at each setting the generator pushes the mount with ${n(r.F)} cos(ωt) newtons. The steady swing has amplitude C(ω) = ${n(r.F)} ÷ √((${n(r.k)} − ${mm(m)}ω²)² + (${n(r.c)}ω)²) metres. The housing can take a swing of at most ${n(L)} m. Enter the practical resonance frequency, then the largest amplitude the mount can reach, then 1 if that largest amplitude is at most ${n(L)} m (so the housing is safe at every setting) or 0 if it is more.`,
   answer: [r.p, A, code],
@@ -106,9 +110,9 @@ mk({
  labels: ['practical resonance frequency (rad/s)', 'largest amplitude (m)', 'amplitude at the running speed (m)'], tolerance: 0.0005,
  gl: [['practical resonance frequency (rad/s)'], ['largest amplitude (m)'], ['(k − mω²)² + (cω)² at the running speed'], ['amplitude at the running speed (m)']]
 }, {
- canonical: { m: 1, i: 0, A: 0.4, wr: 9 },
- draw: R => tryDraw(() => ({ m: R.int(1, 3), i: R.int(0, P21D.length - 1), A: R.pick([0.2, 0.3, 0.4, 0.5, 0.6]), wr: R.int(1, 16) }),
-  p => { const pr = P21D[p.i]; if (p.wr === pr[0]) return false; const v = run21(p.m, pr, p.A, p.wr); return v.Dr2 < 99999 && safe3(v.r.F / Math.sqrt(v.Dr2)); }, { m: 1, i: 0, A: 0.4, wr: 9 }),
+ canonical: phys21({ m: 1, i: 0, A: 0.4, wr: 9 }, P21D),
+ draw: R => phys21(tryDraw(() => ({ m: R.int(1, 3), i: R.int(0, P21D.length - 1), A: R.pick([0.2, 0.3, 0.4, 0.5, 0.6]), wr: R.int(1, 16) }),
+  p => { const pr = P21D[p.i]; if (p.wr === pr[0]) return false; const v = run21(p.m, pr, p.A, p.wr); return v.Dr2 < 99999 && safe3(v.r.F / Math.sqrt(v.Dr2)); }, { m: 1, i: 0, A: 0.4, wr: 9 }), P21D),
  build: ({ m, i, A, wr }) => { const { r, u2, cw2, Dr2, Aw } = run21(m, P21D[i], A, wr); return {
   prompt: `A flywheel on a damped spring mount in the Engine Room has mass ${n(m)} kg, damping ${n(r.c)} N·s/m and stiffness ${n(r.k)} N/m, and its imbalance pushes the mount with ${n(r.F)} cos(ωt) newtons. The steady swing has amplitude C(ω) = ${n(r.F)} ÷ √((${n(r.k)} − ${mm(m)}ω²)² + (${n(r.c)}ω)²) metres. Enter the practical resonance frequency in rad/s, then the largest amplitude the mount can reach in metres. The flywheel will actually run at ω = ${n(wr)} rad/s: enter the steady amplitude at that speed in metres, to 3 decimal places.`,
   answer: [r.p, A, Aw],
@@ -243,14 +247,16 @@ mk({
 });
 
 const T23C = [[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10]];
+/* q23c parameters with the physical numbers (damping c, stiffness k, push F) and the printed limit L, for the oracle. */
+const lim23 = p => { const r = sw23(p, T23C); return { ...p, c: r.c, k: r.k, F: r.F, L: G.tidy(r.C * (p.ok ? 1.25 : 0.8)) }; };
 mk({
  id: 'q23c', parent: 'q23', kind: 'applied', title: 'The compressor housing limit',
  brief: 'A compressor housing can survive only a certain swing, and the crew must know whether its motor will break that limit.',
  labels: ['A (m)', 'B (m)', 'within limit (1 yes, 0 no)'], tolerance: 0.01,
  gl: [['A (m)'], ['B (m)'], ['within limit (1 yes, 0 no)']]
 }, {
- canonical: { m: 3, w: 2, i: 1, neg: false, s: 2, j: 6, ok: true },
- draw: R => tryDraw(() => ({ m: R.int(1, 4), w: R.int(1, 4), i: R.int(0, T23C.length - 1), neg: R.bool(), s: R.int(1, 4), j: R.int(2, 9), ok: R.bool() }), p => ok23(p, T23C), { m: 3, w: 2, i: 1, neg: false, s: 2, j: 6, ok: true }),
+ canonical: lim23({ m: 3, w: 2, i: 1, neg: false, s: 2, j: 6, ok: true }),
+ draw: R => lim23(tryDraw(() => ({ m: R.int(1, 4), w: R.int(1, 4), i: R.int(0, T23C.length - 1), neg: R.bool(), s: R.int(1, 4), j: R.int(2, 9), ok: R.bool() }), p => ok23(p, T23C), { m: 3, w: 2, i: 1, neg: false, s: 2, j: 6, ok: true })),
  build: p => { const { m, w, ok } = p, r = sw23(p, T23C), L = G.tidy(r.C * (ok ? 1.25 : 0.8)), code = ok ? 1 : 0; return {
   prompt: `A compressor in the Engine Room is bolted to a housing of mass ${n(m)} kg with damping ${n(r.c)} N·s/m and stiffness ${n(r.k)} N/m. The compressor pushes the housing with ${n(r.F)} cos(${bt(w)}) newtons, so the displacement x (in metres, with t in seconds) obeys ${eq23(m, r, w)}. After the start-up swings die away, x = A cos(${bt(w)}) + B sin(${bt(w)}). The housing can take a steady swing of at most ${n(L)} m. Enter A, then B, then 1 if the amplitude √(A² + B²) is at most ${n(L)} m, or 0 if it is more.`,
   answer: [r.A, r.B, code],
@@ -292,7 +298,7 @@ mk({
 
 /* ---- q24 Turning an equation into a first-order system; Euler for systems [3.1] ---- */
 
-const HINT24 = ['x₁′ = x₂ is the first equation, so the top row of A is always (0, 1). For the bottom row, divide the whole equation by the number in front of x″, move the other terms across, and write x₁ and x₂ in place of x and x′.', 'Euler’s method moves each unknown forward by h times its rate: new value = old value + h × (its rate worked out at the old values). Use the old values for both unknowns.'];
+const HINT24 = ['For the top row of A, differentiate x₁ = x and write the result using the new names x₁ and x₂. For the bottom row, divide the whole equation by the number in front of x″, move the other terms across, and write x₁ and x₂ in place of x and x′.', 'Euler’s method moves each unknown forward by h times its rate: new value = old value + h × (its rate worked out at the old values). Use the old values for both unknowns.'];
 
 /* Camera mast: terms in the other order (k x + c x′ + m x″ = 0), m in {1, 3, 4, 5}, h in {0.1, 0.25, 0.5}. Not the parent's. */
 mk({
@@ -349,7 +355,7 @@ mk({
  canonical: { m: 2, a: 3, b: 2, c: 5, p0: 1, p1: -2, p2: 3, h: 0.1 },
  draw: R => ({ m: R.pick([1, 2]), a: R.int(1, 6), b: R.int(1, 8), c: R.int(1, 9), p0: R.nz(-3, 3), p1: R.int(-3, 3), p2: R.int(-3, 3), h: R.pick([0.1, 0.2, 0.5]) }),
  build: ({ m, a, b, c, p0, p1, p2, h }) => { const acc = -c * p0 - b * p1 - a * p2, x1 = G.tidy(p0 + h * p1), x2 = G.tidy(p1 + h * p2), x3 = G.tidy(p2 + h * acc); return {
-  prompt: `A three-stage stabiliser in the Control Room obeys ${mm(m)}x‴${tail([[m * a, 'x″'], [m * b, 'x′'], [m * c, 'x']])} = 0, where x is its angle in radians and t is time in seconds. The same idea as for a second-order equation works with one more unknown: put x₁ = x, x₂ = x′ and x₃ = x″, so that x₁′ = x₂, x₂′ = x₃, and the equation solved for x‴ gives x₃′ in terms of x₁, x₂ and x₃. This makes (x₁, x₂, x₃)′ = A(x₁, x₂, x₃) with a 3 × 3 matrix A. Enter the three entries of the bottom row of A, then take one Euler step of size h = ${n(h)} from x(0) = ${n(p0)}, x′(0) = ${n(p1)} and x″(0) = ${n(p2)}, and enter the estimates of x₁, x₂ and x₃ at t = ${n(h)}.`,
+  prompt: `A three-stage stabiliser in the Control Room obeys ${mm(m)}x‴${tail([[m * a, 'x″'], [m * b, 'x′'], [m * c, 'x']])} = 0, where x is its angle in radians and t is time in seconds. Here x‴ is the third derivative of x, the derivative of x″. The same idea as for a second-order equation works with one more unknown: put x₁ = x, x₂ = x′ and x₃ = x″, so that x₁′ = x₂, x₂′ = x₃, and the equation solved for x‴ gives x₃′ in terms of x₁, x₂ and x₃. This makes (x₁, x₂, x₃)′ = A(x₁, x₂, x₃) with a 3 × 3 matrix A. Enter the three entries of the bottom row of A, then take one Euler step of size h = ${n(h)} from x(0) = ${n(p0)}, x′(0) = ${n(p1)} and x″(0) = ${n(p2)}, and enter the estimates of x₁, x₂ and x₃ at t = ${n(h)}.`,
   answer: [-c, -b, -a, x1, x2, x3],
   hints: ['The first two rows of A are fixed by x₁′ = x₂ and x₂′ = x₃. For the bottom row, divide the whole equation by the number in front of x‴, move the other terms across, and read off the numbers that multiply x₁, x₂ and x₃.', 'Euler’s method moves every unknown forward by h times its rate, with all three rates worked out at the old values: x₁′ = x₂, x₂′ = x₃ and x₃′ from the bottom row.'],
   solution: `${m === 1 ? 'The coefficient of x‴ is already 1, so' : `Dividing by ${n(m)} gives`} x‴ = ${cf(-c, 'x')}${tail([[-b, 'x′'], [-a, 'x″']])}, so x₃′ = ${cf(-c, 'x₁')}${tail([[-b, 'x₂'], [-a, 'x₃']])} and the bottom row of A is (${n(-c)}, ${n(-b)}, ${n(-a)}). At t = 0 the rates are x₁′ = ${n(p1)}, x₂′ = ${n(p2)} and x₃′ = ${n(-c)} × ${par(p0)} ${sgn(-b)} ${n(b)} × ${par(p1)} ${sgn(-a)} ${n(a)} × ${par(p2)} = ${n(acc)}. One step gives x₁ ≈ ${n(p0)} + ${n(h)} × ${par(p1)} = ${n(x1)}, x₂ ≈ ${n(p1)} + ${n(h)} × ${par(p2)} = ${n(x2)} and x₃ ≈ ${n(p2)} + ${n(h)} × ${par(acc)} = ${n(x3)}.`,

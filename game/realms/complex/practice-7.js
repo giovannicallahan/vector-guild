@@ -401,7 +401,7 @@ mk({
   p => p.r > p.s && p.r - p.s <= 9, { r: 3, s: -2, A: 4, B: -3 }),
  build: ({ r, s, A, B }) => { const al = A + B, be = -(A * s + B * r), top = poly([[al, 1], [be, 0]]), topP = al !== 0 && be !== 0 ? `(${top})` : top,
   S = r + s, P = r * s, q = poly([[1, 2], [-S, 1], [P, 0]]), dq = poly([[2, 1], [-S, 0]]), pr = al * r + be, ps = al * s + be; return {
-  prompt: `A resonance filter in the control room has the transfer function f(z) = ${topP} ÷ (${q}). Its bottom is 0 at two different whole numbers, and both are simple poles. Find them, then enter the larger one. Then enter the residue of f at the larger pole, and the residue of f at the smaller pole.`,
+  prompt: `A resonance filter in the control room has the transfer function f(z) = ${topP} ÷ (${q}). Its bottom is 0 at two different integers (whole numbers that may be negative or 0), and both are simple poles. Find them, then enter the larger one. Then enter the residue of f at the larger pole, and the residue of f at the smaller pole.`,
   answer: [r, A, B],
   hints: ['A bottom z² + Bz + C is 0 at two numbers whose sum is −B and whose product is C. Find the pair, then use the rule for a simple pole: the residue at a is p(a) ÷ q′(a), where p(a) is not 0.',
    'Differentiate the bottom first: the derivative of z² + Bz + C is 2z + B. Then put each pole into the top and into q′.'],

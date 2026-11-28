@@ -212,12 +212,12 @@ window.QUESTS.push(
   artifact: { name: 'Response band', description: 'Two lines drawn across a gauge’s chart, the highest and lowest values it can approach.' },
   sources: [source.s1_3],
   teaching: {
-   intuition: 'A function f gives one value f(x) for each x in a set D, such as an interval of dial settings. Collect all those values into one set, f(D). The supremum of f over D is sup f(D), and the infimum is inf f(D). We call f a bounded function on D when f(D) is bounded above and below, that is, when some number B has |f(x)| ≤ B for every x in D. On an open interval such as (0, 5), the end points are not in D, so f may never take the values it has there; but its values come as close to them as you like, so they still count for the sup and the inf. For a curve made from a square, such as (x − 4)² + 1, the square is never negative and is 0 only at x = 4, so the extreme values come from x = 4, if it lies inside D, and from the two end points.',
+   intuition: 'A function f gives one value f(x) for each x in a set D, such as an interval of dial settings. Collect all those values into one set, f(D). The supremum of f over D is sup f(D), and the infimum is inf f(D). We call f a bounded function on D when f(D) is bounded above and below, that is, when some number B has |f(x)| ≤ B for every x in D. On an open interval such as (0, 5), the end points are not in D, so f need not take the values it has there; but its values come as close to them as you like, so they still count for the sup and the inf. Some setting inside D may still give the same value as an end point, so check that separately. For a curve made from a square, such as (x − 4)² + 1, the square is never negative and is 0 only at x = 4, so the extreme values come from x = 4, if it lies inside D, and from the two end points.',
    steps: [
     'Work out the values f approaches at the two end points of the interval.',
     'Find where f turns: for s(x − h)² + k it is at x = h. Check whether h lies inside the interval.',
     'Collect the candidates: the two end values, and f(h) = k when h is inside.',
-    'The sup is the largest candidate and the inf is the smallest. An end value is approached but not taken, because the end is not in the interval.'
+    'The sup is the largest candidate and the inf is the smallest. An end value is always approached. It is taken only if some setting inside the interval also gives it, so check that separately.'
    ],
    example: {
     prompt: 'Find sup f and inf f for f(x) = (x − 1)² + 2 on the open interval (−1, 2).',
@@ -331,19 +331,19 @@ window.QUESTS.push(
  {
   id: 'q08', title: 'The loop that settles itself', topic: 'Monotone bounded sequences and recursive limits', tier: 'Basic', sector: 'Signal Log',
   brief: 'A thermostat adjusts its setting from the last one, again and again, and Mira wants to know where the settings end up before trusting the loop.',
-  lesson: 'A monotone sequence converges exactly when it is bounded; for a recursively defined sequence xₙ₊₁ = g(xₙ), the limit L then satisfies L = g(L).',
+  lesson: 'A monotone sequence converges exactly when it is bounded; for a recursively defined sequence xₙ₊₁ = g(xₙ), the limit L then satisfies L = g(L), provided g(xₙ) tends to g(L) whenever xₙ tends to L (true for rules like (x + b) ÷ d, not for a rule with a jump at L).',
   prompt: 'A thermostat\'s control loop starts at the setting x₁ = 2 and then uses the rule xₙ₊₁ = (xₙ + 30) ÷ 4: each new setting is worked out from the one before. Enter x₃ (as a decimal or a fraction), then the limit of the sequence.',
   answer: [9.5, 10], labels: ['x₃', 'limit'], tolerance: 0.00005,
   hints: [
    'Put x₁ into the rule to get x₂, then put x₂ in to get x₃.',
    'Check that the settings move one way and never pass some number, so they converge. If the limit is L, then xₙ₊₁ tends to L as well, so L satisfies the rule with L on both sides. Solve that equation.'
   ],
-  solution: 'x₂ = (2 + 30) ÷ 4 = 8 and x₃ = (8 + 30) ÷ 4 = 9.5. Subtracting 10 from both sides of the rule gives xₙ₊₁ − 10 = (xₙ − 10) ÷ 4: each step keeps the setting on the same side of 10 and cuts its distance from 10 by a factor of 4. The sequence starts below 10, so it is increasing and bounded above by 10, and a monotone bounded sequence converges. Call its limit L. Then xₙ₊₁ tends to L too, so L = (L + 30) ÷ 4, that is 4L = L + 30, 3L = 30 and L = 10.',
+  solution: 'x₂ = (2 + 30) ÷ 4 = 8 and x₃ = (8 + 30) ÷ 4 = 9.5. Subtracting 10 from both sides of the rule gives xₙ₊₁ − 10 = (xₙ − 10) ÷ 4: each step keeps the setting on the same side of 10 and cuts its distance from 10 by a factor of 4. The sequence starts below 10, so it is increasing and bounded above by 10, and a monotone bounded sequence converges. Call its limit L. Then xₙ₊₁ tends to L too. The rule keeps limits: |(xₙ + 30) ÷ 4 − (L + 30) ÷ 4| = |xₙ − L| ÷ 4, which tends to 0. So L = (L + 30) ÷ 4, that is 4L = L + 30, 3L = 30 and L = 10.',
   xp: 100, prereqs: ['q07', 'q01'],
   artifact: { name: 'Control loop trace', description: 'Settings stepping steadily towards one value, each from the one before.' },
   sources: [source.s2_1, source.s2_2],
   teaching: {
-   intuition: 'A recursively defined sequence gives a first term and a rule for getting each term from the one before: x₁ = 1 and xₙ₊₁ = (xₙ + 6) ÷ 2, read “x n plus one”. To trust such a loop we need to know that it converges, and then where. A sequence is increasing when each term is at least the one before, decreasing when each is at most the one before, and monotone when it is one or the other. The monotone convergence theorem says that a monotone sequence converges exactly when it is bounded; an increasing one that is bounded above converges to the supremum of its terms. This is completeness at work. Once we know the limit L exists, the rule finds it: xₙ₊₁ tends to L as well as xₙ, so taking limits on both sides of the rule gives an equation with L on both sides.',
+   intuition: 'A recursively defined sequence gives a first term and a rule for getting each term from the one before: x₁ = 1 and xₙ₊₁ = (xₙ + 6) ÷ 2, read “x n plus one”. To trust such a loop we need to know that it converges, and then where. A sequence is increasing when each term is at least the one before, decreasing when each is at most the one before, and monotone when it is one or the other. The monotone convergence theorem says that a monotone sequence converges exactly when it is bounded; an increasing one that is bounded above converges to the supremum of its terms. This is completeness at work. Once we know the limit L exists, the rule finds it: xₙ₊₁ tends to L as well as xₙ, so taking limits on both sides of the rule gives an equation with L on both sides. That step needs the rule to keep limits: g(xₙ) must tend to g(L). A rule such as (x + 6) ÷ 2 does, because (xₙ + 6) ÷ 2 − (L + 6) ÷ 2 = (xₙ − L) ÷ 2 shrinks to 0. A rule with a jump can fail: with g(x) = x ÷ 2 for x > 0 but g(0) = 1, starting at 1 the terms halve towards 0, yet g(0) = 1, not 0.',
    steps: [
     'Work out the first few terms from the rule to see how the sequence moves.',
     'Show it is monotone and bounded, for example by writing xₙ₊₁ − m in terms of xₙ − m for a suitable m.',

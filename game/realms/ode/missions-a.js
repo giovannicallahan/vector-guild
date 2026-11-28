@@ -19,13 +19,13 @@
    A title reads like: Lebl, Notes on Diffy Qs — 1.3 Separable equations
    Link to the section page itself: https://www.jirka.org/diffyqs/html/<file>.html */
 const source = {
- s0_2: {"title":"Lebl, Notes on Diffy Qs — 0.2 Introduction to differential equations","url":"https://www.jirka.org/diffyqs/html/introde_section.html","description":"What a differential equation and its solution are, and checking that a given function solves an equation by putting it in. The starting-rate condition used here is worked out in this mission.","verified":"2026-11-27"},
+ s0_2: {"title":"Lebl, Notes on Diffy Qs — 0.2 Introduction to differential equations","url":"https://www.jirka.org/diffyqs/html/introde_section.html","description":"What a differential equation and its solution are, and checking that a given function solves an equation by putting it in.","verified":"2026-11-27"},
  s0_3: {"title":"Lebl, Notes on Diffy Qs — 0.3 Classification of differential equations","url":"https://www.jirka.org/diffyqs/html/classification_section.html","description":"Ordinary and partial differential equations, the order of an equation, and linear against nonlinear equations.","verified":"2026-11-27"},
  s1_1: {"title":"Lebl, Notes on Diffy Qs — 1.1 Integrals as solutions","url":"https://www.jirka.org/diffyqs/html/integralsols_section.html","description":"Solving y′ = f(x) by integration, the general solution with its constant, and initial value problems.","verified":"2026-11-27"},
- s1_2: {"title":"Lebl, Notes on Diffy Qs — 1.2 Slope fields","url":"https://www.jirka.org/diffyqs/html/slopefields_section.html","description":"Slope fields: the slope the equation gives at each point, and solution curves that follow those slopes. The equilibrium solution of this mission’s equation is worked out in this mission.","verified":"2026-11-27"},
+ s1_2: {"title":"Lebl, Notes on Diffy Qs — 1.2 Slope fields","url":"https://www.jirka.org/diffyqs/html/slopefields_section.html","description":"Slope fields: the slope the equation gives at each point, and solution curves that follow those slopes.","verified":"2026-11-27"},
  s1_3: {"title":"Lebl, Notes on Diffy Qs — 1.3 Separable equations","url":"https://www.jirka.org/diffyqs/html/separable_section.html","description":"Separable equations: moving y to one side and x to the other, integrating both sides, and using an initial condition.","verified":"2026-11-27"},
  s1_4: {"title":"Lebl, Notes on Diffy Qs — 1.4 Linear equations and the integrating factor","url":"https://www.jirka.org/diffyqs/html/intfactor_section.html","description":"First-order linear equations solved with an integrating factor, and a mixing tank of salt water as an application.","verified":"2026-11-27"},
- s1_6: {"title":"Lebl, Notes on Diffy Qs — 1.6 Autonomous equations","url":"https://www.jirka.org/diffyqs/html/auteq_section.html","description":"Autonomous equations, their equilibrium (critical) points, stable and unstable equilibria, and the logistic equation with its carrying capacity. The time to reach a level is worked out in this mission.","verified":"2026-11-27"},
+ s1_6: {"title":"Lebl, Notes on Diffy Qs — 1.6 Autonomous equations","url":"https://www.jirka.org/diffyqs/html/auteq_section.html","description":"Autonomous equations, their constant (equilibrium) solutions and critical points, stable and unstable critical points, and the logistic equation with its limiting population M, the largest population that can be sustained.","verified":"2026-11-27"},
  s1_7: {"title":"Lebl, Notes on Diffy Qs — 1.7 Numerical methods: Euler’s method","url":"https://www.jirka.org/diffyqs/html/numer_section.html","description":"Euler’s method: stepping along the slope with a step size h to approximate the solution of an initial value problem.","verified":"2026-11-27"}
 };
 window.QUESTS = window.QUESTS || [];
@@ -296,7 +296,8 @@ window.QUESTS.push(
    "description": "A wall chart of short arrows, with one flat line running straight across it."
   },
   "sources": [
-   source.s1_2
+   source.s1_2,
+   source.s1_6
   ],
   "teaching": {
    "intuition": "An equation y′ = f(x, y) tells you, at every point (x, y) of the plane, how steep a solution through that point must be. Draw a short line with that slope at many points and you get a slope field. A solution curve is a curve that follows these little lines everywhere, like a leaf floating along the arrows of a current. You can read the slope at any point by working out f there. Sometimes a horizontal line fits the field exactly: if f(x, m) = 0 for every x, the constant function y = m has derivative 0 and so solves the equation. Such a constant solution is called an equilibrium solution, and in the slope field it shows up as a row of flat lines.",
@@ -462,7 +463,7 @@ window.QUESTS.push(
    source.s1_3
   ],
   "teaching": {
-   "intuition": "Integrating works when y′ depends on t alone. Many equations mix y and t, but in a special way: the right-hand side is a function of t times a function of y. Such an equation is a separable equation. Write y′ as dy/dt and treat dy and dt as pieces you can move: divide by the y part and multiply by dt, so that everything with y sits on the left and everything with t on the right. For y′ = 0.5y this gives dy ÷ y = 0.5 dt. Now integrate each side with respect to its own variable: ln y = 0.5t + c, with one constant for both sides. Solve for y, and use the initial condition to fix the constant. Moving dy and dt about looks like a trick, but it is the chain rule run backwards, and it gives the right answer.",
+   "intuition": "Integrating works when y′ depends on t alone. Many equations mix y and t, but in a special way: the right-hand side is a function of t times a function of y. Such an equation is a separable equation. Write y′ as dy/dt and treat dy and dt as pieces you can move: divide by the y part and multiply by dt, so that everything with y sits on the left and everything with t on the right. For y′ = 0.5y this gives dy ÷ y = 0.5 dt. Now integrate each side with respect to its own variable: ln y = 0.5t + c, with one constant for both sides. Solve for y, and use the initial condition to fix the constant. The same steps work for other separable forms. For y′ = kty, separating gives dy ÷ y = kt dt, so ln y = (k ÷ 2)t² + c and y = Ae^((k ÷ 2)t²). For y′ = t ÷ y, multiply both sides by y and by dt: y dy = t dt, so y² ÷ 2 = t² ÷ 2 + c, that is y² = t² + 2c; when y(0) is positive, take the positive square root. Moving dy and dt about looks like a trick, but it is the chain rule run backwards, and it gives the right answer.",
    "steps": [
     "Check that the right-hand side is (a function of t) × (a function of y).",
     "Separate: put every y factor with dy on the left and every t factor with dt on the right.",

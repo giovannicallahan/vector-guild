@@ -124,7 +124,7 @@ mk({
 const x17 = p => (p.x0 + (p.v0 + p.w * p.x0) * p.t) * Math.exp(-p.w * p.t);
 mk({
  id: 'q17b', parent: 'q17', kind: 'setting', title: 'The telescope mount isolator',
- brief: 'The telescope mount in the Signal Tower sits on a spring and damper, and it must settle without a bounce after every knock.',
+ brief: 'The telescope mount in the Signal Tower sits on a spring and damper, and it must stop swinging back and forth after every knock.',
  labels: ['critical damping c (N·s/m)', 'x at the time (cm, 3 d.p.)'], tolerance: 0.0005,
  gl: [['critical damping c (N·s/m)'], ['repeated root r'], ['C₂'], ['x (cm, 3 d.p.)']]
 }, {
@@ -132,7 +132,7 @@ mk({
  draw: R => tries(() => ({ m: R.int(1, 8), w: R.int(2, 5), x0: R.int(3, 12), v0: R.int(-12, 12), t: R.pick([0.5, 1, 1.5]) }),
   p => Math.abs(x17(p)) > 0.05 && nt(x17(p)) && !same(p, { m: 3, w: 2, x0: 6, v0: -4, t: 1 }) && !(p.m === 1 && p.w === 4 && p.x0 === 2 && p.v0 === 0), { m: 5, w: 3, x0: 8, v0: -2, t: 1.5 }),
  build: p => { const { m, w, x0, v0, t } = p, k = m * w * w, c = 2 * m * w, C2 = v0 + w * x0, X = r3(x17(p)), A = x0 + C2 * t; return {
-  prompt: `The telescope mount in the Signal Tower has mass m = ${n(m)} kg and sits on a spring of stiffness k = ${n(k)} N/m. Its isolator must be critically damped, so the mount settles with no bounce and as quickly as it can. Enter the damping constant c in N·s/m that makes mx″ + cx′ + kx = 0 critically damped. Then, with that damper, a knock moves the mount to x(0) = ${n(x0)} cm and it is released with x′(0) = ${n(v0)} cm/s (t in seconds): enter x(${n(t)}) in cm, to 3 decimal places.`,
+  prompt: `The telescope mount in the Signal Tower has mass m = ${n(m)} kg and sits on a spring of stiffness k = ${n(k)} N/m. Its isolator must be critically damped: the least damping that stops it swinging back and forth. Enter the damping constant c in N·s/m that makes mx″ + cx′ + kx = 0 critically damped. Then, with that damper, a knock moves the mount to x(0) = ${n(x0)} cm and it is released with x′(0) = ${n(v0)} cm/s (t in seconds): enter x(${n(t)}) in cm, to 3 decimal places.`,
   answer: [c, X],
   hints: ['Critical damping is the boundary case c² = 4mk, so c is twice the square root of mk.', 'With critical damping the one repeated root is r = −c ÷ (2m), and x = (C₁ + C₂t)e^(rt) with C₁ = x(0) and C₂ = x′(0) − rC₁.'],
   solution: `Critical damping needs c² = 4mk = 4 × ${n(m)} × ${n(k)} = ${n(c * c)}, so c = ${n(c)} N·s/m. The characteristic equation ${co(m, 'r²')} + ${n(c)}r + ${n(k)} = 0 then has the repeated root r = −${n(c)} ÷ ${n(2 * m)} = ${n(-w)}, so x = (C₁ + C₂t)e^(${n(-w)}t). C₁ = x(0) = ${n(x0)}, and C₂ = x′(0) − rC₁ = ${n(v0)} − (${n(-w)}) × ${n(x0)} = ${n(C2)}. So x(${n(t)}) = (${n(x0)} + ${par(C2)} × ${n(t)})e^(${n(-w * t)}) = ${n(A)}e^(${n(-w * t)}) = ${f3(X)} cm to 3 decimal places.`,
@@ -147,7 +147,7 @@ mk({
 /* The damper c and spring k are given: the critical mass is c² ÷ (4k) = m (whole). Then r = −w and x(t) as above. */
 mk({
  id: 'q17c', parent: 'q17', kind: 'applied', title: 'The last damper on the shelf',
- brief: 'The garage has one damper left on the shelf, and Mira has to choose the load that makes the corner settle without a bounce.',
+ brief: 'The garage has one damper left on the shelf, and Mira has to choose the load that puts the corner exactly on the edge between swinging back and forth and not.',
  labels: ['mass m (kg)', 'x at the time (cm, 3 d.p.)'], tolerance: 0.0005,
  gl: [['mass m (kg)'], ['repeated root r'], ['x (cm, 3 d.p.)']]
 }, {
@@ -290,7 +290,7 @@ mk({
    { prompt: `In the left-hand side, the cos terms add up to (q − ω²)A + pωB with q = ${n(q)}, ω = ${n(w)} and p = ${n(pp)}. What is q − ω²?`, answer: [d], explanation: `q − ω² = ${n(q)} − ${n(w * w)} = ${n(d)}. The −ω²A comes from yₚ″ and the pωB from yₚ′.` },
    { prompt: `What is pω = ${n(pp)} × ${n(w)}?`, answer: [s], explanation: `pω = ${n(s)}. The sin terms are −pωA + (q − ω²)B.` },
    { prompt: `Matching gives ${ex([[d, 'A'], [s, 'B']])} = ${n(F)} (cos terms) and ${ex([[-s, 'A'], [d, 'B']])} = 0 (sin terms). What is A, to 3 decimal places?`, answer: [A], explanation: `From the second equation B = ${n(s)}A ÷ ${par(d)}. Putting that into the first gives (${n(d * d)} + ${n(s * s)})A ÷ ${par(d)} = ${n(F)}, so A = ${n(F)} × ${par(d)} ÷ ${n(N)} = ${f3(A)}.` },
-   { prompt: `And what is B, to 3 decimal places?`, answer: [B], explanation: `B = ${n(s)}A ÷ ${par(d)} = ${n(F)} × ${n(s)} ÷ ${n(N)} = ${f3(B)}.` }
+   { prompt: `And what is B, to 3 decimal places? Work it from the exact A = ${n(F)} × ${par(d)} ÷ ${n(N)}, not from the rounded A, so that the rounding does not change the last digit.`, answer: [B], explanation: `B = ${n(s)}A ÷ ${par(d)} = ${n(s)} × ${n(F)} × ${par(d)} ÷ ${n(N)} ÷ ${par(d)} = ${n(F)} × ${n(s)} ÷ ${n(N)} = ${f3(B)}.` }
   ] }; }
 });
 

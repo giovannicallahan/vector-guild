@@ -15,6 +15,14 @@ localStorage key `vector-guild-save-v2`. The 1.x key `vector-guild-save-v1` is n
 Since 2.3 a slice may also hold `skips` (the skip-ahead check, `game/skip.js`): `{ "<chapter index>": { last, miss: [learn ids], seen, n } }`, one record per chapter whose check was failed and that is not complete yet. A save without `skips` loads as before; a damaged record is dropped; a mission passed by a check is stored exactly like a solved one.
 Since 2.3 `meta` may also hold `daily` (the daily review, `game/daily.js`, rules in `docs/COLLECTION.md`): the last finished day, the day streak, the best streak, the streak rewards already paid and the missions recently asked. It is kept only when the save has one, is made safe on every read, and travels with the backup.
 
+Since 2.8 `meta` may also hold, each optional and absent in older saves (a save without one behaves as before):
+- `played`: local day numbers (whole days since 1970) of the last 14 days with a solve, a drill, a daily review or a five-minute run (the "days played this week" dots, `game/daily.js`).
+- `daily.rests`: the missed days the day streak rested over (one rest day in any seven days, `game/collection/core.js` `streakOn`).
+- `run`: `{ paid, runs }`, the day of the last paid five-minute run and how many runs were finished (`game/run.js`).
+- `finds`: `{ got: [findId], last, n? }`, the cosmetic finds, the solve number of the last one, and `n`, a count of first-time solves made on a realm page that only goes up (resetting a realm does not lower it; the find draws use it). `n` is optional: a save without it loads unchanged and gets it at its next first-time solve, started from the missions solved then (and never below `last`) (`game/finds.js`).
+- `played` keeps days later than the one being marked (a device clock set back does not erase them); the 14 days are counted back from the newest day stored, and the weekly dots never show a day after today.
+Mastery (bronze, silver, gold, `game/mastery.js`) is worked out from `solved` and stores nothing.
+
 Rules
 - First run with no v2 key: if a v1 save parses, `realms.la` = that object (seed moved to the top level, `seed` missing -> 0), `intro:false`. Otherwise a fresh save with a random non-zero seed and no realms.
 - A slice whose pack is not loaded on the current page is NEVER normalised, recomputed or dropped. Only the realm page that loaded that pack validates its own slice.
@@ -54,3 +62,7 @@ meta: { v: 1,
 - `exportAll()` -> v2 object for the backup file (with `meta` when there is one)
 - `importAny(obj)` -> accepts a v2 object or a 1.x object (becomes realms.la); returns {ok, error, kind}. `ok` is false, and nothing is changed, when the file is not a (complete) save or when the device could not store it (`error` says which)
 - `reset(id)` -> removes one realm's slice; `resetAll()`
+
+Mission flow fields (since 2.8, both optional, both in `meta`, both kept in a backup)
+- `meta.tryFirst`: `'try'` or `'learn'`, the start the player chose last on a learn mission (`game/try-first.js`). Missing or anything else means `'learn'`, the flow of earlier releases.
+- `meta.sectorScenes`: `{ <realm id>: [sector index, ...] }`, the sectors whose payoff scene Mira has already shown (`game/sector-scene.js`). Missing means none; entries that are not whole numbers from 0 to 99 are ignored on read. A scene is replayable whatever this says.

@@ -127,7 +127,7 @@
  "mentor": {
   "name": "Mira",
   "role": "field engineer",
-  "cardEyebrow": "MIRA / YOUR SIGNAL ENGINEER",
+  "cardEyebrow": "MIRA / YOUR FIELD ENGINEER",
   "opening": "I’m Mira. Nothing out here is a single line any more, and we have to {purpose}. Your task is “{title}.” {brief} The idea we need: {topic}.",
   "closing": "You already have the derivatives and integrals from Calculus 1 and 2. I’ll go through the worked example with you, and the guided steps are there whenever you want them."
  },

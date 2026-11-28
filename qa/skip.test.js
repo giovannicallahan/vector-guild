@@ -116,6 +116,19 @@ function suite(realm) {
     same(again.qa.getState().solved, one); assert.ok(!/data-skip="0"/.test(again.qa.show('campaign')), 'a complete chapter has no offer');
   });
 
+  test('a passed check marks today as played, with or without stardust; a failed one does not', () => {
+    const d = new Date(), today = Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+    const played = p => (JSON.parse(p.storage.get(KEY)).meta || {}).played;
+    const failed = page(), f = failed.skip.build(0); failed.skip.finish(0, f, wrongAt(f, [0]));
+    assert.ok(!(played(failed) || []).includes(today), 'a failed check is not a day played');
+    const p = page(), items = p.skip.build(0); p.skip.finish(0, items, rightRows(items));
+    assert.ok(played(p).includes(today), 'the only activity today was a passed check');
+    /* Every mission was paid before (the realm was reset): the check pays nothing and still counts. */
+    const paid = JSON.parse(p.storage.get(KEY)); paid.realms = {}; paid.meta.played = []; const st = new Map([[KEY, JSON.stringify(paid)]]);
+    const q = page(st), its = q.skip.build(0); q.clear(); q.skip.finish(0, its, rightRows(its));
+    same(q.events().filter(e => e.type === 'solve'), [], 'nothing paid again'); assert.ok(played(q).includes(today), 'and today is still marked');
+  });
+
   test('a skipped mission is stored exactly like a solved one, minus the star', () => {
     const p = page(), items = p.skip.build(0); p.skip.finish(0, items, rightRows(items));
     const typed = page(save({ solved: one, tools: [] }));

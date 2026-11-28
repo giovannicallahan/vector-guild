@@ -316,7 +316,8 @@ assert.match(app, /state\.xp\+=Number\(q\.xp\)\|\|0;/);
 /* Perks are asked for in one place only: the settle that follows a first solve. Load, import, reset and a landmark are plain. */
 assert.equal((app.match(/settleDust\(true\)/g) || []).length, 1, 'one settle with perks');
 assert.match(app, /function award\(\)\{[^\n]*?state\.solved\.push\(q\.id\);[^\n]*?save\(\);const stardust=dustIn\(settleDust\(true\)\);/, 'and it is the one in award(), after the save');
-assert.match(app, /settle\(undefined,\{perks:perks===true\}\)/, 'settleDust passes the perk switch to the core');
+assert.match(app, /settle\(undefined,\{perks:perks===true,played:played===true\}\)/, 'settleDust passes the perk switch, and the played switch, to the core');
+assert.match(app, /save\(\);const stardust=dustIn\(settleDust\(false,true\)\);/, 'a passed chapter check settles at base rates and marks today played');
 assert.equal((app.match(/settleDust\(\)/g) || []).length, 5, 'load, import (two ways out), reset and landmark settle without perks');
 /* After an import or a reset the settings dialog closes first, so the stardust message is not left inside a closed dialog. */
 assert.match(app, /dialog\.close\(\);settleDust\(\)\}\}catch\(err\)/, 'import: close, then settle');

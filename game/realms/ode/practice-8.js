@@ -77,24 +77,24 @@ mk({
 
 mk({
  id: 'q36c', parent: 'q36', kind: 'applied', title: 'A nudge at the vent',
- brief: 'A sensor in the air vent has been knocked off its resting reading, and the crew wants to know how fast it starts to drift.',
- labels: ['x', 'y', 'u′', 'v′'], tolerance: 0.01,
- gl: [['y'], ['u′'], ['v′']]
+ brief: 'A sensor in the air vent has been knocked off its resting reading, and the crew wants a quick estimate of how fast it starts to drift.',
+ labels: ['x', 'y', 'estimated u′', 'estimated v′'], tolerance: 0.01,
+ gl: [['y'], ['estimated u′'], ['estimated v′']]
 }, {
  /* x′ = xy − c·y0², y′ = x − c·y: y′ = 0 gives x = c y, and then c y² = c y0², so y = ±y0. The critical point with positive x is (c·y0, y0) (y0 > 0).
     There ∂f/∂x = y0, ∂f/∂y = c·y0, ∂g/∂x = 1, ∂g/∂y = −c. The sensor is displaced by (u, v) = (nu, nv), and u′ = y0·nu + c·y0·nv, v′ = nu − c·nv. */
  canonical: { c: 2, y0: 3, nu: 1, nv: -2 },
  draw: R => ({ c: R.int(1, 4), y0: R.int(1, 5), nu: R.nz(-3, 3), nv: R.nz(-3, 3) }),
  build: ({ c, y0, nu, nv }) => { const P = c * y0 * y0, xs = c * y0, ys = y0, up = ys * nu + xs * nv, vp = nu - c * nv, f = `xy${tail([[-P, '']])}`, g = expr([[1, 'x'], [-c, 'y']]); return {
-  prompt: `Two readings from the dome’s air vent, x and y, obey x′ = ${f} and y′ = ${g}. First find the critical point with positive x. Then a sensor is displaced from that point by u = ${n(nu)} in x and v = ${n(nv)} in y. Near the critical point the displacement changes at the rates u′ = (∂f/∂x)u + (∂f/∂y)v and v′ = (∂g/∂x)u + (∂g/∂y)v, with the partial derivatives worked out at the critical point, where f and g are the two right-hand sides. Enter x, then y, then u′, then v′ for this displacement.`,
+  prompt: `Two readings from the dome’s air vent, x and y, obey x′ = ${f} and y′ = ${g}. First find the critical point with positive x. Then a sensor is displaced from that point by u = ${n(nu)} in x and v = ${n(nv)} in y. The linearised system estimates how fast the displacement changes: u′ ≈ (∂f/∂x)u + (∂f/∂y)v and v′ ≈ (∂g/∂x)u + (∂g/∂y)v, with the partial derivatives worked out at the critical point, where f and g are the two right-hand sides. These are estimates, not the exact rates, because the linearisation leaves out a small product term in u and v. Enter x, then y, then the estimated rates u′ and v′ for this displacement.`,
   answer: [xs, ys, up, vp],
   hints: ['At a critical point both right-hand sides are 0. The second equation gives x in terms of y; put it into the first and solve for y, keeping the root that makes x positive.',
-   'The partial derivative of xy in x is y, and in y it is x. Put the critical point into each of the four partial derivatives, then multiply out the two rates with the displacement.'],
-  solution: `y′ = 0 gives x = ${cy(c, 'y')}. Putting this into ${f} = 0 gives ${c === 1 ? '' : n(c)}y² = ${n(P)}, so y² = ${n(y0 * y0)} and y = ±${n(y0)}. Positive x needs positive y, so the critical point is (${n(xs)}, ${n(ys)}). For f = ${f}: ∂f/∂x = y = ${n(ys)} and ∂f/∂y = x = ${n(xs)}. For g = ${g}: ∂g/∂x = 1 and ∂g/∂y = ${n(-c)}. So u′ = ${n(ys)} × ${par(nu)} + ${n(xs)} × ${par(nv)} = ${n(up)} and v′ = 1 × ${par(nu)} + ${par(-c)} × ${par(nv)} = ${n(vp)}.`,
+   'The partial derivative of xy in x is y, and in y it is x. Put the critical point into each of the four partial derivatives, then multiply out the two estimated rates with the displacement.'],
+  solution: `y′ = 0 gives x = ${cy(c, 'y')}. Putting this into ${f} = 0 gives ${c === 1 ? `y² = ${n(P)}` : `${n(c)}y² = ${n(P)}, so y² = ${n(y0 * y0)}`}, and y = ±${n(y0)}. Positive x needs positive y, so the critical point is (${n(xs)}, ${n(ys)}). For f = ${f}: ∂f/∂x = y = ${n(ys)} and ∂f/∂y = x = ${n(xs)}. For g = ${g}: ∂g/∂x = 1 and ∂g/∂y = ${n(-c)}. So the linearised system estimates u′ ≈ ${n(ys)} × ${par(nu)} + ${n(xs)} × ${par(nv)} = ${n(up)} and v′ ≈ 1 × ${par(nu)} + ${par(-c)} × ${par(nv)} = ${n(vp)}.`,
   guidance: [
    { prompt: `y′ = 0 gives x = ${cy(c, 'y')}. Put it into ${f} = 0 to get ${c === 1 ? '' : n(c)}y² = ${n(P)}. What is y at the critical point with positive x?`, answer: [ys], explanation: `y² = ${n(y0 * y0)}, so y = ±${n(y0)}. Since x = ${cy(c, 'y')}, positive x needs positive y: y = ${n(ys)}, and then x = ${n(xs)}.` },
-   { prompt: `At the critical point (${n(xs)}, ${n(ys)}), ∂f/∂x = y and ∂f/∂y = x. What is u′ = (∂f/∂x)u + (∂f/∂y)v for u = ${n(nu)} and v = ${n(nv)}?`, answer: [up], explanation: `u′ = ${n(ys)} × ${par(nu)} + ${n(xs)} × ${par(nv)} = ${n(up)}.` },
-   { prompt: `For g = ${g}, ∂g/∂x = 1 and ∂g/∂y = ${n(-c)}. What is v′ = (∂g/∂x)u + (∂g/∂y)v for the same u and v?`, answer: [vp], explanation: `v′ = 1 × ${par(nu)} + ${par(-c)} × ${par(nv)} = ${n(vp)}.` }
+   { prompt: `At the critical point (${n(xs)}, ${n(ys)}), ∂f/∂x = y and ∂f/∂y = x. What is the linearised estimate u′ ≈ (∂f/∂x)u + (∂f/∂y)v for u = ${n(nu)} and v = ${n(nv)}?`, answer: [up], explanation: `u′ ≈ ${n(ys)} × ${par(nu)} + ${n(xs)} × ${par(nv)} = ${n(up)}.` },
+   { prompt: `For g = ${g}, ∂g/∂x = 1 and ∂g/∂y = ${n(-c)}. What is the linearised estimate v′ ≈ (∂g/∂x)u + (∂g/∂y)v for the same u and v?`, answer: [vp], explanation: `v′ ≈ 1 × ${par(nu)} + ${par(-c)} × ${par(nv)} = ${n(vp)}.` }
   ] }; }
 });
 
@@ -380,7 +380,7 @@ mk({
  draw: R => retry(() => ({ L: R.pick([0.5, 0.8, 1.25, 2, 2.5]), w: R.pick([40, 60, 75, 90, 120, 150]), k: R.int(2, 4), a: R.pick([0.5, 0.6, 0.8, 1.2, 1.5]), ys: R.pick([3, 4, 5, 6, 8, 10, 12]), c: R.pick([0.4, 0.5, 0.6, 0.8, 1.2]), xs: R.pick([4, 5, 8, 10, 12, 16, 20]) }),
   p => hasDec(p.a / p.ys, 4) && hasDec(p.c / p.xs, 4) && p.a !== p.ys && p.c !== p.xs && !nearTie(p.w * p.k * Math.PI / p.L, 2), { L: 2, w: 60, k: 3, a: 1.2, ys: 6, c: 0.5, xs: 10 }),
  build: ({ L, w, k, a, ys, c, xs }) => { const r = k / L, om = w * r * Math.PI, b = a / ys, d = c / xs; return {
-  prompt: `Two readings from the observation deck and the dome. A signal wire is ${n(L)} metres long and fixed at both ends; its shape X obeys X″ + λX = 0 with X(0) = 0 and X(${n(L)}) = 0. Such a wire swings with angular frequency ω = ${n(w)}√λ rad/s, where ${n(w)} m/s is its wave speed (a rule you will meet in the Waves realm; take it as given). Enter the angular frequency of its ${ord(k)} lowest allowed shape, in rad/s to 2 decimal places (type a number of 1000 or more without commas). Then the dome’s moths x (hundreds) and the bats that eat them y (tens) follow x′ = ${cy(a, 'x')} − ${n(b)}xy and y′ = −${cy(c, 'y')} + ${n(d)}xy: enter x, in hundreds, at the coexistence point.`,
+  prompt: `Two readings from the observation deck and the dome. A signal wire is ${n(L)} metres long and fixed at both ends; its shape X obeys X″ + λX = 0 with X(0) = 0 and X(${n(L)}) = 0. Such a wire swings with angular frequency ω = ${n(w)}√λ rad/s, where ${n(w)} m/s is its wave speed (a rule from the physics of waves, not derived here; take it as given). Enter the angular frequency of its ${ord(k)} lowest allowed shape, in rad/s to 2 decimal places (type a number of 1000 or more without commas). Then the dome’s moths x (hundreds) and the bats that eat them y (tens) follow x′ = ${cy(a, 'x')} − ${n(b)}xy and y′ = −${cy(c, 'y')} + ${n(d)}xy: enter x, in hundreds, at the coexistence point.`,
   answer: [r2(om), xs],
   hints: ['The allowed λ of the wire are (jπ ÷ L)² for j = 1, 2, 3, …; take the j that matches the shape asked for, and multiply √λ by the wave speed.',
    'At the coexistence point both populations are non-zero, so the bracket of y′ = y(−c + dx) must be 0.'],
@@ -392,6 +392,8 @@ mk({
   ] }; }
 });
 
+/* q40c parameters plus the numbers the prompt prints for the oracle: the target multiple T of π and the coefficient d of xy in y′. */
+const shown40 = p => ({ ...p, T: Math.round(p.w / p.L), d: p.c / p.xs });
 mk({
  id: 'q40c', parent: 'q40', kind: 'applied', title: 'Cutting the new harp string',
  brief: 'The wind-harp needs a new string cut to sing one exact note, and the dome log needs the insect count at the steady level.',
@@ -400,11 +402,11 @@ mk({
 }, {
  /* String: fundamental ω = w·π ÷ L = m·π, so m = w ÷ L is a whole number (given) and L = w ÷ m; √λ ÷ π = m ÷ w = 1 ÷ L. Dome: x′ = ax − bxy, y′ = −cy + dxy with
     b = a ÷ ys and d = c ÷ xs; the insects at the balance are 100·xs. Not the q40 worked example. */
- canonical: { L: 2.5, w: 100, a: 1.2, ys: 6, c: 0.6, xs: 5 },
- draw: R => retry(() => ({ L: R.pick([0.5, 0.8, 1.25, 2, 2.5, 4, 5]), w: R.pick([40, 50, 60, 80, 100, 120, 150]), a: R.pick([0.5, 0.6, 0.8, 1, 1.2, 1.5]), ys: R.pick([3, 4, 5, 6, 8, 10, 12]), c: R.pick([0.4, 0.5, 0.6, 0.8, 1.2]), xs: R.pick([4, 5, 8, 10, 12, 16, 20]) }),
-  p => isInt(p.w / p.L) && p.w / p.L <= 400 && hasDec(p.a / p.ys, 4) && hasDec(p.c / p.xs, 4) && p.a !== p.ys && p.c !== p.xs && !(p.L === 1.25 && p.w === 90), { L: 2.5, w: 100, a: 1.2, ys: 6, c: 0.6, xs: 5 }),
+ canonical: shown40({ L: 2.5, w: 100, a: 1.2, ys: 6, c: 0.6, xs: 5 }),
+ draw: R => shown40(retry(() => ({ L: R.pick([0.5, 0.8, 1.25, 2, 2.5, 4, 5]), w: R.pick([40, 50, 60, 80, 100, 120, 150]), a: R.pick([0.5, 0.6, 0.8, 1, 1.2, 1.5]), ys: R.pick([3, 4, 5, 6, 8, 10, 12]), c: R.pick([0.4, 0.5, 0.6, 0.8, 1.2]), xs: R.pick([4, 5, 8, 10, 12, 16, 20]) }),
+  p => isInt(p.w / p.L) && p.w / p.L <= 400 && hasDec(p.a / p.ys, 4) && hasDec(p.c / p.xs, 4) && p.a !== p.ys && p.c !== p.xs && !(p.L === 1.25 && p.w === 90), { L: 2.5, w: 100, a: 1.2, ys: 6, c: 0.6, xs: 5 })),
  build: ({ L, w, a, ys, c, xs }) => { const m = Math.round(w / L), inv = 1 / L, b = a / ys, d = c / xs; return {
-  prompt: `The dome’s wind-harp needs a new string, fixed at both ends, whose length L has to be chosen. Its shape X obeys X″ + λX = 0 with X(0) = 0 and X(L) = 0, and it swings with angular frequency ω = ${n(w)}√λ rad/s, where ${n(w)} m/s is its wave speed (a rule from the Waves realm; take it as given). The string must have a fundamental frequency, its lowest allowed angular frequency, of exactly ${n(m)}π rad/s. Enter the length L in metres. Then the dome’s insects x (hundreds) and birds y (tens) follow x′ = ${cy(a, 'x')} − ${n(b)}xy and y′ = −${cy(c, 'y')} + ${n(d)}xy: enter the number of insects at the coexistence point (a count, not hundreds; type a number of 1000 or more without commas).`,
+  prompt: `The dome’s wind-harp needs a new string, fixed at both ends, whose length L has to be chosen. Its shape X obeys X″ + λX = 0 with X(0) = 0 and X(L) = 0, and it swings with angular frequency ω = ${n(w)}√λ rad/s, where ${n(w)} m/s is its wave speed (a rule from the physics of waves, not derived here; take it as given). The string must have a fundamental frequency, its lowest allowed angular frequency, of exactly ${n(m)}π rad/s. Enter the length L in metres. Then the dome’s insects x (hundreds) and birds y (tens) follow x′ = ${cy(a, 'x')} − ${n(b)}xy and y′ = −${cy(c, 'y')} + ${n(d)}xy: enter the number of insects at the coexistence point (a count, not hundreds; type a number of 1000 or more without commas).`,
   answer: [L, xs * 100],
   hints: ['The lowest allowed λ is (π ÷ L)², so √λ = π ÷ L and the fundamental is ω = (wave speed) × π ÷ L. Set that equal to the target and solve for L.',
    'At the coexistence point both populations are non-zero, so the bracket of y′ = y(−c + dx) must be 0. The answer there is in hundreds: multiply by 100 for the count.'],
@@ -429,7 +431,7 @@ mk({
   p => { const o1 = p.w * Math.PI / p.L, q = p.Om / o1, fr = q - Math.floor(q); return hasDec(p.A / p.ys, 4) && hasDec(p.c / p.xs, 4) && p.A !== p.ys && p.c !== p.xs && !nearTie(o1, 2) && q >= 2 && q <= 14 && fr > 0.1 && fr < 0.9; },
   { L: 2.5, w: 100, Om: 1400, A: 0.8, h: 0.2, c: 0.5, ys: 5, xs: 10 }),
  build: ({ L, w, Om, A, h, c, ys, xs }) => { const o1 = w * Math.PI / L, cnt = Math.floor(Om / o1), a = Math.round((A + h) * 1e4) / 1e4, b = A / ys, d = c / xs; return {
-  prompt: `A wind-harp string in the dome is ${n(L)} metres long and fixed at both ends; its shape X obeys X″ + λX = 0 with X(0) = 0 and X(${n(L)}) = 0, and it swings with angular frequency ω = ${n(w)}√λ rad/s, where ${n(w)} m/s is its wave speed (a rule from the Waves realm; take it as given). Enter its fundamental frequency, the lowest allowed angular frequency, in rad/s to 2 decimal places (type a number of 1000 or more without commas), then how many of its allowed angular frequencies are below ${n(Om)} rad/s. Then, in the dome, a crew nets insects every month, and the insects x (hundreds) and birds y (tens) follow x′ = ${cy(a, 'x')} − ${n(b)}xy − ${cy(h, 'x')} and y′ = −${cy(c, 'y')} + ${n(d)}xy, where the last term of the first equation is the netting: enter y at the coexistence point.`,
+  prompt: `A wind-harp string in the dome is ${n(L)} metres long and fixed at both ends; its shape X obeys X″ + λX = 0 with X(0) = 0 and X(${n(L)}) = 0, and it swings with angular frequency ω = ${n(w)}√λ rad/s, where ${n(w)} m/s is its wave speed (a rule from the physics of waves, not derived here; take it as given). Enter its fundamental frequency, the lowest allowed angular frequency, in rad/s to 2 decimal places (type a number of 1000 or more without commas), then how many of its allowed angular frequencies are below ${n(Om)} rad/s. Then, in the dome, a crew nets insects every month, and the insects x (hundreds) and birds y (tens) follow x′ = ${cy(a, 'x')} − ${n(b)}xy − ${cy(h, 'x')} and y′ = −${cy(c, 'y')} + ${n(d)}xy, where the last term of the first equation is the netting: enter y at the coexistence point.`,
   answer: [r2(o1), cnt, ys],
   hints: ['The allowed λ are (jπ ÷ L)² for j = 1, 2, 3, …, so the allowed ω are j times the fundamental. Count the whole numbers j for which j × (fundamental) is below the limit.',
    'Collect the two terms in x only in the first equation: x′ = x(A − by), where A is the growth rate minus the netting rate. With x non-zero, the bracket is 0 at the coexistence point.'],

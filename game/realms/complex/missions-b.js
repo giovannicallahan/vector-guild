@@ -17,6 +17,8 @@
 /* Orloff, Complex Variables with Applications (MIT), on LibreTexts: one entry per section the missions below cite. Each page was opened
    on the date in `verified`. A source row credits a section only with what it states; the rest is worked out in the mission. */
 const source = {
+ s1_3: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 1.3 Terminology and Basic Arithmetic", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/01%3A_Complex_Algebra_and_the_Complex_Plane/1.03%3A_Terminology_and_Basic_Arithmetic", description: "Complex numbers x + iy with i² = −1, real and imaginary parts, adding and multiplying, the conjugate and z z̄ = x² + y², dividing with the conjugate, and the modulus.", verified: '2026-11-28' },
+ s1_5: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 1.5 Polar Coordinates", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/01%3A_Complex_Algebra_and_the_Complex_Plane/1.05%3A_Polar_Coordinates", description: "The modulus r as the distance from the origin, the argument θ and its many values differing by 2π, and choosing a branch such as −π < θ ≤ π.", verified: '2026-11-28' },
  s1_7: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 1.7 The Exponential Function", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/01%3A_Complex_Algebra_and_the_Complex_Plane/1.07%3A_The_Exponential_Function", description: "The complex exponential e^(x + iy) = e^x(cos y + i sin y), and its modulus e^x.", verified: '2026-11-27' },
  s1_11: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 1.11 The Function log(z)", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/01%3A_Complex_Algebra_and_the_Complex_Plane/1.11%3A_The_Function_log(z)", description: "log z = ln |z| + i arg z, the principal branch with −π < arg z ≤ π, and complex powers.", verified: '2026-11-27' },
  s1_12: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 1.12 Inverse Euler formula", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/01%3A_Complex_Algebra_and_the_Complex_Plane/1.12%3A_Inverse_Euler_formula", description: "Cosine and sine written with e^(it) and e^(−it).", verified: '2026-11-27' },
@@ -26,8 +28,8 @@ const source = {
  s2_8: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 2.8 Gallery of Functions", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/02%3A_Analytic_Functions/2.08%3A_Gallery_of_Functions", description: "The complex sine, cosine, sinh and cosh, sin(x + iy) = sin x cosh y + i cos x sinh y, and their derivatives.", verified: '2026-11-27' },
  s6_2: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 6.2 Harmonic Functions", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/06%3A_Harmonic_Functions/6.02%3A_Harmonic_Functions", description: "Harmonic functions as the solutions of Laplace’s equation.", verified: '2026-11-27' },
  s4_2: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 4.2 Complex Line Integrals", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/04%3A_Line_Integrals_and_Cauchys_Theorem/4.02%3A_Complex_Line_Integrals", description: "Integrals along a parametrised curve as ∫ f(γ(t)) γ′(t) dt, with examples on a line segment, including the integral of z̄.", verified: '2026-11-27' },
- s4_3: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 4.3 Fundamental Theorem for Complex Line Integrals", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/04%3A_Line_Integrals_and_Cauchys_Theorem/4.03%3A_Fundamental_Theorem_for_Complex_Line_Integrals", description: "If F′ = f, the integral of f along a curve is F at the end minus F at the start, so a closed curve gives 0.", verified: '2026-11-27' },
- s4_5: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 4.5 Examples", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/04%3A_Line_Integrals_and_Cauchys_Theorem/4.05%3A_Examples", description: "Worked integrals round circles: dz ÷ z round the unit circle gives 2πi and dz ÷ z² gives 0.", verified: '2026-11-27' }
+ s4_3: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 4.3 Fundamental Theorem for Complex Line Integrals", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/04%3A_Line_Integrals_and_Cauchys_Theorem/4.03%3A_Fundamental_Theorem_for_Complex_Line_Integrals", description: "If F′ = f on an open region, the integral of f along a curve in that region is F at the end minus F at the start, with z² ÷ 3 as a worked example on a line and round the unit circle.", verified: '2026-11-28' },
+ s4_5: { title: "Orloff, Complex Variables with Applications (LibreTexts) — 4.5 Examples", url: "https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/04%3A_Line_Integrals_and_Cauchys_Theorem/4.05%3A_Examples", description: "Worked loop integrals: 1 ÷ z round the unit circle gives 2πi, round a circle that leaves 0 outside gives 0, and 1 ÷ z² round the unit circle gives 0.", verified: '2026-11-28' }
 };
 window.QUESTS = window.QUESTS || [];
 window.QUESTS.push(
@@ -43,7 +45,7 @@ window.QUESTS.push(
   ],
   solution: "|z| = √(9 + 16) = √25 = 5. z lies in the second quadrant (real part negative, imaginary part positive). arctan(4 ÷ 3) ≈ 0.9273, so Arg z = π − 0.9273 ≈ 3.1416 − 0.9273 = 2.2143, which is 2.21 to 2 decimal places. Squaring z squares its modulus: |z²| = 5² = 25. So Re Log(z²) = ln 25 ≈ 3.2189, which is 3.22 to 2 decimal places.",
   xp: 100, prereqs: ["q06","q10"],
-  sources: [source.s1_7, source.s1_11],
+  sources: [source.s1_3, source.s1_5, source.s1_7, source.s1_11],
   teaching: {
    intuition: "Every complex number z = a + bi is an arrow in the plane. Its length is the modulus |z| = √(a² + b²), and its direction is the argument: the angle from the positive real axis, in radians. The principal argument Arg z is the one choice of that angle in (−π, π]. These two numbers are exactly what the logarithm reads: the principal logarithm is Log z = ln |z| + i Arg z, so its real part only cares about the length. Powers fit the same picture. By de Moivre’s formula, (r e^(iθ))ⁿ = rⁿ e^(inθ): the length is raised to the power and the angle is multiplied. So the length of z² is |z|², and Re Log(z²) = ln(|z|²).",
    steps: [
@@ -373,20 +375,20 @@ window.QUESTS.push(
  {
   id: "q19", title: "Any route will do", topic: "Antiderivatives and path independence", tier: "Intermediate", sector: "Ring Road",
   brief: "A cable takes a winding route between two points, and the crew wants its integral without tracing every bend.",
-  lesson: "If F′ = f along the way, then ∫_γ f(z) dz = F(end) − F(start) for every curve between the same two points.",
+  lesson: "If one function F has F′ = f at every point of a region, then ∫_γ f(z) dz = F(end) − F(start) for every curve inside that region between the same two points.",
   prompt: "A cable on the ring road runs along a winding route from a = −1 + 2i to b = 2 + 2i. Enter the real part, then the imaginary part, of ∫ z² dz along the route.",
   answer: [-9,6], labels: ["real part","imaginary part"], tolerance: 0.005,
   hints: [
-   "zⁿ has the antiderivative zⁿ⁺¹ ÷ (n + 1), because the derivative of that is zⁿ. With an antiderivative F, the integral is F(end) − F(start), whatever route joins them.",
+   "For n = 0, 1, 2, …, zⁿ has the antiderivative zⁿ⁺¹ ÷ (n + 1) at every point of the plane, because the derivative of that is zⁿ. With an antiderivative F that works at every point of a region holding the routes, the integral is F(end) − F(start), whatever route joins them.",
    "Work out the powers of the two end points one multiplication at a time, using i² = −1."
   ],
   solution: "An antiderivative of z² is F(z) = z³ ÷ 3, so the route does not matter: the integral is F(b) − F(a) = (b³ − a³) ÷ 3. b³ = −16 + 16i and a³ = 11 − 2i, so b³ − a³ = −27 + 18i. Dividing by 3 gives −9 + 6i.",
   xp: 150, prereqs: ["q18"],
   sources: [source.s4_3],
   teaching: {
-   intuition: "In real calculus an antiderivative turns an integral into a subtraction: if F′ = f, the integral of f from a to b is F(b) − F(a). The same is true for contour integrals. If F is a complex function with F′(z) = f(z) at every point of a curve γ from a to b, then along γ the chain rule gives d/dt F(γ(t)) = f(γ(t)) γ′(t), which is exactly the integrand of the parametrised integral. So ∫_γ f(z) dz = F(b) − F(a). The curve has dropped out: any route from a to b gives the same answer. That is path independence. For powers, zⁿ has the antiderivative zⁿ⁺¹ ÷ (n + 1) everywhere in the plane, so the integral of zⁿ from a to b is (bⁿ⁺¹ − aⁿ⁺¹) ÷ (n + 1) along any route at all.",
+   intuition: "In real calculus an antiderivative turns an integral into a subtraction: if F′ = f, the integral of f from a to b is F(b) − F(a). The same is true for contour integrals. If F is a complex function with F′(z) = f(z) at every point of a curve γ from a to b, then along γ the chain rule gives d/dt F(γ(t)) = f(γ(t)) γ′(t), which is exactly the integrand of the parametrised integral. So ∫_γ f(z) dz = F(b) − F(a). The curve has dropped out: any route from a to b that stays where F′ = f gives the same answer. That is path independence. It needs one single F that works at every point of a region holding all the routes being compared. For 1 ÷ z no such F exists on a region that goes all the way round 0, and a route that loops once anticlockwise round 0 picks up an extra 2πi. For powers with n = 0, 1, 2, …, zⁿ has the antiderivative zⁿ⁺¹ ÷ (n + 1) at every point of the plane, so the integral of zⁿ from a to b is (bⁿ⁺¹ − aⁿ⁺¹) ÷ (n + 1) along any route at all. For n = −1 the formula would divide by 0.",
    steps: [
-    "Find an antiderivative F of the integrand: for zⁿ, F(z) = zⁿ⁺¹ ÷ (n + 1).",
+    "Find an antiderivative F of the integrand: for zⁿ with n = 0, 1, 2, …, F(z) = zⁿ⁺¹ ÷ (n + 1).",
     "Work out F at the end point b and at the start point a, with i² = −1.",
     "Subtract: the integral is F(b) − F(a). The shape of the route does not matter.",
     "Read off the real and imaginary parts."

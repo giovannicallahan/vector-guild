@@ -33,7 +33,9 @@ window.VG_ACHIEVEMENTS = (() => {
       out.push(once(id + '-done', a.done, 'Learn every concept in ' + a.short + '.', reward, c => complete(c, id)),
         once(id + '-master', a.master, 'Solve every mission in ' + a.short + ', practice included.', 150, c => finished(c, id)));
     }
-    return out;
+    /* The three 2.5 realms keep their places at the front; realms added later follow in registry order. */
+    const first = a => /^(found|la|calc1)-(done|master)$/.test(a.id);
+    return out.filter(first).concat(out.filter(a => !first(a)));
   }
   return [
     once('solve-1', 'First light', 'Solve your first mission.', 15, c => c.solved >= 1),

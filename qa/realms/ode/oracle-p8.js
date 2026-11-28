@@ -89,8 +89,18 @@ Object.assign(window.ORACLE, {
   },
   /* q40b: ω_k = w √λ_k = w k π / L; coexistence x = c ÷ (the xy coefficient of y') = xs. */
   q40b: p => [r2(p.w * p.k * Math.PI / p.L), p.xs],
-  /* q40c: fundamental w π / L = 96π style: L is what makes that true (the prompt's target is w π / L); insects = 100 xs. */
-  q40c: p => [p.L, 100 * p.xs],
+  /* q40c: the prompt prints the wave speed w, the target fundamental T·π and the coefficients c and d of y′ = −cy + dxy.
+     For a length L the allowed λ make sin(√λ L) = 0 with √λ > 0; the fundamental w·√λ uses the first such √λ, found by
+     scanning for a sign change of sin(kL) and bisecting. L is then found by bisection, since the fundamental falls as L
+     grows. Insects: y′ = 0 with y ≠ 0 needs −c + dx = 0, in hundreds; L, xs and a, ys are not used. */
+  q40c: p => {
+    const firstK = L => { const h = 0.01 / L; let k = h; while (Math.sin(k * L) > 0) k += h; let lo = k - h, hi = k;
+      for (let i = 0; i < 80; i++) { const mid = (lo + hi) / 2; if (Math.sin(mid * L) > 0) lo = mid; else hi = mid; } return (lo + hi) / 2; };
+    const fund = L => p.w * firstK(L), target = p.T * Math.PI;
+    let lo = 1e-3, hi = 1e3;
+    for (let i = 0; i < 200; i++) { const mid = Math.sqrt(lo * hi); if (fund(mid) > target) lo = mid; else hi = mid; }
+    return [Math.round(Math.sqrt(lo * hi) * 1e6) / 1e6, Math.round(100 * p.c / p.d)];
+  },
   /* q40d: fundamental w π/L; count k with k w π/L < Om; y at the coexistence point = net prey rate ÷ b = ys (net rate A, b = A/ys). */
   q40d: p => {
     const w1 = p.w * Math.PI / p.L; let n = 0; while ((n + 1) * w1 < p.Om) n++;

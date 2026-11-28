@@ -19,7 +19,8 @@
    A title reads like: Orloff, Complex Variables with Applications (LibreTexts) — 9.4 Residues
    Link to the section page itself: https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/<NN>%3A_<Chapter>/<N.MM>%3A_<Section> */
 const source = {
- s8_2: { title: 'Orloff, Complex Variables with Applications (LibreTexts) — 8.2 Convergence of Power Series', url: 'https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/08%3A_Taylor_and_Laurent_Series/8.02%3A_Convergence_of_Power_Series', description: 'Power series, the radius and disc of convergence, and finding the radius with the ratio test.', verified: '2026-11-28' },
+ s8_1: { title: 'Orloff, Complex Variables with Applications (LibreTexts) — 8.1 Geometric Series', url: 'https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/08%3A_Taylor_and_Laurent_Series/8.01%3A_Geometric_Series', description: 'Finite and infinite geometric series: the partial sum formula, and convergence to a ÷ (1 − r) when |r| < 1.', verified: '2026-11-28' },
+ s8_2: { title: 'Orloff, Complex Variables with Applications (LibreTexts) — 8.2 Convergence of Power Series', url: 'https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/08%3A_Taylor_and_Laurent_Series/8.02%3A_Convergence_of_Power_Series', description: 'Power series, the radius and disc of convergence, the ratio and root tests for series, and the note that the ratio test often (not always) finds the radius, shown on the geometric series and the series for eᶻ.', verified: '2026-11-28' },
  s8_3: { title: 'Orloff, Complex Variables with Applications (LibreTexts) — 8.3 Taylor Series', url: 'https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/08%3A_Taylor_and_Laurent_Series/8.03%3A_Taylor_Series', description: 'Taylor’s theorem: an analytic function equals its Taylor series, with coefficients f⁽ⁿ⁾(z₀) ÷ n!.', verified: '2026-11-28' },
  s8_7: { title: 'Orloff, Complex Variables with Applications (LibreTexts) — 8.7 Laurent Series', url: 'https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/08%3A_Taylor_and_Laurent_Series/8.07%3A_Laurent_Series', description: 'Laurent series on an annulus, their principal part, and how the series depends on the annulus.', verified: '2026-11-28' },
  s8_9: { title: 'Orloff, Complex Variables with Applications (LibreTexts) — 8.9 Poles', url: 'https://math.libretexts.org/Bookshelves/Analysis/Complex_Variables_with_Applications_(Orloff)/08%3A_Taylor_and_Laurent_Series/8.09%3A_Poles', description: 'Removable singularities, poles of order k and essential singularities, read from the Laurent series.', verified: '2026-11-28' },
@@ -87,7 +88,7 @@ window.QUESTS.push(
   solution: 'Each derivative of e^(3z) brings down another factor 3, so f⁽ⁿ⁾(0) = 3ⁿ and the coefficient of zⁿ is 3ⁿ ÷ n!. For n = 4 it is 3⁴ ÷ 4! = 81 ÷ 24, which is 27 ÷ 8 in lowest terms. For g, write 1 ÷ (1 + 2z) as 1 ÷ (1 − w) with w = −2z. The geometric series 1 + w + w² + … gives g(z) = Σ (−2)ⁿzⁿ for |z| < 1 ÷ 2, so the coefficient of z⁵ is (−2)⁵ = −32.',
   xp: 200, prereqs: ['q31', 'q25'],
   artifact: { name: 'Coefficient ledger', description: 'Two columns of Taylor coefficients, one entry for each power of z.' },
-  sources: [source.s8_3],
+  sources: [source.s8_1, source.s8_3],
   teaching: {
    intuition: 'Cauchy’s formula for derivatives says that an analytic function has derivatives of every order. Taylor’s theorem in the plane turns that into a series: near a point where f is analytic, f(z) equals its Taylor series about that point, and about 0 it reads f(z) = Σ cₙzⁿ with cₙ = f⁽ⁿ⁾(0) ÷ n!. The number cₙ is the Taylor coefficient of zⁿ, and the series is the only power series that equals f near 0, so any way of finding it gives the same coefficients. Two ways are used here. The complex exponential e^(az) has derivative ae^(az), just as a real exponential does, so for e^(az) every derivative brings down one more factor a, so the coefficient of zⁿ is aⁿ ÷ n!. For 1 ÷ (1 − bz), the geometric series with w = bz gives 1 + bz + b²z² + …, so the coefficient of zⁿ is bⁿ, valid while |bz| < 1.',
    steps: [
@@ -162,7 +163,7 @@ window.QUESTS.push(
  {
   id: 'q34', title: 'Sorting the archive’s blow-ups', topic: 'Poles and their order', tier: 'Advanced', sector: 'Signal Archive',
   brief: 'The archive files every point where a filter misbehaves by how badly it misbehaves, and two filters are waiting to be filed.',
-  lesson: 'An isolated singularity is a removable singularity, a pole of order k or an essential singularity, according to how many negative powers its Laurent series has.',
+  lesson: 'An isolated singularity is sorted by the negative powers of its Laurent series: none means a removable singularity; if the most negative power is (z − a)⁻ᵏ, it is a pole of order k; infinitely many means an essential singularity.',
   prompt: 'Two archive filters have singularities. Filter F is f(z) = (z + 1) ÷ ((z − 2)³(z + 1)). Enter the order of the pole of f at z = 2. Then enter 1 if the singularity of f at z = −1 is removable, or 0 if it is not. Filter S is s(z) = sin z ÷ z³: enter the order of its pole at z = 0.',
   answer: [3, 1, 2], labels: ['order at a', 'removable at c (1 or 0)', 'order of s at 0'], tolerance: 0.01,
   hints: [
@@ -198,14 +199,14 @@ window.QUESTS.push(
   },
   guidance: [
    { prompt: 'What power of (z − 2) is on the bottom of f, with nothing on the top to cancel it?', answer: [3], labels: ['power of (z − a)'], explanation: 'The bottom has (z − 2)³ and the top (z + 1) is not 0 at z = 2, so the pole at 2 has order 3.' },
-   { prompt: 'What is the value of the top, z + 1, at z = −1?', answer: [0], labels: ['top at c'], explanation: 'It is −1 − (−1) = 0: the top has the same factor as the bottom, so they cancel and the singularity at −1 is removable.' },
+   { prompt: 'What is the value of the top, z + 1, at z = −1?', answer: [0], labels: ['top at c'], explanation: 'It is −1 + 1 = 0: the top has the same factor as the bottom, so they cancel and the singularity at −1 is removable.' },
    { prompt: 'In the series of s(z) = sin z ÷ z³, what is the lowest power of z? Enter its exponent.', answer: [-2], labels: ['lowest exponent'], explanation: 'The first term of sin z is z, and z ÷ z³ = z⁻². So the lowest power is −2, and the pole has order 2.' }
   ]
  },
  {
   id: 'q35', title: 'One number per pole', topic: 'Residues at simple poles', tier: 'Advanced', sector: 'Control Room',
   brief: 'The control room wants each pole of a transfer function summed up by a single number, so that later integrals become quick sums.',
-  lesson: 'The residue of f at a is the coefficient of (z − a)⁻¹ in its Laurent series; at a simple pole of p ÷ q it equals p(a) ÷ q′(a).',
+  lesson: 'The residue of f at a is the coefficient of (z − a)⁻¹ in its Laurent series; when q has a simple zero at a and p(a) is not 0, the residue of p ÷ q at a is p(a) ÷ q′(a).',
   prompt: 'A control-room transfer function is f(z) = (−3z + 11) ÷ (z² + 2z − 3). Its bottom is 0 at z = 1 and at z = −3, and both are simple poles. Enter the residue of f at z = 1, then the residue of f at z = −3.',
   answer: [2, -5], labels: ['residue at the first pole', 'residue at the second pole'], tolerance: 0.01,
   hints: [
@@ -236,7 +237,8 @@ window.QUESTS.push(
    pitfalls: [
     'Dividing by q(a), which is 0, instead of by q′(a).',
     'Forgetting the sign of q′(a): at the smaller of two real poles of z² + Bz + C, q′ is negative.',
-    'Using p(a) ÷ q′(a) at a pole that is not simple. At a pole of order 2 or more, q′(a) is 0 and another rule is needed.'
+    'Using p(a) ÷ q′(a) at a pole that is not simple. At a pole of order 2 or more, q′(a) is 0 and another rule is needed.',
+    'Using p(a) ÷ q′(a) when the top is also 0 at a. Cancel the factor (z − a) that the top and bottom share first, then use the rule on what is left.'
    ]
   },
   guidance: [
@@ -420,7 +422,7 @@ window.QUESTS.push(
  {
   id: 'q40', title: 'The last loop of the realm', topic: 'Realm review and bridge to Waves', tier: 'Advanced', sector: 'Control Room',
   brief: 'Before the Wave Station hands over to Waves, the control room checks one last filter by counting how often its output turns round 0.',
-  lesson: 'The argument principle: (1 ÷ 2πi) ∮ f′ ÷ f dz = Z − P, the zeros minus the poles inside the curve, which is the winding number of f(z) round 0.',
+  lesson: 'The argument principle: round a simple closed curve traced once anticlockwise, with no zeros or poles on it, (1 ÷ 2πi) ∮ f′ ÷ f dz = Z − P, the zeros minus the poles inside, which is the winding number of f(z) round 0. Traced clockwise, the sign flips.',
   prompt: 'To close the realm, the control room checks the filter f(z) = (z − 1)²(z + 4i) ÷ ((z + 2)³(z − 5)) on the circle |z| = 3, traced once anticlockwise. Count each zero and each pole as many times as the power of its factor. Enter the number Z of zeros of f inside the circle, then the number P of poles inside, then the winding number of the image curve f(z) round 0 as z goes once round the circle.',
   answer: [2, 3, -1], labels: ['zeros inside Z', 'poles inside P', 'winding number'], tolerance: 0.01,
   hints: [

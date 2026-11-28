@@ -434,6 +434,8 @@
     });
     if (n.owned) paneEl.appendChild(ul);
     if (missing) paneEl.appendChild(dropDown('', 'Not found yet (' + missing + ')', lockedOpen, function (v) { lockedOpen = v; }, rest));
+    /* Small surprises (finds.js): the cosmetic finds, under the figures. */
+    if (root.VGFinds && typeof root.VGFinds.drawInto === 'function') try { root.VGFinds.drawInto(paneEl, safe(function () { return C.state(); }, null)); } catch (e) { /* optional */ }
   }
   function fact(dl, name, value) { if (!value) return; var d = el('div'); add(d, el('dt', null, name), el('dd', null, value)); dl.appendChild(d); }
   function part(card, title, text) { if (!text) return; add(card, el('h4', 'vgc-h', title), el('p', 'vgc-text', text)); }

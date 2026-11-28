@@ -16,17 +16,6 @@ const peakW = (m, c, k, F) => {
   }
   return (lo + hi) / 2;
 };
-/* Spring built from a table row (p, j) with Pythagorean p² + j² = h²: c = 2 m j, k = m (p² + 2 j²), so the practical
-   resonance frequency is p and the root at the peak is 2 m j h. The push is F = A (2 m j h), A the stated largest amplitude.
-   The index i only picks the row of the table (a different table in each mission, read off the printed springs). */
-const spring = (tab, p) => {
-  const row = tab[p.i]; if (!row) throw new Error('no table row ' + p.i);
-  const j = row[1], h = Math.hypot(row[0], j), m = p.m;
-  return { m, c: 2 * m * j, k: m * (row[0] * row[0] + 2 * j * j), F: p.A * 2 * m * j * h };
-};
-const T21b = [[3, 4], [6, 8], [12, 5], [5, 12], [4, 3]];
-const T21c = [[3, 4], [4, 3], [6, 8], [8, 6], [12, 5]];
-const T21d = [[6, 8], [8, 6], [12, 5], [5, 12], null, [12, 9]];
 /* Determinant of a 3 × 3 table by expanding along the first row. */
 const det3 = M => M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1]) - M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0]) + M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]);
 /* Gaussian elimination with partial pivoting for A z = b. */
@@ -57,15 +46,16 @@ const build23 = (tab, p) => {
 /* Euler's method for x′ = A x: new x = x + h (A x), with A written out as a matrix. */
 const euler = (A, x, h, steps) => { for (let s = 0; s < steps; s++) x = x.map((xi, i) => xi + h * A[i].reduce((t, a, j) => t + a * x[j], 0)); return x; };
 Object.assign(window.ORACLE, {
-  /* q21b: spring from the table, then a search for the pump speed with the largest amplitude. */
-  q21b: p => { const s = spring(T21b, p), w = peakW(s.m, s.c, s.k, s.F); return [r6(w), r6(ampl(s.m, s.c, s.k, s.F, w))]; },
-  /* q21c: as q21b; the limit printed is 1.25 A when the housing is safe and 0.8 A when not (ok), and the test is amplitude ≤ limit. */
+  /* q21b: the printed mass m, damping c, stiffness k and push F; a search for the pump speed with the largest amplitude.
+     (A and i are the generator's own choices and are not used.) */
+  q21b: p => { const w = peakW(p.m, p.c, p.k, p.F); return [r6(w), r6(ampl(p.m, p.c, p.k, p.F, w))]; },
+  /* q21c: as q21b, then 1 if that largest amplitude is at most the printed limit L. (A, i and ok are not used.) */
   q21c: p => {
-    const s = spring(T21c, p), w = peakW(s.m, s.c, s.k, s.F), top = ampl(s.m, s.c, s.k, s.F, w), limit = p.A * (p.ok ? 1.25 : 0.8);
-    return [r6(w), r6(top), top <= limit + 1e-9 ? 1 : 0];
+    const w = peakW(p.m, p.c, p.k, p.F), top = ampl(p.m, p.c, p.k, p.F, w);
+    return [r6(w), r6(top), top <= p.L + 1e-9 ? 1 : 0];
   },
-  /* q21d: as q21b, then the amplitude at the running speed wr to 3 decimal places. */
-  q21d: p => { const s = spring(T21d, p), w = peakW(s.m, s.c, s.k, s.F); return [r6(w), r6(ampl(s.m, s.c, s.k, s.F, w)), r3(ampl(s.m, s.c, s.k, s.F, p.wr))]; },
+  /* q21d: as q21b, then the amplitude at the running speed wr to 3 decimal places. (A and i are not used.) */
+  q21d: p => { const w = peakW(p.m, p.c, p.k, p.F); return [r6(w), r6(ampl(p.m, p.c, p.k, p.F, w)), r3(ampl(p.m, p.c, p.k, p.F, p.wr))]; },
   /* q22b: y3 is al y1 + be y2 when dep, else e^(r[2] t); Wronskian table at t = 0, determinant; independent when it is not zero. */
   q22b: p => {
     const c1 = expCol(p.r[0]), c2 = expCol(p.r[1]), c3 = p.dep ? comb(p.al, c1, p.be, c2) : expCol(p.r[2]);
@@ -86,10 +76,11 @@ Object.assign(window.ORACLE, {
   },
   /* q23b: spring and push rebuilt from the table; A, B from the matching equations, then the amplitude. */
   q23b: p => { const s = build23(T23bc, p), [A, B] = swing(s.m, s.c, s.k, s.F, s.w); return [r6(A), r6(B), r6(Math.hypot(A, B))]; },
-  /* q23c: A, B, then 1 if the amplitude is at most the printed limit (1.25 times the amplitude when ok, 0.8 times when not). */
+  /* q23c: the printed mass m, damping c, stiffness k, push F at frequency w; A, B from the matching equations, then 1 if
+     the amplitude is at most the printed limit L. (i, neg, s, j and ok are the generator's own choices and are not used.) */
   q23c: p => {
-    const s = build23(T23bc, p), [A, B] = swing(s.m, s.c, s.k, s.F, s.w), top = Math.hypot(A, B), limit = top * (p.ok ? 1.25 : 0.8);
-    return [r6(A), r6(B), top <= limit + 1e-9 ? 1 : 0];
+    const [A, B] = swing(p.m, p.c, p.k, p.F, p.w), top = Math.hypot(A, B);
+    return [r6(A), r6(B), top <= p.L + 1e-9 ? 1 : 0];
   },
   /* q23d: A, B at the running speed, then the practical resonance frequency by searching for the largest amplitude, to 3 places. */
   q23d: p => { const s = build23(T23d, p), [A, B] = swing(s.m, s.c, s.k, s.F, s.w); return [r6(A), r6(B), r3(peakW(s.m, s.c, s.k, s.F))]; },

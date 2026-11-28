@@ -3,8 +3,8 @@
    from what the prompt states by a different method from build() (a table, a search, a numerical method, a solver).
    qa/generators.js loads this file after the whole pack and fails a practice mission that has no oracle here. */
 (function(){ 'use strict';
-/* Round half away from zero; the small nudge keeps an exact tie such as 2.0625 from being lost to floating-point noise. */
-const r3 = x => Math.sign(x) * Math.round(Math.abs(x) * 1e3 + 1e-7) / 1e3, r6 = x => Math.round(x * 1e6) / 1e6;
+/* Plain rounding to 3 and 6 decimal places. */
+const r3 = x => Math.round(x * 1e3) / 1e3, r6 = x => Math.round(x * 1e6) / 1e6;
 /* Eigenvalues of a 2×2 matrix [[a,b],[c,d]] from its characteristic equation λ² − (trace)λ + (determinant) = 0. */
 const eig = A => {
   const tr = A[0][0] + A[1][1], det = A[0][0] * A[1][1] - A[0][1] * A[1][0], disc = tr * tr - 4 * det;

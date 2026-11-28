@@ -22,7 +22,7 @@ Object.assign(window.EXPERIMENTS, {
   return E('Predict the largest possible value of |e₁ + e₂|, in millimetres.', `By the triangle inequality |e₁ + e₂| ≤ |e₁| + |e₂| ≤ 3 + ${n(k)} = ${n(3 + k)}, and e₁ = 3, e₂ = ${n(k)} reaches it.`, [['Largest |e₁ + e₂| (mm)', 3 + k], ['Bound on |e₁| (mm)', 3], ['Bound on |e₂| (mm)', k]]); },
  /* f(x) = (x − 2)² + 1 on (0, c) with c from 3 to 10: inf 1 at x = 2, sup the larger of f(0) = 5 and f(c). */
  q05: t => { t = T(t); const c = 3 + (t + 10) % 8, fc = (c - 2) * (c - 2) + 1, S = Math.max(5, fc);
-  return E('Predict sup f over the open interval.', `At the ends f(0) = 5 and f(${n(c)}) = ${n(fc)}, approached but not taken. The square is 0 at x = 2, inside the interval, where f(2) = 1. So sup f = ${n(S)} and inf f = 1.`, [['sup f', S], ['inf f', 1], ['f at the right end', fc]]); },
+  return E('Predict sup f over the open interval.', `At the ends f would be f(0) = 5 and f(${n(c)}) = ${n(fc)}, values f approaches there. The square is 0 at x = 2, inside the interval, where f(2) = 1. So sup f = ${n(S)} and inf f = 1.`, [['sup f', S], ['inf f', 1], ['f at the right end', fc]]); },
  /* The pair (2, k), k from 1 to 9, in the diagonal listing of ℕ × ℕ: position (1 + … + k) + 2. */
  q06: t => { t = T(t); const k = 1 + (t + 10) % 9, s = k + 2, before = k * (k + 1) / 2;
   return E('Predict the position of the pair in the diagonal listing.', `(2, ${n(k)}) is on the diagonal with sum ${n(s)}. The diagonals before it hold 1 + … + ${n(k)} = ${n(before)} pairs, and it is the 2nd pair of its own diagonal, so its position is ${n(before + 2)}.`, [['Position', before + 2], ['Diagonal sum', s], ['Pairs before the diagonal', before]]); },

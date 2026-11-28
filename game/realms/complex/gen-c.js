@@ -166,7 +166,7 @@ Object.assign(window.MISSION_GEN, {
    prompt: `A field-lab probe reads a signal f that is analytic on and inside the circle |z − 2| = ${n(R)}, and on that circle |f(z)| is never more than ${n(M)}. Enter the largest value Cauchy’s inequality allows for |${der(k)}(2)|. Then judge this claim: “${claim}” Enter 1 if it is true, 0 if it is false.`,
    answer: [bound, truth],
    hints: ['Cauchy’s inequality: if f is analytic on and inside the circle |z − a| = R and |f| ≤ M on that circle, then |f⁽ⁿ⁾(a)| ≤ n! M ÷ Rⁿ.',
-    'Liouville’s theorem: an entire function (one that is analytic at every point of the plane) that is bounded is constant. A polynomial of degree 1 or more grows without limit far from 0, so it is not bounded.'],
+    'An entire function is analytic at every point of the plane, so Cauchy’s inequality holds on circles of every radius R round any point a. If |f| ≤ M at every point, take n = 1: |f′(a)| ≤ M ÷ R for every R. Ask what happens to M ÷ R as R grows, and what that says about f′ and about f.'],
    solution: `Here n = ${n(k)}, M = ${n(M)} and R = ${n(R)}, so the bound is ${n(k)}! × ${n(M)} ÷ ${n(R)}${SUP[k]} = ${n(fact(k))} × ${n(M)} ÷ ${n(Rk)} = ${n(bound)}. ${why}`,
    guidance: [
     { prompt: `The derivative asked for is ${der(k)}, so n = ${n(k)}. What is Rⁿ = ${n(R)}${SUP[k]}?`, answer: [Rk], explanation: `${n(R)}${SUP[k]} = ${n(Rk)}.` },

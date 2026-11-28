@@ -268,7 +268,7 @@ mk({
 });
 
 mk({
- id: 'q23d', parent: 'q23', kind: 'challenge', uses: 'q19', title: 'A pole that is not at the centre',
+ id: 'q23d', parent: 'q23', kind: 'challenge', uses: 'q19', title: 'A squared denominator off centre',
  brief: 'A service loop has a doubled-up term sitting off its centre, and the crew must work out which terms actually count.',
  labels: ['terms that count', 'k'], tolerance: 0.01,
  gl: [['terms that count'], ['sum of the numbers on top'], ['k']]

@@ -32,6 +32,25 @@
 .vgd-feedback[data-ok="yes"]{color:var(--lime,#d4f36a)}
 .vgd-feedback[data-ok="no"]{color:var(--amber,#ffbf5e)}
 .vgd[data-state="done"] .vgd-streak{color:var(--lime,#d4f36a)}
+/* Days played this week (home page only): seven dots, Monday to Sunday, and the same count in words. */
+.vgd-week{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 12px}
+.vgd-dots{display:flex;gap:6px}
+.vgd-dot{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:22px}
+.vgd-dot-mark{display:block;width:14px;height:14px;border:2px solid #66766c;border-radius:50%;background:transparent}
+.vgd-dot.is-played .vgd-dot-mark{border-color:var(--lime,#d4f36a);background:var(--lime,#d4f36a)}
+.vgd-dot.is-today .vgd-dot-mark{box-shadow:0 0 0 2px #172428,0 0 0 4px var(--cyan,#8cddd4)}
+.vgd-dot.is-later .vgd-dot-mark{border-style:dashed;opacity:.6}
+.vgd-dot-day{font-size:12px;line-height:1;font-weight:700;color:#b8c7be}
+.vgd-dot.is-today .vgd-dot-day{color:var(--cyan,#8cddd4)}
+.vgd-week-text{font-size:13px;line-height:1.4;color:#b8c7be}
+/* The five-minute run (run.js) uses this card's look; these are its own parts: a row of pips for the problems
+   (right, not this time, now) and the list of concepts to look at again. The step line says the same in words. */
+.vgr-progress{display:flex;gap:6px;align-items:center}
+.vgr-pip{display:block;width:12px;height:12px;border:2px solid #66766c;border-radius:50%}
+.vgr-pip.is-now{border-color:var(--cyan,#8cddd4)}
+.vgr-pip.is-right{border-color:var(--lime,#d4f36a);background:var(--lime,#d4f36a)}
+.vgr-pip.is-miss{border-color:var(--amber,#ffbf5e)}
+.vgr-list{margin:0;padding-left:20px;font-size:14px;line-height:1.6;color:var(--ivory,#edf0dd)}
 /* Home page: the card is one of the page's sections, so the page's own gap does the spacing. */
 .vgh .vgd{margin:0}
 .vgh .vgd-title{font-size:27px;font-weight:500;letter-spacing:-.5px}

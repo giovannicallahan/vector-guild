@@ -20,7 +20,7 @@
 const source = {
  s1_3: { title: "Lebl, Notes on Diffy Qs — 1.3 Separable equations", url: "https://www.jirka.org/diffyqs/html/separable_section.html", description: "Separable equations, solved by separating the variables and integrating both sides.", verified: '2026-11-27' },
  s1_4: { title: "Lebl, Notes on Diffy Qs — 1.4 Linear equations and the integrating factor", url: "https://www.jirka.org/diffyqs/html/intfactor_section.html", description: "First-order linear equations solved with an integrating factor, and mixing problems.", verified: '2026-11-27' },
- s1_6: { title: "Lebl, Notes on Diffy Qs — 1.6 Autonomous equations", url: "https://www.jirka.org/diffyqs/html/auteq_section.html", description: "Autonomous equations, their equilibrium solutions and stability, and the logistic equation.", verified: '2026-11-27' },
+ s1_6: { title: "Lebl, Notes on Diffy Qs — 1.6 Autonomous equations", url: "https://www.jirka.org/diffyqs/html/auteq_section.html", description: "Autonomous equations, their constant (equilibrium) solutions and critical points, stable and unstable critical points, and the logistic equation with its limiting population M, the largest population that can be sustained.", verified: '2026-11-27' },
  s2_1: { title: "Lebl, Notes on Diffy Qs — 2.1 Second-order linear ODEs", url: "https://www.jirka.org/diffyqs/html/solinear_section.html", description: "Second-order linear equations, superposition, and initial conditions y(0) and y′(0).", verified: '2026-11-27' },
  s2_2: { title: "Lebl, Notes on Diffy Qs — 2.2 Constant-coefficient second-order linear ODEs", url: "https://www.jirka.org/diffyqs/html/sec_ccsol.html", description: "The characteristic equation, with distinct real roots, a repeated root, or complex roots and Euler’s formula.", verified: '2026-11-27' },
  s2_4: { title: "Lebl, Notes on Diffy Qs — 2.4 Mechanical vibrations", url: "https://www.jirka.org/diffyqs/html/sec_mv.html", description: "Masses on springs with damping: natural angular frequency, period, and over-, critical and under-damping.", verified: '2026-11-27' },
@@ -36,7 +36,7 @@ window.QUESTS.push(
   prompt: "A coolant mixing tank holds 200 L of brine and is kept well stirred. Brine with 0.3 kg of salt per litre flows in at 4 L/min, and the mixed brine flows out at the same rate, so the volume stays 200 L. At t = 0 the tank holds 10 kg of salt. The salt x(t) in kg after t minutes obeys x′ = 4 × 0.3 − (4 ÷ 200)x, that is x′ = 1.2 − 0.02x. Enter the salt in the tank after 30 minutes in kg, to 3 decimal places, then the equilibrium amount of salt in kg: the constant solution the tank settles towards.",
   answer: [32.559,60], labels: ["value at the time (3 d.p.)","equilibrium"], tolerance: 0.0005,
   hints: [
-   "Set the right-hand side of the equation equal to 0 and solve: the constant that does this is the equilibrium. For the logistic equation, take the one that is not 0.",
+   "Set the right-hand side of the equation equal to 0 and solve: the constant that does this is the equilibrium.",
    "The equation is linear with a constant rate, so its solution is the equilibrium plus a gap that shrinks: x(t) = equilibrium + De^(−kt), with D fixed by the starting amount."
   ],
   solution: "Setting x′ = 0 gives 0.02x = 1.2, so the equilibrium is x = 1.2 ÷ 0.02 = 60 kg. The solution is x(t) = 60 + De^(−0.02t), and x(0) = 10 gives D = 10 − 60 = −50, so x(t) = 60 − 50e^(−0.02t). At t = 30: x = 60 − 50e^(−0.6) = 32.5594…, which is 32.559 kg to 3 decimal places. As t grows the exponential shrinks to 0, so the salt settles at 60 kg.",
@@ -110,7 +110,7 @@ window.QUESTS.push(
    ]
   },
   guidance: [
-   { prompt: "The starting values give C₁ + C₂ = 6 and −3C₁ + C₂ = −2. Take (−3) times the first equation away from the second to remove C₁. What is C₂?", answer: [4], labels: ["C₂"], explanation: "The difference is 4C₂ = −2 − (−3) × 6 = 16, , so C₂ = 16 ÷ 4 = 4." },
+   { prompt: "The starting values give C₁ + C₂ = 6 and −3C₁ + C₂ = −2. Take (−3) times the first equation away from the second to remove C₁. What is C₂?", answer: [4], labels: ["C₂"], explanation: "The difference is 4C₂ = −2 − (−3) × 6 = 16, so C₂ = 16 ÷ 4 = 4." },
    { prompt: "With C₂ = 4, what is C₁?", answer: [2], labels: ["C₁"], explanation: "C₁ + C₂ = 6, so C₁ = 6 − 4 = 2. Check: (−3) × 2 + 1 × 4 = −2." }
   ]
  },
@@ -129,7 +129,7 @@ window.QUESTS.push(
   artifact: {"name":"Rear shock calibration sheet","description":"A quadratic in r, two roots, and the wheel’s height a moment later."},
   sources: [source.s2_2],
   teaching: {
-   intuition: "In the last mission the two basis solutions were handed to you. Now we find them. For an equation like y″ + py′ + qy = 0 with constant numbers p and q, we need a function whose derivatives look like the function itself, so that the three terms can cancel. The exponential does this: if y = e^(rt), then y′ = re^(rt) and y″ = r²e^(rt). Putting these in gives (r² + pr + q)e^(rt) = 0. An exponential is never 0, so the bracket must be: r² + pr + q = 0. This ordinary quadratic is called the characteristic equation, and it has the same coefficients as the differential equation. Each root r gives a solution e^(rt). When the quadratic has two different real roots r₁ and r₂, superposition gives the general solution y = C₁e^(r₁t) + C₂e^(r₂t), and the starting values fix the constants as before. Negative roots give exponentials that die away, which is what a good shock does.",
+   intuition: "In the last mission the two basis solutions were handed to you. Now we find them. For an equation like y″ + py′ + qy = 0 with constant numbers p and q, we need a function whose derivatives look like the function itself, so that the three terms can cancel. The exponential does this: if y = e^(rt), then y′ = re^(rt) and y″ = r²e^(rt). Putting these in gives (r² + pr + q)e^(rt) = 0. An exponential is never 0, so the bracket must be: r² + pr + q = 0. This ordinary quadratic is called the characteristic equation, and it has the same coefficients as the differential equation. Each root r gives a solution e^(rt). When the quadratic has two different real roots r₁ and r₂, superposition gives the general solution y = C₁e^(r₁t) + C₂e^(r₂t), and the starting values fix the constants as before. The roots may have any signs: a negative root gives an exponential that dies away, which is what a good shock does, and a positive root gives one that grows. The same method works either way.",
    steps: [
     "Write the characteristic equation: replace y″ by r², y′ by r and y by 1.",
     "Solve it, by factoring or the quadratic formula, to get two real roots r₁ < r₂.",
@@ -247,7 +247,7 @@ window.QUESTS.push(
  },
  {
   id: "q16", title: "Reading the suspension corner", topic: "Mechanical vibrations: frequency and damping", tier: "Intermediate", sector: "Rover Garage",
-  brief: "Each corner of the rover is a mass on a spring with a damper, and Mira wants to know how fast each one would swing and whether it bounces at all.",
+  brief: "Each corner of the rover is a mass on a spring with a damper, and Mira wants to know how fast each one would swing and whether it swings back and forth at all.",
   lesson: "A mass on a spring with a damper obeys mx″ + cx′ + kx = 0: its natural angular frequency is ω₀ = √(k ÷ m), and comparing c² with 4mk tells whether it is overdamped, critically damped or underdamped.",
   prompt: "A rover’s suspension corner is a mass m = 4 kg on a spring of stiffness k = 36 N/m with a damper of c = 30 N·s/m, so mx″ + cx′ + kx = 0 becomes 4x″ + 30x′ + 36x = 0 (x in metres, t in seconds). Enter the natural angular frequency ω₀ = √(k ÷ m) in rad/s, then the natural period 2π ÷ ω₀ in seconds to 3 decimal places, then a code for the damping: 1 for overdamped, 2 for critically damped, 3 for underdamped.",
   answer: [3,2.094,1], labels: ["ω₀ (rad/s)","natural period (s, 3 d.p.)","damping code"], tolerance: 0.0005,
@@ -257,10 +257,10 @@ window.QUESTS.push(
   ],
   solution: "ω₀ = √(36 ÷ 4) = √9 = 3 rad/s, and the natural period is 2π ÷ 3 = 2.0944…, which is 2.094 s to 3 decimal places. For the damping, c² = 900 and 4mk = 4 × 4 × 36 = 576, so c² − 4mk = 324. c² is bigger than 4mk, so the corner is overdamped: code 1.",
   xp: 150, prereqs: ["q15"],
-  artifact: {"name":"Suspension corner chart","description":"Mass, spring and damper, sorted into bounce, no bounce and the line between."},
+  artifact: {"name":"Suspension corner chart","description":"Mass, spring and damper, sorted into swinging back and forth, not swinging, and the line between."},
   sources: [source.s2_4],
   teaching: {
-   intuition: "Push a mass m on a spring away from rest by x and the spring pulls back with force kx, where k is its stiffness in newtons per metre. A damper, like the oil in a shock absorber, resists motion with force cx′, where c is the damping constant: the faster it moves, the harder the damper pushes back. Newton’s law, mass times acceleration equals force, gives mx″ = −kx − cx′, or mx″ + cx′ + kx = 0. Without the damper the mass would swing for ever as cos ω₀t and sin ω₀t, with ω₀ = √(k ÷ m). This is the natural angular frequency, in radians per second; one full swing takes the natural period 2π ÷ ω₀ seconds. Damping decides what really happens. The characteristic equation mr² + cr + k = 0 has the number c² − 4mk under its square root. If c² > 4mk there are two negative real roots: the mass creeps back without bouncing, which is called overdamped. If c² = 4mk the square root is 0 and there is only one root, counted twice (a repeated root): critically damped, the boundary case. If c² < 4mk the roots are complex: the mass swings with shrinking swings, underdamped.",
+   intuition: "Push a mass m on a spring away from rest by x and the spring pulls back with force kx, where k is its stiffness in newtons per metre. A damper, like the oil in a shock absorber, resists motion with force cx′, where c is the damping constant: the faster it moves, the harder the damper pushes back. Newton’s law, mass times acceleration equals force, gives mx″ = −kx − cx′, or mx″ + cx′ + kx = 0. Without the damper the mass would swing for ever as cos ω₀t and sin ω₀t, with ω₀ = √(k ÷ m). This is the natural angular frequency, in radians per second; one full swing takes the natural period 2π ÷ ω₀ seconds. Damping decides what really happens. The characteristic equation mr² + cr + k = 0 has the number c² − 4mk under its square root. If c² > 4mk there are two negative real roots: the mass creeps back without swinging back and forth, which is called overdamped. (A hard push towards rest can carry it past its rest position once, but never more than once.) If c² = 4mk the square root is 0 and there is only one root, counted twice (a repeated root): critically damped, the boundary case. If c² < 4mk the roots are complex: the mass swings back and forth, past its rest position again and again, with shrinking swings: underdamped.",
    steps: [
     "Read m, c and k from mx″ + cx′ + kx = 0.",
     "Work out ω₀ = √(k ÷ m) in rad/s and the natural period 2π ÷ ω₀ in seconds.",
@@ -290,9 +290,9 @@ window.QUESTS.push(
  },
  {
   id: "q17", title: "Tuning the rear corner", topic: "Review: tuning a suspension", tier: "Intermediate", sector: "Rover Garage",
-  brief: "Mira wants the rover’s rear corner to settle without a single bounce, and as quickly as it can, before the rover leaves the garage.",
-  lesson: "Critical damping, c = 2√(mk), is the smallest damping with no bounce; its characteristic equation has the repeated root −c ÷ (2m), so x = (C₁ + C₂t)e^(rt).",
-  prompt: "Mira wants the rover’s rear corner critically damped: no bounce, and the quickest settling. The corner has mass m = 3 kg and spring stiffness k = 12 N/m. Enter the damping constant c in N·s/m that makes mx″ + cx′ + kx = 0 critically damped. Then, with that damper, the corner is pushed to x(0) = 6 cm and released with x′(0) = −4 cm/s (t in seconds): enter x(1) in cm, to 3 decimal places.",
+  brief: "Mira wants the rover’s rear corner to stop swinging back and forth after a bump, with as little damping as that takes, before the rover leaves the garage.",
+  lesson: "Critical damping, c = 2√(mk), is the boundary between swinging back and forth and not: any less damping and the mass swings. Its characteristic equation has the repeated root −c ÷ (2m), so x = (C₁ + C₂t)e^(rt).",
+  prompt: "Mira wants the rover’s rear corner critically damped: the least damping that stops it swinging back and forth. The corner has mass m = 3 kg and spring stiffness k = 12 N/m. Enter the damping constant c in N·s/m that makes mx″ + cx′ + kx = 0 critically damped, where x(t) is the corner’s offset from its resting height in cm and t is in seconds. Then, with that damper, the corner is pushed to x(0) = 6 cm and released with x′(0) = −4 cm/s: enter x(1) in cm, to 3 decimal places.",
   answer: [12,1.895], labels: ["critical damping c (N·s/m)","x at the time (cm, 3 d.p.)"], tolerance: 0.0005,
   hints: [
    "Critical damping is the boundary case c² = 4mk, so c = 2√(mk).",
@@ -300,10 +300,10 @@ window.QUESTS.push(
   ],
   solution: "Critical damping needs c² = 4mk = 4 × 3 × 12 = 144, so c = 12 N·s/m. The characteristic equation 3r² + 12r + 12 = 0 then has the repeated root r = −12 ÷ 6 = −2, so x = (C₁ + C₂t)e^(−2t). C₁ = x(0) = 6, and C₂ = x′(0) − rC₁ = −4 + 2 × 6 = 8. So x = (6 + 8t)e^(−2t), and x(1) = 14e^(−2) = 1.8947…, which is 1.895 cm to 3 decimal places.",
   xp: 150, prereqs: ["q14","q16"],
-  artifact: {"name":"Tuned damper tag","description":"The one damper setting that settles the rover’s corner without a bounce."},
+  artifact: {"name":"Tuned damper tag","description":"The one damper setting at the edge between a corner that swings back and forth and one that does not."},
   sources: [source.s2_2, source.s2_4],
   teaching: {
-   intuition: "This mission brings the chapter together. With too little damping a suspension bounces; with too much it creeps back slowly. The best setting sits exactly between them: critical damping, where c² = 4mk, so c = 2√(mk). At that setting the characteristic equation mr² + cr + k = 0 has one repeated root, r = −c ÷ (2m), which works out to −√(k ÷ m) = −ω₀. A repeated root gives the solution x = (C₁ + C₂t)e^(rt), as for any repeated root. So tuning a suspension takes two ideas from this chapter at once: the damping test from mechanical vibrations, and the repeated-root solution. The starting values then fix the constants: C₁ = x(0), and the product rule gives x′(0) = rC₁ + C₂.",
+   intuition: "This mission brings the chapter together. With too little damping a suspension swings back and forth, past its rest position again and again; with too much it creeps back slowly. Critical damping sits exactly on the line between them, where c² = 4mk, so c = 2√(mk). At that setting the characteristic equation mr² + cr + k = 0 has one repeated root, r = −c ÷ (2m), which works out to −√(k ÷ m) = −ω₀. A repeated root gives the solution x = (C₁ + C₂t)e^(rt), as for any repeated root. So tuning a suspension takes two ideas from this chapter at once: the damping test from mechanical vibrations, and the repeated-root solution. The starting values then fix the constants: C₁ = x(0), and the product rule gives x′(0) = rC₁ + C₂. Not swinging back and forth does not always mean never passing rest: C₁ + C₂t can be 0 once, so a corner flicked hard towards rest can shoot past it once and then creep back. Whether it does depends on how it starts.",
    steps: [
     "Set c² = 4mk and take the positive square root: c = 2√(mk).",
     "The repeated root is r = −c ÷ (2m).",
