@@ -183,21 +183,30 @@ function makeCard(r){
   var icon=el('span','vgh-icon');icon.setAttribute('aria-hidden','true');icon.appendChild(glyph(r.node));c.appendChild(icon);
   c.appendChild(el('span','vgh-name',r.name));
   c.appendChild(el('span','vgh-line',shortLine(r)));
-  var status=el('span','vgh-status'),barHost=el('span','vgh-barhost');
-  c.appendChild(status);c.appendChild(barHost);
+  var status=el('span','vgh-status'),barHost=el('span','vgh-barhost'),mastery=el('span','vgh-mastery');mastery.hidden=true;
+  c.appendChild(status);c.appendChild(barHost);c.appendChild(mastery);
   li.appendChild(c);
-  S.cards[r.node]={node:r,el:c,icon:icon,status:status,barHost:barHost,ready:ready};
+  S.cards[r.node]={node:r,el:c,icon:icon,status:status,barHost:barHost,mastery:mastery,ready:ready};
   return li;
 }
 function updateCard(id){
-  var c=S.cards[id],m=S.models[id],text=cardStatus(m),p=nodeProgress(m),key=text+'|'+p.solved+'|'+p.total;
+  var c=S.cards[id],m=S.models[id],text=cardStatus(m),p=nodeProgress(m),medals=masteryText(c.node),key=text+'|'+p.solved+'|'+p.total+'|'+medals;
   if(c.key===key)return; /* unchanged: leave the bar alone so it does not fill in again on every refresh */
   c.key=key;
   c.status.textContent=text;
   c.el.classList.toggle('is-start',text==='Start here');
   c.barHost.textContent='';
   if(c.ready)c.barHost.appendChild(bar(p.solved,p.total));
+  c.mastery.textContent=medals?'Mastery: '+medals:'';c.mastery.hidden=!medals;
 }
+/* Visible mastery (mastery.js): bronze, silver and gold over the realm's ready parts, '' when nothing is learned. */
+function masteryText(r){
+  var M=root.VGMastery;if(!M||!r||!c0(r.parts))return '';
+  var t={gold:0,silver:0,bronze:0};
+  r.parts.forEach(function(p){if(!p||p.status!=='ready'||!p.id)return;var c=M.fromSlice(safeSlice(getSlice,p.id),M.perConcept(p));t.gold+=c.gold;t.silver+=c.silver;t.bronze+=c.bronze});
+  return M.countText(t);
+}
+function c0(a){return Array.isArray(a)&&a.length>0}
 function updateHero(){
   var t=continueTarget(S.realms,getSlice);
   S.cta.hidden=!t;S.ctaNote.hidden=!t;
